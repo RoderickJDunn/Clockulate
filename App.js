@@ -8,6 +8,7 @@ import {
 import moment from 'moment';
 import TaskList from './components/task-list';
 import DurationText from './components/duration-text';
+import TaskItem from './components/task-item';
 
 export default class App extends React.Component {
 
@@ -20,7 +21,7 @@ export default class App extends React.Component {
     }
 
     componentDidMount() {
-        setInterval(() => {
+        setTimeout(() => {  // Temporarily disabled to save resources. (set back to setInterval).
             console.log("Updating time and date");
             this.setState({
                 time: moment().format("LT"),
@@ -36,11 +37,10 @@ export default class App extends React.Component {
                 <Text style={styles.timeText}>
                     {this.state.time}
                 </Text>
-                <Text style={styles.dateText}>
-                    {this.state.date}
-                </Text>
-                {/*<TaskList/>*/}
-                <DurationText minutes="2"/>
+                {/*<Text style={styles.dateText}>*/}
+                    {/*{this.state.date}*/}
+                {/*</Text>*/}
+                <TaskList/>
             </View>
         );
     }
