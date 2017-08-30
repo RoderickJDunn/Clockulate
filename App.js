@@ -1,12 +1,40 @@
 import React from 'react';
-import Tabs from './app/config/router';
+import { MainStack } from './app/config/router';
+import {AppRegistry, AsyncStorage} from 'react-native';
+
+import insertDummyData from './app/data/dummy';
 
 export default class App extends React.Component {
+    constructor() {
+        super();
+        this.state = {firstLaunch: null};
+        console.log("Entry: Constructor");
+    }
+
+    componentDidMount() {
+        console.log("Entry: Component did mount");
+        try {
+            AsyncStorage.getItem('alreadyLaunched').then((value) => {
+                if (value === null) {
+                    console.log("First Launch");
+                    AsyncStorage.setItem('alreadyLaunched', JSON.stringify(true));
+                    this.setState({firstLaunch: true});
+                    insertDummyData();
+                }
+                else {
+                    console.log("Not the first Launch");
+                    this.setState({firstLaunch: false});
+                }
+            });
+        } catch (error) {
+            console.error(`Unable to check if app has already been launched: ${error}`);
+        }
+    };
 
     render() {
-        return <Tabs />
+        return (<MainStack />);
     }
 }
 
 
-
+AppRegistry.registerComponent('Alarm_AutoSet', () => App);

@@ -8,16 +8,32 @@ import PropTypes from 'prop-types';
 
 class DurationText extends Component {
     static propTypes = {
-        hours: PropTypes.string,
-        minutes: PropTypes.string,
+        seconds: PropTypes.number,
     };
 
     constructor(props) {
         super(props);
+        this.state = {
+            data: {
+                duration: props.duration
+            }
+        }
 
     }
 
-    formatDuration(hours, minutes) {
+    calcHours(seconds) {
+        return Math.trunc(seconds / 3600);
+    }
+
+    calcMinutes(seconds, hours) {
+        seconds = seconds - hours*3600;
+        return Math.trunc(seconds / 60);
+    }
+
+    formatDuration(seconds) {
+        let hours = this.calcHours(seconds);
+        let minutes = this.calcMinutes(seconds, hours);
+
         let duration = "";
         if (!hours) {
             duration = minutes ? `${minutes}m` : "0m";
@@ -32,10 +48,8 @@ class DurationText extends Component {
     }
 
     render() {
-        let hours = this.props.hours;
-        let minutes = this.props.minutes;
-
-        let duration = this.formatDuration(hours, minutes);
+        // console.log(this.props.duration);
+        let duration = this.formatDuration(this.props.duration);
 
 
         return (

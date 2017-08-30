@@ -8,29 +8,40 @@ import TaskItem from './task-item';
 
 class TaskList extends React.PureComponent {
 
-    state = {selected: (new Map(): Map<string, boolean>)};
+    // state = {selected: (new Map(): Map<string, boolean>)};
+    tasksArr = [];
 
-    _keyExtractor = (item, index) => item.title;
+    constructor(props) {
+        super(props);
+        console.log("\n\n\n\nProps passed to task-list ----------: \n");
 
-    _onPressItem = (id: string) => {
-        // updater functions are preferred for transactional updates
-        console.debug("Pressed item");
-        this.setState((state) => {
-            // copy the map rather than modifying state.
-            const selected = new Map(state.selected);
-            selected.set(id, !selected.get(id)); // toggle
-            return {selected};
-        });
-    };
+        // create array from tasksList object
+        for (let id in props.data) {
+            this.tasksArr.push(props.data[id]);
+        }
+
+    }
+
+    _keyExtractor = (item, index) => item.id;
+
+    // _onPressItem = (id: string) => {
+    //     console.debug("TaskList: onPressItem");
+    //     // updater functions are preferred for transactional updates
+    //     // console.debug("Pressed item");
+    //     this.setState((state) => {
+    //         // copy the map rather than modifying state.
+    //         const selected = new Map(state.selected);
+    //         selected.set(id, !selected.get(id)); // toggle
+    //         return {selected};
+    //     });
+    // };
 
     _renderItem = ({item}) => (
         <TaskItem
+            {...this.props}
+            // selected={!!this.state.selected.get(item.id)}
+            data={item}
             id={item.id}
-            taskName={item.title}
-            onPressItem={this._onPressItem}
-            selected={!!this.state.selected.get(item.id)}
-            // the '!!' ensures that the item.id is not null. The first '!' converts a Truthy value to False, or a
-                // Falsey value to True. The second '!' converts the False/True to their opposites (True/False).
         />
     );
 
@@ -38,24 +49,7 @@ class TaskList extends React.PureComponent {
         return (
             <View style={listStyle.container}>
                 <FlatList
-                    data={[
-                        {key: 'item1', title: 'Walk the dogs'},
-                        {key: 'item2', title: 'Take the garbage outside to the back'},
-                        {key: 'item3', title: 'Take a shower'},
-                        {key: 'item4', title: 'Work out (cardio)'},
-                        {key: 'item5', title: 'Eat breakfast'},
-                        {key: 'item6', title: 'Finish doing a difficult homework assignment that I should\'ve done weeks ago'},
-                        {key: 'item7', title: 'Jimmy'},
-                        {key: 'item8', title: 'Julie'},
-                        {key: 'item9', title: 'Zevin'},
-                        {key: 'item10', title: 'Zackson'},
-                        {key: 'item11', title: 'Zames'},
-                        {key: 'item12', title: 'Zoel'},
-                        {key: 'item13', title: 'Zohn'},
-                        {key: 'item14', title: 'Zillian'},
-                        {key: 'item15', title: 'Zimmy'},
-                        {key: 'item16', title: 'Zulie'},
-                    ]}
+                    data={this.tasksArr}
                     renderItem={this._renderItem}
                     keyExtractor={this._keyExtractor}
                 />
@@ -68,7 +62,6 @@ class TaskList extends React.PureComponent {
 const listStyle = StyleSheet.create({
     container: {
         flex: 1,
-        paddingTop: 10,
         backgroundColor: '#e8e8e8',
         flexDirection: 'row',
     },
