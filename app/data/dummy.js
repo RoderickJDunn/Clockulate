@@ -68,38 +68,46 @@ function insertDummyData() {
         const almTask1 = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task1,
+            order: 0
             // Since I'm not specifying 'duration' or 'enabled' values, the defaults will be used (see DataSchemas.js
             // to check the default values).
         });
         const almTask7 = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task7,
+            order: 1
         });
         const almTask3 = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task3,
+            order: 2
         });
         const almTask8 = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task8,
+            order: 3
         });
 
         // AlarmTasks for alarm2
-        const almTask1b = realm.create("AlarmTask", {
+        const almTask9 = realm.create("AlarmTask", {
             id: uuid.v1(),
-            task: task1,
+            task: task9,
+            order: 3
         });
         const almTask6 = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task6,
+            order: 1
         });
         const almTask3b = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task3,
+            order: 2
         });
-        const almTask9 = realm.create("AlarmTask", {
+        const almTask1b = realm.create("AlarmTask", {
             id: uuid.v1(),
-            task: task9,
+            task: task1,
+            order: 0
         });
 
         /**** Create Alarms *****/
@@ -121,7 +129,7 @@ function insertDummyData() {
             wakeUpTime: 32400,  // 9am in seconds
             arrivalTime: 36000,  // 10am in seconds
             mode: "basic",
-            tasks: [almTask1, almTask6, almTask3, almTask9],
+            tasks: [almTask6, almTask9, almTask1b, almTask3b],
             label: "Wake up for appointment",
             enabled: true, // if true, it is active, and will Ring at wakeUpTime.
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.

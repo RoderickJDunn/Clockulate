@@ -6,14 +6,14 @@ import React, {Component} from 'react';
 import {Text, View, TouchableOpacity, StyleSheet} from 'react-native';
 
 import moment from 'moment';
-import DateTimePicker from 'react-native-modal-datetime-picker';
+// import DateTimePicker from 'react-native-modal-datetime-picker';
 import DurationText from "./duration-text";
+// import TimePicker from 'react-native-timepicker';
+import Picker from 'react-native-picker';
+import { minuteRange, hourRange } from '../data/constants'
+import { calcWholeHours, calcMinutes } from '../util/date_utils';
 
 class LabeledTimeInput extends Component {
-
-    state = {
-        isDTPickerVisible: false,
-    };
 
     constructor(props) {
         super(props);
@@ -21,32 +21,57 @@ class LabeledTimeInput extends Component {
         this.state = {
             data: {
                 labelText: props.labelText,
-                fieldText: props.fieldText
-            }
+                time: props.time  // time is an Int here.
+            },
         };
     }
 
-    _showDateTimePicker = () => this.setState({isDTPickerVisible: true});
-
-    _hideDateTimePicker = () => this.setState({isDTPickerVisible: false});
-
-    _handleDatePicked = (date) => {
-        console.log('A date has been picked: ', date);
-        this._hideDateTimePicker();
+    _createDurationData = () => {
+        return hourRange().map(function(hour) {
+            return { [hour]: minuteRange() };
+        });
     };
+
+    _showTimePicker = () => {
+        // this.setState({isDTPickerVisible: true});
+        let hours = calcWholeHours(this.state.data.time);
+        let minutes = calcMinutes(this.state.data.time, hours);
+        Picker.init({
+            pickerData: this._createDurationData(),
+            selectedValue: [hours + " hours", minutes + " minutes"],
+            pickerToolBarFontSize: 16,
+            pickerFontSize: 16,
+            pickerFontColor: [255, 0, 0, 1],
+            onPickerConfirm: this._onPickerConfirm,
+            onPickerCancel: (pickedValue, pickedIndex) => {
+                console.log('duration', pickedValue, pickedIndex);
+            },
+            onPickerSelect: (pickedValue, pickedIndex) => {
+                console.log('duration', pickedValue, pickedIndex);
+            }
+        });
+        Picker.show();
+    };
+
+    _onPickerConfirm = (pickedValue, pickedIndex) => {
+        console.debug('Confirmed duration: ', pickedValue, pickedIndex);
+        let dataTemp = this.state.data;
+        dataTemp.time = pickedIndex[0]*3600 + pickedIndex[1]*60;
+
+        this.setState({
+            data: dataTemp
+        });
+        this.props.onChange(pickedValue);
+    };
+
 
     render() {
         return (
-            <View>
+            <View style={styles.container}>
                 <Text style={styles.fieldLabelText}>{this.state.data.labelText}</Text>
-                <TouchableOpacity onPress={this._showDateTimePicker}>
-                    <DurationText duration={this.state.data.fieldText} style={[{flexGrow: 1}]}/>
+                <TouchableOpacity onPress={this._showTimePicker}>
+                    <DurationText duration={this.state.data.time} style={{fontSize: 23}}/>
                 </TouchableOpacity>
-                <DateTimePicker
-                    isVisible={this.state.isDTPickerVisible}
-                    onConfirm={this._handleDatePicked}
-                    onCancel={this._hideDateTimePicker}
-                />
             </View>
         );
     }
@@ -54,18 +79,12 @@ class LabeledTimeInput extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        alignSelf: 'stretch',
-        paddingBottom: 4,
+        justifyContent: 'center',
     },
     fieldLabelText: {
         fontSize: 13,
-        paddingBottom: 15
-
+        paddingBottom: 3
     },
-    fieldText: {
-        fontSize: 23,
-    },
-
 });
 
 

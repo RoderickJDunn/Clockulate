@@ -43,6 +43,7 @@ AlarmTaskSchema.schema = {
         task: {type: 'Task'},
         duration: {type: 'int', optional: true}, // if this is set, use this duration instead of the defaultDuration provided by 'Task'
         enabled: {type: 'bool', default: true},
+        order: 'int'
     }
 };
 

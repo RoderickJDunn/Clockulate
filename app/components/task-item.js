@@ -23,15 +23,11 @@ class TaskItem extends React.PureComponent {
      */
     constructor(props) {
         super(props);
-        // console.log(`props for ${TaskItem.count++}`);
-        // console.log(props);
         let data = props.data;
         this.state = {
-            data: {
-                name: data.task.name,
-                duration: data.duration ? data.duration : data.task.defaultDuration,
-                enabled: data.enabled
-            }
+            name: data.task.name,
+            duration: data.duration ? data.duration : data.task.defaultDuration,
+            enabled: data.enabled
         };
     }
 
@@ -43,24 +39,27 @@ class TaskItem extends React.PureComponent {
     };
 
     onTapCheckBox(data) {
-        data.enabled = !data.enabled;
-        // console.debug("Clicked checkbox: now " + data.isChecked);
+        console.debug(data);
+        this.setState({'enabled': !data.enabled});
+        console.debug("Clicked checkbox: now " + !data.enabled);
+
+        // TODO: Save to database
     }
 
     render() {
         return (
             <TouchableOpacity style={TaskListStyle.item} onPress={this._onPress}>
-                <CheckBox onClick={() => this.onTapCheckBox(this.state.data) }
-                          isChecked={this.state.data.enabled}
+                <CheckBox onClick={() => this.onTapCheckBox(this.state) }
+                          isChecked={this.state.enabled}
                 />
                 <Text style={[TaskListStyle.allChildren, TaskItemStyle.description]}
                       numberOfLines={2}
                       ellipsizeMode="tail"
                       {...this.props} // the '...' is JavaScript way to expand variable # of args
                 >
-                    {this.state.data.name}
+                    {this.state.name}
                 </Text>
-                <DurationText duration={this.state.data.duration} style={[TaskListStyle.allChildren, {flexGrow: 1}]}/>
+                <DurationText duration={this.state.duration} style={[TaskListStyle.allChildren, {flexGrow: 1, fontSize: 15}]}/>
             </TouchableOpacity>
         );
     }

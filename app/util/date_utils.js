@@ -42,3 +42,14 @@
 //     return Math.trunc(seconds / 60);
 // }
 
+
+export function calcWholeHours(seconds)
+{
+    return Math.trunc(seconds / 3600);
+}
+
+export function calcMinutes(seconds, hours)
+{
+    seconds = seconds - hours * 3600;
+    return Math.trunc(seconds / 60);
+}

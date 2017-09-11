@@ -8,11 +8,15 @@ import {
     TextInput,
     StatusBar
 } from 'react-native';
-import moment from 'moment';
+import {NavigationActions} from 'react-navigation'
 
+import moment from 'moment';
+import realm from '../data/DataSchemas';
+import uuid from 'react-native-uuid';
 import LabeledInput from '../components/labeled-input'
 import LabeledTimeInput from "../components/labeled-time-input";
 import { DefaultTask } from '../data/constants';
+import { TaskModel, AlarmTaskModel } from '../data/models'
 
 /*
 This screen allows user to edit details about a Task: Specifically, its Name, Duration, and Enabled
@@ -23,7 +27,8 @@ class TaskDetail extends Component {
         title: "Edit Task"
     });
 
-
+    nameChanged = false;
+    initialName = "";
     /*
     Receives data about the Task that was tapped on the previous screen
      */
@@ -32,38 +37,135 @@ class TaskDetail extends Component {
         console.log("TaskDetail -- Props: ");
         console.log(props);
         const {params} = props.navigation.state; // same as: " const params = props.navigation.state.params "
-        if (params.newTask) {
+        if (!params ||!params.hasOwnProperty('alarmTaskId')) {
+            // We are creating a brand new task. Create a stub TaskAlarm object with default Task values
+
+            let task = new TaskModel();
             this.state = {
-                task: {
-                    name: DefaultTask.name,
-                    defaultDuration: DefaultTask.duration,
-                },
+                alarmTask: new AlarmTaskModel(task, params.order),
+                onSaveTask: params.onSaveTask,
+                newTask: true
             };
+            console.log(this.state.alarmTask);
         }
         else {
+            let alarmTask = realm.objectForPrimaryKey('AlarmTask', params.alarmTaskId);
             this.state = {
-                name: params.name,
-                duration: params.duration,
-
+                alarmTask: {
+                    task: {
+                        id: alarmTask.task.id,
+                        name: alarmTask.task.name,
+                        defaultDuration: alarmTask.task.defaultDuration,
+                    },
+                    id: alarmTask.id,
+                    duration: alarmTask.duration,
+                    enabled: alarmTask.enabled,
+                    order: alarmTask.order,
+                },
+                onSaveTask: params.onSaveTask
             };
+        }
+
+        this.initialName = this.state.alarmTask.task.name;
+
+    }
+
+    componentDidMount() {
+        console.debug("TaskDetail --- ComponentDidMount");
+        // setParams updates the object 'navigation.state.params'
+        // When this Screen is going to be rendered, any code in navigationOptions is run (ie: the code within
+        // the onPress property of a Button (in headerRight)). This code in navigationOptions can have access to
+        // the navigation object that we are updating here - so long as you pass in navigation to navigationOptions
+        this.props.navigation.setParams({handleSave: this.handleSave.bind(this)});
+    }
+
+    handleSave() {
+        // There are several things to think about:
+        // 1. Is this a newly created Task being saved for the first time? Or it a task that's been edited?
+        // 2. Do we need to edit/create a new Task, or just a new AlarmTask? Depends on whether Task name was changed
+        console.log("TaskDetail:handleSave: this.state", this.state);
+
+        // Check if newTask
+        let alarmTask;
+        if (this.state.newTask) {
+            // Create new Task and associated AlarmTask
+            console.log(this.state);
+            let preTask = this.state;
+            realm.write(() => {
+                // NOTE: even though we need both a new Task and AlarmTask, we just need to create the AlarmTask,
+                //        and the Task is automatically created. In fact, creating the Task then trying to create the
+                //        corresponding AlarmTask afterward gives an error (duplicate primary key).
+                alarmTask = realm.create("AlarmTask", this.state.alarmTask);
+            });
+
+        }
+        else {
+            // We are editing a task. Check if name was modified
+            let { navigation } = this.props;
+            if (this.nameChanged) {
+                // create a new Task and associated AlarmTask.
+                // alert("Name was changed, saving as new Task and AlarmTask");
+                realm.write(() => {
+
+                    let idToDelete = this.state.alarmTask.id; // get Id of AlarmTask to delete
+                    let orderOfAlmTask = this.state.alarmTask.order; // store the Order of AlarmTask to be deleted, to apply to the new one
+                    realm.delete(realm.objectForPrimaryKey('AlarmTask', idToDelete)); // delete the AlarmTask by ID
+
+                    // Create new AlarmTask for the new task
+                    const newTask = new TaskModel();
+                    newTask.name = this.state.alarmTask.task.name;
+                    newTask.defaultDuration = this.state.alarmTask.task.defaultDuration;
+
+                    alarmTask = new AlarmTaskModel(newTask, orderOfAlmTask);
+
+                    alarmTask = realm.create("AlarmTask", alarmTask);
+
+                });
+            }
+            else {
+                // create/update the AlarmTask with the new duration
+                console.log("Name NOT changed, updating existing AlarmTask");
+                alarmTask = this.state.alarmTask;
+                realm.write(() => {
+
+                });
+            }
+        }
+
+        this.state.onSaveTask(alarmTask);
+        this.props.navigation.dispatch(NavigationActions.back());
+    }
+
+    onTaskNameChange(text) {
+        console.log(text);
+        const updatedAlmTask = this.state.alarmTask;
+        updatedAlmTask.task.name = text;
+        this.setState({alarmTask: updatedAlmTask});
+        if (this.initialName !== text) {
+            this.nameChanged = true;
         }
     }
 
+    onTaskDurationChanged(duration) {
+        console.debug("Task duration changed: ", duration);
+        const updatedAlmTask = this.state.alarmTask;
+        updatedAlmTask.duration = duration;
+        this.setState({alarmTask: updatedAlmTask});
+    };
+
     render() {
-        console.log(this.state);
         return (
-            <View style={{backgroundColor: 'transparent', flexDirection: 'column'}}>
-                <StatusBar style={{backgroundColor: 'transparent'}}/>
-                <View>
-                    <LabeledInput
-                        labelText="Task Description"
-                        fieldText={this.state.task.name}>
-                    </LabeledInput>
-                    <LabeledTimeInput
-                      labelText="Duration"
-                      fieldText={this.state.duration ? this.state.duration : this.state.task.defaultDuration}>
-                    </LabeledTimeInput>
-                </View>
+            <View style={{flex:1, alignSelf: 'stretch', alignItems:'flex-start'}}>
+                <LabeledInput
+                    labelText="Task Description"
+                    fieldText={this.state.alarmTask.task.name}
+                    handleTextInput={this.onTaskNameChange.bind(this)}>
+                </LabeledInput>
+                <LabeledTimeInput
+                  labelText="Duration"
+                  time={this.state.duration ? this.state.duration : this.state.alarmTask.task.defaultDuration}
+                  onChange={this.onTaskDurationChanged.bind(this)}>
+                </LabeledTimeInput>
             </View>
         );
     }

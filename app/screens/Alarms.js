@@ -37,23 +37,26 @@ class Alarms extends Component {
             // console.log("Changed: " + JSON.stringify(changes));
         });
 
-        // TODO - possibly: Bind all the methods that we will be passing as props.
-        // this.renderScene = this.renderScene.bind(this);
-        // this._addNewTodoList = this._addNewTodoList.bind(this);
-        // this._onPressTodoList = this._onPressTodoList.bind(this);
-
-        // this.state = {};
     }
 
     componentDidMount(){
         console.debug("Alarms --- ComponentDidMount");
         // setParams updates the object 'navigation.state.params'
         // When this Screen is going to be rendered, any code in navigationOptions is run (ie: the code within
-        // the onPress property of a Button (in headerRight). This code in navigationOptions can have access to
+        // the onPress property of a Button (in headerRight)). This code in navigationOptions can have access to
         // the navigation object that we are updating here - so long as you pass in navigation to navigationOptions
         this.props.navigation.setParams({ handleAddAlarm: this.handleAddAlarm.bind(this)});
     }
 
+    /*
+    Handler for 'Add-Alarm' button press. Navigates to AlarmDetail screen sending no Alarm data.
+    SIDE-NOTE: This is a NORMAL function (NOT an arrow function). Therefore, this function creates its own 'this'
+                context. 'this.props' is only accessible from within this function because I 'bound' the external
+                'this' context (the class's "this") within the render method. A different way of doing this is to use
+                an arrow function, which uses the 'this' value of the enclosing execution context. Therefore, when
+                referencing an arrow function, you don't need to bind 'this' in order for it to be access the outer
+                scope 'this'.
+     */
     handleAddAlarm() {
         console.log("Adding alarm");
         // alert("Adding alarm!");
@@ -96,21 +99,6 @@ class Alarms extends Component {
         )
     }
 }
-
-// const listStyle = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         paddingTop: 10,
-//         backgroundColor: '#e8e8e8',
-//         flexDirection: 'row',
-//     },
-//     item: {
-//         padding: 10,
-//         fontSize: 18,
-//         height: 44,
-//     },
-// });
-
 
 export default Alarms;
 

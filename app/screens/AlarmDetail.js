@@ -9,13 +9,17 @@ import {
     StyleSheet,
     StatusBar,
     TextInput,
-    Button
+    TouchableOpacity
 } from 'react-native';
 import moment from 'moment';
+
+import realm from '../data/DataSchemas';
 import TaskList from '../components/task-list';
 import LabeledInput from '../components/labeled-input'
 import Colors from '../styles/colors'
 import { DefaultAlarm } from '../data/constants'
+import { AlarmModel } from '../data/models'
+
 
 class AlarmDetail extends Component {
 
@@ -30,13 +34,7 @@ class AlarmDetail extends Component {
         const { params } = props.navigation.state; // same as: " const params = props.navigation.state.params "
         if (params.newAlarm) {
             console.log("This is a new alarm");
-            this.state = {
-                wakeUpTime: DefaultAlarm.wakeUpTime,
-                arrivalTime: DefaultAlarm.arrivalTime,
-                label: DefaultAlarm.label,
-                mode: DefaultAlarm.mode,
-                tasks: DefaultAlarm.tasks,
-            };
+            this.state = new AlarmModel();
         }
         else {
             console.log("We are editing an old alarm");
@@ -48,6 +46,7 @@ class AlarmDetail extends Component {
                 label: params.label,
                 mode: params.mode,
                 tasks: params.tasks,
+                alarm: params
             };
         }
 
@@ -63,8 +62,21 @@ class AlarmDetail extends Component {
         // }, 1000);
     }
 
-    handleAddTask() {
-        this.props.navigation.navigate('TaskDetail', {newTask: true});
+    onPressAddTask() {
+        let nextTaskPosition = this.state.alarm.tasks.length;
+        this.props.navigation.navigate('TaskDetail',
+            {onSaveTask: this.onTaskListChanged.bind(this),
+             order: nextTaskPosition});
+    }
+
+
+    onTaskListChanged(task) {
+        console.log("Task modified", task);
+        realm.write(() => {
+            let updatedTasks = this.state.alarm.tasks;
+            this.state.alarm.tasks.push(task);
+        });
+        this.setState(this.state);
     }
 
     /*
@@ -78,12 +90,23 @@ class AlarmDetail extends Component {
         // console.debug(this.props);
         console.debug(task);
 
-        this.props.navigation.navigate('TaskDetail', task);
+        // Need to use a workaround to delete the object, otherwise app will crash due to Realm bug when navigating after deleting passed Object:
+        // Pass TaskAlarm ID instead of TaskAlarm object.
+        const params = {alarmTaskId: task.id, onSaveTask: this.onTaskListChanged.bind(this)};
+
+        this.props.navigation.navigate('TaskDetail', params);
     };
 
     render() {
-        console.debug("AlarmDetail: render2");
-        // console.debug(this.props);
+        console.debug("AlarmDetail: render4");
+        console.debug("this.props");
+        console.debug(this.props);
+        console.debug("this.state");
+        console.debug(this.state);
+
+        // Assign tasks to 'sortedTasks', first ordering them if there are >1
+        let sortedTasks = this.state.tasks.length > 1 ? this.state.tasks.sorted('order') : this.state.tasks;
+        console.debug(sortedTasks);
 
         return (
             <View style={styles.screenContainer}>
@@ -109,13 +132,17 @@ class AlarmDetail extends Component {
                 </View>
                 <View style={styles.taskListContainer}>
                     <View style={styles.taskListHeader}>
-                        <Text>Tasks</Text>
-                        <Button style={{alignSelf: "flex-end"}} title="Add Task" onPress={this.handleAddTask.bind(this)}/>
+                        <Text style={{alignSelf: 'flex-start'}}>Tasks</Text>
+                        <TouchableOpacity style={{alignSelf: "flex-start"}} onPress={this.onPressAddTask.bind(this)}>
+                            <Text numberOfLines={1}>
+                                Add Task
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                     <TaskList
                         onPressItem={this._onPressTask.bind(this)}
-                        data={this.state.tasks}/>
-                </View>
+                        data={sortedTasks}/>
+            </View>
             </View>
         );
     }
@@ -138,14 +165,17 @@ const styles = StyleSheet.create({
     fieldsContainer: {
         flex: 3,
         alignSelf: 'stretch',
-        alignItems: 'flex-start',
+        alignItems: 'center',
+        backgroundColor: "#dbd6dd",
         padding: 10,
+        paddingBottom: 10,
     },
     taskListContainer: {
         flex: 9,
         padding: 10,
+        paddingTop: 0,
         alignSelf: 'stretch',
-        backgroundColor: "#EA5"
+        backgroundColor: "#dbd6dd"
     },
     taskListHeader: {
         flexDirection: "row",

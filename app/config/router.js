@@ -84,7 +84,8 @@ export const MainStack = StackNavigator({
             },
             headerTitleStyle: {
                 color: Colors.brandLightGrey
-            }
+            },
+            headerRight: <Button title="Save" onPress={() => navigation.state.params.handleSave()}/>
         }),
 
     }

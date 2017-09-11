@@ -33,11 +33,12 @@ export const TaskListStyle = StyleSheet.create({
         flexDirection: 'row',
         padding: 10,
         height: 55,
-        borderBottomColor: "#969696",
+        borderBottomColor: "#acacac",
         borderBottomWidth: 1,
         alignItems: 'center',
         marginLeft: -5,
         marginRight: -5,
+        backgroundColor: "#dbd6dd"
     },
     allChildren: {
         marginLeft: 5,
@@ -55,5 +56,6 @@ export const TaskItemStyle = StyleSheet.create({
     duration: {
         flexBasis: "18%",
     }
+
 });
 

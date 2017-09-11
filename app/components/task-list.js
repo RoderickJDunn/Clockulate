@@ -9,17 +9,17 @@ import TaskItem from './task-item';
 class TaskList extends React.PureComponent {
 
     // state = {selected: (new Map(): Map<string, boolean>)};
-    tasksArr = [];
 
     constructor(props) {
         super(props);
         console.log("\n\n\n\nProps passed to task-list ----------: \n");
+        console.log(props);
 
-        // create array from tasksList object
-        for (let id in props.data) {
-            this.tasksArr.push(props.data[id]);
-        }
+    }
 
+
+    componentWillReceiveProps(e){
+        console.log("\ncomponentWillReceiveProps", e);
     }
 
     _keyExtractor = (item, index) => item.id;
@@ -46,10 +46,14 @@ class TaskList extends React.PureComponent {
     );
 
     render() {
+        let tasksArr = [];
+        for (let id in this.props.data) {
+            tasksArr.push(this.props.data[id]);
+        }
         return (
             <View style={listStyle.container}>
                 <FlatList
-                    data={this.tasksArr}
+                    data={tasksArr}
                     renderItem={this._renderItem}
                     keyExtractor={this._keyExtractor}
                 />
@@ -62,7 +66,7 @@ class TaskList extends React.PureComponent {
 const listStyle = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#e8e8e8',
+        backgroundColor: '#dbd6dd',
         flexDirection: 'row',
     },
     item: {

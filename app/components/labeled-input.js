@@ -2,51 +2,53 @@
  * Created by rdunn on 2017-08-07.
  */
 import React, {Component} from 'react';
-import {StyleSheet, Text, View, TextInput} from 'react-native';
-
+import {StyleSheet, Text, View, TextInput, Button} from 'react-native';
+import { randomColor } from '../styles/colors'
 class LabeledInput extends Component {
 
     constructor(props) {
         super(props);
-        // console.log(`props for ${TaskItem.count++}`);
-        // console.log(props);
-        this.state = {
-            data: {
-                labelText: props.labelText,
-                fieldText: props.fieldText,
-                placeHolder: props.placeholder
-            }
-        };
-
+        // if (!props.handleTextInput) {
+        //     console.error("Prop 'handleTextInput' is required!");
+        // }
     }
 
     render() {
         return (
             <View style={styles.container}>
-                <Text style={styles.fieldLabelText}>{this.state.data.labelText}</Text>
+                <Text style={styles.fieldLabelText}>{this.props.labelText}</Text>
                 <TextInput
-                    placeholder={this.state.data.placeHolder}
-                    style={[styles.fieldText]}
-                    value={this.state.data.fieldText}>
-                </TextInput>
+                    style={styles.fieldText}
+                    placeholder={this.props.placeHolder}
+                    value={this.props.fieldText}
+                    onChangeText={this.onChangeTextField.bind(this)}/>
+                {/*<Text style={styles.fieldLabelText}>Fake:O0</Text>*/}
+
             </View>
         );
+    }
+
+    onChangeTextField = (text) => {
+        this.props.handleTextInput(text);
     }
 }
 
 const styles = StyleSheet.create({
     container: {
         alignSelf: 'stretch',
-        paddingBottom: 4,
-        flex: 1
+        justifyContent: 'center',
+        paddingBottom: 9,
+        paddingTop: 2,
+        borderBottomColor: "#e9e9e9",
+        borderBottomWidth: 1,
     },
     fieldLabelText: {
         fontSize: 13,
-        paddingBottom: 15
-
+        paddingBottom: 7
     },
     fieldText: {
         fontSize: 23,
+        height: 20,
     },
 
 });
