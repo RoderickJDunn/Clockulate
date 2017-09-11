@@ -47,6 +47,8 @@ class TaskItem extends React.PureComponent {
     }
 
     render() {
+        console.debug("render task-item", this.props);
+        let duration = this.props.data.duration ? this.props.data.duration : this.props.data.task.defaultDuration;
         return (
             <TouchableOpacity style={TaskListStyle.item} onPress={this._onPress}>
                 <CheckBox onClick={() => this.onTapCheckBox(this.state) }
@@ -57,9 +59,9 @@ class TaskItem extends React.PureComponent {
                       ellipsizeMode="tail"
                       {...this.props} // the '...' is JavaScript way to expand variable # of args
                 >
-                    {this.state.name}
+                    {this.props.data.task.name}
                 </Text>
-                <DurationText duration={this.state.duration} style={[TaskListStyle.allChildren, {flexGrow: 1, fontSize: 15}]}/>
+                <DurationText duration={duration} style={[TaskListStyle.allChildren, {flexGrow: 1, fontSize: 15}]}/>
             </TouchableOpacity>
         );
     }

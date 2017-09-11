@@ -12,14 +12,14 @@ class TaskList extends React.PureComponent {
 
     constructor(props) {
         super(props);
-        console.log("\n\n\n\nProps passed to task-list ----------: \n");
-        console.log(props);
+        // console.log("\n\n\n\nProps passed to task-list ----------: \n");
+        // console.log(props);
 
     }
 
 
     componentWillReceiveProps(e){
-        console.log("\ncomponentWillReceiveProps", e);
+        // console.log("\ncomponentWillReceiveProps", e);
     }
 
     _keyExtractor = (item, index) => item.id;
@@ -46,10 +46,12 @@ class TaskList extends React.PureComponent {
     );
 
     render() {
+        console.debug("Render TaskList: props: ", this.props);
         let tasksArr = [];
         for (let id in this.props.data) {
             tasksArr.push(this.props.data[id]);
         }
+        console.log("taskArr", tasksArr);
         return (
             <View style={listStyle.container}>
                 <FlatList

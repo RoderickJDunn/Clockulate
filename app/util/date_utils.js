@@ -53,3 +53,12 @@ export function calcMinutes(seconds, hours)
     seconds = seconds - hours * 3600;
     return Math.trunc(seconds / 60);
 }
+
+export function hour_min_toSec(hours_mins) {
+    if (hours_mins.constructor === Array && hours_mins.length === 2) {
+        return hours_mins[0] * 3600 + hours_mins[1] * 60;
+    }
+    else {
+        console.error("Paramter must be a time array of the format: [h, m]");
+    }
+}

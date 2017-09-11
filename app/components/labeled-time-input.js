@@ -11,7 +11,7 @@ import DurationText from "./duration-text";
 // import TimePicker from 'react-native-timepicker';
 import Picker from 'react-native-picker';
 import { minuteRange, hourRange } from '../data/constants'
-import { calcWholeHours, calcMinutes } from '../util/date_utils';
+import { calcWholeHours, calcMinutes, hour_min_toSec } from '../util/date_utils';
 
 class LabeledTimeInput extends Component {
 
@@ -61,7 +61,7 @@ class LabeledTimeInput extends Component {
         this.setState({
             data: dataTemp
         });
-        this.props.onChange(pickedValue);
+        this.props.onChange(dataTemp.time);
     };
 
 

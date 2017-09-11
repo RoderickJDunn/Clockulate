@@ -97,7 +97,6 @@ class TaskDetail extends Component {
                 //        corresponding AlarmTask afterward gives an error (duplicate primary key).
                 alarmTask = realm.create("AlarmTask", this.state.alarmTask);
             });
-
         }
         else {
             // We are editing a task. Check if name was modified
@@ -114,7 +113,7 @@ class TaskDetail extends Component {
                     // Create new AlarmTask for the new task
                     const newTask = new TaskModel();
                     newTask.name = this.state.alarmTask.task.name;
-                    newTask.defaultDuration = this.state.alarmTask.task.defaultDuration;
+                    newTask.defaultDuration = this.state.alarmTask.duration;
 
                     alarmTask = new AlarmTaskModel(newTask, orderOfAlmTask);
 
@@ -125,9 +124,11 @@ class TaskDetail extends Component {
             else {
                 // create/update the AlarmTask with the new duration
                 console.log("Name NOT changed, updating existing AlarmTask");
-                alarmTask = this.state.alarmTask;
                 realm.write(() => {
-
+                    // NOTE: Here we are updating the AlarmTask in the DB by passing 'true' as the 3rd param of create()
+                    //        This param specifies that it should be an update operation, rather than a creation.
+                    console.log('alarmTask', this.state.alarmTask);
+                    realm.create('AlarmTask', this.state.alarmTask, true);
                 });
             }
         }

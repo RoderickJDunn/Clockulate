@@ -70,12 +70,16 @@ class AlarmDetail extends Component {
     }
 
 
-    onTaskListChanged(task) {
-        console.log("Task modified", task);
-        realm.write(() => {
-            let updatedTasks = this.state.alarm.tasks;
-            this.state.alarm.tasks.push(task);
-        });
+    onTaskListChanged(newTask) {
+        console.log("Task modified", newTask);
+        // Check if Task is defined. This callback contains the newly created task, or nothing if an existing task was updated.
+        if (newTask) {
+            // Task is defined
+            realm.write(() => {
+                let updatedTasks = this.state.alarm.tasks;
+                this.state.alarm.tasks.push(newTask);
+            });
+        }
         this.setState(this.state);
     }
 
@@ -98,11 +102,11 @@ class AlarmDetail extends Component {
     };
 
     render() {
-        console.debug("AlarmDetail: render4");
-        console.debug("this.props");
-        console.debug(this.props);
-        console.debug("this.state");
-        console.debug(this.state);
+        // console.debug("AlarmDetail: render4");
+        // console.debug("this.props");
+        // console.debug(this.props);
+        // console.debug("this.state");
+        // console.debug(this.state);
 
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
         let sortedTasks = this.state.tasks.length > 1 ? this.state.tasks.sorted('order') : this.state.tasks;
