@@ -53,6 +53,7 @@ class TaskItem extends React.PureComponent {
             <TouchableOpacity style={TaskListStyle.item} onPress={this._onPress}>
                 <CheckBox onClick={() => this.onTapCheckBox(this.state) }
                           isChecked={this.state.enabled}
+                          style={TaskItemStyle.checkbox}
                 />
                 <Text style={[TaskListStyle.allChildren, TaskItemStyle.description]}
                       numberOfLines={2}
@@ -61,7 +62,7 @@ class TaskItem extends React.PureComponent {
                 >
                     {this.props.data.task.name}
                 </Text>
-                <DurationText duration={duration} style={[TaskListStyle.allChildren, {flexGrow: 1, fontSize: 15}]}/>
+                <DurationText duration={duration} style={[TaskListStyle.allChildren, TaskItemStyle.duration]}/>
             </TouchableOpacity>
         );
     }

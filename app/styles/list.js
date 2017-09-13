@@ -33,6 +33,7 @@ export const TaskListStyle = StyleSheet.create({
         flexDirection: 'row',
         padding: 10,
         height: 55,
+        alignContent: 'stretch',
         borderBottomColor: "#acacac",
         borderBottomWidth: 1,
         alignItems: 'center',
@@ -49,13 +50,18 @@ export const TaskListStyle = StyleSheet.create({
 });
 
 export const TaskItemStyle = StyleSheet.create({
-
+    checkbox: {
+        flexBasis: "10%",
+    },
     description: {
-        flexBasis: "82%",
+        flexBasis: "65%",
     },
     duration: {
-        flexBasis: "18%",
+        // alignSelf: 'stretch',
+        textAlign: "right",
+        flexBasis: "20%",
+        // flexGrow: 1,
+        fontSize: 15
     }
-
 });
 

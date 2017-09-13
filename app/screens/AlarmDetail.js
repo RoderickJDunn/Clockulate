@@ -40,14 +40,7 @@ class AlarmDetail extends Component {
             console.log("We are editing an old alarm");
             console.log("Test params.wakeUpTime *************");
             console.log(params.wakeUpTime);
-            this.state = {
-                wakeUpTime: params.wakeUpTime,
-                arrivalTime: params.arrivalTime,
-                label: params.label,
-                mode: params.mode,
-                tasks: params.tasks,
-                alarm: params
-            };
+            this.state = params;
         }
 
     }
@@ -63,7 +56,7 @@ class AlarmDetail extends Component {
     }
 
     onPressAddTask() {
-        let nextTaskPosition = this.state.alarm.tasks.length;
+        let nextTaskPosition = this.state.tasks.length;
         this.props.navigation.navigate('TaskDetail',
             {onSaveTask: this.onTaskListChanged.bind(this),
              order: nextTaskPosition});
@@ -76,8 +69,8 @@ class AlarmDetail extends Component {
         if (newTask) {
             // Task is defined
             realm.write(() => {
-                let updatedTasks = this.state.alarm.tasks;
-                this.state.alarm.tasks.push(newTask);
+                let updatedTasks = this.state.tasks;
+                this.state.tasks.push(newTask);
             });
         }
         this.setState(this.state);
