@@ -101,16 +101,19 @@ class AlarmDetail extends Component {
         this.props.navigation.navigate('TaskDetail', params);
     };
 
+    onChangeLabel = (text) => {
+        console.log("Label text changed: ", text);
+        this.setState({label: text});
+    };
+
     render() {
-        // console.debug("AlarmDetail: render4");
+        console.debug("AlarmDetail render - this.state: ", this.state);
         // console.debug("this.props");
         // console.debug(this.props);
-        // console.debug("this.state");
-        // console.debug(this.state);
 
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
         let sortedTasks = this.state.tasks.length > 1 ? this.state.tasks.sorted('order') : this.state.tasks;
-        console.debug(sortedTasks);
+        // console.debug(sortedTasks);
 
         return (
             <View style={styles.screenContainer}>
@@ -126,12 +129,14 @@ class AlarmDetail extends Component {
                 <View style={styles.fieldsContainer}>
                     <LabeledInput
                           labelText="Arrival Time"
-                          fieldText={moment.unix(this.state.arrivalTime).utc().format("h:mm A")} >
+                          fieldText={moment.unix(this.state.arrivalTime).utc().format("h:mm A")}
+                          handleTextInput={() => console.log("Arrival Time textInput changed")}>
                     </LabeledInput>
                     <LabeledInput
                           labelText="Label"
                           placeholder="Enter a label"
-                          fieldText={this.state.label}>
+                          fieldText={this.state.label}
+                          handleTextInput={this.onChangeLabel}  >
                     </LabeledInput>
                 </View>
                 <View style={styles.taskListContainer}>

@@ -8,9 +8,9 @@ class LabeledInput extends Component {
 
     constructor(props) {
         super(props);
-        // if (!props.handleTextInput) {
-        //     console.error("Prop 'handleTextInput' is required!");
-        // }
+        if (!props.handleTextInput) {
+            console.error("Prop 'handleTextInput' is required!");
+        }
     }
 
     render() {
