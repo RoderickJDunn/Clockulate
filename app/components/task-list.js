@@ -38,7 +38,7 @@ class TaskList extends React.PureComponent {
 
     _renderItem = ({item}) => (
         <TaskItem
-            {...this.props}
+            {...this.props}  // the props expanded here include 'onPressItem' callback
             // selected={!!this.state.selected.get(item.id)}
             data={item}
             id={item.id}

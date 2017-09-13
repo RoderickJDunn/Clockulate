@@ -99,6 +99,19 @@ class AlarmDetail extends Component {
         this.setState({label: text});
     };
 
+    onChangeTaskEnabled = (taskToUpdate, enabled) => {
+        let tasks = this.state.tasks;
+        let taskToChange = tasks.find(task => task.id === taskToUpdate.id);
+        if (!taskToChange) {
+            console.error("Could not find task to update with new 'enabled' value. Searching for AlarmTask id: ", modifiedTask.id);
+            return;
+        }
+        realm.write(() => {
+            taskToChange.enabled = !enabled;
+        });
+        this.setState({tasks: tasks});
+    };
+
     render() {
         console.debug("AlarmDetail render - this.state: ", this.state);
         // console.debug("this.props");
@@ -143,6 +156,7 @@ class AlarmDetail extends Component {
                     </View>
                     <TaskList
                         onPressItem={this._onPressTask.bind(this)}
+                        onPressItemCheckBox={this.onChangeTaskEnabled}
                         data={sortedTasks}/>
             </View>
             </View>
