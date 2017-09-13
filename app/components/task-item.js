@@ -12,17 +12,13 @@ import { TaskListStyle, TaskItemStyle } from '../styles/list';
 class TaskItem extends React.PureComponent {
 
     /*
-    Receives an AlarmTask in the 'data' property:
+    Props: Receives an AlarmTask in the 'data' property:
         data: { id:"_"   // this is the AlarmTask id
           duration: #,
           enabled: bool,
           task: { id:"_", name:"Task name", defaultDuration: # }
         }
      */
-    constructor(props) {
-        super(props);
-        let data = props.data;
-    }
 
     _onPress = () => {
         console.debug("TaskItem: onPress");
@@ -37,7 +33,7 @@ class TaskItem extends React.PureComponent {
     };
 
     render() {
-        console.debug("render task-item", this.props);
+        // console.debug("render task-item", this.props);
         let duration = this.props.data.duration ? this.props.data.duration : this.props.data.task.defaultDuration;
         return (
             <TouchableOpacity style={TaskListStyle.item} onPress={this._onPress}>
@@ -57,8 +53,5 @@ class TaskItem extends React.PureComponent {
         );
     }
 }
-
-
-
 
 export default TaskItem;

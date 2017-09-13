@@ -29,17 +29,13 @@ class AlarmDetail extends Component {
 
     constructor(props) {
         super(props);
-        console.log("AlarmDetail -- Props: ");
-        console.log(props);
+        console.log("AlarmDetail -- Props: ", props);
         const { params } = props.navigation.state; // same as: " const params = props.navigation.state.params "
         if (params.newAlarm) {
             console.log("This is a new alarm");
             this.state = new AlarmModel();
         }
         else {
-            console.log("We are editing an old alarm");
-            console.log("Test params.wakeUpTime *************");
-            console.log(params.wakeUpTime);
             this.state = params;
         }
 
@@ -79,13 +75,11 @@ class AlarmDetail extends Component {
     /*
     Called by a 'bubble-up' type functionality, since a reference to this function was passed as a prop to 'TaskList',
     which in turn passes the fx reference to each 'TaskItem' in that list.
-    IMPORTANT: It is vital to bind this function to 'this' in the outer scope (the screen) so that it has access
-    to props.navigation. [See the 'onPressItem' prop of 'TaskList' in the render() function.]
+    IMPORTANT: It is vital to either use an arrow function here (which uses the outer-scope 'this'), or if it is a
+        regular function, bind the fx to 'this' in the outer scope (the screen) so that it has access to this.props.navigation.
      */
     _onPressTask = (task) => {
-        console.debug("AlarmDetail: onPressTask");
-        // console.debug(this.props);
-        console.debug(task);
+        console.debug("AlarmDetail: onPressTask -- task: ", task);
 
         // Need to use a workaround to delete the object, otherwise app will crash due to Realm bug when navigating after deleting passed Object:
         // Pass TaskAlarm ID instead of TaskAlarm object.
@@ -95,7 +89,7 @@ class AlarmDetail extends Component {
     };
 
     onChangeLabel = (text) => {
-        console.log("Label text changed: ", text);
+        // console.log("Label text changed: ", text);
         this.setState({label: text});
     };
 
@@ -113,9 +107,7 @@ class AlarmDetail extends Component {
     };
 
     render() {
-        console.debug("AlarmDetail render - this.state: ", this.state);
-        // console.debug("this.props");
-        // console.debug(this.props);
+        // console.debug("AlarmDetail render - this.state: ", this.state);
 
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
         let sortedTasks = this.state.tasks.length > 1 ? this.state.tasks.sorted('order') : this.state.tasks;

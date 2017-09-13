@@ -8,15 +8,7 @@ import TaskItem from './task-item';
 
 class TaskList extends React.PureComponent {
 
-    // state = {selected: (new Map(): Map<string, boolean>)};
-
-    constructor(props) {
-        super(props);
-        // console.log("\n\n\n\nProps passed to task-list ----------: \n");
-        // console.log(props);
-
-    }
-
+    // TODO: Comment the structure of Props passed in (we don't need a constructor since we are not keeping state in this component)
 
     componentWillReceiveProps(e){
         // console.log("\ncomponentWillReceiveProps", e);
@@ -24,29 +16,16 @@ class TaskList extends React.PureComponent {
 
     _keyExtractor = (item, index) => item.id;
 
-    // _onPressItem = (id: string) => {
-    //     console.debug("TaskList: onPressItem");
-    //     // updater functions are preferred for transactional updates
-    //     // console.debug("Pressed item");
-    //     this.setState((state) => {
-    //         // copy the map rather than modifying state.
-    //         const selected = new Map(state.selected);
-    //         selected.set(id, !selected.get(id)); // toggle
-    //         return {selected};
-    //     });
-    // };
-
     _renderItem = ({item}) => (
         <TaskItem
-            {...this.props}  // the props expanded here include 'onPressItem' callback
-            // selected={!!this.state.selected.get(item.id)}
+            {...this.props}  // the props expanded here include 'onPressItem' callback, and the onPressItemCheckBox callback
             data={item}
             id={item.id}
         />
     );
 
     render() {
-        console.debug("Render TaskList: props: ", this.props);
+        // console.debug("Render TaskList: props: ", this.props);
         let tasksArr = [];
         for (let id in this.props.data) {
             tasksArr.push(this.props.data[id]);

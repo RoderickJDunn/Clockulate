@@ -33,7 +33,6 @@ class LabeledTimeInput extends Component {
     };
 
     _showTimePicker = () => {
-        // this.setState({isDTPickerVisible: true});
         let hours = calcWholeHours(this.state.data.time);
         let minutes = calcMinutes(this.state.data.time, hours);
         Picker.init({
@@ -54,7 +53,6 @@ class LabeledTimeInput extends Component {
     };
 
     _onPickerConfirm = (pickedValue, pickedIndex) => {
-        console.debug('Confirmed duration: ', pickedValue, pickedIndex);
         let dataTemp = this.state.data;
         dataTemp.time = pickedIndex[0]*3600 + pickedIndex[1]*60;
 

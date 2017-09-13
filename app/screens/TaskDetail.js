@@ -34,8 +34,7 @@ class TaskDetail extends Component {
      */
     constructor(props) {
         super(props);
-        console.log("TaskDetail -- Props: ");
-        console.log(props);
+        // console.log("TaskDetail -- Props: ", props);
         const {params} = props.navigation.state; // same as: " const params = props.navigation.state.params "
         if (!params ||!params.hasOwnProperty('alarmTaskId')) {
             // We are creating a brand new task. Create a stub TaskAlarm object with default Task values
@@ -71,7 +70,7 @@ class TaskDetail extends Component {
     }
 
     componentDidMount() {
-        console.debug("TaskDetail --- ComponentDidMount");
+        // console.debug("TaskDetail --- ComponentDidMount");
         // setParams updates the object 'navigation.state.params'
         // When this Screen is going to be rendered, any code in navigationOptions is run (ie: the code within
         // the onPress property of a Button (in headerRight)). This code in navigationOptions can have access to
@@ -83,7 +82,7 @@ class TaskDetail extends Component {
         // There are several things to think about:
         // 1. Is this a newly created Task being saved for the first time? Or it a task that's been edited?
         // 2. Do we need to edit/create a new Task, or just a new AlarmTask? Depends on whether Task name was changed
-        console.log("TaskDetail:handleSave: this.state", this.state);
+        // console.log("TaskDetail:handleSave: this.state", this.state);
 
         // Check if newTask
         let alarmTask;
@@ -123,7 +122,7 @@ class TaskDetail extends Component {
             }
             else {
                 // create/update the AlarmTask with the new duration
-                console.log("Name NOT changed, updating existing AlarmTask");
+                // console.log("Name NOT changed, updating existing AlarmTask");
                 realm.write(() => {
                     // NOTE: Here we are updating the AlarmTask in the DB by passing 'true' as the 3rd param of create()
                     //        This param specifies that it should be an update operation, rather than a creation.
@@ -138,7 +137,6 @@ class TaskDetail extends Component {
     }
 
     onTaskNameChange(text) {
-        console.log(text);
         const updatedAlmTask = this.state.alarmTask;
         updatedAlmTask.task.name = text;
         this.setState({alarmTask: updatedAlmTask});
@@ -148,7 +146,7 @@ class TaskDetail extends Component {
     }
 
     onTaskDurationChanged(duration) {
-        console.debug("Task duration changed: ", duration);
+        // console.debug("Task duration changed: ", duration);
         const updatedAlmTask = this.state.alarmTask;
         updatedAlmTask.duration = duration;
         this.setState({alarmTask: updatedAlmTask});

@@ -32,15 +32,16 @@ class Alarms extends Component {
         console.log("Fetching Alarms...");
         this.alarmList = realm.objects('Alarm'); // TODO: filter by 'visible'=true
 
-        console.log("Registering listener");
-        this.alarmList.addListener((name, changes) => {
-            // console.log("Changed: " + JSON.stringify(changes));
-        });
+        // console.log("Registering listener");
+        // this.alarmList.addListener((name, changes) => {
+        //     // console.log("Changed: " + JSON.stringify(changes));
+        // });
 
     }
 
     componentDidMount(){
-        console.debug("Alarms --- ComponentDidMount");
+        // console.debug("Alarms --- ComponentDidMount");
+
         // setParams updates the object 'navigation.state.params'
         // When this Screen is going to be rendered, any code in navigationOptions is run (ie: the code within
         // the onPress property of a Button (in headerRight)). This code in navigationOptions can have access to
@@ -68,9 +69,7 @@ class Alarms extends Component {
     };
 
     _onPressItem = (item) => {
-        console.debug("_onPressItem called");
-        console.log("--------- " + item.id + " -----------");
-        // console.log(item);
+        // console.debug("_onPressItem called");
 
         this.props.navigation.navigate('AlarmDetail', item);
     };

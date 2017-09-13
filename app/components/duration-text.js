@@ -38,9 +38,9 @@ class DurationText extends Component {
     }
 
     render() {
-        console.log('rendering duration-text');
+        // console.log('rendering duration-text');
         let duration = this.formatDuration(this.props.duration);
-        console.log(duration);
+        // console.log(duration);
         return (
             <Text numberOfLines={1} ellipsizeMode="tail" style={this.props.style}>
                 {duration}
