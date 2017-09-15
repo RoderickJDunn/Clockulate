@@ -47,4 +47,6 @@ AlarmTaskSchema.schema = {
     }
 };
 
+console.log("Realm path: ", Realm.defaultPath);
+
 export default new Realm({schema: [AlarmSchema, TaskSchema, AlarmTaskSchema]});
