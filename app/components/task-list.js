@@ -30,7 +30,7 @@ class TaskList extends React.PureComponent {
         for (let id in this.props.data) {
             tasksArr.push(this.props.data[id]);
         }
-        console.log("taskArr", tasksArr);
+        // console.log("taskArr", tasksArr);
         return (
             <View style={listStyle.container}>
                 <FlatList

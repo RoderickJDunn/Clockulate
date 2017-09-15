@@ -14,6 +14,11 @@ class LabeledInput extends Component {
     }
 
     render() {
+        let onBlur;
+        if (this.props.onTextInputBlur) {
+            onBlur = this.props.onTextInputBlur
+        }
+
         return (
             <View style={styles.container}>
                 <Text style={styles.fieldLabelText}>{this.props.labelText}</Text>
@@ -21,7 +26,9 @@ class LabeledInput extends Component {
                     style={styles.fieldText}
                     placeholder={this.props.placeHolder}
                     value={this.props.fieldText}
-                    onChangeText={this.onChangeTextField.bind(this)}/>
+                    onChangeText={this.onChangeTextField.bind(this)}
+                    onBlur={onBlur}
+                />
                 {/*<Text style={styles.fieldLabelText}>Fake:O0</Text>*/}
 
             </View>

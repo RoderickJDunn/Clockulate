@@ -43,10 +43,10 @@ class LabeledTimeInput extends Component {
             pickerFontColor: [255, 0, 0, 1],
             onPickerConfirm: this._onPickerConfirm,
             onPickerCancel: (pickedValue, pickedIndex) => {
-                console.log('duration', pickedValue, pickedIndex);
+                // console.log('duration', pickedValue, pickedIndex);
             },
             onPickerSelect: (pickedValue, pickedIndex) => {
-                console.log('duration', pickedValue, pickedIndex);
+                // console.log('duration', pickedValue, pickedIndex);
             }
         });
         Picker.show();

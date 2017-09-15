@@ -46,20 +46,6 @@ const navigationConfig = {
 export const MainStack = StackNavigator({
     AlarmsList: {
         screen: Alarms,
-        // navigationOptions: ({navigation}) => ({
-        //     title: "Alarms10",
-        //     // Use this method to provide a custom header (Navigation bar)
-        //     // header: (
-        //     //     <View style={{
-        //     //         height: 80,
-        //     //         marginTop: 20// only for IOS to give StatusBar Space
-        //     //     }}>
-        //     //         <Text>This is my HEADER</Text>
-        //     //     </View>
-        //     // )
-        //     // headerRight: ({state}) => ( <Button title="Add" onPress={state.params.handleAddAlarm} />)
-        //     headerRight: <Button title="Add" onPress={navigation.handleAddAlarm()} />
-        // }),
         navigationOptions: ({navigation}) => ({
                 title: "Alarms",
                 headerRight: <Button title="Add" onPress={() => navigation.state.params.handleAddAlarm()}/>
@@ -74,6 +60,15 @@ export const MainStack = StackNavigator({
             headerTitleStyle: {
                 color: Colors.brandLightGrey
             },
+            // This is how you define a custom back button. Apart from styling, this also seems like the best way to
+            //  perform any additional tasks before executing navigation.goBack(), otherwise, goBack() is called
+            //  automatically when the back button is pushed
+            headerLeft: <Icon name={'chevron-left'} color={Colors.brandLightGrey}
+                              underlayColor={Colors.brandDarkGrey}
+                              onPress={() => {
+                                  navigation.goBack();
+                                  //navigation.state.params.handleBackBtn();
+                              }}/>
         }),
     },
     TaskDetail: {

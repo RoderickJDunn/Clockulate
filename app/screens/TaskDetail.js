@@ -45,7 +45,7 @@ class TaskDetail extends Component {
                 onSaveTask: params.onSaveTask,
                 newTask: true
             };
-            console.log(this.state.alarmTask);
+            // console.log(this.state.alarmTask);
         }
         else {
             let alarmTask = realm.objectForPrimaryKey('AlarmTask', params.alarmTaskId);
@@ -82,19 +82,22 @@ class TaskDetail extends Component {
         // There are several things to think about:
         // 1. Is this a newly created Task being saved for the first time? Or it a task that's been edited?
         // 2. Do we need to edit/create a new Task, or just a new AlarmTask? Depends on whether Task name was changed
+
         // console.log("TaskDetail:handleSave: this.state", this.state);
 
         // Check if newTask
         let alarmTask;
+        let prevAlarmTask = this.state.alarmTask;
+
         if (this.state.newTask) {
             // Create new Task and associated AlarmTask
-            console.log(this.state);
-            let preTask = this.state;
+            // console.log(this.state);
+            prevAlarmTask = this.state.alarmTask;
             realm.write(() => {
                 // NOTE: even though we need both a new Task and AlarmTask, we just need to create the AlarmTask,
                 //        and the Task is automatically created. In fact, creating the Task then trying to create the
                 //        corresponding AlarmTask afterward gives an error (duplicate primary key).
-                alarmTask = realm.create("AlarmTask", this.state.alarmTask);
+                alarmTask = realm.create("AlarmTask", prevAlarmTask);
             });
         }
         else {
@@ -105,14 +108,14 @@ class TaskDetail extends Component {
                 // alert("Name was changed, saving as new Task and AlarmTask");
                 realm.write(() => {
 
-                    let idToDelete = this.state.alarmTask.id; // get Id of AlarmTask to delete
-                    let orderOfAlmTask = this.state.alarmTask.order; // store the Order of AlarmTask to be deleted, to apply to the new one
+                    let idToDelete = prevAlarmTask.id; // get Id of AlarmTask to delete
+                    let orderOfAlmTask = prevAlarmTask.order; // store the Order of AlarmTask to be deleted, to apply to the new one
                     realm.delete(realm.objectForPrimaryKey('AlarmTask', idToDelete)); // delete the AlarmTask by ID
 
                     // Create new AlarmTask for the new task
                     const newTask = new TaskModel();
-                    newTask.name = this.state.alarmTask.task.name;
-                    newTask.defaultDuration = this.state.alarmTask.duration;
+                    newTask.name = prevAlarmTask.task.name;
+                    newTask.defaultDuration = prevAlarmTask.duration ? prevAlarmTask.duration : prevAlarmTask.task.defaultDuration;
 
                     alarmTask = new AlarmTaskModel(newTask, orderOfAlmTask);
 
@@ -126,8 +129,8 @@ class TaskDetail extends Component {
                 realm.write(() => {
                     // NOTE: Here we are updating the AlarmTask in the DB by passing 'true' as the 3rd param of create()
                     //        This param specifies that it should be an update operation, rather than a creation.
-                    console.log('alarmTask', this.state.alarmTask);
-                    realm.create('AlarmTask', this.state.alarmTask, true);
+                    // console.log('alarmTask', this.state.alarmTask);
+                    realm.create('AlarmTask', prevAlarmTask, true);
                 });
             }
         }

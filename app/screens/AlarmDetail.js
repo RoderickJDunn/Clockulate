@@ -19,6 +19,7 @@ import LabeledInput from '../components/labeled-input'
 import Colors from '../styles/colors'
 import { DefaultAlarm } from '../data/constants'
 import { AlarmModel } from '../data/models'
+import {NavigationActions} from 'react-navigation'
 
 
 class AlarmDetail extends Component {
@@ -29,26 +30,77 @@ class AlarmDetail extends Component {
 
     constructor(props) {
         super(props);
-        console.log("AlarmDetail -- Props: ", props);
+        console.log("AlarmDetail -- Constructor");
+        console.log("Blah");
         const { params } = props.navigation.state; // same as: " const params = props.navigation.state.params "
         if (params.newAlarm) {
             console.log("This is a new alarm");
             this.state = new AlarmModel();
         }
         else {
-            this.state = params;
+            console.log("We are editing an existing alarm: ", params);
+            this.state = params.alarm;
+
         }
 
     }
 
+    // componentDidMount() {
+    //     // setTimeout(() => {  // Temporarily disabled to save resources. (set back to setInterval).
+    //     //     // console.log("Updating time and date");
+    //     //     this.setState({
+    //     //         time: moment().format("LT"),
+    //     //         date: moment().format("LL"),
+    //     //     });
+    //     // }, 1000);
+    // }
+
+    componentWillMount() {
+        console.debug("AlarmDetail componentWillMount");
+    }
+
     componentDidMount() {
-        // setTimeout(() => {  // Temporarily disabled to save resources. (set back to setInterval).
-        //     // console.log("Updating time and date");
-        //     this.setState({
-        //         time: moment().format("LT"),
-        //         date: moment().format("LL"),
-        //     });
-        // }, 1000);
+        console.debug("AlarmDetail --- ComponentDidMount");
+        // this.props.navigation.setParams({handleBackBtn: this.handleBackPress.bind(this)});
+
+    }
+
+    componentWillReceiveProps() {
+        console.debug("AlarmDetail componentWillReceiveProps");
+    }
+
+    shouldComponentUpdate() {
+        console.debug("AlarmDetail shouldComponentUpdate");
+        return true;
+    }
+
+    componentWillUpdate() {
+        console.debug("AlarmDetail componentWillUpdate");
+    }
+
+    componentDidUpdate() {
+        console.debug("AlarmDetail componentDidUpdate");
+    }
+
+    /*
+    NOTE: This method DOES get called when you push 'Back' do go back to parent screen. However, no lifecycle
+          methods are called in the previous screen (not even Render()), so any work that you want to do in the
+          parent screen on navigating back must be done by sending a callback fx upon initial navigation to this screen.
+          The callback can be executed from 1) componentWillUnmount (in which case you might see the parent screen update
+          after navigation back is complete), or 2) from a custom 'Back' function. This seems to work better, but
+          requires you to define a custom back button in navigation options, then bind the onPress function of the
+          back button to a function in the child screen (ie: this screen). See handleBackPress() -- I've done option 2.
+     */
+    // componentWillUnmount() {
+    //     console.debug("AlarmDetail componentWillUnmount");
+    // }
+
+    handleBackPress() {
+        console.debug("Going back to Alarms List");
+        this.props.navigation.state.params.reloadAlarms(); // TODO (fix) probably not going to work if you tap back button, without first
+        this.props.navigation.goBack();
+        // this.props.navigation.dispatch(NavigationActions.back());
+
     }
 
     onPressAddTask() {
@@ -93,6 +145,25 @@ class AlarmDetail extends Component {
         this.setState({label: text});
     };
 
+    onLabelInputBlur = () => {
+        console.debug("AlarmLabelInput blurred: ");
+        console.debug("this.state (Alarm): ", this.state);
+        realm.write(() => {
+            // TODO: This should work, but it seems that due to a bug, the Tasks list is unlinked from the parent Alarm object. It should be fixed soon
+            // https://github.com/realm/realm-js/issues/1124
+            //realm.create('Alarm', this.state, true);
+            // TODO: end
+
+            // For Now, use this workaround //
+            let alarm = realm.objects('Alarm').filtered(`id = "${this.state.id}"`);
+            console.debug('Alarm queried from DB: ', alarm);
+            alarm[0].label = this.state.label;
+            console.debug('Alarm after changing label: ', alarm);
+            //////////////////////////////////
+        });
+        console.debug("this.state (Alarm): ", this.state);
+    };
+
     onChangeTaskEnabled = (taskToUpdate, enabled) => {
         let tasks = this.state.tasks;
         let taskToChange = tasks.find(task => task.id === taskToUpdate.id);
@@ -107,6 +178,7 @@ class AlarmDetail extends Component {
     };
 
     render() {
+        console.debug("AlarmDetail render - ");
         // console.debug("AlarmDetail render - this.state: ", this.state);
 
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
@@ -128,13 +200,16 @@ class AlarmDetail extends Component {
                     <LabeledInput
                           labelText="Arrival Time"
                           fieldText={moment.unix(this.state.arrivalTime).utc().format("h:mm A")}
-                          handleTextInput={() => console.log("Arrival Time textInput changed")}>
+                          handleTextInput={() => console.log("Arrival Time textInput changed")}
+                    >
                     </LabeledInput>
                     <LabeledInput
                           labelText="Label"
                           placeholder="Enter a label"
                           fieldText={this.state.label}
-                          handleTextInput={this.onChangeLabel}  >
+                          handleTextInput={this.onChangeLabel}
+                          onTextInputBlur={this.onLabelInputBlur}
+                    >
                     </LabeledInput>
                 </View>
                 <View style={styles.taskListContainer}>
