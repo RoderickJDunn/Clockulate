@@ -61,7 +61,7 @@ class AlarmDetail extends Component {
 
     componentDidMount() {
         console.debug("AlarmDetail --- ComponentDidMount");
-        // this.props.navigation.setParams({handleBackBtn: this.handleBackPress.bind(this)});
+        this.props.navigation.setParams({handleBackBtn: this.handleBackPress.bind(this)});
 
     }
 
@@ -97,8 +97,23 @@ class AlarmDetail extends Component {
 
     handleBackPress() {
         console.debug("Going back to Alarms List");
-        this.props.navigation.state.params.reloadAlarms(); // TODO (fix) probably not going to work if you tap back button, without first
-        this.props.navigation.goBack();
+        realm.write(() => {
+            // TODO: This should work, but it seems that due to a bug, the Tasks list gets unlinked from the parent Alarm object. It should be fixed soon
+            // https://github.com/realm/realm-js/issues/1124
+            //realm.create('Alarm', this.state, true);
+            // TODO: end
+
+            // For Now, use this workaround //
+            let alarm = realm.objects('Alarm').filtered(`id = "${this.state.id}"`);
+            if (alarm && alarm.length === 1) {
+                alarm[0].label = this.state.label;
+            }
+            //////////////////////////////////
+
+            this.props.navigation.state.params.reloadAlarms(); // TODO (fix) probably not going to work if you tap back button, without first
+            this.props.navigation.goBack();
+        });
+
         // this.props.navigation.dispatch(NavigationActions.back());
 
     }
@@ -147,21 +162,8 @@ class AlarmDetail extends Component {
 
     onLabelInputBlur = () => {
         console.debug("AlarmLabelInput blurred: ");
-        console.debug("this.state (Alarm): ", this.state);
-        realm.write(() => {
-            // TODO: This should work, but it seems that due to a bug, the Tasks list is unlinked from the parent Alarm object. It should be fixed soon
-            // https://github.com/realm/realm-js/issues/1124
-            //realm.create('Alarm', this.state, true);
-            // TODO: end
-
-            // For Now, use this workaround //
-            let alarm = realm.objects('Alarm').filtered(`id = "${this.state.id}"`);
-            console.debug('Alarm queried from DB: ', alarm);
-            alarm[0].label = this.state.label;
-            console.debug('Alarm after changing label: ', alarm);
-            //////////////////////////////////
-        });
-        console.debug("this.state (Alarm): ", this.state);
+        // console.debug("this.state (Alarm): ", this.state);
+        // TODO: Figure out if this method is needed. It can probably be removed.
     };
 
     onChangeTaskEnabled = (taskToUpdate, enabled) => {

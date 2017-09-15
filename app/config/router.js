@@ -66,8 +66,7 @@ export const MainStack = StackNavigator({
             headerLeft: <Icon name={'chevron-left'} color={Colors.brandLightGrey}
                               underlayColor={Colors.brandDarkGrey}
                               onPress={() => {
-                                  navigation.goBack();
-                                  //navigation.state.params.handleBackBtn();
+                                  navigation.state.params.handleBackBtn();
                               }}/>
         }),
     },

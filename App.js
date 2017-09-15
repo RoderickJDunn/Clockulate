@@ -8,11 +8,11 @@ export default class App extends React.Component {
     constructor() {
         super();
         this.state = {firstLaunch: null};
-        console.log("Entry: Constructor");
+        // console.log("Entry: Constructor");
     }
 
     componentDidMount() {
-        console.log("Entry: Component did mount");
+        // console.log("Entry: Component did mount");
         try {
             AsyncStorage.getItem('alreadyLaunched').then((value) => {
                 if (value === null) {
