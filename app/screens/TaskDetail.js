@@ -10,12 +10,9 @@ import {
 } from 'react-native';
 import {NavigationActions} from 'react-navigation'
 
-import moment from 'moment';
 import realm from '../data/DataSchemas';
-import uuid from 'react-native-uuid';
 import LabeledInput from '../components/labeled-input'
-import LabeledTimeInput from "../components/labeled-time-input";
-import { DefaultTask } from '../data/constants';
+import LabeledDurationInput from "../components/labeled-duration-input";
 import { TaskModel, AlarmTaskModel } from '../data/models'
 
 /*
@@ -115,7 +112,9 @@ class TaskDetail extends Component {
                     // Create new AlarmTask for the new task
                     const newTask = new TaskModel();
                     newTask.name = prevAlarmTask.task.name;
-                    newTask.defaultDuration = prevAlarmTask.duration ? prevAlarmTask.duration : prevAlarmTask.task.defaultDuration;
+                    newTask.defaultDuration = prevAlarmTask.duration ? prevAlarmTask.duration :
+                                              prevAlarmTask.task.defaultDuration ? prevAlarmTask.task.defaultDuration :
+                                                  600;
 
                     alarmTask = new AlarmTaskModel(newTask, orderOfAlmTask);
 
@@ -163,15 +162,14 @@ class TaskDetail extends Component {
                     fieldText={this.state.alarmTask.task.name}
                     handleTextInput={this.onTaskNameChange.bind(this)}>
                 </LabeledInput>
-                <LabeledTimeInput
+                <LabeledDurationInput
                   labelText="Duration"
                   time={this.state.duration ? this.state.duration : this.state.alarmTask.task.defaultDuration}
                   onChange={this.onTaskDurationChanged.bind(this)}>
-                </LabeledTimeInput>
+                </LabeledDurationInput>
             </View>
         );
     }
-
 }
 
 export default TaskDetail;

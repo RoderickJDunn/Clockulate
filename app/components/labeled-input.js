@@ -29,8 +29,6 @@ class LabeledInput extends Component {
                     onChangeText={this.onChangeTextField.bind(this)}
                     onBlur={onBlur}
                 />
-                {/*<Text style={styles.fieldLabelText}>Fake:O0</Text>*/}
-
             </View>
         );
     }
@@ -51,7 +49,7 @@ const styles = StyleSheet.create({
     },
     fieldLabelText: {
         fontSize: 13,
-        paddingBottom: 7
+        paddingBottom: 5
     },
     fieldText: {
         fontSize: 23,

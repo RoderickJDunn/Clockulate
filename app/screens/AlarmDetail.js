@@ -16,10 +16,9 @@ import moment from 'moment';
 import realm from '../data/DataSchemas';
 import TaskList from '../components/task-list';
 import LabeledInput from '../components/labeled-input'
+import LabeledTimeInput from '../components/labeled-time-input'
 import Colors from '../styles/colors'
-import { DefaultAlarm } from '../data/constants'
 import { AlarmModel } from '../data/models'
-import {NavigationActions} from 'react-navigation'
 
 
 class AlarmDetail extends Component {
@@ -114,7 +113,6 @@ class AlarmDetail extends Component {
             this.props.navigation.goBack();
         });
 
-        // this.props.navigation.dispatch(NavigationActions.back());
 
     }
 
@@ -199,12 +197,13 @@ class AlarmDetail extends Component {
                 </View>
 
                 <View style={styles.fieldsContainer}>
-                    <LabeledInput
+                    <LabeledTimeInput
                           labelText="Arrival Time"
-                          fieldText={moment.unix(this.state.arrivalTime).utc().format("h:mm A")}
-                          handleTextInput={() => console.log("Arrival Time textInput changed")}
+                          fieldText={"9:00 AM"}
+                          handleArrivalChange={(time) => console.log("Arrival Time textInput changed: ", time)}
+                          timePickerPrompt="What time do you need to arrive?"
                     >
-                    </LabeledInput>
+                    </LabeledTimeInput>
                     <LabeledInput
                           labelText="Label"
                           placeholder="Enter a label"
@@ -250,10 +249,11 @@ const styles = StyleSheet.create({
     fieldsContainer: {
         flex: 3,
         alignSelf: 'stretch',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         backgroundColor: "#dbd6dd",
         padding: 10,
         paddingBottom: 10,
+
     },
     taskListContainer: {
         flex: 9,
