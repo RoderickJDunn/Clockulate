@@ -3,13 +3,14 @@
  */
 
 export const DefaultAlarm = {
-    wakeUpTime: 28800,  // 8:00 am
-    arrivalTime: 32400,
+    wakeUpTime: 45000000,  // 8:00 am
+    arrivalTime: 45000000,
     mode: "autocalc",
     tasks: [],
     label: "",
     enabled: true,
     visible: true,
+    preset: false
 };
 
 export const DefaultTask = {

@@ -2,31 +2,26 @@
  * Created by rdunn on 2017-07-16.
  */
 
-import React, {Component} from 'react';
+import React, { Component } from "react";
 import {
     View,
     Text,
     FlatList,
-    StyleSheet,
     TouchableOpacity,
-    StatusBar,
-    AppRegistry,
-    Button
-} from 'react-native';
+} from "react-native";
 
-import realm from '../data/DataSchemas';
-import moment from 'moment';
+import realm from "../data/DataSchemas";
+import moment from "moment";
 
-import { ListStyle } from '../styles/list'
+import { ListStyle } from "../styles/list";
 
 class Alarms extends Component {
-
     constructor() {
         super();
         console.log("Alarm -- Constructor");
         console.log("Fetching Alarms...");
         this.state = {};
-        this.state.alarms = realm.objects('Alarm'); // TODO: filter by 'visible'=true
+        this.state.alarms = realm.objects("Alarm"); // TODO: filter by 'visible'=true
     }
 
     componentWillMount() {
@@ -40,14 +35,16 @@ class Alarms extends Component {
         // When this Screen is going to be rendered, any code in navigationOptions is run (ie: the code within
         // the onPress property of a Button (in headerRight)). This code in navigationOptions can have access to
         // the navigation object that we are updating here - so long as you pass in navigation to navigationOptions
-        this.props.navigation.setParams({handleAddAlarm: this.handleAddAlarm.bind(this)});
+        this.props.navigation.setParams({
+            handleAddAlarm: this.handleAddAlarm.bind(this)
+        });
     }
 
     componentWillReceiveProps() {
         console.debug("Alarms  componentWillReceiveProps");
     }
 
-    componentWillUpdate(){
+    componentWillUpdate() {
         console.debug("Alarms  componentWillUpdate");
     }
     componentDidUpdate() {
@@ -59,9 +56,8 @@ class Alarms extends Component {
 
     reloadAlarms = () => {
         console.debug("Reloading alarms list");
-        this.setState({alarms: realm.objects('Alarm')}); // TODO: filter by 'visible'=true
+        this.setState({ alarms: realm.objects("Alarm") }); // TODO: filter by 'visible'=true
     };
-
 
     /*
     Handler for 'Add-Alarm' button press. Navigates to AlarmDetail screen sending no Alarm data.
@@ -74,29 +70,42 @@ class Alarms extends Component {
      */
     handleAddAlarm() {
         console.log("Adding alarm");
-        this.props.navigation.navigate('AlarmDetail', {newAlarm: true, reloadAlarms: this.reloadAlarms});
+        this.props.navigation.navigate("AlarmDetail", {
+            newAlarm: true,
+            reloadAlarms: this.reloadAlarms
+        });
     }
 
-    _keyExtractor = (item, index) => {
+    _keyExtractor = (item) => {
         return item.id;
     };
 
-    _onPressItem = (item) => {
+    _onPressItem = item => {
         // console.debug("_onPressItem called");
-        this.props.navigation.navigate('AlarmDetail', {alarm: item, reloadAlarms: this.reloadAlarms});
+        this.props.navigation.navigate("AlarmDetail", {
+            alarm: item,
+            reloadAlarms: this.reloadAlarms
+        });
     };
 
-    _renderItem = ({item}) => {
+    _renderItem = ({ item }) => {
         console.debug("alarm: ", item);
         return (
-            <TouchableOpacity style={ListStyle.item} id={item.id}
-                              label={item.label}
-                              onPress={this._onPressItem.bind(this, item)}
+            <TouchableOpacity
+                style={ListStyle.item}
+                id={item.id}
+                label={item.label}
+                onPress={this._onPressItem.bind(this, item)}
             >
-                <Text>{moment.unix(item.wakeUpTime).utc().format("h:mm A")}</Text>
+                <Text>
+                    {moment
+                        .utc(item.wakeUpTime)
+                        .local()
+                        .format("h:mm A")}
+                </Text>
                 <Text>{item.label}</Text>
             </TouchableOpacity>
-        )
+        );
     };
 
     render() {
@@ -108,12 +117,10 @@ class Alarms extends Component {
                     data={this.state.alarms}
                     renderItem={this._renderItem}
                     keyExtractor={this._keyExtractor}
-                >
-                </FlatList>
+                />
             </View>
-        )
+        );
     }
 }
 
 export default Alarms;
-

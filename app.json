@@ -1,7 +1,4 @@
 {
-  "expo": {
-    "sdkVersion": "18.0.0"
-  },
-  "name": "Alarm_AutoSet",
-  "displayName": "Alarm Auto-Set"
+  "name": "Clock_Sample1",
+  "displayName": "Clock_Sample1"
 }

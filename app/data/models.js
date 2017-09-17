@@ -2,12 +2,8 @@
  * Created by rdunn on 2017-08-30.
  */
 
-import realm from './DataSchemas';
 import uuid from 'react-native-uuid';
 import {DefaultTask, DefaultAlarm} from '../data/constants';
-// TODO: MAY NOT NEED THIS FILE AT ALL. MIGHT BE OVERKILL
-// export default class DataManager {
-
 
 export class AlarmModel {
     constructor() {
@@ -19,7 +15,7 @@ export class AlarmModel {
         this.label = DefaultAlarm.label;
         this.enabled = DefaultAlarm.enabled;
         this.visible = DefaultAlarm.visible;
-        this.preset = DefaultAlarm.preset
+        this.preset = DefaultAlarm.preset;
     }
 }
 
