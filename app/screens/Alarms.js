@@ -12,7 +12,8 @@ import {
 } from "react-native";
 import GestureRecognizer from "react-native-swipe-gestures";
 import Svg, { Defs, Circle, RadialGradient, Stop } from "react-native-svg";
-import RNCalendarEvents from "react-native-calendar-events";
+// import { PushNotification } from "react-native-push-notification";
+var PushNotification = require("react-native-push-notification");
 
 import realm from "../data/DataSchemas";
 import moment from "moment";
@@ -126,32 +127,12 @@ class Alarms extends Component {
             alarm.enabled = !alarm.enabled;
         });
 
-        RNCalendarEvents.authorizeEventStore()
-            .then(status => {
-                console.log(
-                    "Promise succeeded requesting authorization... status: ",
-                    status
-                );
-            })
-            .catch(error => {
-                console.log("Error requesting Auth Status. ", error);
-                // TODO: Handle case where user denies permission to Calendar
-            });
-
         if (alarm.enabled) {
             console.log("Setting alarm");
-            RNCalendarEvents.saveEvent(alarm.label, {
-                // TODO: Pass time format dynamically. It expects a utc time in this format ('Z' means UTC).
-                startDate: "2017-10-02T04:35:00.000Z",
-                endDate: "2017-10-02T04:35:00.000Z",
-                alarms: [{ date: 0 }] // a date of 0 here tells it to set an alert for the time of the event
-            })
-                .then(id => {
-                    console.log("Promise was successful");
-                })
-                .catch(error => {
-                    console.log("Error setting calendar event", error);
-                });
+            PushNotification.localNotificationSchedule({
+                message: "My Notification Message", // (required)
+                date: new Date(Date.now() + 30 * 1000) // in 60 secs
+            });
         }
 
         // console.log("this.state", this.state);

@@ -1,0 +1,80 @@
+
+Todo:
+☐ V1
+  ☐ UI Tasks 
+  - Alarms List Screen
+    ✔ ON/OFF Switch on Alarms List (for each alarm) 
+    ✔ Redesign to include WakeUp time and Arrival time, and toggle switch
+
+  - Alarm Detail Screen
+    ✘ ON/OFF Switch in Alarms Detail  [Not doing - not necessary, and would clutter Alarm Detail too much]
+    ✔ Bottom of text is cut off in Label when Editing 
+    ✔ Image background for Wake-Up Time clock (not doing SVG anymore because cannot blur edges)
+        ✔ In progress - should extend slightly below into the first label (how??)
+    ✔ Font for clock 
+    ✔ Wake Up Time - format properly (with small caps for AM/PM)
+    ✔ Add Task button should be an icon (preferably overlaid a little into the task list)
+    ✔ Checkbox color - brandLightPurple
+
+  - Task Detail
+    ✔ Make UI a little nicer - right now its just a skeleton
+    ✔ Large 'Delete' button below other fields to delete this task 
+
+  ☐ Functionality Tasks
+    ✔ Delete Tasks (from Task Detail screen)
+    ✔ Dismiss delete button in Alarms list by tapping anywhere (not just on Alarms).
+    ☐ ACTUALLY SET AN ALARM (LOL)
+        - Now going to try 'react-native-push-notification', instead of the calendar one.
+
+  ✔ BUG: Duration is always '0' in Task Detail screen
+
+☐ V2
+    - Feature Additions
+        - Animations
+        - Normal Mode (and switching between Normal and Auto mode)
+        - Autocomplete Task names in 'TaskDetail' screen
+            - History and Common built-in tasks
+        - Allow editing of 'Arrival Time' **Label** 
+            - Use Case: If I'm working from home, I don't need to 'arrive' anywhere. But I do need to 'Start Working at...'
+            - Sometimes it would be useful to be able to change this label
+        - Style Changes
+            - Find nice fonts
+            - More Icons
+                ☐ 'Add Alarm' button
+
+    - Alarm Detail Screen
+        ☐ Delete tasks from the Alarm Detail screen (in V1 you have to Edit the task)
+        ☐ Handle Mode changes
+            ☐ Normal Mode: Much larger clock, still has label. 
+                        - Also bottom area you can swipe up on to enable the 'Autocalc' mode
+            ☐ Auto Mode: As is.
+            ☐ Tap or swipe down on Wake-Up Time clock to change from 'autocalc' -> 'basic'
+            ☐ Swipe up from bottom "special area" to change from 'basic' -> 'autocalc'
+            ☐ Disable/ignore all arrival time and task functionality
+            ☐ set Wake Up Time directly (re-use Arrival Time picker)
+            ☐ Animate scaling (enlarging/shrinking) the alarm-clock image when changing modes
+
+    - Task Detail Screen
+        ☐ Spruce up UI, its a little too minimal
+
+    ☐ Define common fonts in the 'text.js' style file
+        - Font for Titles (screen headers)
+        - Font for field labels
+        - Font for field contents (times, task names, etc)
+        - Font for Large Time (we have a decent one already)
+        
+  
+☐ V3
+    - Feature Additions
+        - Task Types
+            - Major: Travel -- requires some integration with Google Maps
+        
+    - Alarm List Screen
+        ☐ Drop shadow for Enabled/Disable button on each alarm.
+    - Alarm Detail Screen
+
+    - Task Detail Screen
+        ☐ Task types -- ie: travel, dependent on other person, other
+            - most will be other
+
+    ☐ Profiles
