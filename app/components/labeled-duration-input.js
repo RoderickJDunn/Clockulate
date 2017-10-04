@@ -14,7 +14,7 @@ import { calcWholeHours, calcMinutes } from "../util/date_utils";
 class LabeledDurationInput extends Component {
     constructor(props) {
         super(props);
-        // console.log(props);
+        console.log("props", props);
         this.state = {
             data: {
                 labelText: props.labelText,

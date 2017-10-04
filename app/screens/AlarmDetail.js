@@ -8,8 +8,14 @@ import {
     Text,
     StyleSheet,
     StatusBar,
-    TouchableOpacity
+    TouchableOpacity,
+    Dimensions,
+    ImageBackground,
+    Image
 } from "react-native";
+import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
+import Icon from "react-native-vector-icons/Entypo";
+
 import moment from "moment";
 
 import realm from "../data/DataSchemas";
@@ -19,6 +25,9 @@ import LabeledTimeInput from "../components/labeled-time-input";
 import Colors from "../styles/colors";
 import { AlarmModel } from "../data/models";
 
+// TODO: Remove after we're done choosing fonts
+import { fontPreview } from "../styles/text.js";
+
 class AlarmDetail extends Component {
     static navigationOptions = () => ({
         title: "Edit Alarm"
@@ -26,14 +35,17 @@ class AlarmDetail extends Component {
 
     _calculatedWakeUpTime;
 
+    width = Dimensions.get("window").width; //full width
+    height = Dimensions.get("window").height; //full height
     constructor(props) {
         super(props);
         console.log("AlarmDetail -- Constructor");
+
         const { params } = props.navigation.state; // same as: " const params = props.navigation.state.params "
         if (params.newAlarm) {
             console.log("This is a new alarm");
             realm.write(() => {
-                this.setState(realm.create("Alarm", new AlarmModel()));
+                this.state = realm.create("Alarm", new AlarmModel());
             });
         } else {
             console.log("We are editing an existing alarm: ", params);
@@ -107,10 +119,12 @@ class AlarmDetail extends Component {
             if (alarm && alarm.length === 1) {
                 alarm[0].label = this.state.label;
                 alarm[0].arrivalTime = this.state.arrivalTime;
-                if (this.state.mode ==='autocalc' && this._calculatedWakeUpTime) {
+                if (
+                    this.state.mode === "autocalc" &&
+                    this._calculatedWakeUpTime
+                ) {
                     alarm[0].wakeUpTime = this._calculatedWakeUpTime;
-                } 
-                else {
+                } else {
                     alarm[0].wakeUpTime = this.state.wakeUpTime;
                 }
             }
@@ -124,14 +138,14 @@ class AlarmDetail extends Component {
     onPressAddTask() {
         let nextTaskPosition = this.state.tasks.length;
         this.props.navigation.navigate("TaskDetail", {
-            onSaveTask: this.onTaskListChanged.bind(this),
+            onSaveState: this.onTaskListChanged.bind(this),
             order: nextTaskPosition
         });
     }
 
     onTaskListChanged(newTask) {
         console.log("Task modified", newTask);
-        // Check if Task is defined. This callback contains the newly created alarmTask, 
+        // Check if Task is defined. This callback contains the newly created alarmTask,
         // or nothing if an existing alarmTask was updated.
         if (newTask) {
             realm.write(() => {
@@ -154,11 +168,26 @@ class AlarmDetail extends Component {
         // Pass TaskAlarm ID instead of TaskAlarm object.
         const params = {
             alarmTaskId: task.id,
-            onSaveTask: this.onTaskListChanged.bind(this)
+            onSaveState: this.onTaskListChanged.bind(this)
         };
 
         this.props.navigation.navigate("TaskDetail", params);
     };
+
+    /**** THIS IS A DEV FUNCTION THAT WILL BE DELETED BEFORE RELEASE ****/
+    fontCount = 50;
+    nextFont = fontPreview[0];
+    _CHANGE_CLOCK_FONT() {
+        console.log("Changing font");
+        // console.log(fontPreview);
+        if (this.fontCount < 0 || this.fontCount > fontPreview.length)
+            this.fontCount = 0;
+
+        this.nextFont = fontPreview[this.fontCount];
+        console.log("this.nextFont ", this.nextFont);
+        this.fontCount++;
+        this.setState(this.state);
+    }
 
     onChangeLabel = text => {
         // console.log("Label text changed: ", text);
@@ -192,20 +221,19 @@ class AlarmDetail extends Component {
             .map(alarmTask => {
                 if (alarmTask.enabled) {
                     return alarmTask.duration
-                    ? alarmTask.duration
-                    : alarmTask.task.defaultDuration;
-                }
-                else {
+                        ? alarmTask.duration
+                        : alarmTask.task.defaultDuration;
+                } else {
                     return 0;
                 }
-                
             })
             .reduce((a, b) => a + b, 0);
         totalTaskDurations *= 1000;
         console.log(totalTaskDurations);
 
         // save calculated wakeUpTime to use for saving to DB when user presses back
-        this._calculatedWakeUpTime = this.state.arrivalTime - totalTaskDurations;
+        this._calculatedWakeUpTime =
+            this.state.arrivalTime - totalTaskDurations;
 
         return this._calculatedWakeUpTime;
     };
@@ -228,21 +256,29 @@ class AlarmDetail extends Component {
             wakeUpTime = this.state.wakeUpTime;
         }
 
+        let wakeTimeMoment = moment.utc(wakeUpTime).local();
+        let fWakeUpTime = wakeTimeMoment.format("h:mm");
+        let amPmWakeUpTime = wakeTimeMoment.format("A");
+
         console.log("Wake up time: ", wakeUpTime);
         console.log("Arrival time: ", this.state.arrivalTime);
 
         return (
             <View style={styles.screenContainer}>
-                <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} />
-                <View style={styles.clockContainer}>
-                    <Text style={styles.timeText}>
-                        {moment
-                            .utc(wakeUpTime)
-                            .local()
-                            .format("h:mm A")}
+                {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
+                <Image
+                    style={styles.clockBackground}
+                    source={require("../img/ClockBackground.png")}
+                    /* resizeMode="center" */
+                />
+                <View style={styles.clockTextContainer}>
+                    <Text style={[styles.timeText, {}]}>
+                        {fWakeUpTime}
+                        <Text style={{ fontSize: 50 }}>
+                            {" " + amPmWakeUpTime}
+                        </Text>
                     </Text>
-
-                    <Text style={{ alignSelf: "flex-end" }}>My profile</Text>
+                    {/* <Text style={{ alignSelf: "flex-end" }}>My profile</Text> */}
                 </View>
 
                 <View style={styles.fieldsContainer}>
@@ -257,9 +293,17 @@ class AlarmDetail extends Component {
                             .local()
                             .toDate()}
                         handleArrivalChange={time => {
-                            console.log("Arrival Time textInput changed: ", time);
-                            console.log("Arrival Time textInput changed: ", moment(time).unix());
-                            this.setState({ arrivalTime: moment(time).unix() * 1000 });
+                            console.log(
+                                "Arrival Time textInput changed: ",
+                                time
+                            );
+                            console.log(
+                                "Arrival Time textInput changed: ",
+                                moment(time).unix()
+                            );
+                            this.setState({
+                                arrivalTime: moment(time).unix() * 1000
+                            });
                         }}
                         timePickerPrompt="What time do you need to arrive?"
                     />
@@ -273,12 +317,17 @@ class AlarmDetail extends Component {
                 </View>
                 <View style={styles.taskListContainer}>
                     <View style={styles.taskListHeader}>
-                        <Text style={{ alignSelf: "flex-start" }}>Tasks</Text>
+                        <Text style={{ alignSelf: "center" }}>Tasks</Text>
                         <TouchableOpacity
                             style={{ alignSelf: "flex-start" }}
                             onPress={this.onPressAddTask.bind(this)}
+                            /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
                         >
-                            <Text numberOfLines={1}>Add Task</Text>
+                            <Icon
+                                name="add-to-list"
+                                size={30}
+                                color={Colors.brandLightPurple}
+                            />
                         </TouchableOpacity>
                     </View>
                     <TaskList
@@ -296,21 +345,21 @@ const styles = StyleSheet.create({
     screenContainer: {
         flex: 1,
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        backgroundColor: Colors.backgroundGrey
     },
     clockContainer: {
-        backgroundColor: "#594483",
+        backgroundColor: "transparent",
         flex: 4,
         alignSelf: "stretch",
         alignItems: "center",
-        justifyContent: "center",
-        padding: 10
+        justifyContent: "center"
     },
     fieldsContainer: {
         flex: 3,
         alignSelf: "stretch",
         alignItems: "flex-start",
-        backgroundColor: "#dbd6dd",
+        // backgroundColor: Colors.backgroundGrey,
         padding: 10,
         paddingBottom: 10
     },
@@ -318,17 +367,34 @@ const styles = StyleSheet.create({
         flex: 9,
         padding: 10,
         paddingTop: 0,
-        alignSelf: "stretch",
-        backgroundColor: "#dbd6dd"
+        alignSelf: "stretch"
+        // backgroundColor: "#dbd6dd"
     },
     taskListHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center"
     },
+    clockBackground: {
+        justifyContent: "center",
+        alignItems: "center",
+        position: "absolute",
+        top: -40,
+        width: 450,
+        height: 220
+    },
+    clockTextContainer: {
+        flex: 4,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "transparent"
+    },
     timeText: {
         color: "#999999",
-        fontSize: 80
+        fontSize: 95,
+        backgroundColor: "transparent",
+        alignSelf: "center",
+        fontFamily: "Baskerville-Bold"
     },
     dateText: {
         color: "#999999",

@@ -2,8 +2,8 @@
  * Created by rdunn on 2017-08-30.
  */
 
-import uuid from 'react-native-uuid';
-import {DefaultTask, DefaultAlarm} from '../data/constants';
+import uuid from "react-native-uuid";
+import { DefaultTask, DefaultAlarm } from "../data/constants";
 
 export class AlarmModel {
     constructor() {
@@ -30,8 +30,8 @@ export class TaskModel {
 export class AlarmTaskModel {
     /*
     Paramters --
-        Task: the base task entry to which this AlarmTask is linked
-        alarmTasksList: the list of AlarmTasks to which this AlarmTask will be added. This is used to determine the "order"
+        task: the base task entry to which this AlarmTask is linked
+        order: the order of this AlarmTask within the linked Alarm's list of AlarmTasks.
      */
     constructor(task, order) {
         this.id = uuid.v1();

@@ -8,14 +8,23 @@ import {
     Text,
     FlatList,
     TouchableOpacity,
+    Dimensions
 } from "react-native";
+import GestureRecognizer from "react-native-swipe-gestures";
+import Svg, { Defs, Circle, RadialGradient, Stop } from "react-native-svg";
+import RNCalendarEvents from "react-native-calendar-events";
 
 import realm from "../data/DataSchemas";
 import moment from "moment";
 
-import { ListStyle } from "../styles/list";
+import Colors from "../styles/colors";
+import { ListStyle, AlarmListStyle } from "../styles/list";
+import { TextStyle } from "../styles/text";
 
 class Alarms extends Component {
+    width = Dimensions.get("window").width; //full width
+    height = Dimensions.get("window").height; //full height
+
     constructor() {
         super();
         console.log("Alarm -- Constructor");
@@ -76,47 +85,287 @@ class Alarms extends Component {
         });
     }
 
-    _keyExtractor = (item) => {
+    _keyExtractor = item => {
         return item.id;
     };
 
     _onPressItem = item => {
-        // console.debug("_onPressItem called");
-        this.props.navigation.navigate("AlarmDetail", {
-            alarm: item,
-            reloadAlarms: this.reloadAlarms
-        });
+        console.debug("_onPressItem called");
+
+        console.log("showDelete", this.state.showDelete);
+        if (!("showDelete" in this.state) || isNaN(this.state.showDelete)) {
+            this.props.navigation.navigate("AlarmDetail", {
+                alarm: item,
+                reloadAlarms: this.reloadAlarms
+            });
+        } else {
+            let tempState = this.state;
+            delete tempState.showDelete;
+            this.setState(tempState);
+        }
     };
 
-    _renderItem = ({ item }) => {
-        console.debug("alarm: ", item);
+    _onPressDelete = (item, event) => {
+        // console.log("event", event);
+        realm.write(() => {
+            realm.delete(item);
+        });
+        let tempState = this.state;
+        delete tempState.showDelete;
+        this.setState(tempState);
+    };
+
+    _onSwipeLeft(alarmIndex, state) {
+        console.log("You swiped left! Showing delete button");
+        this.setState({ showDelete: alarmIndex });
+    }
+
+    _onAlarmToggled = alarm => {
+        console.log("alarm toggled: ", alarm);
+        realm.write(() => {
+            alarm.enabled = !alarm.enabled;
+        });
+
+        RNCalendarEvents.authorizeEventStore()
+            .then(status => {
+                console.log(
+                    "Promise succeeded requesting authorization... status: ",
+                    status
+                );
+            })
+            .catch(error => {
+                console.log("Error requesting Auth Status. ", error);
+                // TODO: Handle case where user denies permission to Calendar
+            });
+
+        if (alarm.enabled) {
+            console.log("Setting alarm");
+            RNCalendarEvents.saveEvent(alarm.label, {
+                // TODO: Pass time format dynamically. It expects a utc time in this format ('Z' means UTC).
+                startDate: "2017-10-02T04:35:00.000Z",
+                endDate: "2017-10-02T04:35:00.000Z",
+                alarms: [{ date: 0 }] // a date of 0 here tells it to set an alert for the time of the event
+            })
+                .then(id => {
+                    console.log("Promise was successful");
+                })
+                .catch(error => {
+                    console.log("Error setting calendar event", error);
+                });
+        }
+
+        // console.log("this.state", this.state);
+        this.setState(this.state);
+    };
+
+    _makeDeleteButton(item) {
         return (
             <TouchableOpacity
-                style={ListStyle.item}
-                id={item.id}
-                label={item.label}
-                onPress={this._onPressItem.bind(this, item)}
+                style={{
+                    position: "absolute",
+                    height: 120,
+                    width: 100,
+                    backgroundColor: Colors.deleteBtnRed,
+                    right: 0,
+                    alignSelf: "center",
+                    justifyContent: "center",
+                    borderColor: "black",
+                    shadowColor: "black",
+                    zIndex: 1
+                }}
+                onPress={this._onPressDelete.bind(this, item)}
             >
-                <Text>
-                    {moment
-                        .utc(item.wakeUpTime)
-                        .local()
-                        .format("h:mm A")}
+                <Text
+                    style={{
+                        textAlign: "center",
+                        color: "white",
+                        fontSize: 17
+                    }}
+                >
+                    Delete
                 </Text>
-                <Text>{item.label}</Text>
             </TouchableOpacity>
+        );
+    }
+
+    _makeOverlay() {
+        return (
+            <TouchableOpacity
+                style={{
+                    position: "absolute",
+                    height: this.height,
+                    width: this.width,
+                    backgroundColor: "transparent",
+                    left: 0,
+                    top: 0,
+                    alignSelf: "center",
+                    justifyContent: "center",
+                    zIndex: 2
+                }}
+                onPress={() => {
+                    let tempState = this.state;
+                    delete tempState.showDelete;
+                    this.setState(tempState);
+                }}
+            />
+        );
+    }
+
+    _renderItem = ({ item, index }) => {
+        // console.debug("alarm: ", item);
+        // console.log("index", index);
+        const config = {
+            velocityThreshold: 0.3,
+            directionalOffsetThreshold: 80
+        };
+
+        // Handle showing or hiding the delete button
+        let deleteButton;
+        let touchedOpacity = 0.2;
+        if ("showDelete" in this.state) {
+            if (index === this.state.showDelete) {
+                deleteButton = this._makeDeleteButton(item);
+            }
+            touchedOpacity = 1;
+        }
+
+        // Grab correct colors depending on whether alarm is enabled/disabled
+        let textColor, buttonColor;
+        if (item.enabled) {
+            textColor = Colors.black;
+            buttonColor = Colors.buttonOnGreen;
+        } else {
+            textColor = Colors.disabledGrey;
+            buttonColor = Colors.disabledGrey;
+        }
+
+        // Format times
+        let wakeTimeMoment = moment.utc(item.wakeUpTime).local();
+        let fWakeUpTime = wakeTimeMoment.format("h:mm");
+        let amPmWakeUpTime = wakeTimeMoment.format("A");
+
+        let arriveTimeMoment = moment.utc(item.arrivalTime).local();
+        let fArriveTime = arriveTimeMoment.format("h:mm");
+        let amPmArriveTime = arriveTimeMoment.format("A");
+
+        return (
+            <GestureRecognizer
+                onSwipeLeft={this._onSwipeLeft.bind(this, index)}
+                config={config}
+            >
+                <TouchableOpacity
+                    style={[AlarmListStyle.alarmRow, ListStyle.item]}
+                    activeOpacity={touchedOpacity}
+                    id={item.id}
+                    label={item.label}
+                    onPress={this._onPressItem.bind(this, item)}
+                >
+                    <Svg height="100" width="70">
+                        <Defs>
+                            <RadialGradient
+                                id="mainGrad"
+                                cx="35"
+                                cy="35"
+                                rx="50"
+                                ry="50"
+                                fx="23"
+                                fy="47"
+                                gradientUnits="userSpaceOnUse"
+                            >
+                                <Stop
+                                    offset="0"
+                                    stopColor={buttonColor}
+                                    stopOpacity="1"
+                                />
+                                <Stop
+                                    offset="1"
+                                    stopColor={Colors.brandDarkGrey}
+                                    stopOpacity="1"
+                                />
+                            </RadialGradient>
+                            {/* <RadialGradient
+                                id="shadow"
+                                cx="45"
+                                cy="35"
+                                rx="25"
+                                ry="25"
+                                fx="25"
+                                fy="25"
+                                gradientUnits="userSpaceOnUse"
+                            >
+                                <Stop
+                                    offset="0"
+                                    stopColor={Colors.black}
+                                    stopOpacity="1"
+                                />
+                                <Stop
+                                    offset="1"
+                                    stopColor={Colors.backgroundGrey}
+                                    stopOpacity="1"
+                                />
+                            </RadialGradient> */}
+                        </Defs>
+
+                        {/* <Circle cx="25" cy="25" r="20" fill="url(#shadow)" /> */}
+                        <Circle
+                            cx="25"
+                            cy="45"
+                            r="22"
+                            fill="url(#mainGrad)"
+                            onPressOut={this._onAlarmToggled.bind(this, item)}
+                        />
+                    </Svg>
+                    <View style={AlarmListStyle.infoContainer}>
+                        <Text
+                            style={[
+                                AlarmListStyle.timeText,
+                                TextStyle.timeText,
+                                { color: textColor }
+                            ]}
+                        >
+                            {fWakeUpTime}
+                            <Text style={TextStyle.AmPm}>
+                                {" " + amPmWakeUpTime}
+                            </Text>
+                        </Text>
+                        <Text style={{ color: textColor }}>{item.label}</Text>
+                        <Text
+                            style={[
+                                {
+                                    alignSelf: "flex-end",
+                                    fontSize: 15,
+                                    color: textColor
+                                }
+                            ]}
+                        >
+                            {"(" + fArriveTime}
+                            <Text style={{ fontSize: 12 }}>
+                                {" " + amPmArriveTime}
+                            </Text>
+                            {")"}
+                        </Text>
+                    </View>
+                    {deleteButton}
+                </TouchableOpacity>
+            </GestureRecognizer>
         );
     };
 
     render() {
         console.debug("AlarmsList Render");
-        console.debug(this.state);
+        // console.debug(this.state);
+        let overlay;
+        if ("showDelete" in this.state) {
+            overlay = this._makeOverlay();
+        }
         return (
             <View style={ListStyle.container}>
+                {overlay}
                 <FlatList
                     data={this.state.alarms}
                     renderItem={this._renderItem}
                     keyExtractor={this._keyExtractor}
+                    extraData={this.state}
                 />
             </View>
         );

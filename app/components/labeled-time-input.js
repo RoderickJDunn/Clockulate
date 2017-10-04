@@ -3,6 +3,8 @@ import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
 
 import DateTimePicker from "react-native-modal-datetime-picker";
 
+import { TextStyle } from "../styles/text";
+
 class LabeledTimeInput extends Component {
     constructor(props) {
         super(props);
@@ -34,14 +36,14 @@ class LabeledTimeInput extends Component {
         let test = "Hello log wrap";
         return (
             <View style={styles.container}>
-                <Text style={styles.fieldLabelText}>
+                <Text style={[TextStyle.labelText, styles.fieldLabelText]}>
                     {this.state.data.labelText}
                 </Text>
                 <TouchableOpacity
                     style={{ height: 5 }}
                     onPress={this._showDateTimePicker}
                 >
-                    <Text style={[{ fontSize: 25 }]}>
+                    <Text style={[TextStyle.timeText, { fontSize: 25 }]}>
                         {this.props.fieldText}
                     </Text>
                 </TouchableOpacity>
@@ -60,11 +62,11 @@ class LabeledTimeInput extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
+        backgroundColor: "transparent"
     },
     fieldLabelText: {
-        fontSize: 13,
-        paddingBottom: 3
+        paddingBottom: 2
     }
 });
 
