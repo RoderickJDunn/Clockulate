@@ -43,19 +43,19 @@ export const TaskListStyle = StyleSheet.create({
     item: {
         flex: 1,
         flexDirection: "row",
-        padding: 10,
+        paddingTop: 10,
+        paddingBottom: 10,
         height: 55,
         alignContent: "stretch",
         borderBottomColor: "#acacac",
         borderBottomWidth: 1,
         alignItems: "center",
-        marginLeft: -5,
-        marginRight: -5,
-        backgroundColor: "#dbd6dd"
+        backgroundColor: "#dbd6dd",
+        justifyContent: "space-between"
     },
     allChildren: {
-        marginLeft: 5,
-        marginRight: 5,
+        // marginLeft: 5,
+        // marginRight: 5,
         fontSize: 20,
         overflow: "hidden"
     }
@@ -63,16 +63,16 @@ export const TaskListStyle = StyleSheet.create({
 
 export const TaskItemStyle = StyleSheet.create({
     checkbox: {
-        flexBasis: "10%"
+        flexBasis: "11%"
+        // height: 50,
     },
     description: {
-        flexBasis: "65%"
+        flexBasis: "71%"
     },
     duration: {
         // alignSelf: 'stretch',
         textAlign: "right",
-        flexBasis: "20%",
-        // flexGrow: 1,
-        fontSize: 15
+        flexBasis: "18%",
+        fontSize: 16
     }
 });

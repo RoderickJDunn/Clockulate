@@ -1,40 +1,43 @@
-import React from 'react';
-import { MainStack } from './app/config/router';
-import {AppRegistry, AsyncStorage} from 'react-native';
+import React from "react";
+import { MainStack } from "./app/config/router";
+import { AppRegistry, AsyncStorage } from "react-native";
 
-import insertDummyData from './app/data/dummy';
+import insertDummyData from "./app/data/dummy";
 
 export default class App extends React.Component {
     constructor() {
         super();
-        this.state = {firstLaunch: null};
+        this.state = { firstLaunch: null };
         // console.log("Entry: Constructor");
     }
 
     componentDidMount() {
         // console.log("Entry: Component did mount");
         try {
-            AsyncStorage.getItem('alreadyLaunched').then((value) => {
+            AsyncStorage.getItem("alreadyLaunched").then(value => {
                 if (value === null) {
                     console.log("First Launch");
-                    AsyncStorage.setItem('alreadyLaunched', JSON.stringify(true));
-                    this.setState({firstLaunch: true});
+                    AsyncStorage.setItem(
+                        "alreadyLaunched",
+                        JSON.stringify(true)
+                    );
+                    this.setState({ firstLaunch: true });
                     insertDummyData();
-                }
-                else {
+                } else {
                     console.log("Not the first Launch");
-                    this.setState({firstLaunch: false});
+                    this.setState({ firstLaunch: false });
                 }
             });
         } catch (error) {
-            console.error(`Unable to check if app has already been launched: ${error}`);
+            console.error(
+                `Unable to check if app has already been launched: ${error}`
+            );
         }
-    };
+    }
 
     render() {
-        return (<MainStack />);
+        return <MainStack />;
     }
 }
 
-
-AppRegistry.registerComponent('Alarm_AutoSet', () => App);
+AppRegistry.registerComponent("Alarm_AutoSet", () => App);

@@ -12,8 +12,8 @@ import {
 } from "react-native";
 import GestureRecognizer from "react-native-swipe-gestures";
 import Svg, { Defs, Circle, RadialGradient, Stop } from "react-native-svg";
-// import { PushNotification } from "react-native-push-notification";
-var PushNotification = require("react-native-push-notification");
+import PushNotification from "react-native-push-notification";
+import PushController from "../alarmservice/PushController";
 
 import realm from "../data/DataSchemas";
 import moment from "moment";
@@ -34,10 +34,6 @@ class Alarms extends Component {
         this.state.alarms = realm.objects("Alarm"); // TODO: filter by 'visible'=true
     }
 
-    componentWillMount() {
-        console.debug("Alarms  componentWillMount");
-    }
-
     componentDidMount() {
         console.debug("Alarms --- ComponentDidMount");
 
@@ -50,22 +46,8 @@ class Alarms extends Component {
         });
     }
 
-    componentWillReceiveProps() {
-        console.debug("Alarms  componentWillReceiveProps");
-    }
-
-    componentWillUpdate() {
-        console.debug("Alarms  componentWillUpdate");
-    }
-    componentDidUpdate() {
-        console.debug("Alarms  componentDidUpdate");
-    }
-    componentWillUnmount() {
-        console.debug("Alarms  componentWillUnmount");
-    }
-
     reloadAlarms = () => {
-        console.debug("Reloading alarms list");
+        // console.debug("Reloading alarms list");
         this.setState({ alarms: realm.objects("Alarm") }); // TODO: filter by 'visible'=true
     };
 
@@ -79,7 +61,7 @@ class Alarms extends Component {
                 scope 'this'.
      */
     handleAddAlarm() {
-        console.log("Adding alarm");
+        // console.log("Adding alarm");
         this.props.navigation.navigate("AlarmDetail", {
             newAlarm: true,
             reloadAlarms: this.reloadAlarms
@@ -91,9 +73,9 @@ class Alarms extends Component {
     };
 
     _onPressItem = item => {
-        console.debug("_onPressItem called");
+        // console.debug("_onPressItem called");
 
-        console.log("showDelete", this.state.showDelete);
+        // console.log("showDelete", this.state.showDelete);
         if (!("showDelete" in this.state) || isNaN(this.state.showDelete)) {
             this.props.navigation.navigate("AlarmDetail", {
                 alarm: item,
@@ -107,7 +89,7 @@ class Alarms extends Component {
     };
 
     _onPressDelete = (item, event) => {
-        // console.log("event", event);
+        // console.log("onPressDelete: ", item);
         realm.write(() => {
             realm.delete(item);
         });
@@ -117,12 +99,12 @@ class Alarms extends Component {
     };
 
     _onSwipeLeft(alarmIndex, state) {
-        console.log("You swiped left! Showing delete button");
+        // console.log("You swiped left! Showing delete button");
         this.setState({ showDelete: alarmIndex });
     }
 
     _onAlarmToggled = alarm => {
-        console.log("alarm toggled: ", alarm);
+        // console.log("alarm toggled: ", alarm);
         realm.write(() => {
             alarm.enabled = !alarm.enabled;
         });
@@ -130,7 +112,7 @@ class Alarms extends Component {
         if (alarm.enabled) {
             console.log("Setting alarm");
             PushNotification.localNotificationSchedule({
-                message: "My Notification Message", // (required)
+                message: "wake up ho!", // (required)
                 date: new Date(Date.now() + 30 * 1000) // in 60 secs
             });
         }
@@ -180,8 +162,7 @@ class Alarms extends Component {
                     left: 0,
                     top: 0,
                     alignSelf: "center",
-                    justifyContent: "center",
-                    zIndex: 2
+                    justifyContent: "center"
                 }}
                 onPress={() => {
                     let tempState = this.state;
@@ -341,6 +322,7 @@ class Alarms extends Component {
         }
         return (
             <View style={ListStyle.container}>
+                <PushController />
                 {overlay}
                 <FlatList
                     data={this.state.alarms}

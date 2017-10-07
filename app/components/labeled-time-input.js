@@ -19,7 +19,7 @@ class LabeledTimeInput extends Component {
     }
 
     componentWillReceiveProps() {
-        console.debug("Alarms  componentWillReceiveProps");
+        // console.debug("Alarms  componentWillReceiveProps");
     }
 
     _showDateTimePicker = () => this.setState({ isDTPickerVisible: true });

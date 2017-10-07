@@ -4,7 +4,7 @@
 
 import uuid from "react-native-uuid";
 import { DefaultTask, DefaultAlarm } from "../data/constants";
-
+import { isEmpty } from "../util/general_util";
 export class AlarmModel {
     constructor() {
         this.id = uuid.v1();
@@ -16,6 +16,23 @@ export class AlarmModel {
         this.enabled = DefaultAlarm.enabled;
         this.visible = DefaultAlarm.visible;
         this.preset = DefaultAlarm.preset;
+    }
+
+    static isDefault(alarm) {
+        if (
+            alarm.wakeUpTime === DefaultAlarm.wakeUpTime &&
+            alarm.arrivalTime === DefaultAlarm.arrivalTime &&
+            alarm.mode === DefaultAlarm.mode &&
+            alarm.tasks.length === DefaultAlarm.tasks.length &&
+            alarm.label === DefaultAlarm.label &&
+            alarm.enabled === DefaultAlarm.enabled &&
+            alarm.visible === DefaultAlarm.visible &&
+            alarm.preset === DefaultAlarm.preset
+        ) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
 

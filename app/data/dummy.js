@@ -113,7 +113,7 @@ function insertDummyData() {
             id: uuid.v1(),
             wakeUpTime: 45000000, // 12:30 in seconds UTC -- (which is 7:30am local)
             arrivalTime: 48600000, // 1:30 in seconds UTC -- (which is 8:30am local)
-            mode: "basic",
+            mode: "autocalc", // TODO: Change back to basic for testing
             tasks: [almTask1, almTask7, almTask3, almTask8],
             label: "Wake up on work-day",
             enabled: true, // if true, it is active, and will Ring at wakeUpTime.
@@ -133,7 +133,6 @@ function insertDummyData() {
             preset: false // if tr
         });
         console.log(alarm2, alarm1, task2, task4, task5);
-    
     });
 
     const longTasks = realm.objects("Task").filtered("defaultDuration > 1000");

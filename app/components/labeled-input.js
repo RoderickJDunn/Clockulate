@@ -15,11 +15,13 @@ class LabeledInput extends Component {
     }
 
     render() {
-        let onBlur;
+        let onBlur, height;
         if (this.props.onTextInputBlur) {
             onBlur = this.props.onTextInputBlur;
         }
-
+        if (this.props.height) {
+            height = this.props.height;
+        }
         return (
             <View style={styles.container}>
                 <Text style={[TextStyle.labelText, styles.fieldLabelText]}>
@@ -45,17 +47,17 @@ const styles = StyleSheet.create({
     container: {
         alignSelf: "stretch",
         justifyContent: "center",
-        paddingBottom: 9,
+        paddingBottom: 18,
         paddingTop: 2,
         borderBottomColor: "#e9e9e9",
         borderBottomWidth: 1
     },
     fieldLabelText: {
-        paddingBottom: 2
+        paddingBottom: 7
     },
     fieldText: {
-        fontSize: 23,
-        height: 25
+        fontSize: 25,
+        height: 30
     }
 });
 

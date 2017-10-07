@@ -2,19 +2,18 @@
  * Created by rdunn on 2017-07-15.
  */
 
-import React, {Component} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
-import PropTypes from 'prop-types';
-import { calcWholeHours, calcMinutes } from '../util/date_utils'
-
+import React, { Component } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import PropTypes from "prop-types";
+import { calcWholeHours, calcMinutes } from "../util/date_utils";
 class DurationText extends Component {
     static propTypes = {
-        seconds: PropTypes.number,
+        seconds: PropTypes.number
     };
 
     constructor(props) {
         super(props);
-        console.log(props);
+        // console.log(props);
     }
 
     formatDuration(seconds) {
@@ -27,11 +26,9 @@ class DurationText extends Component {
         let duration = "";
         if (!hours) {
             duration = minutes ? `${minutes}m` : "0m";
-        }
-        else if (hours && !minutes) {
-            duration = `${hours}h`
-        }
-        else {
+        } else if (hours && !minutes) {
+            duration = `${hours}h`;
+        } else {
             duration = `${hours}h, ${minutes}m`;
         }
         return duration;
@@ -41,11 +38,16 @@ class DurationText extends Component {
         // console.log('rendering duration-text');
         let duration = this.formatDuration(this.props.duration);
         // console.log(duration);
+        console.log(this.props.style);
         return (
-            <Text numberOfLines={1} ellipsizeMode="tail" style={this.props.style}>
+            <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={this.props.style}
+            >
                 {duration}
             </Text>
-        )
+        );
     }
 }
 

@@ -22,15 +22,14 @@ export const TextStyle = StyleSheet.create({
     },
     editableText: {
         // TODO: Figure out a good font for editable text (eg: alarm labels, time fields)
-        fontFamily: "Baskerville"
+        fontFamily: "Verdana"
     },
     clockText: {
         // TODO: Figure out a good font for the main Clock (and probably the large times in Alarms screen)
         fontFamily: "Baskerville-Bold"
     },
     timeText: {
-        fontFamily: "Baskerville",
-        fontSize: 14
+        fontFamily: "Baskerville"
     }
 });
 

@@ -10,11 +10,12 @@ import DurationText from "./duration-text";
 import Picker from "react-native-picker";
 import { minuteRange, hourRange } from "../data/constants";
 import { calcWholeHours, calcMinutes } from "../util/date_utils";
+import { TextStyle } from "../styles/text";
 
 class LabeledDurationInput extends Component {
     constructor(props) {
         super(props);
-        console.log("props", props);
+        // console.log("props", props);
         this.state = {
             data: {
                 labelText: props.labelText,
@@ -68,7 +69,7 @@ class LabeledDurationInput extends Component {
                 <TouchableOpacity onPress={this._showTimePicker}>
                     <DurationText
                         duration={this.state.data.time}
-                        style={{ fontSize: 23 }}
+                        style={[TextStyle.timeText, { fontSize: 30 }]}
                     />
                 </TouchableOpacity>
             </View>
@@ -78,11 +79,12 @@ class LabeledDurationInput extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        justifyContent: "center"
+        justifyContent: "center",
+        paddingTop: 10
     },
     fieldLabelText: {
         fontSize: 13,
-        paddingBottom: 3
+        paddingBottom: 4
     }
 });
 

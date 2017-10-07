@@ -27,7 +27,6 @@ import { AlarmModel } from "../data/models";
 
 // TODO: Remove after we're done choosing fonts
 import { fontPreview } from "../styles/text.js";
-
 class AlarmDetail extends Component {
     static navigationOptions = () => ({
         title: "Edit Alarm"
@@ -48,7 +47,7 @@ class AlarmDetail extends Component {
                 this.state = realm.create("Alarm", new AlarmModel());
             });
         } else {
-            console.log("We are editing an existing alarm: ", params);
+            // console.log("We are editing an existing alarm: ", params);
             this.state = params.alarm;
         }
     }
@@ -63,32 +62,11 @@ class AlarmDetail extends Component {
     //     // }, 1000);
     // }
 
-    componentWillMount() {
-        console.debug("AlarmDetail componentWillMount");
-    }
-
     componentDidMount() {
-        console.debug("AlarmDetail --- ComponentDidMount");
+        // console.debug("AlarmDetail --- ComponentDidMount");
         this.props.navigation.setParams({
             handleBackBtn: this.handleBackPress.bind(this)
         });
-    }
-
-    componentWillReceiveProps() {
-        console.debug("AlarmDetail componentWillReceiveProps");
-    }
-
-    shouldComponentUpdate() {
-        console.debug("AlarmDetail shouldComponentUpdate");
-        return true;
-    }
-
-    componentWillUpdate() {
-        console.debug("AlarmDetail componentWillUpdate");
-    }
-
-    componentDidUpdate() {
-        console.debug("AlarmDetail componentDidUpdate");
     }
 
     /*
@@ -105,7 +83,8 @@ class AlarmDetail extends Component {
     // }
 
     handleBackPress() {
-        console.debug("Going back to Alarms List");
+        // console.debug("Going back to Alarms List");
+
         realm.write(() => {
             // TODO: This should work, but it seems that due to a bug, the Tasks list gets unlinked from the parent Alarm object. It should be fixed soon
             // https://github.com/realm/realm-js/issues/1124
@@ -117,22 +96,25 @@ class AlarmDetail extends Component {
                 .objects("Alarm")
                 .filtered(`id = "${this.state.id}"`);
             if (alarm && alarm.length === 1) {
-                alarm[0].label = this.state.label;
-                alarm[0].arrivalTime = this.state.arrivalTime;
-                if (
-                    this.state.mode === "autocalc" &&
-                    this._calculatedWakeUpTime
-                ) {
-                    alarm[0].wakeUpTime = this._calculatedWakeUpTime;
+                if (AlarmModel.isDefault(alarm[0])) {
+                    realm.delete(alarm);
                 } else {
-                    alarm[0].wakeUpTime = this.state.wakeUpTime;
+                    alarm[0].label = this.state.label;
+                    alarm[0].arrivalTime = this.state.arrivalTime;
+                    if (
+                        this.state.mode === "autocalc" &&
+                        this._calculatedWakeUpTime
+                    ) {
+                        alarm[0].wakeUpTime = this._calculatedWakeUpTime;
+                    } else {
+                        alarm[0].wakeUpTime = this.state.wakeUpTime;
+                    }
                 }
             }
             //////////////////////////////////
-
-            this.props.navigation.state.params.reloadAlarms();
-            this.props.navigation.goBack();
         });
+        this.props.navigation.state.params.reloadAlarms();
+        this.props.navigation.goBack();
     }
 
     onPressAddTask() {
@@ -144,7 +126,7 @@ class AlarmDetail extends Component {
     }
 
     onTaskListChanged(newTask) {
-        console.log("Task modified", newTask);
+        // console.log("Task modified", newTask);
         // Check if Task is defined. This callback contains the newly created alarmTask,
         // or nothing if an existing alarmTask was updated.
         if (newTask) {
@@ -162,7 +144,7 @@ class AlarmDetail extends Component {
         regular function, bind the fx to 'this' in the outer scope (the screen) so that it has access to this.props.navigation.
      */
     _onPressTask = task => {
-        console.debug("AlarmDetail: onPressTask -- task: ", task);
+        // console.debug("AlarmDetail: onPressTask -- task: ", task);
 
         // Need to use a workaround to delete the object, otherwise app will crash due to Realm bug when navigating after deleting passed Object:
         // Pass TaskAlarm ID instead of TaskAlarm object.
@@ -178,13 +160,13 @@ class AlarmDetail extends Component {
     fontCount = 50;
     nextFont = fontPreview[0];
     _CHANGE_CLOCK_FONT() {
-        console.log("Changing font");
+        // console.log("Changing font");
         // console.log(fontPreview);
         if (this.fontCount < 0 || this.fontCount > fontPreview.length)
             this.fontCount = 0;
 
         this.nextFont = fontPreview[this.fontCount];
-        console.log("this.nextFont ", this.nextFont);
+        // console.log("this.nextFont ", this.nextFont);
         this.fontCount++;
         this.setState(this.state);
     }
@@ -195,7 +177,7 @@ class AlarmDetail extends Component {
     };
 
     onLabelInputBlur = () => {
-        console.debug("AlarmLabelInput blurred: ");
+        // console.debug("AlarmLabelInput blurred: ");
         // console.debug("this.state (Alarm): ", this.state);
         // TODO: Figure out if this method is needed. It can probably be removed.
     };
@@ -217,6 +199,7 @@ class AlarmDetail extends Component {
     };
 
     _calcWakeUpTime = () => {
+        // console.log("Calculating wakeuptime");
         let totalTaskDurations = this.state.tasks
             .map(alarmTask => {
                 if (alarmTask.enabled) {
@@ -229,7 +212,7 @@ class AlarmDetail extends Component {
             })
             .reduce((a, b) => a + b, 0);
         totalTaskDurations *= 1000;
-        console.log(totalTaskDurations);
+        // console.log(totalTaskDurations);
 
         // save calculated wakeUpTime to use for saving to DB when user presses back
         this._calculatedWakeUpTime =
@@ -239,8 +222,8 @@ class AlarmDetail extends Component {
     };
 
     render() {
-        console.debug("AlarmDetail render - ");
-        console.debug("AlarmDetail render - this.state: ", this.state);
+        // console.debug("AlarmDetail render - ");
+        // console.debug("AlarmDetail render - this.state: ", this.state);
 
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
         let sortedTasks =
@@ -250,6 +233,7 @@ class AlarmDetail extends Component {
         // console.debug(sortedTasks);
 
         let wakeUpTime;
+        // console.log("this.state.mode", this.state.mode);
         if (this.state.mode == "autocalc") {
             wakeUpTime = this._calcWakeUpTime();
         } else {
@@ -260,15 +244,12 @@ class AlarmDetail extends Component {
         let fWakeUpTime = wakeTimeMoment.format("h:mm");
         let amPmWakeUpTime = wakeTimeMoment.format("A");
 
-        console.log("Wake up time: ", wakeUpTime);
-        console.log("Arrival time: ", this.state.arrivalTime);
-
         return (
             <View style={styles.screenContainer}>
                 {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
                 <Image
                     style={styles.clockBackground}
-                    source={require("../img/ClockBackground.png")}
+                    source={require("../img/ClockBackground.jpg")}
                     /* resizeMode="center" */
                 />
                 <View style={styles.clockTextContainer}>
@@ -283,7 +264,7 @@ class AlarmDetail extends Component {
 
                 <View style={styles.fieldsContainer}>
                     <LabeledTimeInput
-                        labelText="Arrival Time"
+                        labelText="ARRIVAL TIME"
                         fieldText={moment
                             .utc(this.state.arrivalTime)
                             .local()
@@ -308,7 +289,7 @@ class AlarmDetail extends Component {
                         timePickerPrompt="What time do you need to arrive?"
                     />
                     <LabeledInput
-                        labelText="Label"
+                        labelText="ALARM LABEL"
                         placeholder="Enter a label"
                         fieldText={this.state.label}
                         handleTextInput={this.onChangeLabel}
@@ -317,7 +298,7 @@ class AlarmDetail extends Component {
                 </View>
                 <View style={styles.taskListContainer}>
                     <View style={styles.taskListHeader}>
-                        <Text style={{ alignSelf: "center" }}>Tasks</Text>
+                        <Text style={{ alignSelf: "center" }}>TASKS</Text>
                         <TouchableOpacity
                             style={{ alignSelf: "flex-start" }}
                             onPress={this.onPressAddTask.bind(this)}

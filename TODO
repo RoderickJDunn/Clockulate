@@ -15,10 +15,15 @@ Todo:
     ✔ Wake Up Time - format properly (with small caps for AM/PM)
     ✔ Add Task button should be an icon (preferably overlaid a little into the task list)
     ✔ Checkbox color - brandLightPurple
+    ☐ Text Input style problem - figure out best way to do this when not so tired.
+    ✔ Back button is really hard to Push
+    ✔ Checkboxes are hard to push
 
   - Task Detail
     ✔ Make UI a little nicer - right now its just a skeleton
     ✔ Large 'Delete' button below other fields to delete this task 
+    ☐ Bug: Its possible to navigate back to AlarmDetail with Duration picker still open (press Delete or Back) 
+        --> handle this (maybe just close the popup on-back)
 
   ☐ Functionality Tasks
     ✔ Delete Tasks (from Task Detail screen)
@@ -27,6 +32,8 @@ Todo:
         - Now going to try 'react-native-push-notification', instead of the calendar one.
 
   ✔ BUG: Duration is always '0' in Task Detail screen
+  ☐ Start-up screen with 'Mascot' (complex logo character)
+  ☐ Style issue: Status Bar is not really visible on any screen
 
 ☐ V2
     - Feature Additions
@@ -43,6 +50,8 @@ Todo:
                 ☐ 'Add Alarm' button
 
     - Alarm Detail Screen
+        ☐ Annoying Checkmark layout issue. Can't get the overall circle+checkmark to layout properly without negative margins
+            - Even with this hack, the checkmark itself is not exactly centered in the circle
         ☐ Delete tasks from the Alarm Detail screen (in V1 you have to Edit the task)
         ☐ Handle Mode changes
             ☐ Normal Mode: Much larger clock, still has label. 

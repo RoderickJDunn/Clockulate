@@ -5,10 +5,12 @@
 import React, { Component } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import DurationText from "./duration-text";
-import CheckBox from "react-native-check-box";
+// import CheckBox from "react-native-check-box";
+import { CheckBox } from "native-base";
 import Colors from "../styles/colors";
 
 import { TaskListStyle, TaskItemStyle } from "../styles/list";
+import { TextStyle } from "../styles/text";
 
 class TaskItem extends React.PureComponent {
     /*
@@ -22,13 +24,13 @@ class TaskItem extends React.PureComponent {
 
     _onPress = () => {
         console.debug("TaskItem: onPress");
-        console.debug(this.props.data);
+        // console.debug(this.props.data);
 
         this.props.onPressItem(this.props.data);
     };
 
     _onTapCheckBox = data => {
-        console.debug(data);
+        // console.debug(data);
         this.props.onPressItemCheckBox(data, data.enabled);
     };
 
@@ -42,12 +44,19 @@ class TaskItem extends React.PureComponent {
                 style={TaskListStyle.item}
                 onPress={this._onPress}
             >
-                <CheckBox
-                    onClick={() => this._onTapCheckBox(this.props.data)}
-                    isChecked={this.props.data.enabled}
-                    checkBoxColor={Colors.brandLightPurple}
-                    style={TaskItemStyle.checkbox}
-                />
+                <View style={TaskItemStyle.checkbox}>
+                    <CheckBox
+                        onPress={() => this._onTapCheckBox(this.props.data)}
+                        checked={this.props.data.enabled}
+                        style={{
+                            marginLeft: -7,
+                            paddingTop: 1,
+                            backgroundColor: Colors.brandLightPurple,
+                            borderColor: "transparent"
+                        }}
+                        hitSlop={{ top: 15, bottom: 15, left: 5, right: 15 }}
+                    />
+                </View>
                 <Text
                     style={[
                         TaskListStyle.allChildren,
@@ -61,7 +70,11 @@ class TaskItem extends React.PureComponent {
                 </Text>
                 <DurationText
                     duration={duration}
-                    style={[TaskListStyle.allChildren, TaskItemStyle.duration]}
+                    style={[
+                        TaskListStyle.allChildren,
+                        TaskItemStyle.duration,
+                        TextStyle.timeText
+                    ]}
                 />
             </TouchableOpacity>
         );

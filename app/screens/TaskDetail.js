@@ -179,22 +179,21 @@ class TaskDetail extends Component {
     }
 
     render() {
-        console.log("this.state", this.state);
+        // console.log("this.state", this.state);
         return (
             <View style={ScreenStyles.TaskScreen}>
                 <LabeledInput
-                    labelText="Task Description"
+                    labelText="TASK NAME"
+                    placeholder="Enter a task name"
                     fieldText={this.state.alarmTask.task.name}
                     handleTextInput={this._onTaskNameChange.bind(this)}
                 />
                 <LabeledDurationInput
-                    labelText="Duration"
+                    labelText="DURATION"
                     time={
-                        this.state.alarmTask.duration ? (
-                            this.state.alarmTask.duration
-                        ) : (
-                            this.state.alarmTask.task.defaultDuration
-                        )
+                        this.state.alarmTask.duration
+                            ? this.state.alarmTask.duration
+                            : this.state.alarmTask.task.defaultDuration
                     }
                     onChange={this._onTaskDurationChanged.bind(this)}
                 />
@@ -202,7 +201,7 @@ class TaskDetail extends Component {
                     style={Styles.DeleteButton}
                     onPress={this._onDeleteTask.bind(this)}
                 >
-                    <Text style={{ color: "white" }}>Delete</Text>
+                    <Text style={{ color: "white", fontSize: 18 }}>Delete</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -213,11 +212,12 @@ export default TaskDetail;
 
 const Styles = StyleSheet.create({
     DeleteButton: {
-        marginTop: 10,
+        marginTop: 15,
         padding: 10,
         backgroundColor: Colors.deleteBtnRed,
         alignSelf: "stretch",
-        height: 40,
-        alignItems: "center"
+        height: 50,
+        alignItems: "center",
+        justifyContent: "center"
     }
 });
