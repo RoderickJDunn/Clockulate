@@ -15,20 +15,38 @@ class LabeledInput extends Component {
     }
 
     render() {
-        let onBlur, height;
+        let onBlur, height, labelBottomPadding, flex;
         if (this.props.onTextInputBlur) {
             onBlur = this.props.onTextInputBlur;
         }
         if (this.props.height) {
             height = this.props.height;
         }
+        if (this.props.separation) {
+            labelBottomPadding = this.props.separation;
+        }
         return (
-            <View style={styles.container}>
-                <Text style={[TextStyle.labelText, styles.fieldLabelText]}>
+            <View
+                style={[
+                    styles.container,
+                    { height: height, flex: this.props.flex }
+                ]}
+            >
+                <Text
+                    style={[
+                        TextStyle.labelText,
+                        styles.fieldLabelText,
+                        { paddingBottom: labelBottomPadding }
+                    ]}
+                >
                     {this.props.labelText}
                 </Text>
                 <TextInput
-                    style={[styles.fieldText, TextStyle.editableText]}
+                    style={[
+                        styles.fieldText,
+                        TextStyle.editableText,
+                        this.props.style
+                    ]}
                     placeholder={this.props.placeHolder}
                     value={this.props.fieldText}
                     onChangeText={this.onChangeTextField.bind(this)}
@@ -45,12 +63,11 @@ class LabeledInput extends Component {
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
         alignSelf: "stretch",
         justifyContent: "center",
-        paddingBottom: 18,
-        paddingTop: 2,
-        borderBottomColor: "#e9e9e9",
-        borderBottomWidth: 1
+        paddingBottom: 0,
+        paddingTop: 2
     },
     fieldLabelText: {
         paddingBottom: 7

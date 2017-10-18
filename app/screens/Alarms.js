@@ -8,7 +8,9 @@ import {
     Text,
     FlatList,
     TouchableOpacity,
-    Dimensions
+    Dimensions,
+    Animated,
+    Easing
 } from "react-native";
 import GestureRecognizer from "react-native-swipe-gestures";
 import Svg, { Defs, Circle, RadialGradient, Stop } from "react-native-svg";
@@ -31,7 +33,16 @@ class Alarms extends Component {
         console.log("Alarm -- Constructor");
         console.log("Fetching Alarms...");
         this.state = {};
-        this.state.alarms = realm.objects("Alarm"); // TODO: filter by 'visible'=true
+        this.state.alarms = this.slideIn = Animated.timing(this.state.slide, {
+            toValue: { x: 200, y: 0 },
+            duration: 2000,
+            delay: 1000,
+            easing: Easing.in(Easing.ease)
+        });
+        this.state = {
+            alarms: realm.objects("Alarm"), // TODO: filter by 'visible'=true
+            slide: new Animated.ValueXY({ x: 0, y: 0 })
+        };
     }
 
     componentDidMount() {
@@ -123,31 +134,33 @@ class Alarms extends Component {
 
     _makeDeleteButton(item) {
         return (
-            <TouchableOpacity
-                style={{
-                    position: "absolute",
-                    height: 120,
-                    width: 100,
-                    backgroundColor: Colors.deleteBtnRed,
-                    right: 0,
-                    alignSelf: "center",
-                    justifyContent: "center",
-                    borderColor: "black",
-                    shadowColor: "black",
-                    zIndex: 1
-                }}
-                onPress={this._onPressDelete.bind(this, item)}
-            >
-                <Text
+            <Animated.View>
+                <TouchableOpacity
                     style={{
-                        textAlign: "center",
-                        color: "white",
-                        fontSize: 17
+                        position: "absolute",
+                        height: 120,
+                        width: 100,
+                        backgroundColor: Colors.deleteBtnRed,
+                        right: 0,
+                        alignSelf: "center",
+                        justifyContent: "center",
+                        borderColor: "black",
+                        shadowColor: "black",
+                        zIndex: 1
                     }}
+                    onPress={this._onPressDelete.bind(this, item)}
                 >
-                    Delete
-                </Text>
-            </TouchableOpacity>
+                    <Text
+                        style={{
+                            textAlign: "center",
+                            color: "white",
+                            fontSize: 17
+                        }}
+                    >
+                        Delete
+                    </Text>
+                </TouchableOpacity>
+            </Animated.View>
         );
     }
 
@@ -222,61 +235,43 @@ class Alarms extends Component {
                     label={item.label}
                     onPress={this._onPressItem.bind(this, item)}
                 >
-                    <Svg height="100" width="70">
-                        <Defs>
-                            <RadialGradient
-                                id="mainGrad"
-                                cx="35"
-                                cy="35"
-                                rx="50"
-                                ry="50"
-                                fx="23"
-                                fy="47"
-                                gradientUnits="userSpaceOnUse"
-                            >
-                                <Stop
-                                    offset="0"
-                                    stopColor={buttonColor}
-                                    stopOpacity="1"
-                                />
-                                <Stop
-                                    offset="1"
-                                    stopColor={Colors.brandDarkGrey}
-                                    stopOpacity="1"
-                                />
-                            </RadialGradient>
-                            {/* <RadialGradient
-                                id="shadow"
-                                cx="45"
-                                cy="35"
-                                rx="25"
-                                ry="25"
-                                fx="25"
-                                fy="25"
-                                gradientUnits="userSpaceOnUse"
-                            >
-                                <Stop
-                                    offset="0"
-                                    stopColor={Colors.black}
-                                    stopOpacity="1"
-                                />
-                                <Stop
-                                    offset="1"
-                                    stopColor={Colors.backgroundGrey}
-                                    stopOpacity="1"
-                                />
-                            </RadialGradient> */}
-                        </Defs>
+                    <TouchableOpacity
+                        style={AlarmListStyle.toggleButton}
+                        onPressOut={this._onAlarmToggled.bind(this, item)}
+                    >
+                        <Svg height="100" width="70">
+                            <Defs>
+                                <RadialGradient
+                                    id="mainGrad"
+                                    cx="35"
+                                    cy="35"
+                                    rx="50"
+                                    ry="50"
+                                    fx="23"
+                                    fy="47"
+                                    gradientUnits="userSpaceOnUse"
+                                >
+                                    <Stop
+                                        offset="0"
+                                        stopColor={buttonColor}
+                                        stopOpacity="1"
+                                    />
+                                    <Stop
+                                        offset="1"
+                                        stopColor={Colors.brandDarkGrey}
+                                        stopOpacity="1"
+                                    />
+                                </RadialGradient>
+                            </Defs>
 
-                        {/* <Circle cx="25" cy="25" r="20" fill="url(#shadow)" /> */}
-                        <Circle
-                            cx="25"
-                            cy="45"
-                            r="22"
-                            fill="url(#mainGrad)"
-                            onPressOut={this._onAlarmToggled.bind(this, item)}
-                        />
-                    </Svg>
+                            <Circle
+                                cx="25"
+                                cy="45"
+                                r="22"
+                                fill="url(#mainGrad)"
+                            />
+                        </Svg>
+                    </TouchableOpacity>
                     <View style={AlarmListStyle.infoContainer}>
                         <Text
                             style={[

@@ -33,17 +33,18 @@ class LabeledTimeInput extends Component {
     };
 
     render() {
-        let test = "Hello log wrap";
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { flex: this.props.flex }]}>
                 <Text style={[TextStyle.labelText, styles.fieldLabelText]}>
                     {this.state.data.labelText}
                 </Text>
-                <TouchableOpacity
-                    style={{ height: 5 }}
-                    onPress={this._showDateTimePicker}
-                >
-                    <Text style={[TextStyle.timeText, { fontSize: 25 }]}>
+                <TouchableOpacity onPress={this._showDateTimePicker}>
+                    <Text
+                        style={[
+                            TextStyle.timeText,
+                            { fontSize: this.props.inputFontSize }
+                        ]}
+                    >
                         {this.props.fieldText}
                     </Text>
                 </TouchableOpacity>
@@ -62,7 +63,8 @@ class LabeledTimeInput extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        // flex: 1,
+        alignSelf: "stretch",
         backgroundColor: "transparent"
     },
     fieldLabelText: {

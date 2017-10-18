@@ -187,7 +187,9 @@ class TaskDetail extends Component {
                     placeholder="Enter a task name"
                     fieldText={this.state.alarmTask.task.name}
                     handleTextInput={this._onTaskNameChange.bind(this)}
+                    separation={3}
                 />
+                <View style={{ height: 13 }} />
                 <LabeledDurationInput
                     labelText="DURATION"
                     time={
@@ -196,6 +198,7 @@ class TaskDetail extends Component {
                             : this.state.alarmTask.task.defaultDuration
                     }
                     onChange={this._onTaskDurationChanged.bind(this)}
+                    inputFontSize={28}
                 />
                 <TouchableOpacity
                     style={Styles.DeleteButton}

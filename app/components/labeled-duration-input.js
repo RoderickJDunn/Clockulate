@@ -30,6 +30,11 @@ class LabeledDurationInput extends Component {
         });
     };
 
+    componentWillUnmount() {
+        console.debug("AlarmDetail componentWillUnmount");
+        Picker.hide();
+    }
+
     _showTimePicker = () => {
         let hours = calcWholeHours(this.state.data.time);
         let minutes = calcMinutes(this.state.data.time, hours);
@@ -62,14 +67,17 @@ class LabeledDurationInput extends Component {
 
     render() {
         return (
-            <View style={styles.container}>
-                <Text style={styles.fieldLabelText}>
+            <View style={[styles.container, { flex: this.props.flex }]}>
+                <Text style={[styles.fieldLabelText, TextStyle.labelText]}>
                     {this.state.data.labelText}
                 </Text>
                 <TouchableOpacity onPress={this._showTimePicker}>
                     <DurationText
                         duration={this.state.data.time}
-                        style={[TextStyle.timeText, { fontSize: 30 }]}
+                        style={[
+                            TextStyle.timeText,
+                            { fontSize: this.props.inputFontSize }
+                        ]}
                     />
                 </TouchableOpacity>
             </View>
@@ -79,12 +87,14 @@ class LabeledDurationInput extends Component {
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
+        alignSelf: "stretch",
         justifyContent: "center",
         paddingTop: 10
     },
     fieldLabelText: {
-        fontSize: 13,
-        paddingBottom: 4
+        fontSize: 13
+        // paddingBottom: 4
     }
 });
 

@@ -5,6 +5,8 @@ Todo:
   - Alarms List Screen
     ✔ ON/OFF Switch on Alarms List (for each alarm) 
     ✔ Redesign to include WakeUp time and Arrival time, and toggle switch
+    ✔ "Add alarm" button should have an icon instead of word
+  
 
   - Alarm Detail Screen
     ✘ ON/OFF Switch in Alarms Detail  [Not doing - not necessary, and would clutter Alarm Detail too much]
@@ -15,25 +17,33 @@ Todo:
     ✔ Wake Up Time - format properly (with small caps for AM/PM)
     ✔ Add Task button should be an icon (preferably overlaid a little into the task list)
     ✔ Checkbox color - brandLightPurple
-    ☐ Text Input style problem - figure out best way to do this when not so tired.
+    ✔ Text Input style problem - figure out best way to do this when not so tired.
     ✔ Back button is really hard to Push
     ✔ Checkboxes are hard to push
 
   - Task Detail
     ✔ Make UI a little nicer - right now its just a skeleton
     ✔ Large 'Delete' button below other fields to delete this task 
-    ☐ Bug: Its possible to navigate back to AlarmDetail with Duration picker still open (press Delete or Back) 
-        --> handle this (maybe just close the popup on-back)
+    ✔ Bug: Its possible to navigate back to AlarmDetail with Duration picker still open (press Delete or Back) 
+        ✔-> handle this (maybe just close the popup on-back)
 
   ☐ Functionality Tasks
     ✔ Delete Tasks (from Task Detail screen)
     ✔ Dismiss delete button in Alarms list by tapping anywhere (not just on Alarms).
+    ✔ When navigating back from AlarmDetail to AlarmList, enable the Alarm when Saving. 
     ☐ ACTUALLY SET AN ALARM (LOL)
-        - Now going to try 'react-native-push-notification', instead of the calendar one.
+        - Using 'react-native-push-notification', instead of the calendar one.
+        - An alarm with hard-coded time is now set properly (note that notifications don't work on Simulator)
 
   ✔ BUG: Duration is always '0' in Task Detail screen
-  ☐ Start-up screen with 'Mascot' (complex logo character)
-  ☐ Style issue: Status Bar is not really visible on any screen
+  ✘ Start-up screen with 'Mascot' (complex logo character) ----- Not supposed to be Logo. Supposed to be a skeleton of first screen the user sees to "give the impression that the app loaded immediately"
+  ✔ LaunchScreen (iOS)
+    ✘ Create a LaunchScreen (not splash screen) from Screenshot of blank opening page. 
+    ✔ Using storyboard file instead of images. Easier and I think its what Apple wants 
+  ☐ LaunchScreen (Android) -- needs investigation 
+  ✔ Style issue: Status Bar is not really visible on any screen
+  ☐ fit clock background image on iPhone 6 screen properly (different size image)
+    - I kind of like the look of the background when you don't see any blur on the sides. ie) Blur is only visible on top and bottom
 
 ☐ V2
     - Feature Additions
@@ -53,16 +63,27 @@ Todo:
         ☐ Annoying Checkmark layout issue. Can't get the overall circle+checkmark to layout properly without negative margins
             - Even with this hack, the checkmark itself is not exactly centered in the circle
         ☐ Delete tasks from the Alarm Detail screen (in V1 you have to Edit the task)
-        ☐ Handle Mode changes
-            ☐ Normal Mode: Much larger clock, still has label. 
-                        - Also bottom area you can swipe up on to enable the 'Autocalc' mode
-            ☐ Auto Mode: As is.
-            ☐ Tap or swipe down on Wake-Up Time clock to change from 'autocalc' -> 'basic'
-            ☐ Swipe up from bottom "special area" to change from 'basic' -> 'autocalc'
-            ☐ Disable/ignore all arrival time and task functionality
-            ☐ set Wake Up Time directly (re-use Arrival Time picker)
+        ☐ Handle Swipes for additional functionality 
+            ☐ Swipe down on Clock:
+                - Takes you from CalcMode --> Normal Mode (Much larger clock, still has label)
+                    - Normal mode
+                        - In normal mode you can set the wake-up time directly
+                        - Normal mode also accessible by tapping the Clock
+                        - Disable/ignore all arrival time and task functionality
+            ☐ Swipe up on Clock (while in Normal mode)
+                - Takes you to AutoCalc mode (makes clock small, and shows task list)
+            ☐ Swipe from right to left
+                ☐ Shows an overlay with additional information
+                    - How much sleep you'll get if you fall asleep NOW
+                    - Total time of all enabled tasks to do in the morning
+                    - Weather now and tomorrow
+                    - 
             ☐ Animate scaling (enlarging/shrinking) the alarm-clock image when changing modes
-
+        ☐ Menu button and functions
+            - Hide disabled tasks
+            - Copy another alarm to this one
+            - Switch modes (between Normal and AutoCalc)
+            - 
     - Task Detail Screen
         ☐ Spruce up UI, its a little too minimal
 

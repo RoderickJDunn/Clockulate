@@ -28,8 +28,11 @@ export const AlarmListStyle = StyleSheet.create({
         borderBottomWidth: 1,
         alignItems: "stretch"
     },
+    toggleButton: {
+        flex: 2
+    },
     infoContainer: {
-        flex: 1,
+        flex: 8,
         justifyContent: "space-between"
     },
     timeText: {

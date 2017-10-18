@@ -18,7 +18,8 @@ export const TextStyle = StyleSheet.create({
     labelText: {
         // TODO: Figure out a good font for labels
         fontFamily: "Verdana",
-        fontSize: 12
+        fontSize: 12,
+        color: "#686868"
     },
     editableText: {
         // TODO: Figure out a good font for editable text (eg: alarm labels, time fields)

@@ -23,6 +23,7 @@ import TaskList from "../components/task-list";
 import LabeledInput from "../components/labeled-input";
 import LabeledTimeInput from "../components/labeled-time-input";
 import Colors from "../styles/colors";
+import { TextStyle } from "../styles/text";
 import { AlarmModel } from "../data/models";
 
 // TODO: Remove after we're done choosing fonts
@@ -97,10 +98,12 @@ class AlarmDetail extends Component {
                 .filtered(`id = "${this.state.id}"`);
             if (alarm && alarm.length === 1) {
                 if (AlarmModel.isDefault(alarm[0])) {
+                    // Since this alarm has default settings, delete it before nav'ing back. User hasn't changed anything.
                     realm.delete(alarm);
                 } else {
                     alarm[0].label = this.state.label;
                     alarm[0].arrivalTime = this.state.arrivalTime;
+                    alarm[0].enabled = true;
                     if (
                         this.state.mode === "autocalc" &&
                         this._calculatedWakeUpTime
@@ -170,6 +173,7 @@ class AlarmDetail extends Component {
         this.fontCount++;
         this.setState(this.state);
     }
+    /***************************************************/
 
     onChangeLabel = text => {
         // console.log("Label text changed: ", text);
@@ -222,7 +226,7 @@ class AlarmDetail extends Component {
     };
 
     render() {
-        // console.debug("AlarmDetail render - ");
+        console.debug("AlarmDetail render - ");
         // console.debug("AlarmDetail render - this.state: ", this.state);
 
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
@@ -249,7 +253,7 @@ class AlarmDetail extends Component {
                 {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
                 <Image
                     style={styles.clockBackground}
-                    source={require("../img/ClockBackground.jpg")}
+                    source={require("../img/ClockBackground.png")}
                     /* resizeMode="center" */
                 />
                 <View style={styles.clockTextContainer}>
@@ -265,6 +269,7 @@ class AlarmDetail extends Component {
                 <View style={styles.fieldsContainer}>
                     <LabeledTimeInput
                         labelText="ARRIVAL TIME"
+                        flex={1}
                         fieldText={moment
                             .utc(this.state.arrivalTime)
                             .local()
@@ -287,18 +292,31 @@ class AlarmDetail extends Component {
                             });
                         }}
                         timePickerPrompt="What time do you need to arrive?"
+                        inputFontSize={29}
                     />
+                    {/* <View style={{ height: 5 }} /> */}
                     <LabeledInput
                         labelText="ALARM LABEL"
                         placeholder="Enter a label"
                         fieldText={this.state.label}
                         handleTextInput={this.onChangeLabel}
                         onTextInputBlur={this.onLabelInputBlur}
+                        height={15}
+                        separation={2}
+                        style={{ fontSize: 22 }}
+                        flex={1}
                     />
                 </View>
                 <View style={styles.taskListContainer}>
                     <View style={styles.taskListHeader}>
-                        <Text style={{ alignSelf: "center" }}>TASKS</Text>
+                        <Text
+                            style={[
+                                TextStyle.labelText,
+                                { alignSelf: "center" }
+                            ]}
+                        >
+                            TASKS
+                        </Text>
                         <TouchableOpacity
                             style={{ alignSelf: "flex-start" }}
                             onPress={this.onPressAddTask.bind(this)}
@@ -340,14 +358,16 @@ const styles = StyleSheet.create({
         flex: 3,
         alignSelf: "stretch",
         alignItems: "flex-start",
-        // backgroundColor: Colors.backgroundGrey,
+        // backgroundColor: "yellow",
         padding: 10,
-        paddingBottom: 10
+        paddingBottom: 8,
+        borderBottomColor: "#e9e9e9",
+        borderBottomWidth: 1
     },
     taskListContainer: {
-        flex: 9,
+        flex: 8,
         padding: 10,
-        paddingTop: 0,
+        paddingTop: 10,
         alignSelf: "stretch"
         // backgroundColor: "#dbd6dd"
     },

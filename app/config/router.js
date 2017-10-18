@@ -52,9 +52,14 @@ export const MainStack = StackNavigator(
             navigationOptions: ({ navigation }) => ({
                 title: "Alarms",
                 headerRight: (
-                    <Button
-                        title="Add"
+                    <Icon
+                        name={"add"}
+                        color={Colors.brandLightGrey}
+                        underlayColor={Colors.brandDarkGrey}
+                        size={28}
                         onPress={() => navigation.state.params.handleAddAlarm()}
+                        hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
+                        style={{ marginRight: 5 }}
                     />
                 )
             })

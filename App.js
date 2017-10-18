@@ -1,6 +1,6 @@
 import React from "react";
 import { MainStack } from "./app/config/router";
-import { AppRegistry, AsyncStorage } from "react-native";
+import { AppRegistry, AsyncStorage, View, StatusBar } from "react-native";
 
 import insertDummyData from "./app/data/dummy";
 
@@ -36,7 +36,12 @@ export default class App extends React.Component {
     }
 
     render() {
-        return <MainStack />;
+        return (
+            <View style={{ flex: 1 }}>
+                <StatusBar animated={true} barStyle={"light-content"} />
+                <MainStack />
+            </View>
+        );
     }
 }
 
