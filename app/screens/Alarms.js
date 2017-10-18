@@ -12,11 +12,12 @@ import {
     Animated,
     Easing
 } from "react-native";
+import DeleteButton from "../components/delete-button";
 import GestureRecognizer from "react-native-swipe-gestures";
 import Svg, { Defs, Circle, RadialGradient, Stop } from "react-native-svg";
 import PushNotification from "react-native-push-notification";
 import PushController from "../alarmservice/PushController";
-
+import Swipeout from "react-native-swipeout";
 import realm from "../data/DataSchemas";
 import moment from "moment";
 
@@ -132,37 +133,42 @@ class Alarms extends Component {
         this.setState(this.state);
     };
 
-    _makeDeleteButton(item) {
-        return (
-            <Animated.View>
-                <TouchableOpacity
-                    style={{
-                        position: "absolute",
-                        height: 120,
-                        width: 100,
-                        backgroundColor: Colors.deleteBtnRed,
-                        right: 0,
-                        alignSelf: "center",
-                        justifyContent: "center",
-                        borderColor: "black",
-                        shadowColor: "black",
-                        zIndex: 1
-                    }}
-                    onPress={this._onPressDelete.bind(this, item)}
-                >
-                    <Text
-                        style={{
-                            textAlign: "center",
-                            color: "white",
-                            fontSize: 17
-                        }}
-                    >
-                        Delete
-                    </Text>
-                </TouchableOpacity>
-            </Animated.View>
-        );
-    }
+    // _makeDeleteButton(item) {
+    //     const slideStyle = this.state.slide.transform;
+    //     return (
+    //         <Animated.View
+    //             style={[
+    //                 {
+    //                     position: "absolute",
+    //                     height: 120,
+    //                     width: 100,
+    //                     backgroundColor: Colors.deleteBtnRed,
+    //                     right: 0,
+    //                     alignSelf: "center",
+    //                     justifyContent: "center",
+    //                     borderColor: "black",
+    //                     shadowColor: "black",
+    //                     zIndex: 1
+    //                 },
+    //                 slideStyle
+    //             ]}
+    //         >
+    //             <TouchableOpacity
+    //                 onPress={this._onPressDelete.bind(this, item)}
+    //             >
+    //                 <Text
+    //                     style={{
+    //                         textAlign: "center",
+    //                         color: "white",
+    //                         fontSize: 17
+    //                     }}
+    //                 >
+    //                     Delete
+    //                 </Text>
+    //             </TouchableOpacity>
+    //         </Animated.View>
+    //     );
+    // }
 
     _makeOverlay() {
         return (
@@ -199,7 +205,7 @@ class Alarms extends Component {
         let touchedOpacity = 0.2;
         if ("showDelete" in this.state) {
             if (index === this.state.showDelete) {
-                deleteButton = this._makeDeleteButton(item);
+                console.log("Delete button is showing");
             }
             touchedOpacity = 1;
         }
@@ -223,11 +229,15 @@ class Alarms extends Component {
         let fArriveTime = arriveTimeMoment.format("h:mm");
         let amPmArriveTime = arriveTimeMoment.format("A");
 
+        var swipeoutButton = [
+            {
+                text: "Delete",
+                backgroundColor: Colors.deleteBtnRed,
+                onPress: this._onPressDelete.bind(this, item)
+            }
+        ];
         return (
-            <GestureRecognizer
-                onSwipeLeft={this._onSwipeLeft.bind(this, index)}
-                config={config}
-            >
+            <Swipeout right={swipeoutButton}>
                 <TouchableOpacity
                     style={[AlarmListStyle.alarmRow, ListStyle.item]}
                     activeOpacity={touchedOpacity}
@@ -290,21 +300,23 @@ class Alarms extends Component {
                             style={[
                                 {
                                     alignSelf: "flex-end",
-                                    fontSize: 15,
+                                    fontSize: 17,
                                     color: textColor
-                                }
+                                },
+                                TextStyle.timeText
                             ]}
                         >
-                            {"(" + fArriveTime}
-                            <Text style={{ fontSize: 12 }}>
+                            {fArriveTime}
+                            <Text
+                                style={[{ fontSize: 12 }, TextStyle.timeText]}
+                            >
                                 {" " + amPmArriveTime}
                             </Text>
-                            {")"}
                         </Text>
                     </View>
-                    {deleteButton}
+                    {/* {deleteButton} */}
                 </TouchableOpacity>
-            </GestureRecognizer>
+            </Swipeout>
         );
     };
 
