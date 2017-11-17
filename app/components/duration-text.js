@@ -38,7 +38,7 @@ class DurationText extends Component {
         // console.log('rendering duration-text');
         let duration = this.formatDuration(this.props.duration);
         // console.log(duration);
-        console.log(this.props.style);
+        // console.log(this.props.style);
         return (
             <Text
                 numberOfLines={1}

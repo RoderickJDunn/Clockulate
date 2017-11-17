@@ -9,7 +9,8 @@ Todo:
     ☐ Added library to handle animation for showing Delete button when swiping
         ☐ Need to support dismissing the delete button when tapping on OTHER rows or anywhere really
         ☐ Need to remove unused DeleteButton code. (Component file, as well as some code in Alarms.js)
-  
+    ✔ Current issue: AlarmItem is not re-rendered when alarm is toggled. Therefore color of toggle button does not change
+        -- SOLUTION: Pass FlatList {this.state} as the 'extraData' prop
 
   - Alarm Detail Screen
     ✘ ON/OFF Switch in Alarms Detail  [Not doing - not necessary, and would clutter Alarm Detail too much]
@@ -24,6 +25,7 @@ Todo:
     ✔ Back button is really hard to Push
     ✔ Checkboxes are hard to push
     ☐ If no tasks are on list, show text "Add some tasks" with an swooping arrow pointing to Add button
+    ☐ Its in a really weird UI state right now for animation experimenting. Change it back.
 
   - Task Detail
     ✔ Make UI a little nicer - right now its just a skeleton
@@ -52,6 +54,9 @@ Todo:
 ☐ V2
     - Feature Additions
         - Animations
+            - Normal Mode <--> Calc Mode  [clock background and layout animations]
+            - Task durations - animate flying to Clock, before updating WakeUp time.
+
         - Normal Mode (and switching between Normal and Auto mode)
         - Autocomplete Task names in 'TaskDetail' screen
             - History and Common built-in tasks

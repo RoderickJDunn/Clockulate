@@ -45,12 +45,19 @@ class AlarmDetail extends Component {
         if (params.newAlarm) {
             console.log("This is a new alarm");
             realm.write(() => {
-                this.state = realm.create("Alarm", new AlarmModel());
+                this.state = {
+                    alarm: realm.create("Alarm", new AlarmModel())
+                };
+                this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
         } else {
             // console.log("We are editing an existing alarm: ", params);
-            this.state = params.alarm;
+            this.state = {
+                alarm: params.alarm
+            };
         }
+        console.log(this.state);
+        console.log(params);
     }
 
     // componentDidMount() {
@@ -95,22 +102,22 @@ class AlarmDetail extends Component {
             // For Now, use this workaround //
             let alarm = realm
                 .objects("Alarm")
-                .filtered(`id = "${this.state.id}"`);
+                .filtered(`id = "${this.state.alarm.id}"`);
             if (alarm && alarm.length === 1) {
                 if (AlarmModel.isDefault(alarm[0])) {
                     // Since this alarm has default settings, delete it before nav'ing back. User hasn't changed anything.
                     realm.delete(alarm);
                 } else {
-                    alarm[0].label = this.state.label;
-                    alarm[0].arrivalTime = this.state.arrivalTime;
+                    alarm[0].label = this.state.alarm.label;
+                    alarm[0].arrivalTime = this.state.alarm.arrivalTime;
                     alarm[0].enabled = true;
                     if (
-                        this.state.mode === "autocalc" &&
+                        this.state.alarm.mode === "autocalc" &&
                         this._calculatedWakeUpTime
                     ) {
                         alarm[0].wakeUpTime = this._calculatedWakeUpTime;
                     } else {
-                        alarm[0].wakeUpTime = this.state.wakeUpTime;
+                        alarm[0].wakeUpTime = this.state.alarm.wakeUpTime;
                     }
                 }
             }
@@ -121,7 +128,7 @@ class AlarmDetail extends Component {
     }
 
     onPressAddTask() {
-        let nextTaskPosition = this.state.tasks.length;
+        let nextTaskPosition = this.state.alarm.tasks.length;
         this.props.navigation.navigate("TaskDetail", {
             onSaveState: this.onTaskListChanged.bind(this),
             order: nextTaskPosition
@@ -134,7 +141,7 @@ class AlarmDetail extends Component {
         // or nothing if an existing alarmTask was updated.
         if (newTask) {
             realm.write(() => {
-                this.state.tasks.push(newTask);
+                this.state.alarm.tasks.push(newTask);
             });
         }
         this.setState(this.state);
@@ -177,17 +184,13 @@ class AlarmDetail extends Component {
 
     onChangeLabel = text => {
         // console.log("Label text changed: ", text);
-        this.setState({ label: text });
-    };
-
-    onLabelInputBlur = () => {
-        // console.debug("AlarmLabelInput blurred: ");
-        // console.debug("this.state (Alarm): ", this.state);
-        // TODO: Figure out if this method is needed. It can probably be removed.
+        let tempState = this.state;
+        tempState.alarm.label = text;
+        this.setState(tempState);
     };
 
     onChangeTaskEnabled = (taskToUpdate, enabled) => {
-        let tasks = this.state.tasks;
+        let tasks = this.state.alarm.tasks;
         let taskToChange = tasks.find(task => task.id === taskToUpdate.id);
         if (!taskToChange) {
             console.error(
@@ -204,7 +207,7 @@ class AlarmDetail extends Component {
 
     _calcWakeUpTime = () => {
         // console.log("Calculating wakeuptime");
-        let totalTaskDurations = this.state.tasks
+        let totalTaskDurations = this.state.alarm.tasks
             .map(alarmTask => {
                 if (alarmTask.enabled) {
                     return alarmTask.duration
@@ -220,28 +223,38 @@ class AlarmDetail extends Component {
 
         // save calculated wakeUpTime to use for saving to DB when user presses back
         this._calculatedWakeUpTime =
-            this.state.arrivalTime - totalTaskDurations;
+            this.state.alarm.arrivalTime - totalTaskDurations;
 
         return this._calculatedWakeUpTime;
     };
 
     render() {
         console.debug("AlarmDetail render - ");
-        // console.debug("AlarmDetail render - this.state: ", this.state);
+        console.debug("AlarmDetail render - this.state: ", this.state);
+        let clockFlex = 4;
+        let imageHeight = 220;
+        let fieldsFlex = 3;
+        let tasksFlex = 8;
+        if (this.state.alarm.mode === "normal") {
+            clockFlex = 1;
+            imageHeight = this.height;
+            fieldsFlex = 0;
+            tasksFlex = 0;
+        }
 
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
         let sortedTasks =
-            this.state.tasks.length > 1
-                ? this.state.tasks.sorted("order")
-                : this.state.tasks;
+            this.state.alarm.tasks.length > 1
+                ? this.state.alarm.tasks.sorted("order")
+                : this.state.alarm.tasks;
         // console.debug(sortedTasks);
 
         let wakeUpTime;
-        // console.log("this.state.mode", this.state.mode);
-        if (this.state.mode == "autocalc") {
+        // console.log("this.state.alarm.mode", this.state.alarm.mode);
+        if (this.state.alarm.mode == "autocalc") {
             wakeUpTime = this._calcWakeUpTime();
         } else {
-            wakeUpTime = this.state.wakeUpTime;
+            wakeUpTime = this.state.alarm.wakeUpTime;
         }
 
         let wakeTimeMoment = moment.utc(wakeUpTime).local();
@@ -252,11 +265,11 @@ class AlarmDetail extends Component {
             <View style={styles.screenContainer}>
                 {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
                 <Image
-                    style={styles.clockBackground}
+                    style={[styles.clockBackground, { height: imageHeight }]}
                     source={require("../img/ClockBackground.png")}
                     /* resizeMode="center" */
                 />
-                <View style={styles.clockTextContainer}>
+                <View style={[styles.clockTextContainer, { flex: clockFlex }]}>
                     <Text style={[styles.timeText, {}]}>
                         {fWakeUpTime}
                         <Text style={{ fontSize: 50 }}>
@@ -266,16 +279,16 @@ class AlarmDetail extends Component {
                     {/* <Text style={{ alignSelf: "flex-end" }}>My profile</Text> */}
                 </View>
 
-                <View style={styles.fieldsContainer}>
+                <View style={[styles.fieldsContainer, { flex: fieldsFlex }]}>
                     <LabeledTimeInput
                         labelText="ARRIVAL TIME"
                         flex={1}
                         fieldText={moment
-                            .utc(this.state.arrivalTime)
+                            .utc(this.state.alarm.arrivalTime)
                             .local()
                             .format("h:mm A")}
                         time={moment
-                            .utc(this.state.arrivalTime)
+                            .utc(this.state.alarm.arrivalTime)
                             .local()
                             .toDate()}
                         handleArrivalChange={time => {
@@ -298,7 +311,7 @@ class AlarmDetail extends Component {
                     <LabeledInput
                         labelText="ALARM LABEL"
                         placeholder="Enter a label"
-                        fieldText={this.state.label}
+                        fieldText={this.state.alarm.label}
                         handleTextInput={this.onChangeLabel}
                         onTextInputBlur={this.onLabelInputBlur}
                         height={15}
@@ -307,7 +320,7 @@ class AlarmDetail extends Component {
                         flex={1}
                     />
                 </View>
-                <View style={styles.taskListContainer}>
+                <View style={[styles.taskListContainer, { flex: tasksFlex }]}>
                     <View style={styles.taskListHeader}>
                         <Text
                             style={[
