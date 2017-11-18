@@ -19,10 +19,12 @@ export class AlarmModel {
     }
 
     static isDefault(alarm) {
+        console.log("------- Checking if alarm is default -----");
+        console.log(alarm);
         if (
             alarm.wakeUpTime === DefaultAlarm.wakeUpTime &&
             alarm.arrivalTime === DefaultAlarm.arrivalTime &&
-            alarm.mode === DefaultAlarm.mode &&
+            // alarm.mode === DefaultAlarm.mode &&
             alarm.tasks.length === DefaultAlarm.tasks.length &&
             alarm.label === DefaultAlarm.label &&
             alarm.enabled === DefaultAlarm.enabled &&

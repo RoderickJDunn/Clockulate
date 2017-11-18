@@ -38,7 +38,7 @@ class Alarms extends Component {
     }
 
     componentWillUpdate() {
-        LayoutAnimation.spring();
+        console.log("this.props.navigation", this.props.navigation);
     }
 
     componentDidMount() {
@@ -63,6 +63,7 @@ class Alarms extends Component {
 
     reloadAlarms = () => {
         // console.debug("Reloading alarms list");
+        LayoutAnimation.easeInEaseOut();
         this.setState({ alarms: realm.objects("Alarm") }); // TODO: filter by 'visible'=true
     };
 
@@ -126,6 +127,7 @@ class Alarms extends Component {
         realm.write(() => {
             realm.delete(item);
         });
+        LayoutAnimation.spring();
         this.setState(this.state);
 
         // const { onRemove } = this.props;

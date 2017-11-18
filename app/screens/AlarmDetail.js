@@ -124,7 +124,7 @@ class AlarmDetail extends Component {
             //////////////////////////////////
         });
         this.props.navigation.state.params.reloadAlarms();
-        this.props.navigation.goBack();
+        setTimeout(this.props.navigation.goBack, 0);
     }
 
     onPressAddTask() {
@@ -185,7 +185,9 @@ class AlarmDetail extends Component {
     onChangeLabel = text => {
         // console.log("Label text changed: ", text);
         let tempState = this.state;
-        tempState.alarm.label = text;
+        realm.write(() => {
+            tempState.alarm.label = text;
+        });
         this.setState(tempState);
     };
 
@@ -266,10 +268,10 @@ class AlarmDetail extends Component {
                 {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
                 <Image
                     style={[styles.clockBackground, { height: imageHeight }]}
-                    source={require("../img/ClockBackground.png")}
+                    source={require("../img/ClockBgV2.png")}
                     /* resizeMode="center" */
                 />
-                <View style={[styles.clockTextContainer, { flex: clockFlex }]}>
+                <View style={[styles.clockTextContainer]}>
                     <Text style={[styles.timeText, {}]}>
                         {fWakeUpTime}
                         <Text style={{ fontSize: 50 }}>
@@ -279,74 +281,84 @@ class AlarmDetail extends Component {
                     {/* <Text style={{ alignSelf: "flex-end" }}>My profile</Text> */}
                 </View>
 
-                <View style={[styles.fieldsContainer, { flex: fieldsFlex }]}>
-                    <LabeledTimeInput
-                        labelText="ARRIVAL TIME"
-                        flex={1}
-                        fieldText={moment
-                            .utc(this.state.alarm.arrivalTime)
-                            .local()
-                            .format("h:mm A")}
-                        time={moment
-                            .utc(this.state.alarm.arrivalTime)
-                            .local()
-                            .toDate()}
-                        handleArrivalChange={time => {
-                            console.log(
-                                "Arrival Time textInput changed: ",
-                                time
-                            );
-                            console.log(
-                                "Arrival Time textInput changed: ",
-                                moment(time).unix()
-                            );
-                            this.setState({
-                                arrivalTime: moment(time).unix() * 1000
-                            });
-                        }}
-                        timePickerPrompt="What time do you need to arrive?"
-                        inputFontSize={29}
+                <View style={[styles.nonClockWrapper]}>
+                    <Image
+                        style={[
+                            styles.nonClockBgImage,
+                            { height: imageHeight }
+                        ]}
+                        source={require("../img/NonClockBgV2.png")}
+                        /* resizeMode="center" */
                     />
-                    {/* <View style={{ height: 5 }} /> */}
-                    <LabeledInput
-                        labelText="ALARM LABEL"
-                        placeholder="Enter a label"
-                        fieldText={this.state.alarm.label}
-                        handleTextInput={this.onChangeLabel}
-                        onTextInputBlur={this.onLabelInputBlur}
-                        height={15}
-                        separation={2}
-                        style={{ fontSize: 22 }}
-                        flex={1}
-                    />
-                </View>
-                <View style={[styles.taskListContainer, { flex: tasksFlex }]}>
-                    <View style={styles.taskListHeader}>
-                        <Text
-                            style={[
-                                TextStyle.labelText,
-                                { alignSelf: "center" }
-                            ]}
-                        >
-                            TASKS
-                        </Text>
-                        <TouchableOpacity
-                            style={{ alignSelf: "flex-start" }}
-                            onPress={this.onPressAddTask.bind(this)}
-                            /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
-                        >
-                            <Icon
-                                name="add-to-list"
-                                size={30}
-                                color={Colors.brandLightPurple}
-                            />
-                        </TouchableOpacity>
+                    <View style={[styles.fieldsContainer]}>
+                        <LabeledTimeInput
+                            labelText="ARRIVAL TIME"
+                            flex={1}
+                            fieldText={moment
+                                .utc(this.state.alarm.arrivalTime)
+                                .local()
+                                .format("h:mm A")}
+                            time={moment
+                                .utc(this.state.alarm.arrivalTime)
+                                .local()
+                                .toDate()}
+                            handleArrivalChange={time => {
+                                console.log(
+                                    "Arrival Time textInput changed: ",
+                                    time
+                                );
+                                console.log(
+                                    "Arrival Time textInput changed: ",
+                                    moment(time).unix()
+                                );
+                                this.setState({
+                                    arrivalTime: moment(time).unix() * 1000
+                                });
+                            }}
+                            timePickerPrompt="What time do you need to arrive?"
+                            inputFontSize={29}
+                        />
+                        {/* <View style={{ height: 5 }} /> */}
+                        <LabeledInput
+                            labelText="ALARM LABEL"
+                            placeholder="Enter a label"
+                            fieldText={this.state.alarm.label}
+                            handleTextInput={this.onChangeLabel}
+                            onTextInputBlur={this.onLabelInputBlur}
+                            height={15}
+                            separation={2}
+                            style={{ fontSize: 22 }}
+                            flex={1}
+                        />
                     </View>
-                    <TaskList
-                        onPressItem={this._onPressTask.bind(this)}
-                        onPressItemCheckBox={this.onChangeTaskEnabled}
-                        data={sortedTasks}
-                    />
+                    <View style={[styles.taskListContainer]}>
+                        <View style={styles.taskListHeader}>
+                            <Text
+                                style={[
+                                    TextStyle.labelText,
+                                    { alignSelf: "center" }
+                                ]}
+                            >
+                                TASKS
+                            </Text>
+                            <TouchableOpacity
+                                style={{ alignSelf: "flex-start" }}
+                                onPress={this.onPressAddTask.bind(this)}
+                                /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
+                            >
+                                <Icon
+                                    name="add-to-list"
+                                    size={30}
+                                    color={Colors.brandLightPurple}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                        <TaskList
+                            onPressItem={this._onPressTask.bind(this)}
+                            onPressItemCheckBox={this.onChangeTaskEnabled}
+                            data={sortedTasks}
+                        />
+                    </View>
                 </View>
             </View>
         );
@@ -366,6 +378,9 @@ const styles = StyleSheet.create({
         alignSelf: "stretch",
         alignItems: "center",
         justifyContent: "center"
+    },
+    nonClockWrapper: {
+        flex: 11
     },
     fieldsContainer: {
         flex: 3,
@@ -397,6 +412,23 @@ const styles = StyleSheet.create({
         width: 450,
         height: 220
     },
+    nonClockBgImage: {
+        position: "absolute",
+        justifyContent: "center",
+        alignItems: "center",
+        width: 450,
+        height: 500,
+        top: -15
+    },
+    clockBackgroundNotImage: {
+        justifyContent: "center",
+        alignItems: "center",
+        position: "absolute",
+        top: -40,
+        width: 450,
+        height: 195,
+        backgroundColor: "#220957"
+    },
     clockTextContainer: {
         flex: 4,
         justifyContent: "center",
@@ -404,14 +436,14 @@ const styles = StyleSheet.create({
         backgroundColor: "transparent"
     },
     timeText: {
-        color: "#999999",
+        color: "#d5d5d5",
         fontSize: 95,
         backgroundColor: "transparent",
         alignSelf: "center",
         fontFamily: "Baskerville-Bold"
     },
     dateText: {
-        color: "#999999",
+        color: "#d5d5d5",
         fontSize: 40
     }
 });

@@ -16,6 +16,7 @@ class LabeledInput extends Component {
 
     render() {
         let onBlur, height, labelBottomPadding, flex;
+        console.log(this.props.placeholder);
         if (this.props.onTextInputBlur) {
             onBlur = this.props.onTextInputBlur;
         }
@@ -47,7 +48,7 @@ class LabeledInput extends Component {
                         TextStyle.editableText,
                         this.props.style
                     ]}
-                    placeholder={this.props.placeHolder}
+                    placeholder={this.props.placeholder}
                     value={this.props.fieldText}
                     onChangeText={this.onChangeTextField.bind(this)}
                     onBlur={onBlur}
@@ -70,7 +71,8 @@ const styles = StyleSheet.create({
         paddingTop: 2
     },
     fieldLabelText: {
-        paddingBottom: 7
+        paddingBottom: 7,
+        backgroundColor: "transparent"
     },
     fieldText: {
         fontSize: 25,
