@@ -27,6 +27,7 @@
     "react-native-calendar-events": "^1.4.3",
     "react-native-check-box": "^2.0.1",
     "react-native-elements": "^0.16.0",
+    "react-native-interactable": "^0.1.7",
     "react-native-modal-datetime-picker": "^4.9.0",
     "react-native-picker": "^4.1.2",
     "react-native-push-notification": "^3.0.1",

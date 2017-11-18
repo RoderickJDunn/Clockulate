@@ -3,6 +3,7 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.wix.interactable.Interactable;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.calendarevents.CalendarEventsPackage;
 import com.horcrux.svg.SvgPackage;
@@ -28,6 +29,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new Interactable(),
             new ReactNativePushNotificationPackage(),
             new CalendarEventsPackage(),
             new SvgPackage(),
