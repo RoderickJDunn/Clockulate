@@ -275,7 +275,7 @@ class AlarmDetail extends Component {
                 <Interactable.View
                     style={[styles.animatedView]}
                     verticalOnly={true}
-                    snapPoints={[{ y: 0 }, { y: 550 }]}
+                    snapPoints={[{ y: 0 }, { y: 500 }]}
                 >
                     <View style={[styles.clockTextContainer]}>
                         <Text style={[styles.timeText, {}]}>
