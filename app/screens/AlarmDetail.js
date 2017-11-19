@@ -215,6 +215,11 @@ class AlarmDetail extends Component {
         this.setState({ tasks: tasks });
     };
 
+    onPressClock = ref => {
+        console.log("onPressClock");
+        this.interactiveRef.snapTo({ index: 1 });
+    };
+
     _calcWakeUpTime = () => {
         // console.log("Calculating wakeuptime");
         let totalTaskDurations = this.state.alarm.tasks
@@ -274,6 +279,8 @@ class AlarmDetail extends Component {
         const AnimatedAlarmLabel = Animated.createAnimatedComponent(
             LabeledInput
         );
+
+        let interactableRef = el => (this.interactiveRef = el);
 
         return (
             <View style={styles.screenContainer}>
@@ -335,6 +342,7 @@ class AlarmDetail extends Component {
                 </Animated.View>
 
                 <Interactable.View
+                    ref={interactableRef}
                     style={[styles.animatedView]}
                     verticalOnly={true}
                     snapPoints={[{ y: 0 }, { y: 455 }]}
@@ -351,7 +359,11 @@ class AlarmDetail extends Component {
                             backgroundColor: "transparent"
                         }}
                     />
-                    <View style={[styles.interactableHandle]} />
+
+                    <TouchableOpacity
+                        onPress={this.onPressClock.bind(this, interactableRef)}
+                        style={[styles.interactableHandle]}
+                    />
                     <View style={[styles.nonClockWrapper]}>
                         <Image
                             style={[
