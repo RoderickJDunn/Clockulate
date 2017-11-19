@@ -16,7 +16,7 @@ class LabeledInput extends Component {
 
     render() {
         let onBlur, height, labelBottomPadding, flex;
-        console.log(this.props.placeholder);
+        // console.log(this.props.placeholder);
         if (this.props.onTextInputBlur) {
             onBlur = this.props.onTextInputBlur;
         }
@@ -50,16 +50,12 @@ class LabeledInput extends Component {
                     ]}
                     placeholder={this.props.placeholder}
                     value={this.props.fieldText}
-                    onChangeText={this.onChangeTextField.bind(this)}
+                    onChangeText={this.props.handleTextInput.bind(this)}
                     onBlur={onBlur}
                 />
             </View>
         );
     }
-
-    onChangeTextField = text => {
-        this.props.handleTextInput(text);
-    };
 }
 
 const styles = StyleSheet.create({

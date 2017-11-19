@@ -73,7 +73,8 @@ Todo:
             - Even with this hack, the checkmark itself is not exactly centered in the circle
         ☐ Delete tasks from the Alarm Detail screen (in V1 you have to Edit the task)
         ☐ Tap Clock to go to Normal Mode (trigger the same animation as swiping down)
-            ☐ This should also show a time-picker for Wake-up time
+            ✔ Trigger the animation by tapping clock @done(17-11-19 10:18)
+            ☐ Show a time-picker for Wake-up time
         ☐ Handle Swipes for additional functionality 
             ☐ Swipe down on Clock:
                 - Takes you from CalcMode --> Normal Mode (Much larger clock, still has label)

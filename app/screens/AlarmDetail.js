@@ -18,6 +18,7 @@ import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import Interactable from "react-native-interactable";
+import DateTimePicker from "react-native-modal-datetime-picker";
 
 import moment from "moment";
 
@@ -44,6 +45,9 @@ class AlarmDetail extends Component {
     _clockTransform = new Animated.Value(0);
     _alarmLabelTransparency = new Animated.Value(0);
 
+    AnimatedAlarmLabel = Animated.createAnimatedComponent(LabeledInput);
+    AnimatedHandle = Animated.createAnimatedComponent(MaterialIcon);
+
     constructor(props) {
         super(props);
         console.log("AlarmDetail -- Constructor");
@@ -53,14 +57,16 @@ class AlarmDetail extends Component {
             console.log("This is a new alarm");
             realm.write(() => {
                 this.state = {
-                    alarm: realm.create("Alarm", new AlarmModel())
+                    alarm: realm.create("Alarm", new AlarmModel()),
+                    isDatePickerVisible: false
                 };
                 this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
         } else {
             // console.log("We are editing an existing alarm: ", params);
             this.state = {
-                alarm: params.alarm
+                alarm: params.alarm,
+                isDatePickerVisible: false
             };
         }
 
@@ -191,12 +197,16 @@ class AlarmDetail extends Component {
     /***************************************************/
 
     onChangeLabel = text => {
-        // console.log("Label text changed: ", text);
-        let tempState = this.state;
+        console.log("Label text changed: ", text);
+        let tempAlarm = this.state.alarm;
         realm.write(() => {
-            tempState.alarm.label = text;
+            tempAlarm.label = text;
         });
-        this.setState(tempState);
+        this.setState({ alarm: tempAlarm });
+    };
+
+    onLabelInputBlur = () => {
+        console.log("Label text lost focus: ");
     };
 
     onChangeTaskEnabled = (taskToUpdate, enabled) => {
@@ -215,10 +225,54 @@ class AlarmDetail extends Component {
         this.setState({ tasks: tasks });
     };
 
+    onSnap = event => {
+        let alarmState = this.state.alarm;
+        let snapId = event.nativeEvent.id;
+        if (snapId != alarmState.mode) {
+            realm.write(() => {
+                if (event.nativeEvent.id == "normal") {
+                    alarmState.mode = "normal";
+                } else {
+                    alarmState.mode = "calc";
+                }
+                this.setState({ alarm: alarmState });
+            });
+        }
+    };
+
     onPressClock = ref => {
         console.log("onPressClock");
-        this.interactiveRef.snapTo({ index: 1 });
+        if (this.state.alarm.mode == "calc") {
+            this.interactiveRef.snapTo({ index: 1 });
+        }
+        this._showDateTimePicker();
     };
+
+    _onArrivalTimePicked = time => {
+        console.log("Arrival Time textInput changed: ", time);
+        console.log("Arrival Time textInput changed: ", moment(time).unix());
+        let { alarm } = this.state;
+        realm.write(() => {
+            alarm.arrivalTime = moment(time).unix() * 1000;
+        });
+        this.setState({
+            alarm: alarm
+        });
+    };
+
+    _onWakeTimePicked = time => {
+        console.log("A date has been picked: ", time);
+        let { alarm } = this.state;
+        realm.write(() => {
+            alarm.wakeUpTime;
+        });
+        moment(time).unix() * 1000;
+        this._hideDateTimePicker();
+    };
+
+    _showDateTimePicker = () => this.setState({ isDatePickerVisible: true });
+
+    _hideDateTimePicker = () => this.setState({ isDatePickerVisible: false });
 
     _calcWakeUpTime = () => {
         // console.log("Calculating wakeuptime");
@@ -250,11 +304,12 @@ class AlarmDetail extends Component {
         let imageHeight = 220;
         let fieldsFlex = 3;
         let tasksFlex = 8;
+        imageHeight = this.height;
+
         if (this.state.alarm.mode === "normal") {
-            clockFlex = 1;
-            imageHeight = this.height;
-            fieldsFlex = 0;
-            tasksFlex = 0;
+            // clockFlex = 1;
+            // fieldsFlex = 0;
+            // tasksFlex = 0;
         }
 
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
@@ -276,10 +331,6 @@ class AlarmDetail extends Component {
         let fWakeUpTime = wakeTimeMoment.format("h:mm");
         let amPmWakeUpTime = wakeTimeMoment.format("A");
 
-        const AnimatedAlarmLabel = Animated.createAnimatedComponent(
-            LabeledInput
-        );
-
         let interactableRef = el => (this.interactiveRef = el);
 
         return (
@@ -292,8 +343,9 @@ class AlarmDetail extends Component {
                 />
                 <Animated.View
                     style={[
-                        styles.clockTextContainer,
+                        styles.clockContainer,
                         {
+                            width: this.width,
                             transform: [
                                 {
                                     scale: this._clockTransform.interpolate({
@@ -304,7 +356,7 @@ class AlarmDetail extends Component {
                                 {
                                     translateY: this._clockTransform.interpolate(
                                         {
-                                            inputRange: [0, 500],
+                                            inputRange: [0, 450],
                                             outputRange: [0, 210]
                                         }
                                     )
@@ -313,20 +365,27 @@ class AlarmDetail extends Component {
                         }
                     ]}
                 >
-                    <Text style={[styles.timeText]}>
-                        {fWakeUpTime}
-                        <Text style={{ fontSize: 50 }}>
-                            {" " + amPmWakeUpTime}
+                    <TouchableOpacity
+                        onPress={this.onPressClock.bind(this, interactableRef)}
+                        style={{
+                            alignSelf: "stretch"
+                        }}
+                    >
+                        <Text style={[styles.timeText]}>
+                            {fWakeUpTime}
+                            <Text style={[{ fontSize: 50 }]}>
+                                {" " + amPmWakeUpTime}
+                            </Text>
                         </Text>
-                    </Text>
-                    <AnimatedAlarmLabel
+                    </TouchableOpacity>
+                    <this.AnimatedAlarmLabel
                         placeholder="Enter a label"
                         fieldText={this.state.alarm.label}
                         handleTextInput={this.onChangeLabel}
                         onTextInputBlur={this.onLabelInputBlur}
                         separation={2}
                         style={{
-                            marginTop: 100,
+                            marginTop: 60,
                             fontSize: 16,
                             color: "#d5d5d5",
                             textAlign: "center",
@@ -343,24 +402,19 @@ class AlarmDetail extends Component {
 
                 <Interactable.View
                     ref={interactableRef}
-                    style={[styles.animatedView]}
+                    style={[styles.animatedView, { width: this.width }]}
                     verticalOnly={true}
-                    snapPoints={[{ y: 0 }, { y: 455 }]}
+                    snapPoints={[
+                        { y: 0, id: "calc" },
+                        { y: 450, id: "normal" }
+                    ]}
                     animatedValueY={this._clockTransform}
+                    onSnap={this.onSnap.bind(this)}
                 >
-                    <MaterialIcon
-                        name="drag-handle"
-                        size={30}
-                        color={"white"}
-                        style={{
-                            position: "absolute",
-                            bottom: 450,
-                            left: this.width / 2 - 15,
-                            backgroundColor: "transparent"
-                        }}
-                    />
-
                     <TouchableOpacity
+                        disabled={
+                            this.state.alarm.mode == "normal" ? true : false
+                        }
                         onPress={this.onPressClock.bind(this, interactableRef)}
                         style={[styles.interactableHandle]}
                     />
@@ -397,19 +451,7 @@ class AlarmDetail extends Component {
                                     .utc(this.state.alarm.arrivalTime)
                                     .local()
                                     .toDate()}
-                                handleArrivalChange={time => {
-                                    console.log(
-                                        "Arrival Time textInput changed: ",
-                                        time
-                                    );
-                                    console.log(
-                                        "Arrival Time textInput changed: ",
-                                        moment(time).unix()
-                                    );
-                                    this.setState({
-                                        arrivalTime: moment(time).unix() * 1000
-                                    });
-                                }}
+                                handleArrivalChange={this._onArrivalTimePicked}
                                 timePickerPrompt="What time do you need to arrive?"
                                 inputFontSize={29}
                             />
@@ -444,7 +486,38 @@ class AlarmDetail extends Component {
                             />
                         </View>
                     </View>
+                    <this.AnimatedHandle
+                        name="drag-handle"
+                        size={25}
+                        color={Colors.disabledGrey}
+                        style={{
+                            position: "absolute",
+                            left: this.width / 2 - 12.5,
+                            backgroundColor: "transparent",
+                            transform: [
+                                {
+                                    translateY: this._clockTransform.interpolate(
+                                        {
+                                            inputRange: [0, 450],
+                                            outputRange: [160, 120]
+                                        }
+                                    )
+                                }
+                            ]
+                        }}
+                    />
                 </Interactable.View>
+                <DateTimePicker
+                    date={moment
+                        .utc(this.state.alarm.wakeUpTime)
+                        .local()
+                        .toDate()} // time has been converted into a Date() for this Component
+                    mode={"time"}
+                    titleIOS={"Set Wake-Up Time"}
+                    isVisible={this.state.isDatePickerVisible}
+                    onConfirm={this._onWakeTimePicked}
+                    onCancel={this._hideDateTimePicker}
+                />
             </View>
         );
     }
@@ -455,16 +528,10 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+        alignContent: "stretch",
         backgroundColor: Colors.backgroundGrey
     },
 
-    clockContainer: {
-        backgroundColor: "transparent",
-        flex: 4,
-        alignSelf: "stretch",
-        alignItems: "center",
-        justifyContent: "center"
-    },
     clockBackground: {
         justifyContent: "center",
         alignItems: "center",
@@ -473,7 +540,7 @@ const styles = StyleSheet.create({
         width: 450,
         height: 220
     },
-    clockTextContainer: {
+    clockContainer: {
         position: "absolute",
         top: 20,
         justifyContent: "center",
@@ -485,12 +552,11 @@ const styles = StyleSheet.create({
         backgroundColor: "transparent"
     },
     nonClockWrapper: {
-        flex: 11
+        flex: 11,
+        alignItems: "stretch"
     },
     animatedView: {
-        flex: 1,
-        // top: -600,
-        width: window.width
+        flex: 1
     },
     fieldsContainer: {
         flex: 3,
@@ -517,11 +583,11 @@ const styles = StyleSheet.create({
 
     nonClockBgImage: {
         position: "absolute",
-        justifyContent: "center",
-        alignItems: "center",
         width: 450,
         height: 500,
         top: -15
+        // borderColor: "red",
+        // borderWidth: 2
     },
     clockBackgroundNotImage: {
         justifyContent: "center",
