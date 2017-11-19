@@ -11,10 +11,12 @@ import {
     TouchableOpacity,
     Dimensions,
     ImageBackground,
-    Image
+    Image,
+    Animated
 } from "react-native";
 import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
-import Icon from "react-native-vector-icons/Entypo";
+import EntypoIcon from "react-native-vector-icons/Entypo";
+import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import Interactable from "react-native-interactable";
 
 import moment from "moment";
@@ -38,6 +40,10 @@ class AlarmDetail extends Component {
 
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
+
+    _clockTransform = new Animated.Value(0);
+    _alarmLabelTransparency = new Animated.Value(0);
+
     constructor(props) {
         super(props);
         console.log("AlarmDetail -- Constructor");
@@ -57,6 +63,7 @@ class AlarmDetail extends Component {
                 alarm: params.alarm
             };
         }
+
         console.log(this.state);
         console.log(params);
     }
@@ -264,6 +271,10 @@ class AlarmDetail extends Component {
         let fWakeUpTime = wakeTimeMoment.format("h:mm");
         let amPmWakeUpTime = wakeTimeMoment.format("A");
 
+        const AnimatedAlarmLabel = Animated.createAnimatedComponent(
+            LabeledInput
+        );
+
         return (
             <View style={styles.screenContainer}>
                 {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
@@ -272,21 +283,75 @@ class AlarmDetail extends Component {
                     source={require("../img/ClockBgV2.png")}
                     /* resizeMode="center" */
                 />
+                <Animated.View
+                    style={[
+                        styles.clockTextContainer,
+                        {
+                            transform: [
+                                {
+                                    scale: this._clockTransform.interpolate({
+                                        inputRange: [-150, -150, 0, 0],
+                                        outputRange: [0.3, 0.3, 1, 1]
+                                    })
+                                },
+                                {
+                                    translateY: this._clockTransform.interpolate(
+                                        {
+                                            inputRange: [0, 500],
+                                            outputRange: [0, 210]
+                                        }
+                                    )
+                                }
+                            ]
+                        }
+                    ]}
+                >
+                    <Text style={[styles.timeText]}>
+                        {fWakeUpTime}
+                        <Text style={{ fontSize: 50 }}>
+                            {" " + amPmWakeUpTime}
+                        </Text>
+                    </Text>
+                    <AnimatedAlarmLabel
+                        placeholder="Enter a label"
+                        fieldText={this.state.alarm.label}
+                        handleTextInput={this.onChangeLabel}
+                        onTextInputBlur={this.onLabelInputBlur}
+                        separation={2}
+                        style={{
+                            marginTop: 100,
+                            fontSize: 16,
+                            color: "#d5d5d5",
+                            textAlign: "center",
+                            alignSelf: "stretch",
+                            opacity: this._clockTransform.interpolate({
+                                inputRange: [200, 450],
+                                outputRange: [0, 1]
+                            })
+                        }}
+                        flex={1}
+                    />
+                    {/* <Text style={{ alignSelf: "flex-end" }}>My profile</Text> */}
+                </Animated.View>
+
                 <Interactable.View
                     style={[styles.animatedView]}
                     verticalOnly={true}
-                    snapPoints={[{ y: 0 }, { y: 500 }]}
+                    snapPoints={[{ y: 0 }, { y: 455 }]}
+                    animatedValueY={this._clockTransform}
                 >
-                    <View style={[styles.clockTextContainer]}>
-                        <Text style={[styles.timeText, {}]}>
-                            {fWakeUpTime}
-                            <Text style={{ fontSize: 50 }}>
-                                {" " + amPmWakeUpTime}
-                            </Text>
-                        </Text>
-                        {/* <Text style={{ alignSelf: "flex-end" }}>My profile</Text> */}
-                    </View>
-
+                    <MaterialIcon
+                        name="drag-handle"
+                        size={30}
+                        color={"white"}
+                        style={{
+                            position: "absolute",
+                            bottom: 450,
+                            left: this.width / 2 - 15,
+                            backgroundColor: "transparent"
+                        }}
+                    />
+                    <View style={[styles.interactableHandle]} />
                     <View style={[styles.nonClockWrapper]}>
                         <Image
                             style={[
@@ -296,7 +361,19 @@ class AlarmDetail extends Component {
                             source={require("../img/NonClockBgV2.png")}
                             /* resizeMode="center" */
                         />
+
                         <View style={[styles.fieldsContainer]}>
+                            <LabeledInput
+                                labelText="ALARM LABEL"
+                                placeholder="Enter a label"
+                                fieldText={this.state.alarm.label}
+                                handleTextInput={this.onChangeLabel}
+                                onTextInputBlur={this.onLabelInputBlur}
+                                height={15}
+                                separation={2}
+                                style={{ fontSize: 22 }}
+                                flex={1}
+                            />
                             <LabeledTimeInput
                                 labelText="ARRIVAL TIME"
                                 flex={1}
@@ -325,17 +402,6 @@ class AlarmDetail extends Component {
                                 inputFontSize={29}
                             />
                             {/* <View style={{ height: 5 }} /> */}
-                            <LabeledInput
-                                labelText="ALARM LABEL"
-                                placeholder="Enter a label"
-                                fieldText={this.state.alarm.label}
-                                handleTextInput={this.onChangeLabel}
-                                onTextInputBlur={this.onLabelInputBlur}
-                                height={15}
-                                separation={2}
-                                style={{ fontSize: 22 }}
-                                flex={1}
-                            />
                         </View>
                         <View style={[styles.taskListContainer]}>
                             <View style={styles.taskListHeader}>
@@ -352,7 +418,7 @@ class AlarmDetail extends Component {
                                     onPress={this.onPressAddTask.bind(this)}
                                     /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
                                 >
-                                    <Icon
+                                    <EntypoIcon
                                         name="add-to-list"
                                         size={30}
                                         color={Colors.brandLightPurple}
@@ -379,11 +445,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: Colors.backgroundGrey
     },
-    animatedView: {
-        flex: 1,
-        // top: -600,
-        width: window.width
-    },
+
     clockContainer: {
         backgroundColor: "transparent",
         flex: 4,
@@ -391,8 +453,32 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center"
     },
+    clockBackground: {
+        justifyContent: "center",
+        alignItems: "center",
+        position: "absolute",
+        top: -40,
+        width: 450,
+        height: 220
+    },
+    clockTextContainer: {
+        position: "absolute",
+        top: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "transparent"
+    },
+    interactableHandle: {
+        flex: 4,
+        backgroundColor: "transparent"
+    },
     nonClockWrapper: {
         flex: 11
+    },
+    animatedView: {
+        flex: 1,
+        // top: -600,
+        width: window.width
     },
     fieldsContainer: {
         flex: 3,
@@ -416,14 +502,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center"
     },
-    clockBackground: {
-        justifyContent: "center",
-        alignItems: "center",
-        position: "absolute",
-        top: -40,
-        width: 450,
-        height: 220
-    },
+
     nonClockBgImage: {
         position: "absolute",
         justifyContent: "center",
@@ -440,12 +519,6 @@ const styles = StyleSheet.create({
         width: 450,
         height: 195,
         backgroundColor: "#220957"
-    },
-    clockTextContainer: {
-        flex: 4,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "transparent"
     },
     timeText: {
         color: "#d5d5d5",

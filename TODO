@@ -25,7 +25,7 @@ Todo:
     ✔ Back button is really hard to Push
     ✔ Checkboxes are hard to push
     ☐ If no tasks are on list, show text "Add some tasks" with an swooping arrow pointing to Add button
-    ☐ Its in a really weird UI state right now for animation experimenting. Change it back.
+    ✔ Its in a really weird UI state right now for animation experimenting. Change it back. @done(17-11-19 08:44)
 
   - Task Detail
     ✔ Make UI a little nicer - right now its just a skeleton
@@ -72,6 +72,8 @@ Todo:
         ☐ Annoying Checkmark layout issue. Can't get the overall circle+checkmark to layout properly without negative margins
             - Even with this hack, the checkmark itself is not exactly centered in the circle
         ☐ Delete tasks from the Alarm Detail screen (in V1 you have to Edit the task)
+        ☐ Tap Clock to go to Normal Mode (trigger the same animation as swiping down)
+            ☐ This should also show a time-picker for Wake-up time
         ☐ Handle Swipes for additional functionality 
             ☐ Swipe down on Clock:
                 - Takes you from CalcMode --> Normal Mode (Much larger clock, still has label)
@@ -79,15 +81,13 @@ Todo:
                         - In normal mode you can set the wake-up time directly
                         - Normal mode also accessible by tapping the Clock
                         - Disable/ignore all arrival time and task functionality
+                    ✔ Transition to Normal mode needs to keep alarm label on screen @done(17-11-19 09:43)
+                    ✔ Make the "handle" icon display properly @done(17-11-19 09:43)
             ☐ Swipe up on Clock (while in Normal mode)
                 - Takes you to AutoCalc mode (makes clock small, and shows task list)
-            ☐ Swipe from right to left
-                ☐ Shows an overlay with additional information
-                    - How much sleep you'll get if you fall asleep NOW
-                    - Total time of all enabled tasks to do in the morning
-                    - Weather now and tomorrow
-                    - 
             ☐ Animate scaling (enlarging/shrinking) the alarm-clock image when changing modes
+        ☐ Normal Mode
+            ☐ set the Wake-up time directly in normal mode
         ☐ Menu button and functions
             - Hide disabled tasks
             - Copy another alarm to this one
@@ -111,6 +111,12 @@ Todo:
     - Alarm List Screen
         ☐ Drop shadow for Enabled/Disable button on each alarm.
     - Alarm Detail Screen
+        ☐ Swipe from right to left
+            ☐ Shows an overlay with additional information
+                - How much sleep you'll get if you fall asleep NOW
+                - Total time of all enabled tasks to do in the morning
+                - Weather now and tomorrow
+
 
     - Task Detail Screen
         ☐ Task types -- ie: travel, dependent on other person, other

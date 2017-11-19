@@ -9,9 +9,9 @@ import { TextStyle } from "../styles/text";
 class LabeledInput extends Component {
     constructor(props) {
         super(props);
-        if (!props.handleTextInput) {
-            console.error("Prop 'handleTextInput' is required!");
-        }
+        // if (!props.handleTextInput) {
+        //     console.error("Prop 'handleTextInput' is required!");
+        // }
     }
 
     render() {
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignSelf: "stretch",
         justifyContent: "center",
-        paddingBottom: 0,
+        paddingBottom: 4,
         paddingTop: 2
     },
     fieldLabelText: {
