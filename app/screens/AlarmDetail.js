@@ -42,12 +42,10 @@ class AlarmDetail extends Component {
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
 
-    _clockTransform = new Animated.Value(0);
-    _alarmLabelTransparency = new Animated.Value(0);
-
     AnimatedAlarmLabel = Animated.createAnimatedComponent(LabeledInput);
     AnimatedHandle = Animated.createAnimatedComponent(MaterialIcon);
 
+    _clockTransform = new Animated.Value(0);
     constructor(props) {
         super(props);
         console.log("AlarmDetail -- Constructor");
@@ -60,7 +58,7 @@ class AlarmDetail extends Component {
                     alarm: realm.create("Alarm", new AlarmModel()),
                     isDatePickerVisible: false
                 };
-                this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
+                // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
         } else {
             // console.log("We are editing an existing alarm: ", params);
@@ -68,6 +66,12 @@ class AlarmDetail extends Component {
                 alarm: params.alarm,
                 isDatePickerVisible: false
             };
+        }
+
+        if (this.state.alarm.mode == "normal") {
+            setTimeout(() => {
+                this.interactiveRef.snapTo({ index: 1 });
+            }, 0);
         }
 
         console.log(this.state);
@@ -233,7 +237,7 @@ class AlarmDetail extends Component {
                 if (event.nativeEvent.id == "normal") {
                     alarmState.mode = "normal";
                 } else {
-                    alarmState.mode = "calc";
+                    alarmState.mode = "autocalc";
                 }
                 this.setState({ alarm: alarmState });
             });
@@ -242,7 +246,7 @@ class AlarmDetail extends Component {
 
     onPressClock = ref => {
         console.log("onPressClock");
-        if (this.state.alarm.mode == "calc") {
+        if (this.state.alarm.mode == "autocalc") {
             this.interactiveRef.snapTo({ index: 1 });
         }
         this._showDateTimePicker();
@@ -264,9 +268,8 @@ class AlarmDetail extends Component {
         console.log("A date has been picked: ", time);
         let { alarm } = this.state;
         realm.write(() => {
-            alarm.wakeUpTime;
+            alarm.wakeUpTime = moment(time).unix() * 1000;
         });
-        moment(time).unix() * 1000;
         this._hideDateTimePicker();
     };
 
@@ -300,17 +303,20 @@ class AlarmDetail extends Component {
     render() {
         console.debug("AlarmDetail render - ");
         console.debug("AlarmDetail render - this.state: ", this.state);
-        let clockFlex = 4;
-        let imageHeight = 220;
-        let fieldsFlex = 3;
-        let tasksFlex = 8;
-        imageHeight = this.height;
+        let imageHeight = this.height;
+        let initInterPosition, initClockPosition, initHandlePosition;
 
-        if (this.state.alarm.mode === "normal") {
-            // clockFlex = 1;
-            // fieldsFlex = 0;
-            // tasksFlex = 0;
+        if (this.state.alarm.mode == "normal") {
+            initInterPosition = 450;
+            initClockPosition = 210;
+            initHandlePosition = 160;
+        } else {
+            initInterPosition = 0;
+            initClockPosition = 0;
+            initHandlePosition = 120;
         }
+
+        console.log("_clockTransform", this._clockTransform);
 
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
         let sortedTasks =
@@ -405,11 +411,12 @@ class AlarmDetail extends Component {
                     style={[styles.animatedView, { width: this.width }]}
                     verticalOnly={true}
                     snapPoints={[
-                        { y: 0, id: "calc" },
+                        { y: 0, id: "autocalc" },
                         { y: 450, id: "normal" }
                     ]}
                     animatedValueY={this._clockTransform}
                     onSnap={this.onSnap.bind(this)}
+                    initialPosition={{ y: initInterPosition }}
                 >
                     <TouchableOpacity
                         disabled={
@@ -542,10 +549,10 @@ const styles = StyleSheet.create({
     },
     clockContainer: {
         position: "absolute",
-        top: 20,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "transparent"
+        backgroundColor: "transparent",
+        top: 20
     },
     interactableHandle: {
         flex: 4,
