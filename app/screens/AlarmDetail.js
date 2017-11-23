@@ -316,8 +316,6 @@ class AlarmDetail extends Component {
             initHandlePosition = 120;
         }
 
-        console.log("_clockTransform", this._clockTransform);
-
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
         let sortedTasks =
             this.state.alarm.tasks.length > 1

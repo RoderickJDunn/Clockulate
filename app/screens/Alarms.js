@@ -5,23 +5,19 @@
 import React, { Component } from "react";
 import {
     View,
-    Text,
     FlatList,
     TouchableOpacity,
+    TouchableWithoutFeedback,
     Dimensions,
     Animated,
     Easing,
     LayoutAnimation
 } from "react-native";
-import { createAnimatableComponent } from "react-native-animatable";
-import PushNotification from "react-native-push-notification";
 import PushController from "../alarmservice/PushController";
 import realm from "../data/DataSchemas";
 
-import Colors from "../styles/colors";
-import { ListStyle, AlarmListStyle } from "../styles/list";
+import { ListStyle } from "../styles/list";
 import AlarmItem from "../components/alarm-item";
-import { TextStyle } from "../styles/text";
 
 class Alarms extends Component {
     width = Dimensions.get("window").width; //full width
@@ -33,12 +29,13 @@ class Alarms extends Component {
         console.log("Fetching Alarms...");
         this.state = {};
         this.state = {
-            alarms: realm.objects("Alarm") // TODO: filter by 'visible'=true
+            alarms: realm.objects("Alarm"), // TODO: filter by 'visible'=true
+            activeRow: null
         };
     }
 
     componentWillUpdate() {
-        console.log("this.props.navigation", this.props.navigation);
+        // console.log("this.props.navigation", this.props.navigation);
     }
 
     componentDidMount() {
@@ -77,23 +74,23 @@ class Alarms extends Component {
                 scope 'this'.
      */
 
-    _makeOverlay() {
+    overlay(top, height) {
         return (
             <TouchableOpacity
                 style={{
                     position: "absolute",
-                    height: this.height,
+                    height: height,
                     width: this.width,
-                    backgroundColor: "transparent",
+                    backgroundColor: "green",
                     left: 0,
-                    top: 0,
+                    top: top,
                     alignSelf: "center",
                     justifyContent: "center"
                 }}
                 onPress={() => {
-                    let tempState = this.state;
-                    delete tempState.showDelete;
-                    this.setState(tempState);
+                    console.log("Clicked overlay");
+                    delete this.state.deleteShowing;
+                    this.setState({ collapseAll: true });
                 }}
             />
         );
@@ -107,23 +104,18 @@ class Alarms extends Component {
 
     _onPressItem = alarmItem => {
         console.debug("_onPressItem called");
-        console.log("item", alarmItem);
-
-        // console.log("showDelete", this.state.showDelete);
-        if (!("showDelete" in this.state) || isNaN(this.state.showDelete)) {
+        if (this.state.activeRow == null) {
             this.props.navigation.navigate("AlarmDetail", {
                 alarm: alarmItem,
                 reloadAlarms: this.reloadAlarms
             });
         } else {
-            let tempState = this.state;
-            delete tempState.showDelete;
-            this.setState(tempState);
+            this.setState({ activeRow: null });
         }
     };
 
     _onPressDelete = (item, event) => {
-        console.log("onPressDelete: ", item);
+        // console.log("onPressDelete: ", item);
         realm.write(() => {
             realm.delete(item);
         });
@@ -137,18 +129,18 @@ class Alarms extends Component {
         //         duration: 1000
         //     }).start(() => {
         //         let tempState = this.state;
-        //         delete tempState.showDelete;
+        //         delete tempState.deleteShowing;
         //         this.setState(tempState);
         //     });
         // }
     };
 
     _onAlarmToggled = alarm => {
-        console.log("alarm toggled: ", alarm);
+        // console.log("alarm toggled: ", alarm);
         realm.write(() => {
             alarm.enabled = !alarm.enabled;
         });
-        console.log("alarm toggled: ", alarm);
+        // console.log("alarm toggled: ", alarm);
         // if (alarm.enabled) {
         //     console.log("Setting alarm");
         //     PushNotification.localNotificationSchedule({
@@ -161,33 +153,77 @@ class Alarms extends Component {
         this.setState(this.state);
     };
 
+    _onRowSwipe = (item, rowId, direction) => {
+        console.log("=========== row swiped ============", item);
+        this.setState({ activeRow: item.id });
+    };
+
+    _onRowDismiss = (item, rowId, direction) => {
+        console.log("*********** row dismissed **********", item);
+        if (
+            item.id === this.state.activeRow &&
+            typeof direction !== "undefined"
+        ) {
+            this.setState({ activeRow: null });
+        }
+    };
+
+    _onPressBackground = () => {
+        console.log("Pressed background");
+        this.setState({ activeRow: null });
+    };
+
     render() {
         console.debug("AlarmsList Render");
         // console.debug(this.state);
-        let overlay;
-        if ("showDelete" in this.state) {
-            overlay = this._makeOverlay();
-        }
+        let close;
+        let overlayTop, overlayBottom;
+        let { alarms } = this.state;
+        // console.log("iterating alarms");
+
+        // for (let i = 0; i < alarms.length; i++) {
+        //     // console.log("iterating...");
+        //     // console.log("alarm", alarms[i]);
+        //     if (alarms[i].deleteShowing === true) {
+        //         console.log("creating overlays");
+        //         // Based on the index of the row showing the delete button, create overlay(s) above and below if necessary
+        //         overlayBottom = this.overlay((i + 1) * 120, this.height);
+        //         if (i > 0) {
+        //             overlayTop = this.overlay(0, i * 120);
+        //         }
+        //         break;
+        //     }
+        // }
+
         return (
-            <View style={ListStyle.container}>
-                <PushController />
-                {overlay}
-                <FlatList
-                    data={this.state.alarms}
-                    renderItem={alarm => {
-                        return (
-                            <AlarmItem
-                                alarm={alarm.item}
-                                onPress={this._onPressItem}
-                                onDelete={this._onPressDelete}
-                                onToggle={this._onAlarmToggled}
-                            />
-                        );
-                    }}
-                    keyExtractor={this._keyExtractor}
-                    extraData={this.state}
-                />
-            </View>
+            <TouchableWithoutFeedback
+                style={ListStyle.container}
+                onPressIn={this._onPressBackground}
+            >
+                <View style={{ flex: 1 }}>
+                    <PushController />
+                    <FlatList
+                        data={this.state.alarms}
+                        renderItem={alarm => {
+                            return (
+                                <AlarmItem
+                                    alarm={alarm.item}
+                                    onPress={this._onPressItem}
+                                    onDelete={this._onPressDelete}
+                                    onToggle={this._onAlarmToggled}
+                                    onSwipe={this._onRowSwipe}
+                                    onClose={this._onRowDismiss}
+                                    close={
+                                        alarm.item.id !== this.state.activeRow
+                                    }
+                                />
+                            );
+                        }}
+                        keyExtractor={this._keyExtractor}
+                        extraData={this.state}
+                    />
+                </View>
+            </TouchableWithoutFeedback>
         );
     }
 }

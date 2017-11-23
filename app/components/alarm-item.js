@@ -49,7 +49,7 @@ class AlarmItem extends React.PureComponent {
     // };
 
     render() {
-        console.debug("alarm-item render(): ", this.props.alarm);
+        // console.debug("alarm-item render(): ", this.props.alarm);
         // console.log("index", index);
 
         const config = {
@@ -90,12 +90,22 @@ class AlarmItem extends React.PureComponent {
             {
                 text: "Delete",
                 backgroundColor: Colors.deleteBtnRed,
-                onPress: this.props.onDelete.bind(this, this.props.alarm)
+                onPress: this.props.onDelete.bind(this, this.props.alarm),
+                zIndex: 1000
             }
         ];
         // let { listItemAnimation } = this.state;
         return (
-            <AnimatableSwipeout right={swipeoutButton} duration={1000}>
+            <AnimatableSwipeout
+                autoClose={true}
+                right={swipeoutButton}
+                duration={1000}
+                onOpen={(secId, rowId, direction) =>
+                    this.props.onSwipe(this.props.alarm, rowId, direction)}
+                onClose={(secId, rowId, direction) =>
+                    this.props.onClose(this.props.alarm, rowId, direction)}
+                close={this.props.close}
+            >
                 <TouchableOpacity
                     style={[AlarmListStyle.alarmRow, ListStyle.item]}
                     activeOpacity={touchedOpacity}
