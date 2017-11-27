@@ -6,7 +6,7 @@ import uuid from "react-native-uuid";
 import { DefaultTask, DefaultAlarm } from "../data/constants";
 import { isEmpty } from "../util/general_util";
 export class AlarmModel {
-    constructor() {
+    constructor(order) {
         this.id = uuid.v1();
         this.wakeUpTime = DefaultAlarm.wakeUpTime;
         this.arrivalTime = DefaultAlarm.arrivalTime;
@@ -16,6 +16,7 @@ export class AlarmModel {
         this.enabled = DefaultAlarm.enabled;
         this.visible = DefaultAlarm.visible;
         this.preset = DefaultAlarm.preset;
+        this.order = order;
     }
 
     static isDefault(alarm) {

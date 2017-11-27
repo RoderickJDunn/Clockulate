@@ -10,7 +10,8 @@ export const DefaultAlarm = {
     label: "",
     enabled: true,
     visible: true,
-    preset: false
+    preset: false,
+    order: null
 };
 
 export const DefaultTask = {

@@ -22,20 +22,19 @@ import AlarmItem from "../components/alarm-item";
 class Alarms extends Component {
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
-    listItemAnimation = "bounceInUp";
+
     constructor() {
         super();
-        console.log("Alarm -- Constructor");
-        console.log("Fetching Alarms...");
-        this.state = {};
+        //console.log("Alarm -- Constructor");
+        //console.log("Fetching Alarms...");
         this.state = {
-            alarms: realm.objects("Alarm"), // TODO: filter by 'visible'=true
+            alarms: realm.objects("Alarm").sorted("order"), // TODO: filter by 'visible'=true
             activeRow: null
         };
     }
 
     componentWillUpdate() {
-        // console.log("this.props.navigation", this.props.navigation);
+        // //console.log("this.props.navigation", this.props.navigation);
     }
 
     componentDidMount() {
@@ -51,17 +50,19 @@ class Alarms extends Component {
     }
 
     handleAddAlarm() {
-        // console.log("Adding alarm");
+        // //console.log("Adding alarm");
         this.props.navigation.navigate("AlarmDetail", {
             newAlarm: true,
             reloadAlarms: this.reloadAlarms
         });
     }
 
-    reloadAlarms = () => {
+    reloadAlarms = animate => {
         // console.debug("Reloading alarms list");
-        LayoutAnimation.easeInEaseOut();
-        this.setState({ alarms: realm.objects("Alarm") }); // TODO: filter by 'visible'=true
+        if (animate == true) {
+            // LayoutAnimation.easeInEaseOut(); // don't seem to need this actually
+        }
+        this.setState({ alarms: realm.objects("Alarm").sorted("order") }); // TODO: filter by 'visible'=true
     };
 
     /*
@@ -73,28 +74,6 @@ class Alarms extends Component {
                 referencing an arrow function, you don't need to bind 'this' in order for it to be access the outer
                 scope 'this'.
      */
-
-    overlay(top, height) {
-        return (
-            <TouchableOpacity
-                style={{
-                    position: "absolute",
-                    height: height,
-                    width: this.width,
-                    backgroundColor: "green",
-                    left: 0,
-                    top: top,
-                    alignSelf: "center",
-                    justifyContent: "center"
-                }}
-                onPress={() => {
-                    console.log("Clicked overlay");
-                    delete this.state.deleteShowing;
-                    this.setState({ collapseAll: true });
-                }}
-            />
-        );
-    }
 
     // _renderItem = ({ item, index }) => {};
 
@@ -115,51 +94,57 @@ class Alarms extends Component {
     };
 
     _onPressDelete = (item, event) => {
-        // console.log("onPressDelete: ", item);
+        //console.log("onPressDelete: ", item);
         realm.write(() => {
             realm.delete(item);
         });
-        LayoutAnimation.spring();
+        let config = {
+            duration: 1000,
+            update: {
+                duration: 1000,
+                type: "spring",
+                springDamping: 0.5,
+                property: "scaleXY"
+            },
+            delete: {
+                duration: 10,
+                type: "linear",
+                property: "opacity"
+            }
+        };
+        LayoutAnimation.configureNext(config);
         this.setState(this.state);
-
-        // const { onRemove } = this.props;
-        // if (onRemove) {
-        //     Animated.timing(this._animated, {
-        //         toValue: 0,
-        //         duration: 1000
-        //     }).start(() => {
-        //         let tempState = this.state;
-        //         delete tempState.deleteShowing;
-        //         this.setState(tempState);
-        //     });
-        // }
     };
 
     _onAlarmToggled = alarm => {
-        // console.log("alarm toggled: ", alarm);
+        // //console.log("alarm toggled: ", alarm);
         realm.write(() => {
             alarm.enabled = !alarm.enabled;
         });
         // console.log("alarm toggled: ", alarm);
         // if (alarm.enabled) {
-        //     console.log("Setting alarm");
+        //     //console.log("Setting alarm");
         //     PushNotification.localNotificationSchedule({
         //         message: "wake up ho!", // (required)
         //         date: new Date(Date.now() + 30 * 1000) // in 60 secs
         //     });
         // }
 
-        // console.log("this.state", this.state);
+        // //console.log("this.state", this.state);
         this.setState(this.state);
     };
 
-    _onRowSwipe = (item, rowId, direction) => {
-        console.log("=========== row swiped ============", item);
-        this.setState({ activeRow: item.id });
+    _onSnap = (row, rowState) => {
+        //console.log("=========== row swiped ============", row);
+        //console.log("=========== rowState ============", rowState);
+
+        if (rowState == "active") {
+            this.setState({ activeRow: row.item.id });
+        }
     };
 
     _onRowDismiss = (item, rowId, direction) => {
-        console.log("*********** row dismissed **********", item);
+        //console.log("*********** row dismissed **********");
         if (
             item.id === this.state.activeRow &&
             typeof direction !== "undefined"
@@ -169,23 +154,26 @@ class Alarms extends Component {
     };
 
     _onPressBackground = () => {
-        console.log("Pressed background");
+        //console.log("Pressed background");
         this.setState({ activeRow: null });
     };
 
     render() {
         console.debug("AlarmsList Render");
         // console.debug(this.state);
-        let close;
-        let overlayTop, overlayBottom;
         let { alarms } = this.state;
-        // console.log("iterating alarms");
+        // console.log("alarms", alarms);
+
+        console.log("alarms order");
+        alarms.forEach(a => {
+            console.log(a.id);
+        });
 
         // for (let i = 0; i < alarms.length; i++) {
-        //     // console.log("iterating...");
-        //     // console.log("alarm", alarms[i]);
+        //     // //console.log("iterating...");
+        //     // //console.log("alarm", alarms[i]);
         //     if (alarms[i].deleteShowing === true) {
-        //         console.log("creating overlays");
+        //         //console.log("creating overlays");
         //         // Based on the index of the row showing the delete button, create overlay(s) above and below if necessary
         //         overlayBottom = this.overlay((i + 1) * 120, this.height);
         //         if (i > 0) {
@@ -209,9 +197,12 @@ class Alarms extends Component {
                                 <AlarmItem
                                     alarm={alarm.item}
                                     onPress={this._onPressItem}
-                                    onDelete={this._onPressDelete}
+                                    onDelete={this._onPressDelete.bind(
+                                        this,
+                                        alarm.item
+                                    )}
                                     onToggle={this._onAlarmToggled}
-                                    onSwipe={this._onRowSwipe}
+                                    onSnap={this._onSnap.bind(this, alarm)}
                                     onClose={this._onRowDismiss}
                                     close={
                                         alarm.item.id !== this.state.activeRow

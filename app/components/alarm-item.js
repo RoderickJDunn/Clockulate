@@ -2,40 +2,27 @@
  * Created by rdunn on 2017-07-15.
  */
 
-import React, { Component } from "react";
-import {
-    StyleSheet,
-    Text,
-    View,
-    TouchableOpacity,
-    Animated,
-    Easing
-} from "react-native";
-import { createAnimatableComponent } from "react-native-animatable";
+import React from "react";
+import { Text, View, TouchableOpacity, Dimensions } from "react-native";
 import Svg, { Defs, Circle, RadialGradient, Stop } from "react-native-svg";
-import realm from "../data/DataSchemas";
 import moment from "moment";
+import Interactable from "react-native-interactable";
 
-import DurationText from "./duration-text";
-// import CheckBox from "react-native-check-box";
-import { CheckBox } from "native-base";
 import Colors from "../styles/colors";
-import { TaskListStyle, TaskItemStyle } from "../styles/list";
 import { TextStyle } from "../styles/text";
-import Swipeout from "react-native-swipeout";
 import { ListStyle, AlarmListStyle } from "../styles/list";
-
-const AnimatableSwipeout = createAnimatableComponent(Swipeout);
 
 class AlarmItem extends React.PureComponent {
     /*
     Props: 
      */
 
+    width = Dimensions.get("window").width; //full width
+    height = Dimensions.get("window").height; //full height
     // _onPressItem = item => {
     //     // console.debug("_onPressItem called");
 
-    //     // console.log("showDelete", this.state.showDelete);
+    //     // //console.log("showDelete", this.state.showDelete);
     //     if (!("showDelete" in this.state) || isNaN(this.state.showDelete)) {
     //         this.props.navigation.navigate("AlarmDetail", {
     //             alarm: item,
@@ -48,9 +35,13 @@ class AlarmItem extends React.PureComponent {
     //     }
     // };
 
+    componentDidMount() {
+        //console.log("AlarmItem ----- Component did mount ");
+    }
+
     render() {
         // console.debug("alarm-item render(): ", this.props.alarm);
-        // console.log("index", index);
+        // //console.log("index", index);
 
         const config = {
             velocityThreshold: 0.3,
@@ -62,7 +53,7 @@ class AlarmItem extends React.PureComponent {
         let touchedOpacity = 0.2;
         // if ("showDelete" in this.state) {
         //     if (index === this.state.showDelete) {
-        //         console.log("Delete button is showing");
+        //         //console.log("Delete button is showing");
         //     }
         //     touchedOpacity = 1;
         // }
@@ -86,32 +77,36 @@ class AlarmItem extends React.PureComponent {
         let fArriveTime = arriveTimeMoment.format("h:mm");
         let amPmArriveTime = arriveTimeMoment.format("A");
 
-        var swipeoutButton = [
-            {
-                text: "Delete",
-                backgroundColor: Colors.deleteBtnRed,
-                onPress: this.props.onDelete.bind(this, this.props.alarm),
-                zIndex: 1000
-            }
-        ];
+        let interactableRef = el => (this.interactiveRef = el);
+
+        if (this.props.close == true) {
+            setTimeout(() => {
+                this.interactiveRef.snapTo({ index: 0 });
+            }, 0);
+        }
+
         // let { listItemAnimation } = this.state;
         return (
-            <AnimatableSwipeout
-                autoClose={true}
-                right={swipeoutButton}
-                duration={1000}
-                onOpen={(secId, rowId, direction) =>
-                    this.props.onSwipe(this.props.alarm, rowId, direction)}
-                onClose={(secId, rowId, direction) =>
-                    this.props.onClose(this.props.alarm, rowId, direction)}
-                close={this.props.close}
+            <Interactable.View
+                ref={interactableRef}
+                style={[AlarmListStyle.alarmRow, ListStyle.item]}
+                horizontalOnly={true}
+                snapPoints={[{ x: 0, id: "closed" }, { x: -100, id: "active" }]}
+                dragWithSpring={{ tension: 1000, damping: 0.5 }}
+                animatedNativeDriver={true}
+                onSnap={e => {
+                    this.props.onSnap(e.nativeEvent.id);
+                }}
             >
                 <TouchableOpacity
-                    style={[AlarmListStyle.alarmRow, ListStyle.item]}
                     activeOpacity={touchedOpacity}
                     id={this.props.alarm.id}
                     label={this.props.alarm.label}
-                    onPress={this.props.onPress.bind(this, this.props.alarm)}
+                    onPress={() => this.props.onPress(this.props.alarm)}
+                    style={{
+                        width: this.width - 20, // subtract padding
+                        flexDirection: "row"
+                    }}
                 >
                     <TouchableOpacity
                         style={AlarmListStyle.toggleButton}
@@ -188,9 +183,15 @@ class AlarmItem extends React.PureComponent {
                         </Text>
                     </View>
                 </TouchableOpacity>
-            </AnimatableSwipeout>
+                <TouchableOpacity
+                    style={[AlarmListStyle.deleteBtn]}
+                    onPressOut={alarm => this.props.onDelete(alarm)}
+                >
+                    <Text style={AlarmListStyle.deleteBtnText}>DELETE</Text>
+                </TouchableOpacity>
+            </Interactable.View>
         );
     }
 }
-
+// onPress: this.props.onDelete.bind(this, this.props.alarm),
 export default AlarmItem;

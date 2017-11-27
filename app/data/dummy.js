@@ -118,7 +118,8 @@ function insertDummyData() {
             label: "Wake up on work-day",
             enabled: true, // if true, it is active, and will Ring at wakeUpTime.
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
-            preset: false // if tr
+            preset: false, // if tr
+            order: 0
         });
 
         const alarm2 = realm.create("Alarm", {
@@ -130,7 +131,8 @@ function insertDummyData() {
             label: "Wake up for appointment",
             enabled: true, // if true, it is active, and will Ring at wakeUpTime.
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
-            preset: false // if tr
+            preset: false, // if tr
+            order: 1
         });
         console.log(alarm2, alarm1, task2, task4, task5);
     });

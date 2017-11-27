@@ -141,8 +141,9 @@ class AlarmDetail extends Component {
             }
             //////////////////////////////////
         });
-        this.props.navigation.state.params.reloadAlarms();
-        setTimeout(this.props.navigation.goBack, 0);
+        // this.props.navigation.state.params.reloadAlarms();
+        this.props.navigation.goBack();
+        setTimeout(this.props.navigation.state.params.reloadAlarms, 0);
     }
 
     onPressAddTask() {

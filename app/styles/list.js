@@ -10,12 +10,12 @@ export const ListStyle = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: Colors.backgroundGrey,
-        flexDirection: "row"
+        flexDirection: "row",
+        zIndex: 50
     },
     item: {
         height: 120,
-        padding: 10,
-        justifyContent: "center"
+        padding: 10
     }
 });
 
@@ -23,10 +23,9 @@ export const AlarmListStyle = StyleSheet.create({
     alarmRow: {
         flex: 1,
         flexDirection: "row",
-        alignContent: "stretch",
         borderBottomColor: "#FFFFFF",
         borderBottomWidth: 1,
-        alignItems: "stretch"
+        width: 480
     },
     toggleButton: {
         flex: 2
@@ -37,6 +36,20 @@ export const AlarmListStyle = StyleSheet.create({
     },
     timeText: {
         fontSize: 55
+    },
+    deleteBtn: {
+        position: "absolute",
+        backgroundColor: Colors.deleteBtnRed,
+        right: 0,
+        width: 100,
+        height: 120,
+        justifyContent: "center",
+        zIndex: 10000
+    },
+    deleteBtnText: {
+        alignSelf: "stretch",
+        textAlign: "center",
+        color: "white"
     }
 });
 
