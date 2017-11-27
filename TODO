@@ -3,11 +3,16 @@ Todo:
 ☐ V1
   ☐ UI Tasks 
   - Alarms List Screen
-    ✔ ON/OFF Switch on Alarms List (for each alarm) 
+    ✔ BUG: After navigating back to this screen, delete button animation "Flies in" from the left, @done(17-11-26 17:30)
+        instead sliding in from the right. WTF!???
+    ☐ UI Improvement: Alarm row should not flash when sliding to show delete. It would look better
+        if it stayed solid while sliding. 
+    ✔ Pretty bad performance issues using Swipeout. Maybe switch to RN-Interactive again! @done(17-11-26 17:29)
+    ☐ ON/OFF Switch on Alarms List (for each alarm)
     ✔ Redesign to include WakeUp time and Arrival time, and toggle switch
     ✔ "Add alarm" button should have an icon instead of word
-    ☐ Added library to handle animation for showing Delete button when swiping
-        ☐ Need to support dismissing the delete button when tapping on OTHER rows or anywhere really
+    ✔ Added library to handle animation for showing Delete button when swiping @done(17-11-22 22:05)
+        ✔ Need to support dismissing the delete button when tapping on OTHER rows or anywhere really @done(17-11-22 22:05)
         ☐ Need to remove unused DeleteButton code. (Component file, as well as some code in Alarms.js)
     ✔ Current issue: AlarmItem is not re-rendered when alarm is toggled. Therefore color of toggle button does not change
         -- SOLUTION: Pass FlatList {this.state} as the 'extraData' prop
@@ -46,37 +51,41 @@ Todo:
   ✔ LaunchScreen (iOS)
     ✘ Create a LaunchScreen (not splash screen) from Screenshot of blank opening page. 
     ✔ Using storyboard file instead of images. Easier and I think its what Apple wants 
-  ☐ LaunchScreen (Android) -- needs investigation 
   ✔ Style issue: Status Bar is not really visible on any screen
-  ☐ fit clock background image on iPhone 6 screen properly (different size image)
-    - I kind of like the look of the background when you don't see any blur on the sides. ie) Blur is only visible on top and bottom
+  ☐ fit background images on different screen sizes properly (different size images, and use Dimensions)
 
 ☐ V2
     - Feature Additions
         - Animations
             - Normal Mode <--> Calc Mode  [clock background and layout animations]
-            - Task durations - animate flying to Clock, before updating WakeUp time.
-
         - Normal Mode (and switching between Normal and Auto mode)
-        - Autocomplete Task names in 'TaskDetail' screen
+        - Autocomplete Task names in 'TaskDetail' screen @high 
             - History and Common built-in tasks
-        - Allow editing of 'Arrival Time' **Label** 
-            - Use Case: If I'm working from home, I don't need to 'arrive' anywhere. But I do need to 'Start Working at...'
-            - Sometimes it would be useful to be able to change this label
         - Style Changes
             - Find nice fonts
             - More Icons
-                ☐ 'Add Alarm' button
+    - Alarms List
+        ☐ Support re-arranging alarms
 
     - Alarm Detail Screen
+        ☐ Once WakeUp time (and therefore main clock time) always shows the most recently determined time. @high
+            - ie) Permanently update WakeUp time when 1) It is re-calculated. 2) It is set directly by the user
+        ☐ Autocomplete Task suggestions @high
+            - Suggested tasks should provide the name (obviously) and an estimated duration...
+            ☐ Assemble list of Tasks and estimated durations to include with the app.
+
+        ☐ Task Type - Travel
+            ☐ Open Google Maps view. Input start and destination. 
+            ☐ Clockulate will input the appropriate start time for the trip into Google's API, 
+                then use the output trip duration from Google Maps
         ☐ Annoying Checkmark layout issue. Can't get the overall circle+checkmark to layout properly without negative margins
             - Even with this hack, the checkmark itself is not exactly centered in the circle
-        ☐ Delete tasks from the Alarm Detail screen (in V1 you have to Edit the task)
-        ☐ Tap Clock to go to Normal Mode (trigger the same animation as swiping down)
+        ☐ Delete tasks from the Alarm Detail screen (in V1 you have to Edit the task) 
+        ✔ Tap Clock to go to Normal Mode (trigger the same animation as swiping down) @done(17-11-19 21:36)
             ✔ Trigger the animation by tapping clock @done(17-11-19 10:18)
-            ☐ Show a time-picker for Wake-up time
+            ✔ Show a time-picker for Wake-up time @done(17-11-19 21:35)
         ☐ Handle Swipes for additional functionality 
-            ☐ Swipe down on Clock:
+            ✔ Swipe down on Clock: @done(17-11-19 21:35)
                 - Takes you from CalcMode --> Normal Mode (Much larger clock, still has label)
                     - Normal mode
                         - In normal mode you can set the wake-up time directly
@@ -84,16 +93,21 @@ Todo:
                         - Disable/ignore all arrival time and task functionality
                     ✔ Transition to Normal mode needs to keep alarm label on screen @done(17-11-19 09:43)
                     ✔ Make the "handle" icon display properly @done(17-11-19 09:43)
-            ☐ Swipe up on Clock (while in Normal mode)
+                    ☐ Add parralex effect to background image (stars) during this animation
+            ✔ Swipe up on Clock (while in Normal mode) @done(17-11-19 21:36)
                 - Takes you to AutoCalc mode (makes clock small, and shows task list)
-            ☐ Animate scaling (enlarging/shrinking) the alarm-clock image when changing modes
-        ☐ Normal Mode
-            ☐ set the Wake-up time directly in normal mode
+                ☐ Add parralex effect to background image (stars) during this animation
+            ✔ Animate scaling (enlarging/shrinking) the alarm-clock image when changing modes @done(17-11-19 21:36)
+        ✔ Normal Mode @done(17-11-19 21:36)
+            ✔ set the Wake-up time directly in normal mode @done(17-11-19 21:36)
+
+        ☐ Task List
+            ☐ Support rearranging tasks (by long-press, then dragging)
         ☐ Menu button and functions
-            - Hide disabled tasks
-            - Copy another alarm to this one
-            - Switch modes (between Normal and AutoCalc)
-            - 
+            ☐ Hide disabled tasks
+            ☐ Copy another alarm to this one
+            ☐ Switch modes (between Normal and AutoCalc)
+            ☐ Re-calculate 
     - Task Detail Screen
         ☐ Spruce up UI, its a little too minimal
 
@@ -105,6 +119,18 @@ Todo:
         
   
 ☐ V3
+    Feature Additions
+        - Animations
+            - Task durations - animate flying to Clock, before updating WakeUp time.
+
+        - Allow editing of 'Arrival Time' **Label** 
+            - Use Case: If I'm working from home, I don't need to 'arrive' anywhere. But I do need to 'Start Working at...'
+            - Sometimes it would be useful to be able to change this label
+  ☐ Android Support 
+    ☐ LaunchScreen (Android) -- needs investigation
+  - 
+
+☐ V4
     - Feature Additions
         - Task Types
             - Major: Travel -- requires some integration with Google Maps
@@ -117,7 +143,6 @@ Todo:
                 - How much sleep you'll get if you fall asleep NOW
                 - Total time of all enabled tasks to do in the morning
                 - Weather now and tomorrow
-
 
     - Task Detail Screen
         ☐ Task types -- ie: travel, dependent on other person, other

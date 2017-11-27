@@ -26,6 +26,7 @@ import realm from "../data/DataSchemas";
 import TaskList from "../components/task-list";
 import LabeledInput from "../components/labeled-input";
 import LabeledTimeInput from "../components/labeled-time-input";
+import AnimatedView from "../components/animated-view";
 import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { AlarmModel } from "../data/models";
@@ -53,10 +54,17 @@ class AlarmDetail extends Component {
         const { params } = props.navigation.state; // same as: " const params = props.navigation.state.params "
         if (params.newAlarm) {
             console.log("This is a new alarm");
+            let alarmsCount = realm.objects("Alarm").length;
+
             realm.write(() => {
                 this.state = {
-                    alarm: realm.create("Alarm", new AlarmModel()),
-                    isDatePickerVisible: false
+                    alarm: realm.create("Alarm", new AlarmModel(alarmsCount)),
+                    isDatePickerVisible: false,
+                    path: `M74.5,218.5 C114.817,218.5 147.5,185.817 147.5,145.5
+                    C147.5,65.419 114.369,0.5 73.5,0.5 C33.183,0.5 0.5,
+                    65.419 0.5,145.5 C0.5,185.817 33.183,218.5 73.5,218.5 Z`,
+                    segmentCount: 50,
+                    animationDuration: 3000
                 };
                 // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
@@ -64,15 +72,28 @@ class AlarmDetail extends Component {
             // console.log("We are editing an existing alarm: ", params);
             this.state = {
                 alarm: params.alarm,
-                isDatePickerVisible: false
+                isDatePickerVisible: false,
+                // path: `M 156 155 Q 352 195 312 3`,
+                path: `M 180 125 Q 346 161 313 7 L 330 17 L 301 23 L 313 7`,
+                // path: `M74.5,218.5 C114.817,218.5 147.5,185.817 147.5,145.5
+                // C147.5,65.419 114.369,0.5 73.5,0.5 C33.183,0.5 0.5,
+                // 65.419 0.5,145.5 C0.5,185.817 33.183,218.5 73.5,218.5 Z`,
+                segmentCount: 50,
+                animationDuration: 3000
             };
         }
+
+        this._setAnimatedViewRef = this._setAnimatedViewRef.bind(this);
 
         if (this.state.alarm.mode == "normal") {
             setTimeout(() => {
                 this.interactiveRef.snapTo({ index: 1 });
             }, 0);
         }
+
+        // setTimeout(() => {
+        //     this._animatedView.animate(this.state.animationDuration);
+        // }, 0);
 
         console.log(this.state);
         console.log(params);
@@ -93,6 +114,10 @@ class AlarmDetail extends Component {
         this.props.navigation.setParams({
             handleBackBtn: this.handleBackPress.bind(this)
         });
+    }
+
+    _setAnimatedViewRef(ref) {
+        this._animatedView = ref;
     }
 
     /*
@@ -322,7 +347,28 @@ class AlarmDetail extends Component {
             this.state.alarm.tasks.length > 1
                 ? this.state.alarm.tasks.sorted("order")
                 : this.state.alarm.tasks;
-        // console.debug(sortedTasks);
+
+        const { path, segmentCount } = this.state;
+        let taskArea = null;
+        if (sortedTasks.length == 0) {
+            // taskArea = <TaskPlaceHolder />;
+            taskArea = (
+                <AnimatedView
+                    ref={this._setAnimatedViewRef}
+                    path={path}
+                    segmentCount={segmentCount}
+                    animationDuration={this.state.animationDuration}
+                />
+            );
+        } else {
+            taskArea = (
+                <TaskList
+                    onPressItem={this._onPressTask.bind(this)}
+                    onPressItemCheckBox={this.onChangeTaskEnabled}
+                    data={sortedTasks}
+                />
+            );
+        }
 
         let wakeUpTime;
         // console.log("this.state.alarm.mode", this.state.alarm.mode);
@@ -485,11 +531,7 @@ class AlarmDetail extends Component {
                                     />
                                 </TouchableOpacity>
                             </View>
-                            <TaskList
-                                onPressItem={this._onPressTask.bind(this)}
-                                onPressItemCheckBox={this.onChangeTaskEnabled}
-                                data={sortedTasks}
-                            />
+                            {taskArea}
                         </View>
                     </View>
                     <this.AnimatedHandle
