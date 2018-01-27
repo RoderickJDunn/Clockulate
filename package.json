@@ -1,44 +1,45 @@
 {
-  "name": "Clock_Sample1",
-  "version": "0.1.0",
-  "private": true,
-  "devDependencies": {
-    "buffer": "^5.0.7",
-    "jest-expo": "~20.0.0",
-    "react-test-renderer": "16.0.0-alpha.12"
-  },
-  "scripts": {
-    "start": "react-native start",
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
-    "test": "node node_modules/jest/bin/jest.js --watch"
-  },
-  "jest": {
-    "preset": "jest-expo"
-  },
-  "dependencies": {
-    "babel-eslint": "^8.0.0",
-    "eslint": "^4.7.0",
-    "eslint-plugin-react": "^7.3.0",
-    "native-base": "^2.3.2",
-    "react": "^16.0.0-alpha.12",
-    "react-native": "^0.48.4",
-    "react-native-animatable": "^1.2.4",
-    "react-native-calendar-events": "^1.4.3",
-    "react-native-check-box": "^2.0.1",
-    "react-native-elements": "^0.16.0",
-    "react-native-interactable": "^0.1.7",
-    "react-native-modal-datetime-picker": "^4.9.0",
-    "react-native-picker": "^4.1.2",
-    "react-native-push-notification": "^3.0.1",
-    "react-native-svg": "^5.4.1",
-    "react-native-swipe-gestures": "^1.0.2",
-    "react-native-swipeable-flat-list": "0.0.5",
-    "react-native-swipeout": "^2.2.2",
-    "react-native-timepicker": "^1.0.3",
-    "react-native-uuid": "^1.4.9",
-    "react-native-vector-icons": "^4.3.0",
-    "react-navigation": "git+https://github.com/react-community/react-navigation.git",
-    "realm": "^1.12.0"
-  }
+    "name": "Clock_Sample1",
+    "version": "0.1.0",
+    "private": true,
+    "devDependencies": {
+        "buffer": "^5.0.7",
+        "jest-expo": "~20.0.0",
+        "react-test-renderer": "16.0.0-alpha.12"
+    },
+    "scripts": {
+        "start": "react-native start",
+        "android": "react-native run-android",
+        "ios": "react-native run-ios",
+        "test": "node node_modules/jest/bin/jest.js --watch"
+    },
+    "jest": {
+        "preset": "jest-expo"
+    },
+    "dependencies": {
+        "babel-eslint": "^8.0.0",
+        "eslint": "^4.7.0",
+        "eslint-plugin-react": "^7.3.0",
+        "moment": "^2.20.1",
+        "native-base": "^2.3.2",
+        "react": "^16.2.0",
+        "react-native": "^0.49.5",
+        "react-native-animatable": "^1.2.4",
+        "react-native-calendar-events": "^1.4.3",
+        "react-native-check-box": "^2.0.1",
+        "react-native-elements": "^0.16.0",
+        "react-native-interactable": "^0.1.7",
+        "react-native-modal-datetime-picker": "^4.9.0",
+        "react-native-picker": "^4.1.2",
+        "react-native-push-notification": "^3.0.1",
+        "react-native-svg": "^5.4.1",
+        "react-native-swipe-gestures": "^1.0.2",
+        "react-native-swipeable-flat-list": "0.0.5",
+        "react-native-swipeout": "^2.2.2",
+        "react-native-timepicker": "^1.0.3",
+        "react-native-uuid": "^1.4.9",
+        "react-native-vector-icons": "^4.3.0",
+        "react-navigation": "git+https://github.com/react-community/react-navigation.git",
+        "realm": "^1.13.0"
+    }
 }

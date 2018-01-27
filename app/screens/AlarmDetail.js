@@ -19,6 +19,7 @@ import EntypoIcon from "react-native-vector-icons/Entypo";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import Interactable from "react-native-interactable";
 import DateTimePicker from "react-native-modal-datetime-picker";
+// import KeyframesView from "react-native-facebook-keyframes";
 
 import moment from "moment";
 
@@ -30,7 +31,7 @@ import AnimatedView from "../components/animated-view";
 import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { AlarmModel } from "../data/models";
-
+import ArrowView from "../components/arrow-view-native";
 // TODO: Remove after we're done choosing fonts
 import { fontPreview } from "../styles/text.js";
 class AlarmDetail extends Component {
@@ -50,6 +51,9 @@ class AlarmDetail extends Component {
     constructor(props) {
         super(props);
         console.log("AlarmDetail -- Constructor");
+
+        // let av = ArrowView();
+        // av.printHello();
 
         const { params } = props.navigation.state; // same as: " const params = props.navigation.state.params "
         if (params.newAlarm) {
@@ -352,14 +356,15 @@ class AlarmDetail extends Component {
         let taskArea = null;
         if (sortedTasks.length == 0) {
             // taskArea = <TaskPlaceHolder />;
-            taskArea = (
-                <AnimatedView
-                    ref={this._setAnimatedViewRef}
-                    path={path}
-                    segmentCount={segmentCount}
-                    animationDuration={this.state.animationDuration}
-                />
-            );
+            // taskArea = (
+            //     <AnimatedView
+            //         ref={this._setAnimatedViewRef}
+            //         path={path}
+            //         segmentCount={segmentCount}
+            //         animationDuration={this.state.animationDuration}
+            //     />
+            // );
+            taskArea = <ArrowView />;
         } else {
             taskArea = (
                 <TaskList

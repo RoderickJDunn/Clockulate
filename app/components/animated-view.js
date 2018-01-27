@@ -92,8 +92,13 @@ export default class AnimatedView extends Component {
                         d={path}
                         stroke="#9b59b6"
                         strokeWidth="3"
-                        markerEnd="round"
                         fill="none"
+                    />
+                    <Path
+                        d={"M1,1 L2,1 L1.5,2 Z"}
+                        stroke="#90d006"
+                        strokeWidth="3"
+                        fill="#90d006"
                     />
                 </Svg>
                 <Animated.View style={[styles.square, animatedStyle]} />

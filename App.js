@@ -1,14 +1,19 @@
 import React from "react";
 import { MainStack } from "./app/config/router";
 import { AppRegistry, AsyncStorage, View, StatusBar } from "react-native";
+import ArrowView from "./app/components/arrow-view-native";
 
 import insertDummyData from "./app/data/dummy";
 
 export default class App extends React.Component {
     constructor() {
         super();
+
+        console.log("1");
+        // Arrows.createArrow();
         this.state = { firstLaunch: null };
         // console.log("Entry: Constructor");
+        // let av = ArrowView();
     }
 
     componentDidMount() {

@@ -8,7 +8,7 @@ Todo:
     ☐ UI Improvement: Alarm row should not flash when sliding to show delete. It would look better
         if it stayed solid while sliding. 
     ✔ Pretty bad performance issues using Swipeout. Maybe switch to RN-Interactive again! @done(17-11-26 17:29)
-    ☐ ON/OFF Switch on Alarms List (for each alarm)
+    ☐ ON/OFF Switch on Alarms List (for each alarm) -- instead of weird circle 
     ✔ Redesign to include WakeUp time and Arrival time, and toggle switch
     ✔ "Add alarm" button should have an icon instead of word
     ✔ Added library to handle animation for showing Delete button when swiping @done(17-11-22 22:05)
@@ -43,7 +43,7 @@ Todo:
     ✔ Dismiss delete button in Alarms list by tapping anywhere (not just on Alarms).
     ✔ When navigating back from AlarmDetail to AlarmList, enable the Alarm when Saving. 
     ☐ ACTUALLY SET AN ALARM (LOL)
-        - Using 'react-native-push-notification', instead of the calendar one.
+        ✔ Using 'react-native-push-notification', instead of the calendar one. @done(18-01-25 21:48)
         - An alarm with hard-coded time is now set properly (note that notifications don't work on Simulator)
 
   ✔ BUG: Duration is always '0' in Task Detail screen
