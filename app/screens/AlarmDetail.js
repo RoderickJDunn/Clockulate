@@ -364,7 +364,7 @@ class AlarmDetail extends Component {
             //         animationDuration={this.state.animationDuration}
             //     />
             // );
-            taskArea = <ArrowView />;
+            taskArea = <ArrowView points={50} />;
         } else {
             taskArea = (
                 <TaskList

@@ -9,15 +9,16 @@
 import UIKit
 import Foundation
 
-@objc(ArrowViewManager)
-class ArrowViewManager: RCTViewManager {
-  
-  override func view() -> UIView! {
-    print("returning arrowview!!!")
-    return ArrowView()
-  }
-}
+//@objc(ArrowViewManager)
+//class ArrowViewManager: RCTViewManager {
+//
+//  override func view() -> UIView! {
+//    print("returning arrowview!!!")
+//    return ArrowView()
+//  }
+//}
 
+@objc(ArrowView)
 class ArrowView: UIView {
   
   var arrow = UIBezierPath()
@@ -32,19 +33,34 @@ class ArrowView: UIView {
   var endSegmentSlope: CGFloat = 0.0
   
   var finalMask = UIBezierPath()
+  var start = CGPoint()
+  var end = CGPoint()
+//  var points: Int = 0   // TODO: Try adding this class var 'points'
   
-  @objc
+//  weak var pdfViewController: PSPDFViewController?
+  
+  var points: Int = 0 {
+    didSet {
+      print("set points")
+      self.start = CGPoint(x: points, y: points)
+      self.end = CGPoint(x: points + 150, y: points + 150)
+      self.setupArrow()
+    }
+  }
+  
   func printHello() {
       print("Hello")
   }
   
-  override init(frame: CGRect) {
+  @objc override init(frame: CGRect) {
     super.init(frame: frame)
     print("Frame: " + String(describing: frame))
     print("Init ArrowView")
     
-    
-    let lineEnd = CGPoint(x: 280, y: 180)
+  }
+  
+  func setupArrow() {
+    let lineEnd = self.end
     //        let lineEnd = CGPoint(x: 350, y: 600)
     //        let lineEnd = CGPoint(x: 350, y: 200)
     //        let lineEnd = CGPoint(x: 100, y: 600)
@@ -52,7 +68,7 @@ class ArrowView: UIView {
     //        let lineEnd = CGPoint(x: 250, y: 100)
     
     
-    shapeLayer.path = createSimpleCurve(start: CGPoint(x: 150, y: 300), end: lineEnd, curvature: -1, skew: nil, spread: nil).cgPath
+    shapeLayer.path = createSimpleCurve(start: self.start, end: lineEnd, curvature: -1, skew: nil, spread: nil).cgPath
     //        shapeLayer.path = createSimpleCurve(start: CGPoint(x: 250, y: 500), end: CGPoint(x: 350, y: 318), curvature: 0).cgPath
     
     shapeLayer.strokeColor = UIColor.purple.cgColor
@@ -112,10 +128,26 @@ class ArrowView: UIView {
     })
   }
   
-  required init?(coder aDecoder: NSCoder) {
+  @objc required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
   
+//  func setStart(start: Int) {
+//    print("set start")
+//    self.start = CGPoint(x: start, y: start)
+//  }
+//
+//  func setEnd(end: Int) {
+//    print("set end")
+//    self.end = CGPoint(x: end, y: end)
+//  }
+  
+//  func setPoints(points: Int) {
+//    print("setting points")
+//    self.start = CGPoint(x: points, y: points)
+//    self.end = CGPoint(x: points + 150, y: points + 150)
+//    self.setupArrow()
+//  }
   
   func drawLineAnimate(_ repeatCount: Int?) {
     shapeLayer.isHidden = false
