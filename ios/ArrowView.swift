@@ -33,24 +33,54 @@ class ArrowView: UIView {
   var endSegmentSlope: CGFloat = 0.0
   
   var finalMask = UIBezierPath()
-  var start = CGPoint()
-  var end = CGPoint()
-//  var points: Int = 0   // TODO: Try adding this class var 'points'
   
-//  weak var pdfViewController: PSPDFViewController?
+  var shape:[String:Any] = [:] {
+    didSet {
+      print("setting shape dictionary")
+      if let start = shape["start"] {
+        let startArr = (start as! [CGFloat])
+        self.start = CGPoint(x: startArr[0], y: startArr[1])
+
+      }
+      if let end = shape["end"] {
+        let endArr = (end as! [CGFloat])
+        self.end = CGPoint(x: endArr[0], y: endArr[1])
+      }
+      
+      if let curve = shape["curve"] {
+        self.curve = curve as! CGFloat
+      }
+      
+      if let skew = shape["skew"] {
+        self.skew = skew as! CGFloat
+      }
+      
+      if let spread = shape["spread"] {
+        self.spread = spread as! CGFloat
+      }
+      
+      self.makeArrow()
+    }
+  }
+  
+  var start:CGPoint = CGPoint()
+  var end:CGPoint = CGPoint()
+  var curve:CGFloat = 0
+  var skew:CGFloat? = nil
+  var spread:CGFloat? = nil
+
   
   var points: Int = 0 {
     didSet {
       print("set points")
       self.start = CGPoint(x: points, y: points)
       self.end = CGPoint(x: points + 150, y: points + 150)
-      self.setupArrow()
+      self.makeArrow()
+//      self.setupArrow()
     }
   }
   
-  func printHello() {
-      print("Hello")
-  }
+  
   
   @objc override init(frame: CGRect) {
     super.init(frame: frame)
@@ -59,16 +89,16 @@ class ArrowView: UIView {
     
   }
   
-  func setupArrow() {
-    let lineEnd = self.end
+  func makeArrow() {
+    print("drawing")
+
     //        let lineEnd = CGPoint(x: 350, y: 600)
     //        let lineEnd = CGPoint(x: 350, y: 200)
     //        let lineEnd = CGPoint(x: 100, y: 600)
     //        let lineEnd = CGPoint(x: 350, y: 350)
     //        let lineEnd = CGPoint(x: 250, y: 100)
     
-    
-    shapeLayer.path = createSimpleCurve(start: self.start, end: lineEnd, curvature: -1, skew: nil, spread: nil).cgPath
+    shapeLayer.path = createSimpleCurve(start: self.start, end: self.end, curvature: self.curve, skew: self.skew, spread: self.spread).cgPath
     //        shapeLayer.path = createSimpleCurve(start: CGPoint(x: 250, y: 500), end: CGPoint(x: 350, y: 318), curvature: 0).cgPath
     
     shapeLayer.strokeColor = UIColor.purple.cgColor
@@ -76,7 +106,7 @@ class ArrowView: UIView {
     shapeLayer.lineWidth = 1.0
     shapeLayer.lineCap = kCALineCapRound
     
-    self.arrow = arrowPath(btmCenter: lineEnd, height: 20, width: 10)
+    self.arrow = arrowPath(btmCenter: self.end, height: 20, width: 10)
     //        self.arrow = initialPath
     arrowLayer.path = self.initialPath.cgPath
     
@@ -95,14 +125,14 @@ class ArrowView: UIView {
     //        maskLayer.lineWidth = 2.0
     
     var pathTransform = CGAffineTransform.identity
-    pathTransform = pathTransform.translatedBy(x: lineEnd.x, y: lineEnd.y)
+    pathTransform = pathTransform.translatedBy(x: self.end.x, y: self.end.y)
     pathTransform = pathTransform.rotated(by: CGFloat(arrowAngle))
-    pathTransform = pathTransform.translatedBy(x: -lineEnd.x, y: -lineEnd.y)
+    pathTransform = pathTransform.translatedBy(x: -self.end.x, y: -self.end.y)
     finalMask.apply(pathTransform)
     //        maskLayer.frame = CGRect(x: 0, y: 0, width: 350, height: 700)
     maskLayer.fillColor = UIColor.blue.cgColor
-    maskLayer.path = CGPath(rect: CGRect(x: lineEnd.x, y: lineEnd.y, width: 40, height: 40), transform: &pathTransform)
-    maskLayer.anchorPoint = CGPoint(x: lineEnd.x / 2, y: lineEnd.y / 2)
+    maskLayer.path = CGPath(rect: CGRect(x: self.end.x, y: self.end.y, width: 40, height: 40), transform: &pathTransform)
+    maskLayer.anchorPoint = CGPoint(x: self.end.x / 2, y: self.end.y / 2)
     
     
     shapeLayer.isHidden = true

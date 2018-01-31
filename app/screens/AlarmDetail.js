@@ -364,7 +364,48 @@ class AlarmDetail extends Component {
             //         animationDuration={this.state.animationDuration}
             //     />
             // );
-            taskArea = <ArrowView points={50} />;
+            taskArea = (
+                <View
+                    style={{
+                        flex: 1
+                    }}
+                >
+                    <ArrowView
+                        style={{
+                            alignSelf: "flex-start",
+                            position: "absolute",
+                            width: 300,
+                            height: 300
+                        }}
+                        shape={{
+                            start: [180, 160],
+                            end: [350, 20],
+                            curve: 0.9,
+                            skew: -0.1,
+                            spread: 0.2
+                        }}
+                    />
+                    <View
+                        style={{
+                            flex: 1,
+                            flexDirection: "column",
+                            justifyContent: "center"
+                        }}
+                    >
+                        <Text
+                            style={{
+                                alignSelf: "center",
+                                justifyContent: "center",
+                                position: "absolute",
+                                textAlign: "center",
+                                color: Colors.labelText
+                            }}
+                        >
+                            ADD TASKS TO THIS ALARM
+                        </Text>
+                    </View>
+                </View>
+            );
         } else {
             taskArea = (
                 <TaskList
@@ -392,8 +433,23 @@ class AlarmDetail extends Component {
         return (
             <View style={styles.screenContainer}>
                 {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
-                <Image
-                    style={[styles.clockBackground, { height: imageHeight }]}
+                <Animated.Image
+                    style={[
+                        styles.clockBackground,
+                        { height: imageHeight },
+                        {
+                            transform: [
+                                {
+                                    translateY: this._clockTransform.interpolate(
+                                        {
+                                            inputRange: [0, 450],
+                                            outputRange: [0, 15]
+                                        }
+                                    )
+                                }
+                            ]
+                        }
+                    ]}
                     source={require("../img/ClockBgV2.png")}
                     /* resizeMode="center" */
                 />
@@ -462,7 +518,7 @@ class AlarmDetail extends Component {
                     verticalOnly={true}
                     snapPoints={[
                         { y: 0, id: "autocalc" },
-                        { y: 450, id: "normal" }
+                        { y: 460, id: "normal" }
                     ]}
                     animatedValueY={this._clockTransform}
                     onSnap={this.onSnap.bind(this)}

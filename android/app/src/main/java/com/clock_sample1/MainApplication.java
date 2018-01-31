@@ -3,6 +3,8 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+// import com.reactlibrary.RNArrowsPackage;
+import com.facebook.react.uimanager.ViewManager;
 import com.wix.interactable.Interactable;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.calendarevents.CalendarEventsPackage;
@@ -13,6 +15,7 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
+import io.realm.react.RealmReactPackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,14 +32,24 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            // new RNArrowsPackage(),
             new Interactable(),
             new ReactNativePushNotificationPackage(),
             new CalendarEventsPackage(),
             new SvgPackage(),
             new VectorIconsPackage(),
-            new PickerViewPackage()
+            new PickerViewPackage(),
+            new RealmReactPackage(),
+            new ArrowViewPackage()
       );
     }
+
+    @Override
+    protected String getJSMainModuleName() {
+      return "index";
+    }
+
+
   };
 
   @Override

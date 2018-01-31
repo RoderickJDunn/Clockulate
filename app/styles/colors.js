@@ -10,6 +10,7 @@ const Colors = {
     brandDarkGrey: "#1E1E1E",
     buttonOnGreen: "#0dff00",
     disabledGrey: "#999999",
+    labelText: "#686868",
     black: "#000",
     deleteBtnRed: "#ce0000"
 };

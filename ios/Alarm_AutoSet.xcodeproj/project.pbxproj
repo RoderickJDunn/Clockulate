@@ -47,6 +47,8 @@
 		6576D022050B4AD39F6D6CB5 /* libRNCalendarEvents.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 248C0C1389684C9F8A6F2E4B /* libRNCalendarEvents.a */; };
 		707A2F89278648F7BEDA303E /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB975A8A36D64E1783582831 /* Zocial.ttf */; };
 		7742ACFB1F85198400C2DD4C /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77829B121F846B9D00705E6A /* libRCTPushNotification.a */; };
+		7782412A201BEE6D0077CF2F /* ArrowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77824129201BEE6D0077CF2F /* ArrowView.swift */; };
+		77824157201BF0D50077CF2F /* ArrowViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 77824156201BF0D50077CF2F /* ArrowViewManager.m */; };
 		778B4A4D1F96D91000AB5DCA /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 778B4A4C1F96D91000AB5DCA /* LaunchScreen.xib */; };
 		7966E830EEED4BE7AD293BFE /* libRCTBEEPickerManager.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A525ACE79ED4D639237F06A /* libRCTBEEPickerManager.a */; };
 		7B779CCCB03C4BDFB24FA212 /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 239FBD4A90F1498AA1855A57 /* Entypo.ttf */; };
@@ -344,6 +346,20 @@
 			remoteGlobalIDString = BEC43C6A1C723089001221C6;
 			remoteInfo = RNCalendarEvents;
 		};
+		77E6F2FF20150DD5002298E5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3DBE0D001F3B181A0099AA32;
+			remoteInfo = fishhook;
+		};
+		77E6F30120150DD5002298E5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3DBE0D0D1F3B181C0099AA32;
+			remoteInfo = "fishhook-tvOS";
+		};
 		77FA5B231FC0857000F87DEB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 5EAEC4BC8B774925A446E8C7 /* Interactable.xcodeproj */;
@@ -405,6 +421,9 @@
 		6E69BB1BC77649E69A794456 /* EvilIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = EvilIcons.ttf; path = "../node_modules/native-base/Fonts/EvilIcons.ttf"; sourceTree = "<group>"; };
 		76E0C48BF8D543E39198C8B7 /* RNVectorIcons.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNVectorIcons.xcodeproj; path = "../node_modules/react-native-vector-icons/RNVectorIcons.xcodeproj"; sourceTree = "<group>"; };
 		7742ACFA1F85180900C2DD4C /* Alarm_AutoSet.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Alarm_AutoSet.entitlements; path = Alarm_AutoSet/Alarm_AutoSet.entitlements; sourceTree = "<group>"; };
+		77824129201BEE6D0077CF2F /* ArrowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrowView.swift; sourceTree = "<group>"; };
+		77824156201BF0D50077CF2F /* ArrowViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ArrowViewManager.m; sourceTree = "<group>"; };
+		77824158201BF2FD0077CF2F /* Alarm_AutoSet-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Alarm_AutoSet-Bridging-Header.h"; sourceTree = "<group>"; };
 		77829B011F846B9D00705E6A /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		778B4A4C1F96D91000AB5DCA /* LaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = LaunchScreen.xib; path = Alarm_AutoSet/LaunchScreen.xib; sourceTree = "<group>"; };
 		77EC5CD8DB4B47FBAAA34706 /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
@@ -569,6 +588,8 @@
 			children = (
 				139FDEF41B06529B00C62182 /* libRCTWebSocket.a */,
 				3DAD3E991DF850E9000B6D8A /* libRCTWebSocket-tvOS.a */,
+				77E6F30020150DD5002298E5 /* libfishhook.a */,
+				77E6F30220150DD5002298E5 /* libfishhook-tvOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -584,6 +605,9 @@
 				778B4A4C1F96D91000AB5DCA /* LaunchScreen.xib */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				77824129201BEE6D0077CF2F /* ArrowView.swift */,
+				77824158201BF2FD0077CF2F /* Alarm_AutoSet-Bridging-Header.h */,
+				77824156201BF0D50077CF2F /* ArrowViewManager.m */,
 			);
 			name = Alarm_AutoSet;
 			sourceTree = "<group>";
@@ -687,6 +711,20 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		775C2DCA201ACCDE00DC3E4C /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				4E0283941A034496A2B01129 /* libRealmReact.a */,
+				309B42D098724AEE9B9C1B8B /* libRNVectorIcons.a */,
+				4A525ACE79ED4D639237F06A /* libRCTBEEPickerManager.a */,
+				B1B0273ACACE44F5AD5876F1 /* libRCTActionSheet.a */,
+				95E00286B0724F7DA477CD70 /* libRNSVG.a */,
+				248C0C1389684C9F8A6F2E4B /* libRNCalendarEvents.a */,
+				632EC84740294E07AD09DD7E /* libInteractable.a */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		77829B021F846B9D00705E6A /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -774,6 +812,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2544FA4B4E434F93BCF3E4AB /* Frameworks */,
 				3849B67EAA994E0CA44A32ED /* Resources */,
+				775C2DCA201ACCDE00DC3E4C /* Recovered References */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -881,6 +920,7 @@
 					};
 					13B07F861A680F5B00A75B9A = {
 						DevelopmentTeam = 9SXQK8L2Q6;
+						LastSwiftMigration = 830;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Push = {
@@ -1259,6 +1299,20 @@
 			remoteRef = 77B350841F809E1400E8FCAC /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		77E6F30020150DD5002298E5 /* libfishhook.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libfishhook.a;
+			remoteRef = 77E6F2FF20150DD5002298E5 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		77E6F30220150DD5002298E5 /* libfishhook-tvOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libfishhook-tvOS.a";
+			remoteRef = 77E6F30120150DD5002298E5 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		77FA5B241FC0857000F87DEB /* libInteractable.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1384,6 +1438,8 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				7782412A201BEE6D0077CF2F /* ArrowView.swift in Sources */,
+				77824157201BF0D50077CF2F /* ArrowViewManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1423,6 +1479,7 @@
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = 9SXQK8L2Q6;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1437,12 +1494,14 @@
 					"$(SRCROOT)/../node_modules/react-native-svg/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-calendar-events",
 					"$(SRCROOT)/../node_modules/react-native-interactable/lib/ios/Interactable",
+					"$(SRCROOT)/../node_modules/react-native-arrows/ios",
 				);
 				INFOPLIST_FILE = Alarm_AutoSetTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -1463,6 +1522,7 @@
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				DEVELOPMENT_TEAM = 9SXQK8L2Q6;
@@ -1474,12 +1534,14 @@
 					"$(SRCROOT)/../node_modules/react-native-svg/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-calendar-events",
 					"$(SRCROOT)/../node_modules/react-native-interactable/lib/ios/Interactable",
+					"$(SRCROOT)/../node_modules/react-native-arrows/ios",
 				);
 				INFOPLIST_FILE = Alarm_AutoSetTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -1501,6 +1563,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Alarm_AutoSet/Alarm_AutoSet.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
@@ -1526,6 +1589,9 @@
 				);
 				PRODUCT_NAME = Alarm_AutoSet;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "Alarm_AutoSet-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -1534,6 +1600,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Alarm_AutoSet/Alarm_AutoSet.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
@@ -1558,6 +1625,8 @@
 				);
 				PRODUCT_NAME = Alarm_AutoSet;
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "Alarm_AutoSet-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
@@ -1583,11 +1652,13 @@
 					"$(SRCROOT)/../node_modules/react-native-svg/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-calendar-events",
 					"$(SRCROOT)/../node_modules/react-native-interactable/lib/ios/Interactable",
+					"$(SRCROOT)/../node_modules/react-native-arrows/ios",
 				);
 				INFOPLIST_FILE = "Alarm_AutoSet-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -1629,11 +1700,13 @@
 					"$(SRCROOT)/../node_modules/react-native-svg/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-calendar-events",
 					"$(SRCROOT)/../node_modules/react-native-interactable/lib/ios/Interactable",
+					"$(SRCROOT)/../node_modules/react-native-arrows/ios",
 				);
 				INFOPLIST_FILE = "Alarm_AutoSet-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -1677,6 +1750,7 @@
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.REACT.Alarm_AutoSet-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1702,6 +1776,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",

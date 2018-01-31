@@ -1,6 +1,6 @@
 import React from "react";
 import { MainStack } from "./app/config/router";
-import { AppRegistry, AsyncStorage, View, StatusBar } from "react-native";
+import { AppRegistry, AsyncStorage, View, StatusBar, Text } from "react-native";
 import ArrowView from "./app/components/arrow-view-native";
 
 import insertDummyData from "./app/data/dummy";
@@ -41,6 +41,23 @@ export default class App extends React.Component {
     }
 
     render() {
+        // return (
+        //     <View style={{ flex: 1 }}>
+        //         <Text>Hello</Text>
+        //         <ArrowView
+        //             style={{
+        //                 flex: 1
+        //             }}
+        //             shape={{
+        //                 start: [180, 160],
+        //                 end: [350, 20],
+        //                 curve: 0.9,
+        //                 skew: -0.1,
+        //                 spread: 0.2
+        //             }}
+        //         />
+        //     </View>
+        // );
         return (
             <View style={{ flex: 1 }}>
                 <StatusBar animated={true} barStyle={"light-content"} />

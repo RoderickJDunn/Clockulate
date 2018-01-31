@@ -4,6 +4,7 @@
 "use strict";
 
 import { StyleSheet } from "react-native";
+import Colors from "./colors";
 
 export const TextStyle = StyleSheet.create({
     AmPm: {
@@ -19,7 +20,7 @@ export const TextStyle = StyleSheet.create({
         // TODO: Figure out a good font for labels
         fontFamily: "Verdana",
         fontSize: 12,
-        color: "#686868"
+        color: Colors.labelText
     },
     editableText: {
         // TODO: Figure out a good font for editable text (eg: alarm labels, time fields)
