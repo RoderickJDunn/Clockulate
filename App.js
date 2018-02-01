@@ -41,29 +41,33 @@ export default class App extends React.Component {
     }
 
     render() {
-        // return (
-        //     <View style={{ flex: 1 }}>
-        //         <Text>Hello</Text>
-        //         <ArrowView
-        //             style={{
-        //                 flex: 1
-        //             }}
-        //             shape={{
-        //                 start: [180, 160],
-        //                 end: [350, 20],
-        //                 curve: 0.9,
-        //                 skew: -0.1,
-        //                 spread: 0.2
-        //             }}
-        //         />
-        //     </View>
-        // );
+        console.log("Rendering APP!!!!!!");
         return (
             <View style={{ flex: 1 }}>
-                <StatusBar animated={true} barStyle={"light-content"} />
-                <MainStack />
+                <Text>Hello</Text>
+                <ArrowView
+                    style={{
+                        alignSelf: "flex-start",
+                        position: "absolute",
+                        width: 420,
+                        height: 300
+                    }}
+                    shape={{
+                        start: [180, 160],
+                        end: [350, 80],
+                        curve: 0.9,
+                        skew: 0,
+                        spread: 1.0
+                    }}
+                />
             </View>
         );
+        // return (
+        //     <View style={{ flex: 1 }}>
+        //         <StatusBar animated={true} barStyle={"light-content"} />
+        //         <MainStack />
+        //     </View>
+        // );
     }
 }
 
