@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
@@ -24,6 +25,10 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static java.lang.Math.atan;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+
 /**
  * Created by rdunn on 2018-01-30.
  */
@@ -37,8 +42,8 @@ public class ArrowView extends View {
     private double skew = 0;
     private double spread = 0;
 
-    private int capHeight = 70; // TODO: Revisit. Why is this so much larger on Android compared to swift.
-    private int capWidth = 35; // TODO: Revisit. Why is this so much larger on Android compared to swift.
+    private int capHeight = 50; // TODO: Revisit. Why is this so much larger on Android compared to swift.
+    private int capWidth = 25; // TODO: Revisit. Why is this so much larger on Android compared to swift.
 
     private Path arrow;
     // private Path initialPath;
@@ -96,14 +101,14 @@ public class ArrowView extends View {
         Paint pLine = new Paint() {{
             setStyle(Paint.Style.FILL_AND_STROKE);
             setAntiAlias(true);
-            setStrokeWidth(1.5f);
+            setStrokeWidth(2.5f);
             setColor(Color.MAGENTA); // Line color
         }};
 
         Paint pLineBorder = new Paint(Paint.ANTI_ALIAS_FLAG) {{
             setStyle(Paint.Style.STROKE);
             setAntiAlias(true);
-            setStrokeWidth(3.0f);
+            setStrokeWidth(2.0f);
             setStrokeCap(Cap.ROUND);
             setColor(Color.MAGENTA); // Darker version of the color
         }};
@@ -126,6 +131,13 @@ public class ArrowView extends View {
 
         Path capPath = this.createCap(this.end, this.capWidth, this.capHeight);
 
+        Matrix matrix = new Matrix();
+//        matrix.setSinCos((float) sin(this.arrowAngle), (float) cos(this.arrowAngle), this.end.x, this.end.y);
+//        matrix.setSinCos((float) sin(this.arrowAngle), 0, this.end.x, this.end.y);
+        Log.d(TAG, "Rotation Angle: " + this.arrowAngle);
+//        matrix.setSinCos((float) 0.174533, (float) -0.174533, this.end.x, this.end.y);
+        matrix.setRotate((float) this.arrowAngle, this.end.x, this.end.y);
+        capPath.transform(matrix);
 //
         // TODO: Rotate the cap based on end-direction of linePath.
 
@@ -171,7 +183,7 @@ public class ArrowView extends View {
         double rise = end.y - start.y;
         double run = end.x - start.x;
 
-        double slope = rise == 0 ? 0 : rise / run;
+        double slope = rise == 0 || run == 0 ? 0 : rise / run;
         double invSlope = -1 / slope;  // NOTE: Think is actually a mirror-image slope. not perpendicular
         double invYint = midPoint.y - (invSlope * midPoint.x);
 
@@ -189,7 +201,9 @@ public class ArrowView extends View {
             rightTriPoint = new Point((int) flatX, (int) (flatX + (run / 2)));
         } else {
             // the line is vertical
-            rightTriPoint = new Point((int) (flatY + (rise / 2)), (int) flatY);
+            // FIXED (check in Swift) : curve prop had no affect for vertical paths, until I changed
+            // this from flatY to flatX     *flatY*
+            rightTriPoint = new Point((int) (flatX + (rise / 2)), (int) flatY);
         }
 
         // Calculate x range of curvature
@@ -249,11 +263,11 @@ public class ArrowView extends View {
             spreadPoint1.y -= (float) (spreadF * distance);
             spreadPoint2.y += (float) (spreadF * distance);
         } else {
-            spreadPoint1.y -= (float) (spreadF * distance * slope);
-            spreadPoint1.x -= (float) (spreadF * distance);
+            spreadPoint1.y -= (float) (spreadF * distance);
+            spreadPoint1.x -= (float) (spreadF * distance) / slope;
 
-            spreadPoint2.y += (float) (spreadF * distance * slope);
-            spreadPoint2.x += (float) (spreadF * distance);
+            spreadPoint2.y += (float) (spreadF * distance);
+            spreadPoint2.x += (float) (spreadF * distance) / slope;
         }
         Log.d(TAG, "Post-spread 1: " + spreadPoint1.toString());
         Log.d(TAG, "Post-spread 2: " + spreadPoint2.toString());
@@ -268,6 +282,27 @@ public class ArrowView extends View {
         line.moveTo(this.start.x, this.start.y);
 //        line.quadTo(curvedPoint.x, curvedPoint.y, this.end.x, this.end.y);
         line.cubicTo(spreadPoint1.x, spreadPoint1.y, spreadPoint2.x, spreadPoint2.y, this.end.x, this.end.y);
+
+
+        // Calculate the rotation angle for arrow head.
+        double endSegRise = end.y - spreadPoint2.y;
+        double endSegRun = end.x - spreadPoint2.x;
+
+        double endSegSlope = endSegRise / endSegRun;
+
+        double angleToXAxis = atan(endSegSlope);
+        double referenceAngle = endSegRise > 0 ? (Math.PI + Math.PI / 2) : Math.PI / 2;
+
+        if (angleToXAxis == 0) {
+            referenceAngle *= endSegRun > 0 ? 1 : -1;
+        }
+        else {
+            referenceAngle *= endSegSlope > 0 ? -1 : 1;
+        }
+
+        this.arrowAngle = referenceAngle + angleToXAxis;
+        this.arrowAngle = Math.toDegrees(this.arrowAngle);
+
         return line;
     }
 

@@ -381,7 +381,6 @@ class AlarmDetail extends Component {
                             start: [180, 160],
                             end: [350, 20],
                             curve: 0.9,
-                            skew: -0.1,
                             spread: 0.2
                         }}
                     />

@@ -27,7 +27,6 @@ class ArrowView: UIView {
   
   let shapeLayer = CAShapeLayer()
   let arrowLayer = CAShapeLayer()
-  let maskLayer = CAShapeLayer()
   
   var arrowAngle = 0.0
   var endSegmentSlope: CGFloat = 0.0
@@ -118,30 +117,19 @@ class ArrowView: UIView {
     arrowLayer.fillColor = UIColor.purple.cgColor
     arrowLayer.lineWidth = 1.0
     arrowLayer.lineCap = kCALineCapRound
-    
-    
-    //        maskLayer.path = createMask(top: lineEnd, height: 22, width: 12).cgPath
-    //        maskLayer.fillColor = UIColor.blue.cgColor
-    //        maskLayer.lineWidth = 2.0
+
     
     var pathTransform = CGAffineTransform.identity
     pathTransform = pathTransform.translatedBy(x: self.end.x, y: self.end.y)
     pathTransform = pathTransform.rotated(by: CGFloat(arrowAngle))
     pathTransform = pathTransform.translatedBy(x: -self.end.x, y: -self.end.y)
     finalMask.apply(pathTransform)
-    //        maskLayer.frame = CGRect(x: 0, y: 0, width: 350, height: 700)
-    maskLayer.fillColor = UIColor.blue.cgColor
-    maskLayer.path = CGPath(rect: CGRect(x: self.end.x, y: self.end.y, width: 40, height: 40), transform: &pathTransform)
-    maskLayer.anchorPoint = CGPoint(x: self.end.x / 2, y: self.end.y / 2)
-    
     
     shapeLayer.isHidden = true
     
     self.layer.addSublayer(shapeLayer)
     self.layer.addSublayer(arrowLayer)
-    
-    //        self.layer.addSublayer(maskLayer)
-    
+
     
     // DEV ONLY //
     //        var finalMaskLayer = CAShapeLayer()
@@ -270,18 +258,24 @@ class ArrowView: UIView {
     
     print(flatX)
     print(flatY)
+    
+    // NOTE: These 'tri' vars have nothing to do with the arrowHead. They are related
+    // to the right-triangle geometry being carried out.
     let rightTriPoint: CGPoint
     if slope != 0 {
       rightTriPoint = CGPoint(x: end.x, y: start.y) // positive corner of right-angle triangle
     }
     else if rise == 0 {
+      // The line is completely horizontal.
       // just use the half length of line, but in perpendicular direction
       let halfLength = run / 2
       rightTriPoint = CGPoint(x: flatX, y: flatX + halfLength)
     }
     else {
       let halfLength = rise / 2
-      rightTriPoint = CGPoint(x: flatY + halfLength, y: flatY)
+      // TODO: When this was flatY in android. Curve prop had no affect on vertical lines.
+      // Test this change       *flatY*
+      rightTriPoint = CGPoint(x: flatX + halfLength, y: flatY)
     }
     
     
@@ -293,7 +287,7 @@ class ArrowView: UIView {
     let curvedPointX = rangeX * curvature + flatX
     let curvedPointY: CGFloat
     if slope == 0 {
-      print("Slope is ZERO. Curvature as function of length height ")
+      print("Slope is ZERO. Calculate curvature as function of line length ")
       curvedPointY = flatY + curvature * (run / 2)
       print(flatY)
       print(run / 2)
@@ -350,11 +344,11 @@ class ArrowView: UIView {
         print("Pre-spread 1: " + String(describing: skewedPoint1))
         print("Pre-spread 2: " + String(describing: skewedPoint2))
         
-        skewedPoint1.y -= spread * distance * slope
-        skewedPoint1.x -= spread * distance
+        skewedPoint1.y -= spread * distance
+        skewedPoint1.x -= (spread * distance) / slope
         
-        skewedPoint2.y += spread * distance * slope
-        skewedPoint2.x += spread * distance
+        skewedPoint2.y += spread * distance
+        skewedPoint2.x += (spread * distance) / slope
         
         print("Post-spread 1: " + String(describing: skewedPoint1))
         print("Post-spread 2: " + String(describing: skewedPoint2))

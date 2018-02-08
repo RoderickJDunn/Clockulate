@@ -11,8 +11,8 @@ import java.util.ArrayList;
  */
 
 public class RNConvert {
-    public static double[] arrowPoint(ReadableArray point) {
-        double pointArr[] = { point.getDouble(0), point.getDouble(1)};
-        return pointArr;
+    public static Point arrowPoint(ReadableArray point) {
+        Point p = new Point((int) point.getDouble(0), (int) point.getDouble(1));
+        return p;
     }
 }

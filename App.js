@@ -53,11 +53,11 @@ export default class App extends React.Component {
                         height: 300
                     }}
                     shape={{
-                        start: [180, 160],
-                        end: [350, 80],
-                        curve: 0.9,
+                        start: [100, 100],
+                        end: [150, 400],
+                        curve: 5,
                         skew: 0,
-                        spread: 1.0
+                        spread: 0.8
                     }}
                 />
             </View>
