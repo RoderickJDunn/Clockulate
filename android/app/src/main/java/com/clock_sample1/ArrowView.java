@@ -1,5 +1,6 @@
 package com.clock_sample1;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -13,6 +14,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.text.TextPaint;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -42,23 +44,34 @@ public class ArrowView extends View {
     private double skew = 0;
     private double spread = 0;
 
-    private int capHeight = 50; // TODO: Revisit. Why is this so much larger on Android compared to swift.
-    private int capWidth = 25; // TODO: Revisit. Why is this so much larger on Android compared to swift.
+    private int capHeight = 20;
+    private int capWidth = 10;
 
-    private Path arrow;
+    private Path linePath;
+    private Path capPath;
     // private Path initialPath;
     private Point topCorner;
 
     private double arrowAngle = 0;
     private double endSegmentSlope = 0;
 
+    private static final float animSpeedInMs = 0.7f;
+    private static final long animMsBetweenStrokes = 1;
+    private long animLastUpdate;
+    private boolean animRunning = true;
+    private int animCurrentCountour;
+    private float animCurrentPos;
+    private Path animPath;
+    private PathMeasure animPathMeasure;
+
+
     public ArrowView(Context context) {
         super(context);
 //        this.setBackgroundColor(Color.parseColor("#3D9A10"));
 
         // TODO: setters will need this conversion as well (if I end up adding them as props)
-//        this.capHeight = pxToDp(this.capHeight);
-//        this.capWidth = pxToDp(this.capWidth);
+        this.capHeight = dpToPx(this.capHeight);
+        this.capWidth = dpToPx(this.capWidth);
 
 
     }
@@ -67,8 +80,21 @@ public class ArrowView extends View {
         this.start = RNConvert.arrowPoint(shape.getArray("start"));
         this.end = RNConvert.arrowPoint(shape.getArray("end"));
 
-        Log.d(TAG, this.start.toString());
-        Log.d(TAG, this.end.toString());
+        Log.d(TAG, "Start: " + this.start.toString());
+        Log.d(TAG, "End: " + this.end.toString());
+
+
+        this.start = dpToPx(this.start);
+        this.end = dpToPx(this.end);
+
+        Log.d(TAG, "Start: " + this.start.toString());
+        Log.d(TAG, "End: " + this.end.toString());
+
+        int screenW = Resources.getSystem().getDisplayMetrics().widthPixels;
+        int screenH = Resources.getSystem().getDisplayMetrics().heightPixels;
+
+        Log.d(TAG, "ScreenW: " + screenW);
+        Log.d(TAG, "ScreenH: " + screenH);
 
         if (shape.hasKey("curve")) {
             this.curve = shape.getDouble("curve");
@@ -84,28 +110,80 @@ public class ArrowView extends View {
         this.invalidate();
     }
 
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        Log.d(TAG, "Drawing...");
-
-        // TODO: If start/end not set, do not draw anything!
-
-        if (this.end == null || this.start == null) {
-            return;
+        if (this.linePath == null || this.capPath == null){
+            createFullArrow();
         }
+        if (animRunning) {
+            drawAnimation(canvas);
+        }
+        else {
+            drawPath(canvas, linePath, capPath);
+        }
+    }
 
-        Log.d(TAG, "onDraw after null checks");
+    protected void drawAnimation(Canvas canvas) {
+        Log.d(TAG, "drawAnimation: ");
+        if (animPathMeasure == null) {
+            // Start of animation. Set it up.
+            animPathMeasure = new PathMeasure(this.linePath, false);
+            animPathMeasure.nextContour();
+            animPath = new Path();
+            animLastUpdate = System.currentTimeMillis();
+            animCurrentCountour = 0;
+            animCurrentPos = 0.0f;
+        } else {
+            // Get time since last frame
+            long now = System.currentTimeMillis();
+            long timeSinceLast = now - animLastUpdate;
+
+            if (animCurrentPos == 0.0f) {
+                timeSinceLast -= animMsBetweenStrokes;
+            }
+
+            if (timeSinceLast > 0) {
+                Log.d(TAG, "timeSinceLast > 0");
+                // Get next segment of path
+                float newPos = (float)(timeSinceLast) / animSpeedInMs + animCurrentPos;
+                boolean moveTo = (animCurrentPos == 0.0f);
+
+                animPathMeasure.getSegment(animCurrentPos, newPos, animPath, moveTo);
+                Log.d(TAG, "got next segment from animPathMeasure");
+                animPath.rLineTo(0, 0);
+                animCurrentPos = newPos;
+                animLastUpdate = now;
 
 
-        Paint pLine = new Paint() {{
+                // If this stroke is done, move on to next
+                Log.d(TAG, "newPos         : " + newPos);
+                Log.d(TAG, "animPathMeasure: " + animPathMeasure.getLength());
+                if (newPos > animPathMeasure.getLength()) {
+                    animCurrentPos = 0.0f;
+                    animCurrentCountour++;
+                    boolean more = animPathMeasure.nextContour();
+                    // Check if finished
+                    if (!more) { animRunning = false; }
+                }
+            }
+
+            // Draw path
+            this.drawPath(canvas, animPath, null);
+        }
+        Log.d(TAG, "------------------------------------------\n");
+        invalidate();
+    }
+
+    protected void drawPath(Canvas canvas, Path linePath, Path capPath) {
+        Paint pCap = new Paint() {{
             setStyle(Paint.Style.FILL_AND_STROKE);
             setAntiAlias(true);
             setStrokeWidth(2.5f);
             setColor(Color.MAGENTA); // Line color
         }};
 
-        Paint pLineBorder = new Paint(Paint.ANTI_ALIAS_FLAG) {{
+        Paint pLine = new Paint(Paint.ANTI_ALIAS_FLAG) {{
             setStyle(Paint.Style.STROKE);
             setAntiAlias(true);
             setStrokeWidth(2.0f);
@@ -113,36 +191,37 @@ public class ArrowView extends View {
             setColor(Color.MAGENTA); // Darker version of the color
         }};
 
+        canvas.drawPath(linePath, pLine);
+        if (capPath != null) {
+            canvas.drawPath(capPath, pCap);
+        }
 
-        Path linePath = this.createLine(this.start, this.end, this.curve, this.skew, this.spread);
-//        Path p = new Path ();
-//        Point mid = new Point();
-//        // ...
-//        Point start =new Point (30,90);
-//        Point end =new Point (canvas.getWidth ()-30,140);
-//        mid.set ((start.x + end.x) / 2, (start.y + end.y) / 2);
-//
-//        // Draw line connecting the two points:
-//        p.reset ();
-//        p.moveTo (start.x, start.y);
-//        p.quadTo ((start.x + mid.x) / 2, start.y, mid.x, mid.y);
-//        p.quadTo ((mid.x + end.x) / 2, end.y, end.x, end.y);
+    }
+
+    protected void createFullArrow() {
+
+        Log.d(TAG, "Drawing...");
+
+        // If start/end not set, do not create anything!
+        if (this.end == null || this.start == null) {
+            return;
+        }
+
+        Log.d(TAG, "onDraw after null checks");
 
 
-        Path capPath = this.createCap(this.end, this.capWidth, this.capHeight);
+        linePath = this.createLine(this.start, this.end, this.curve, this.skew, this.spread);
+
+        capPath = this.createCap(this.end, this.capWidth, this.capHeight);
 
         Matrix matrix = new Matrix();
-//        matrix.setSinCos((float) sin(this.arrowAngle), (float) cos(this.arrowAngle), this.end.x, this.end.y);
-//        matrix.setSinCos((float) sin(this.arrowAngle), 0, this.end.x, this.end.y);
         Log.d(TAG, "Rotation Angle: " + this.arrowAngle);
-//        matrix.setSinCos((float) 0.174533, (float) -0.174533, this.end.x, this.end.y);
         matrix.setRotate((float) this.arrowAngle, this.end.x, this.end.y);
         capPath.transform(matrix);
 //
         // TODO: Rotate the cap based on end-direction of linePath.
 
-        canvas.drawPath(capPath, pLine);
-        canvas.drawPath(linePath, pLineBorder);
+
     }
 
     private Path createCap(Point end, int capWidth, int capHeight) {
@@ -201,8 +280,6 @@ public class ArrowView extends View {
             rightTriPoint = new Point((int) flatX, (int) (flatX + (run / 2)));
         } else {
             // the line is vertical
-            // FIXED (check in Swift) : curve prop had no affect for vertical paths, until I changed
-            // this from flatY to flatX     *flatY*
             rightTriPoint = new Point((int) (flatX + (rise / 2)), (int) flatY);
         }
 
@@ -312,6 +389,10 @@ public class ArrowView extends View {
 
     public static int dpToPx(int dp) {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    public static Point dpToPx(Point dp) {
+        return new Point(dpToPx(dp.x), dpToPx(dp.y));
     }
 
 

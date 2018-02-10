@@ -1,6 +1,13 @@
 import React from "react";
 import { MainStack } from "./app/config/router";
-import { AppRegistry, AsyncStorage, View, StatusBar, Text } from "react-native";
+import {
+    AppRegistry,
+    AsyncStorage,
+    View,
+    StatusBar,
+    Text,
+    Dimensions
+} from "react-native";
 import ArrowView from "./app/components/arrow-view-native";
 
 import insertDummyData from "./app/data/dummy";
@@ -42,6 +49,9 @@ export default class App extends React.Component {
 
     render() {
         console.log("Rendering APP!!!!!!");
+        let width = Dimensions.get("window").width;
+        let height = Dimensions.get("window").height;
+        console.log(`Width: ${width} | Height: ${height}`);
         return (
             <View style={{ flex: 1 }}>
                 <Text>Hello</Text>
@@ -49,15 +59,16 @@ export default class App extends React.Component {
                     style={{
                         alignSelf: "flex-start",
                         position: "absolute",
-                        width: 420,
-                        height: 300
+                        width: width,
+                        height: height,
+                        backgroundColor: "#3789E1"
                     }}
                     shape={{
                         start: [100, 100],
-                        end: [150, 400],
-                        curve: 5,
-                        skew: 0,
-                        spread: 0.8
+                        end: [100, 400],
+                        curve: 1,
+                        skew: 0.1,
+                        spread: 0
                     }}
                 />
             </View>

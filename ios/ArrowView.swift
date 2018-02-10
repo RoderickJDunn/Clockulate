@@ -68,18 +68,8 @@ class ArrowView: UIView {
   var skew:CGFloat? = nil
   var spread:CGFloat? = nil
 
-  
-  var points: Int = 0 {
-    didSet {
-      print("set points")
-      self.start = CGPoint(x: points, y: points)
-      self.end = CGPoint(x: points + 150, y: points + 150)
-      self.makeArrow()
-//      self.setupArrow()
-    }
-  }
-  
-  
+  var capWidth: CGFloat = 10
+  var capHeight: CGFloat = 20
   
   @objc override init(frame: CGRect) {
     super.init(frame: frame)
@@ -97,15 +87,16 @@ class ArrowView: UIView {
     //        let lineEnd = CGPoint(x: 350, y: 350)
     //        let lineEnd = CGPoint(x: 250, y: 100)
     
-    shapeLayer.path = createSimpleCurve(start: self.start, end: self.end, curvature: self.curve, skew: self.skew, spread: self.spread).cgPath
-    //        shapeLayer.path = createSimpleCurve(start: CGPoint(x: 250, y: 500), end: CGPoint(x: 350, y: 318), curvature: 0).cgPath
+    shapeLayer.path = createSimpleCurve(start: self.start, end: self.end,
+                                        curvature: self.curve, skew: self.skew,
+                                        spread: self.spread).cgPath
     
     shapeLayer.strokeColor = UIColor.purple.cgColor
     shapeLayer.fillColor = UIColor.clear.cgColor
     shapeLayer.lineWidth = 1.0
     shapeLayer.lineCap = kCALineCapRound
     
-    self.arrow = arrowPath(btmCenter: self.end, height: 20, width: 10)
+    self.arrow = createCapPath(btmCenter: self.end, height: self.capHeight, width: self.capWidth)
     //        self.arrow = initialPath
     arrowLayer.path = self.initialPath.cgPath
     
@@ -427,24 +418,7 @@ class ArrowView: UIView {
     return bezierPath
   }
   
-  func arrowPathOld(top: CGPoint, height: Int, width: Int) -> UIBezierPath {
-    let bezierPath = UIBezierPath()
-    
-    
-    bezierPath.move(to: top)
-    bezierPath.addLine(to: CGPoint(x: top.x + CGFloat(width / 2), y: top.y + CGFloat(height)))
-    bezierPath.addLine(to: CGPoint(x: top.x - CGFloat(width / 2), y: top.y + CGFloat(height)))
-    bezierPath.close()
-    
-    var pathTransform  = CGAffineTransform.identity
-    pathTransform = pathTransform.translatedBy(x: top.x, y: top.y)
-    pathTransform = pathTransform.rotated(by: CGFloat(arrowAngle))
-    pathTransform = pathTransform.translatedBy(x: -top.x, y: -top.y)
-    bezierPath.apply(pathTransform)
-    return bezierPath
-  }
-  
-  func arrowPath(btmCenter: CGPoint, height: Int, width: Int) -> UIBezierPath {
+  func createCapPath(btmCenter: CGPoint, height: CGFloat, width: CGFloat) -> UIBezierPath {
     let bezierPath = UIBezierPath()
     
     // start at bottom-center of triangle
@@ -459,14 +433,14 @@ class ArrowView: UIView {
     
     // try starting at top corner of triangle instead (for consistency with final path) -- THAT'S IT!!!!
     bezierPath.move(to: btmCenter)
-    let rightCorner = CGPoint(x: btmCenter.x + CGFloat(width / 2), y: btmCenter.y)
+    let rightCorner = CGPoint(x: btmCenter.x + (width / 2), y: btmCenter.y)
     bezierPath.addLine(to: rightCorner)
     
-    topCorner = CGPoint(x: btmCenter.x, y: btmCenter.y - CGFloat(height))
+    topCorner = CGPoint(x: btmCenter.x, y: btmCenter.y - height)
     bezierPath.addLine(to: topCorner)
     bezierPath.addLine(to: topCorner) // add twice for consistency with trapezoidal initial path
     
-    let leftCorner = CGPoint(x: btmCenter.x - CGFloat(width / 2), y: btmCenter.y)
+    let leftCorner = CGPoint(x: btmCenter.x - (width / 2), y: btmCenter.y)
     bezierPath.addLine(to: leftCorner)
     bezierPath.close()
     
@@ -480,18 +454,18 @@ class ArrowView: UIView {
     return bezierPath
   }
   
-  // TODO: Change to 'Initial path'. Needs to be a trapezoid shape, that grows in height until it becomes a triangle.
-  func createInitialArrowPath(btmCenter: CGPoint, width: Int) {
+  // Needs to be a trapezoid shape, that grows in height until it becomes a triangle.
+  func createInitialArrowPath(btmCenter: CGPoint, width: CGFloat) {
     initialPath = UIBezierPath()
     initialPath.move(to: btmCenter)
-    let rightBtm = CGPoint(x: btmCenter.x + CGFloat(width / 2), y: btmCenter.y)
+    let rightBtm = CGPoint(x: btmCenter.x + (width / 2), y: btmCenter.y)
     initialPath.addLine(to: rightBtm)
-    let rightTop = CGPoint(x: btmCenter.x + CGFloat(width / 2), y: btmCenter.y)
+    let rightTop = CGPoint(x: btmCenter.x + (width / 2), y: btmCenter.y)
     initialPath.addLine(to: rightTop)
     
-    let leftTop = CGPoint(x: btmCenter.x - CGFloat(width / 2), y: btmCenter.y)
+    let leftTop = CGPoint(x: btmCenter.x - (width / 2), y: btmCenter.y)
     initialPath.addLine(to: leftTop)
-    let leftBtm = CGPoint(x: btmCenter.x - CGFloat(width / 2), y: btmCenter.y)
+    let leftBtm = CGPoint(x: btmCenter.x - (width / 2), y: btmCenter.y)
     initialPath.addLine(to: leftBtm)
     initialPath.close()
     
