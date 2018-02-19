@@ -32,6 +32,9 @@ class ArrowView: UIView {
   var endSegmentSlope: CGFloat = 0.0
   
   var finalMask = UIBezierPath()
+  var animDuration: Int = 0
+  
+  let WAIT_FOR_PROPS = ["shape", "animInfo"]
   
   var shape:[String:Any] = [:] {
     didSet {
@@ -62,6 +65,26 @@ class ArrowView: UIView {
     }
   }
   
+  var animInfo:[String:Any] = [:] {
+    didSet {
+      print("setting animation info")
+      if let duration = animInfo["duration"] as? Int {
+        self.animDuration = duration
+      }
+    }
+  }
+  
+  override func didSetProps(_ changedProps: [String]!) {
+    print("DidSetProps()")
+    print(changedProps)
+    if let changedProps = changedProps {
+      if changedProps.contains("animateDrawIn") && changedProps.contains("shape"){
+      self.drawLineAnimate(nil)
+      }
+    }
+    
+  }
+  
   var start:CGPoint = CGPoint()
   var end:CGPoint = CGPoint()
   var curve:CGFloat = 0
@@ -79,7 +102,7 @@ class ArrowView: UIView {
   }
   
   func makeArrow() {
-    print("drawing")
+    print("creating arrow")
 
     //        let lineEnd = CGPoint(x: 350, y: 600)
     //        let lineEnd = CGPoint(x: 350, y: 200)
@@ -131,37 +154,20 @@ class ArrowView: UIView {
     //        self.layer.addSublayer(finalMaskLayer)
     //
     //
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
-      print("executing async code")
-      self.drawLineAnimate(2)
-    })
+//    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+//      print("executing async code")
+//      self.drawLineAnimate(2)
+//    })
   }
   
   @objc required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
   
-//  func setStart(start: Int) {
-//    print("set start")
-//    self.start = CGPoint(x: start, y: start)
-//  }
-//
-//  func setEnd(end: Int) {
-//    print("set end")
-//    self.end = CGPoint(x: end, y: end)
-//  }
-  
-//  func setPoints(points: Int) {
-//    print("setting points")
-//    self.start = CGPoint(x: points, y: points)
-//    self.end = CGPoint(x: points + 150, y: points + 150)
-//    self.setupArrow()
-//  }
-  
   func drawLineAnimate(_ repeatCount: Int?) {
     shapeLayer.isHidden = false
     print("drawing arrow")
-    let totalDuration = 0.7
+    let totalDuration = Double(self.animDuration) / 1000
     let arwHeadRatio = 0.1
     
     let arrowDuration = totalDuration * arwHeadRatio

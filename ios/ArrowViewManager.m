@@ -29,6 +29,8 @@ RCT_EXPORT_MODULE()
 
 RCT_EXPORT_VIEW_PROPERTY(shape, NSDictionary)
 
+RCT_REMAP_VIEW_PROPERTY(animateDrawIn, animInfo, NSDictionary)
+
 //RCT_CUSTOM_VIEW_PROPERTY(shape, NSDictionary, ArrowView) {
 //
 //  NSLog(@"debug custom view property");

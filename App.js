@@ -48,27 +48,28 @@ export default class App extends React.Component {
     }
 
     render() {
-        console.log("Rendering APP!!!!!!");
+        console.log(
+            "------------------------ RENDERING APP -------------------------- "
+        );
         let width = Dimensions.get("window").width;
         let height = Dimensions.get("window").height;
-        console.log(`Width: ${width} | Height: ${height}`);
+        // console.log(`Width: ${width} | Height: ${height}`);
+
         return (
             <View style={{ flex: 1 }}>
-                <Text>Hello</Text>
                 <ArrowView
                     style={{
                         alignSelf: "flex-start",
                         position: "absolute",
                         width: width,
-                        height: height,
-                        backgroundColor: "#3789E1"
+                        height: height
                     }}
                     shape={{
                         start: [100, 100],
-                        end: [100, 400],
-                        curve: 1,
-                        skew: 0.1,
-                        spread: 0
+                        end: [300, 100]
+                    }}
+                    animateDrawIn={{
+                        duration: 1000
                     }}
                 />
             </View>

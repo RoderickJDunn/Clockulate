@@ -34,7 +34,16 @@ ArrowView.propTypes = {
         curve: PropTypes.number,
         skew: PropTypes.number,
         spread: PropTypes.number
-    }).isRequired
+    }).isRequired,
+    animateDrawIn: PropTypes.shape({
+        duration: PropTypes.number
+    })
+};
+
+ArrowView.defaultProps = {
+    animateDrawIn: {
+        duration: 0
+    }
 };
 
 /*

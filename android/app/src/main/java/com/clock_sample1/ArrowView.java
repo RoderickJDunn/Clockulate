@@ -16,8 +16,10 @@ import android.graphics.Region;
 import android.text.TextPaint;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.clock_sample1.RNConvert.RNConvert;
 import com.facebook.react.bridge.ReadableArray;
@@ -49,34 +51,39 @@ public class ArrowView extends View {
 
     private Path linePath;
     private Path capPath;
-    // private Path initialPath;
     private Point topCorner;
 
     private double arrowAngle = 0;
     private double endSegmentSlope = 0;
+    private double lineLength = 0;
 
-    private static final float animSpeedInMs = 0.7f;
-    private static final long animMsBetweenStrokes = 1;
+    private long animDuration = 0;
+    private static float animSpeedInMs = 0.7f;
+    private static long animMsBetweenStrokes = 1;
     private long animLastUpdate;
-    private boolean animRunning = true;
+    private boolean animRunning = false;
     private int animCurrentCountour;
     private float animCurrentPos;
+    private int animCapIdx = 0;
     private Path animPath;
+    private Path animCapPath;
     private PathMeasure animPathMeasure;
 
+    ArrayList<Path> capPathsExp = new ArrayList<>();
 
     public ArrowView(Context context) {
         super(context);
 //        this.setBackgroundColor(Color.parseColor("#3D9A10"));
 
-        // TODO: setters will need this conversion as well (if I end up adding them as props)
+        // TODO: setters will need this conversion as well (if we end up adding them as props)
         this.capHeight = dpToPx(this.capHeight);
         this.capWidth = dpToPx(this.capWidth);
 
-
     }
 
+
     public void setShape(ReadableMap shape) {
+        Log.v(TAG, "setShape:");
         this.start = RNConvert.arrowPoint(shape.getArray("start"));
         this.end = RNConvert.arrowPoint(shape.getArray("end"));
 
@@ -106,14 +113,42 @@ public class ArrowView extends View {
         if (shape.hasKey("spread")) {
             this.spread = shape.getDouble("spread");
         }
-        Log.i(TAG, "set shape props. Calling invalidate");
-        this.invalidate();
+
+        createFullArrow();
     }
+
+    public void setAnimInfo(ReadableMap animInfo) {
+        // animProps: {
+        //  duration: 0.5,
+        //  initialDelay?
+        //  repeatCount?
+        //  delayBetween?
+        // }
+        // duration = totalFrames * fps
+        Log.d(TAG, "setAnimInfo: ");
+        if (animInfo.hasKey("duration")) {
+            this.animDuration = (long) animInfo.getDouble("duration");
+            Log.d(TAG, "animDuration: " + this.animDuration);
+        }
+        Log.i(TAG, "setAnimDuration");
+        Log.i(TAG, "lineLength: " + lineLength);
+    }
+
+    public void didSetProps() {
+        if (lineLength > 0 ) {
+            Log.d(TAG, "didSetProps: Calculating animation speed");
+            animSpeedInMs = (float) (animDuration / lineLength);
+            animRunning = true;
+            this.invalidate();
+        }
+    }
+
+
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (this.linePath == null || this.capPath == null){
+        if (this.linePath == null){
             createFullArrow();
         }
         if (animRunning) {
@@ -124,13 +159,32 @@ public class ArrowView extends View {
         }
     }
 
+    protected Path nextCapSeg() {
+        try {
+            Path p = this.capPathsExp.get(this.animCapIdx);
+            this.animCapIdx++;
+            return p;
+        }
+        catch (IndexOutOfBoundsException iob) {
+            Log.d(TAG, "capPath index out of bounds");
+            animCapIdx = 0;
+            return this.capPath;
+        }
+
+    }
+
+
+
     protected void drawAnimation(Canvas canvas) {
         Log.d(TAG, "drawAnimation: ");
         if (animPathMeasure == null) {
-            // Start of animation. Set it up.
+            Log.d(TAG, "initializing animation ");
+
+            // Set up line animation.
             animPathMeasure = new PathMeasure(this.linePath, false);
             animPathMeasure.nextContour();
             animPath = new Path();
+            animCapPath = null;
             animLastUpdate = System.currentTimeMillis();
             animCurrentCountour = 0;
             animCurrentPos = 0.0f;
@@ -138,14 +192,17 @@ public class ArrowView extends View {
             // Get time since last frame
             long now = System.currentTimeMillis();
             long timeSinceLast = now - animLastUpdate;
-
+            Log.d(TAG, "timeSinceLast: " + timeSinceLast);
             if (animCurrentPos == 0.0f) {
+
                 timeSinceLast -= animMsBetweenStrokes;
             }
+            Log.d(TAG, "timeSinceLast: " + timeSinceLast);
 
             if (timeSinceLast > 0) {
                 Log.d(TAG, "timeSinceLast > 0");
                 // Get next segment of path
+                // timeSinceLast / (ms per frame)   +  animCurrPos
                 float newPos = (float)(timeSinceLast) / animSpeedInMs + animCurrentPos;
                 boolean moveTo = (animCurrentPos == 0.0f);
 
@@ -160,24 +217,34 @@ public class ArrowView extends View {
                 Log.d(TAG, "newPos         : " + newPos);
                 Log.d(TAG, "animPathMeasure: " + animPathMeasure.getLength());
                 if (newPos > animPathMeasure.getLength()) {
-                    animCurrentPos = 0.0f;
-                    animCurrentCountour++;
+//                    animCurrentPos = 0.0f;
+//                    animCurrentCountour++;
                     boolean more = animPathMeasure.nextContour();
                     // Check if finished
-                    if (!more) { animRunning = false; }
+                    if (!more) {
+                        Log.d(TAG, "Cap path segment");
+                        animCapPath = this.nextCapSeg();
+                        if (animCapPath == this.capPath) {
+                            Log.d(TAG, "Cap path finished");
+                            animRunning = false;
+                        }
+                    }
                 }
             }
 
             // Draw path
-            this.drawPath(canvas, animPath, null);
+            this.drawPath(canvas, animPath, animCapPath);
         }
         Log.d(TAG, "------------------------------------------\n");
-        invalidate();
+//        invalidate();
+        postInvalidateDelayed(10);
     }
 
     protected void drawPath(Canvas canvas, Path linePath, Path capPath) {
+        Log.d(TAG, "drawPath() ");
+
         Paint pCap = new Paint() {{
-            setStyle(Paint.Style.FILL_AND_STROKE);
+            setStyle(Style.FILL);
             setAntiAlias(true);
             setStrokeWidth(2.5f);
             setColor(Color.MAGENTA); // Line color
@@ -190,8 +257,9 @@ public class ArrowView extends View {
             setStrokeCap(Cap.ROUND);
             setColor(Color.MAGENTA); // Darker version of the color
         }};
-
-        canvas.drawPath(linePath, pLine);
+        if (linePath != null) {
+            canvas.drawPath(linePath, pLine);
+        }
         if (capPath != null) {
             canvas.drawPath(capPath, pCap);
         }
@@ -212,19 +280,32 @@ public class ArrowView extends View {
 
         linePath = this.createLine(this.start, this.end, this.curve, this.skew, this.spread);
 
-        capPath = this.createCap(this.end, this.capWidth, this.capHeight);
+        PathMeasure pm = new PathMeasure(linePath, false);
+        pm.nextContour();
+        lineLength = 0;
+        while (true) {
+            lineLength += pm.getLength();
+            if (!pm.nextContour()) {
+                break;
+            }
+        }
+        this.createCaps(this.end, this.capWidth, this.capHeight);
 
-        Matrix matrix = new Matrix();
-        Log.d(TAG, "Rotation Angle: " + this.arrowAngle);
-        matrix.setRotate((float) this.arrowAngle, this.end.x, this.end.y);
-        capPath.transform(matrix);
-//
-        // TODO: Rotate the cap based on end-direction of linePath.
 
+
+
+//        this.capPathsExp = createCapList(capPath);
+//        this.capPathsExp.add(initCap);
+
+//        linePath.op(capPath, Path.Op.UNION);
 
     }
 
-    private Path createCap(Point end, int capWidth, int capHeight) {
+//    private ArrayList<Path> createCapList(Path capPath) {
+//
+//    }
+
+    private void createCaps(Point end, int capWidth, int capHeight) {
 
         Point btmCenter = end;
         Point pRight, pTop, pLeft;
@@ -240,15 +321,78 @@ public class ArrowView extends View {
         Path capPath = new Path();
         capPath.setFillType(Path.FillType.EVEN_ODD);
 
-        capPath.moveTo(btmCenter.x, btmCenter.y);
-        capPath.lineTo(pRight.x, pRight.y);
+        capPath.moveTo(pRight.x, pRight.y);
         capPath.lineTo(pTop.x, pTop.y);
-//        capPath.lineTo(pTop.x, pTop.y); // TODO: in Swift added this twice to create extra corner for animation to work properly
         capPath.lineTo(pLeft.x, pLeft.y);
-        capPath.lineTo(btmCenter.x, btmCenter.y);
         capPath.close();
 
-        return capPath;
+        Matrix matrix = new Matrix();
+        Log.d(TAG, "Rotation Angle: " + this.arrowAngle);
+        matrix.setRotate((float) this.arrowAngle, end.x, end.y);
+
+        capPath.transform(matrix);
+
+        this.capPath = capPath;
+
+
+        // Calculate List of CapPaths for animation
+        // 1. Using length of cap, and duration of animation, determine how many capPath segments to create
+        // 2. Create capPath segments and add them to the array. They will all have 4 points (trapezoidal)
+
+
+        // All paths will have pRight and pLeft as their bottom corners
+        // All paths must be transformed by the rotation matrix in the calling method.
+
+        // assign short-var names for bottom right and bottom left corners
+        float xR0 = pRight.x;
+        float yR0 = pRight.y;
+        float xL0 = pLeft.x;
+        float yL0 = pLeft.y;
+
+        // calculate slopes for right and left side of triangle
+        float mR = (pTop.y - pRight.y) / (pTop.x - pRight.x);
+        float mL = (pTop.y - pLeft.y) / (pTop.x - pLeft.x);
+
+
+
+        float interval = 10; // distance increased per animation segment
+        float d = interval;
+        int animSegs = (int) (capHeight / d);
+
+        Log.d(TAG, "Cap Segments Count: " + animSegs);
+
+        for (int i=0; i<animSegs; i++) {
+
+            // Formula (x) : x - x0 = d * (1 / sqrt(1 + m^2))
+            //         (y) : y - y0 = d * (m / sqrt(1 + m^2))
+
+            float xR1 = (-d * (1 / (float) Math.sqrt(1 + mR*mR))) + xR0;
+            float yR1 = (-d * (mR / (float)  Math.sqrt(1 + mR*mR))) + yR0;
+            float xL1 = (d * (1 / (float) Math.sqrt(1 + mL*mL))) + xL0;
+            float yL1 = (d * (mL / (float) Math.sqrt(1 + mL*mL))) + yL0;
+
+
+            Path p = new Path();
+            p.setFillType(Path.FillType.EVEN_ODD);
+            p.moveTo(xR0, yR0);
+            Log.d(TAG, "[" + xR0 + ", " + yR0 + "]");
+            p.lineTo(xR1, yR1);
+            Log.d(TAG, "[" + xR1 + ", " + yR1 + "]");
+            p.lineTo(xL1, yL1);
+            Log.d(TAG, "[" + xL1 + ", " + yL1 + "]");
+            p.lineTo(xL0, yL0);
+            Log.d(TAG, "[" + xL0 + ", " + yL0 + "]");
+            p.close();
+
+
+            p.transform(matrix);
+            this.capPathsExp.add(p);
+
+            d += interval;
+        }
+
+        this.capPathsExp.add(capPath);
+
     }
 
     private Path createLine(Point start, Point end, double curve, double skew, double spread) {
@@ -349,15 +493,8 @@ public class ArrowView extends View {
         Log.d(TAG, "Post-spread 1: " + spreadPoint1.toString());
         Log.d(TAG, "Post-spread 2: " + spreadPoint2.toString());
 
-        // TODO: finish calculating curve, skew, and spread
-
-        // TODO: Probably need to use 'quadTo' for drawing the curved path.
-//        p.quadTo ((start.x + mid.x) / 2, start.y, mid.x, mid.y);
-//        p.quadTo ((mid.x + end.x) / 2, end.y, end.x, end.y);
-
         Path line = new Path();
         line.moveTo(this.start.x, this.start.y);
-//        line.quadTo(curvedPoint.x, curvedPoint.y, this.end.x, this.end.y);
         line.cubicTo(spreadPoint1.x, spreadPoint1.y, spreadPoint2.x, spreadPoint2.y, this.end.x, this.end.y);
 
 
