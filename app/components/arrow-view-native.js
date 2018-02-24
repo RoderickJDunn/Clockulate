@@ -62,7 +62,9 @@ ArrowView.defaultProps = {
         spread: 0
     },
     color: processColor?,
-    head: "arrow",
-    drawIn: true
+    cap: "arrow",
+    animateDrawIn: {
+        duration: 0
+    }
 }
 */

@@ -55,31 +55,31 @@ export default class App extends React.Component {
         let height = Dimensions.get("window").height;
         // console.log(`Width: ${width} | Height: ${height}`);
 
-        return (
-            <View style={{ flex: 1 }}>
-                <ArrowView
-                    style={{
-                        alignSelf: "flex-start",
-                        position: "absolute",
-                        width: width,
-                        height: height
-                    }}
-                    shape={{
-                        start: [100, 100],
-                        end: [300, 100]
-                    }}
-                    animateDrawIn={{
-                        duration: 1000
-                    }}
-                />
-            </View>
-        );
         // return (
         //     <View style={{ flex: 1 }}>
-        //         <StatusBar animated={true} barStyle={"light-content"} />
-        //         <MainStack />
+        //         <ArrowView
+        //             style={{
+        //                 alignSelf: "flex-start",
+        //                 position: "absolute",
+        //                 width: width,
+        //                 height: height
+        //             }}
+        //             shape={{
+        //                 start: [100, 100],
+        //                 end: [300, 100]
+        //             }}
+        //             animateDrawIn={{
+        //                 duration: 1000
+        //             }}
+        //         />
         //     </View>
         // );
+        return (
+            <View style={{ flex: 1 }}>
+                <StatusBar animated={true} barStyle={"light-content"} />
+                <MainStack />
+            </View>
+        );
     }
 }
 

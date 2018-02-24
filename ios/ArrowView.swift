@@ -114,7 +114,9 @@ class ArrowView: UIView {
                                         curvature: self.curve, skew: self.skew,
                                         spread: self.spread).cgPath
     
-    shapeLayer.strokeColor = UIColor.purple.cgColor
+    let color = UIColor(red: 114.0/255.0, green: 72.0/255.0, blue: 173.0/255.0, alpha: 0.6).cgColor
+//    shapeLayer.strokeColor = UIColor.purple.cgColor
+    shapeLayer.strokeColor = color
     shapeLayer.fillColor = UIColor.clear.cgColor
     shapeLayer.lineWidth = 1.0
     shapeLayer.lineCap = kCALineCapRound
@@ -128,7 +130,7 @@ class ArrowView: UIView {
     
     
     arrowLayer.strokeColor = UIColor.clear.cgColor
-    arrowLayer.fillColor = UIColor.purple.cgColor
+    arrowLayer.fillColor = color
     arrowLayer.lineWidth = 1.0
     arrowLayer.lineCap = kCALineCapRound
 
