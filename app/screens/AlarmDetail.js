@@ -365,25 +365,12 @@ class AlarmDetail extends Component {
             //     />
             // );
             taskArea = (
-                <View
+                <TouchableOpacity
                     style={{
                         flex: 1
                     }}
+                    onPress={this.onPressAddTask.bind(this)}
                 >
-                    <ArrowView
-                        style={{
-                            alignSelf: "flex-start",
-                            position: "absolute",
-                            width: 300,
-                            height: 300
-                        }}
-                        shape={{
-                            start: [180, 160],
-                            end: [350, 20],
-                            curve: 0.9,
-                            spread: -0.1
-                        }}
-                    />
                     <View
                         style={{
                             flex: 1,
@@ -391,19 +378,19 @@ class AlarmDetail extends Component {
                             justifyContent: "center"
                         }}
                     >
-                        <Text
+                        <View
                             style={{
                                 alignSelf: "center",
                                 justifyContent: "center",
-                                position: "absolute",
-                                textAlign: "center",
-                                color: Colors.labelText
+                                position: "absolute"
                             }}
                         >
-                            ADD TASKS TO THIS ALARM
-                        </Text>
+                            <Text style={{ color: Colors.labelText }}>
+                                ADD TASKS TO THIS ALARM
+                            </Text>
+                        </View>
                     </View>
-                </View>
+                </TouchableOpacity>
             );
         } else {
             taskArea = (

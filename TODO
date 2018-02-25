@@ -116,6 +116,12 @@ Todo:
         - Font for field labels
         - Font for field contents (times, task names, etc)
         - Font for Large Time (we have a decent one already)
+
+    ☐ Adjust fonts for times in alarms list
+    ☐ Add devisions in alarms list
+    ☐ Add label for arrival time in alarms list
+    ☐ Remove arrow from ADD TASKS TO THIS ALARM (save for tutorial)
+    ☐ Turn ADD TASKS TO THIS ALARM into a button
         
   
 ☐ V3

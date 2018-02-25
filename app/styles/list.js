@@ -56,11 +56,12 @@ export const AlarmListStyle = StyleSheet.create({
 // const AlarmItemStyle = StyleSheet.create({});
 
 export const TaskListStyle = StyleSheet.create({
-    item: {
+    taskRow: {
         flex: 1,
         flexDirection: "row",
         paddingTop: 10,
         paddingBottom: 10,
+        width: 440,
         height: 55,
         alignContent: "stretch",
         borderBottomColor: "#acacac",
@@ -69,6 +70,7 @@ export const TaskListStyle = StyleSheet.create({
         backgroundColor: "#dbd6dd",
         justifyContent: "space-between"
     },
+
     allChildren: {
         // marginLeft: 5,
         // marginRight: 5,
@@ -78,6 +80,20 @@ export const TaskListStyle = StyleSheet.create({
 });
 
 export const TaskItemStyle = StyleSheet.create({
+    taskInfoWrap: {
+        flex: 0.8,
+        flexDirection: "row",
+        paddingTop: 10,
+        paddingBottom: 10,
+        width: 480,
+        height: 55,
+        alignContent: "stretch",
+        borderBottomColor: "#acacac",
+        borderBottomWidth: 1,
+        alignItems: "center",
+        backgroundColor: "#dbd6dd",
+        justifyContent: "space-between"
+    },
     checkbox: {
         flexBasis: "11%"
         // height: 50,
@@ -90,5 +106,19 @@ export const TaskItemStyle = StyleSheet.create({
         textAlign: "right",
         flexBasis: "18%",
         fontSize: 16
+    },
+    deleteBtn: {
+        position: "absolute",
+        backgroundColor: Colors.deleteBtnRed,
+        right: 0,
+        width: 80,
+        height: 55,
+        justifyContent: "center",
+        zIndex: 10000
+    },
+    deleteBtnText: {
+        alignSelf: "stretch",
+        textAlign: "center",
+        color: "white"
     }
 });

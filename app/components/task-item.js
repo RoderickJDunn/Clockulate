@@ -11,6 +11,7 @@ import Colors from "../styles/colors";
 
 import { TaskListStyle, TaskItemStyle } from "../styles/list";
 import { TextStyle } from "../styles/text";
+import Interactable from "react-native-interactable";
 
 class TaskItem extends React.PureComponent {
     /*
@@ -40,43 +41,66 @@ class TaskItem extends React.PureComponent {
             ? this.props.data.duration
             : this.props.data.task.defaultDuration;
         return (
-            <TouchableOpacity
-                style={TaskListStyle.item}
-                onPress={this._onPress}
+            <Interactable.View
+                style={[TaskListStyle.taskRow]}
+                horizontalOnly={true}
+                snapPoints={[{ x: 0, id: "closed" }, { x: -85, id: "active" }]}
+                dragWithSpring={{ tension: 500, damping: 0.5 }}
+                animatedNativeDriver={true}
+                onSnap={e => {
+                    // this.props.onSnap(e.nativeEvent.id);
+                    console.log("Snapping");
+                }}
             >
-                <View style={TaskItemStyle.checkbox}>
-                    <CheckBox
-                        onPress={() => this._onTapCheckBox(this.props.data)}
-                        checked={this.props.data.enabled}
-                        style={{
-                            marginLeft: -7,
-                            paddingTop: 1,
-                            backgroundColor: Colors.brandLightPurple,
-                            borderColor: "transparent"
-                        }}
-                        hitSlop={{ top: 15, bottom: 15, left: 5, right: 15 }}
-                    />
-                </View>
-                <Text
-                    style={[
-                        TaskListStyle.allChildren,
-                        TaskItemStyle.description
-                    ]}
-                    numberOfLines={2}
-                    ellipsizeMode="tail"
-                    {...this.props} // the '...' is JavaScript way to expand variable # of args
+                <TouchableOpacity
+                    style={TaskItemStyle.taskInfoWrap}
+                    onPress={this._onPress}
                 >
-                    {this.props.data.task.name}
-                </Text>
-                <DurationText
-                    duration={duration}
-                    style={[
-                        TaskListStyle.allChildren,
-                        TaskItemStyle.duration,
-                        TextStyle.timeText
-                    ]}
-                />
-            </TouchableOpacity>
+                    <View style={TaskItemStyle.checkbox}>
+                        <CheckBox
+                            onPress={() => this._onTapCheckBox(this.props.data)}
+                            checked={this.props.data.enabled}
+                            style={{
+                                marginLeft: -7,
+                                paddingTop: 1,
+                                backgroundColor: Colors.brandLightPurple,
+                                borderColor: "transparent"
+                            }}
+                            hitSlop={{
+                                top: 15,
+                                bottom: 15,
+                                left: 5,
+                                right: 15
+                            }}
+                        />
+                    </View>
+                    <Text
+                        style={[
+                            TaskListStyle.allChildren,
+                            TaskItemStyle.description
+                        ]}
+                        numberOfLines={2}
+                        ellipsizeMode="tail"
+                        {...this.props} // the '...' is JavaScript way to expand variable # of args
+                    >
+                        {this.props.data.task.name}
+                    </Text>
+                    <DurationText
+                        duration={duration}
+                        style={[
+                            TaskListStyle.allChildren,
+                            TaskItemStyle.duration,
+                            TextStyle.timeText
+                        ]}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[TaskItemStyle.deleteBtn]}
+                    onPressOut={() => console.log("Deleting task (mock)")}
+                >
+                    <Text style={TaskItemStyle.deleteBtnText}>DELETE</Text>
+                </TouchableOpacity>
+            </Interactable.View>
         );
     }
 }
