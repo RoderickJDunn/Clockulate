@@ -330,6 +330,23 @@ class AlarmDetail extends Component {
         return this._calculatedWakeUpTime;
     };
 
+    _onDeleteTask(data) {
+        console.log("Deleting task");
+        console.log("data", data);
+        console.log("data.id", data.id);
+
+        let alarmTaskRlmObject = realm.objectForPrimaryKey(
+            "AlarmTask",
+            data.id
+        );
+        if (alarmTaskRlmObject) {
+            realm.write(() => {
+                realm.delete(alarmTaskRlmObject);
+            });
+        }
+        this.onTaskListChanged();
+    }
+
     render() {
         console.debug("AlarmDetail render - ");
         console.debug("AlarmDetail render - this.state: ", this.state);
@@ -397,6 +414,7 @@ class AlarmDetail extends Component {
                 <TaskList
                     onPressItem={this._onPressTask.bind(this)}
                     onPressItemCheckBox={this.onChangeTaskEnabled}
+                    onPressDelete={this._onDeleteTask.bind(this)}
                     data={sortedTasks}
                 />
             );

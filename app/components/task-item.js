@@ -25,9 +25,15 @@ class TaskItem extends React.PureComponent {
 
     _onPress = () => {
         console.debug("TaskItem: onPress");
+        console.debug("TaskItem: onPress");
         // console.debug(this.props.data);
 
         this.props.onPressItem(this.props.data);
+    };
+
+    _onPressDelete = () => {
+        console.debug("TaskItem: onPressDelete");
+        this.props.onPressDelete(this.props.data);
     };
 
     _onTapCheckBox = data => {
@@ -96,7 +102,7 @@ class TaskItem extends React.PureComponent {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[TaskItemStyle.deleteBtn]}
-                    onPressOut={() => console.log("Deleting task (mock)")}
+                    onPress={this._onPressDelete}
                 >
                     <Text style={TaskItemStyle.deleteBtnText}>DELETE</Text>
                 </TouchableOpacity>
