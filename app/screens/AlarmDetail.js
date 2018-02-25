@@ -12,7 +12,8 @@ import {
     Dimensions,
     ImageBackground,
     Image,
-    Animated
+    Animated,
+    TouchableWithoutFeedback
 } from "react-native";
 import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -32,6 +33,7 @@ import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { AlarmModel } from "../data/models";
 import ArrowView from "../components/arrow-view-native";
+import TouchableBackdrop from "../components/touchable-backdrop";
 // TODO: Remove after we're done choosing fonts
 import { fontPreview } from "../styles/text.js";
 class AlarmDetail extends Component {
@@ -68,7 +70,8 @@ class AlarmDetail extends Component {
                     C147.5,65.419 114.369,0.5 73.5,0.5 C33.183,0.5 0.5,
                     65.419 0.5,145.5 C0.5,185.817 33.183,218.5 73.5,218.5 Z`,
                     segmentCount: 50,
-                    animationDuration: 3000
+                    animationDuration: 3000,
+                    activeTask: null
                 };
                 // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
@@ -83,7 +86,8 @@ class AlarmDetail extends Component {
                 // C147.5,65.419 114.369,0.5 73.5,0.5 C33.183,0.5 0.5,
                 // 65.419 0.5,145.5 C0.5,185.817 33.183,218.5 73.5,218.5 Z`,
                 segmentCount: 50,
-                animationDuration: 3000
+                animationDuration: 3000,
+                activeTask: null
             };
         }
 
@@ -140,6 +144,8 @@ class AlarmDetail extends Component {
     handleBackPress() {
         // console.debug("Going back to Alarms List");
 
+        // TODO: If activeTask != null, set it back to inactive (snap back to not showing Delete)
+
         realm.write(() => {
             // TODO: This should work, but it seems that due to a bug, the Tasks list gets unlinked from the parent Alarm object. It should be fixed soon
             // https://github.com/realm/realm-js/issues/1124
@@ -176,11 +182,16 @@ class AlarmDetail extends Component {
     }
 
     onPressAddTask() {
-        let nextTaskPosition = this.state.alarm.tasks.length;
-        this.props.navigation.navigate("TaskDetail", {
-            onSaveState: this.onTaskListChanged.bind(this),
-            order: nextTaskPosition
-        });
+        if (this.state.activeTask == null) {
+            let nextTaskPosition = this.state.alarm.tasks.length;
+            this.props.navigation.navigate("TaskDetail", {
+                onSaveState: this.onTaskListChanged.bind(this),
+                order: nextTaskPosition
+            });
+        } else {
+            // simply snap the active task back to resting position
+            this.setState({ activeTask: null });
+        }
     }
 
     onTaskListChanged(newTask) {
@@ -192,7 +203,9 @@ class AlarmDetail extends Component {
                 this.state.alarm.tasks.push(newTask);
             });
         }
-        this.setState(this.state);
+        let tempState = this.state;
+        tempState.activeTask = null;
+        this.setState(tempState);
     }
 
     /*
@@ -204,14 +217,19 @@ class AlarmDetail extends Component {
     _onPressTask = task => {
         // console.debug("AlarmDetail: onPressTask -- task: ", task);
 
-        // Need to use a workaround to delete the object, otherwise app will crash due to Realm bug when navigating after deleting passed Object:
-        // Pass TaskAlarm ID instead of TaskAlarm object.
-        const params = {
-            alarmTaskId: task.id,
-            onSaveState: this.onTaskListChanged.bind(this)
-        };
+        if (this.state.activeTask == null) {
+            // Need to use a workaround to delete the object, otherwise app will crash due to Realm bug when navigating after deleting passed Object:
+            // Pass TaskAlarm ID instead of TaskAlarm object.
+            const params = {
+                alarmTaskId: task.id,
+                onSaveState: this.onTaskListChanged.bind(this)
+            };
 
-        this.props.navigation.navigate("TaskDetail", params);
+            this.props.navigation.navigate("TaskDetail", params);
+        } else {
+            // simply snap the active task back to resting position
+            this.setState({ activeTask: null });
+        }
     };
 
     /**** THIS IS A DEV FUNCTION THAT WILL BE DELETED BEFORE RELEASE ****/
@@ -276,10 +294,15 @@ class AlarmDetail extends Component {
 
     onPressClock = ref => {
         console.log("onPressClock");
-        if (this.state.alarm.mode == "autocalc") {
-            this.interactiveRef.snapTo({ index: 1 });
+        if (this.state.activeTask == null) {
+            if (this.state.alarm.mode == "autocalc") {
+                this.interactiveRef.snapTo({ index: 1 });
+            }
+            this._showDateTimePicker();
+        } else {
+            // simply snap the active task back to resting position
+            this.setState({ activeTask: null });
         }
-        this._showDateTimePicker();
     };
 
     _onArrivalTimePicked = time => {
@@ -345,6 +368,20 @@ class AlarmDetail extends Component {
             });
         }
         this.onTaskListChanged();
+    }
+
+    _onSnapTask(item, index, rowState) {
+        console.log("Snapping task");
+        console.log("1. ", item);
+        console.log("2. ", index);
+        console.log("3. ", rowState);
+        if (rowState == "active") {
+            this.setState({ activeTask: index });
+        }
+    }
+
+    _closeTaskRows() {
+        this.setState({ activeTask: null });
     }
 
     render() {
@@ -415,7 +452,10 @@ class AlarmDetail extends Component {
                     onPressItem={this._onPressTask.bind(this)}
                     onPressItemCheckBox={this.onChangeTaskEnabled}
                     onPressDelete={this._onDeleteTask.bind(this)}
+                    onSnapTask={this._onSnapTask.bind(this)}
                     data={sortedTasks}
+                    activeTask={this.state.activeTask}
+                    closeTaskRows={this._closeTaskRows.bind(this)}
                 />
             );
         }
@@ -433,6 +473,24 @@ class AlarmDetail extends Component {
         let amPmWakeUpTime = wakeTimeMoment.format("A");
 
         let interactableRef = el => (this.interactiveRef = el);
+
+        let touchableBackdrop = null;
+        if (this.state.activeTask != null) {
+            touchableBackdrop = (
+                <TouchableBackdrop
+                    style={{
+                        width: this.width,
+                        height: this.height
+                    }}
+                    onPress={() => {
+                        console.log(
+                            "Pressed touchable without feedback....~~~~~~!!!!"
+                        );
+                        this._closeTaskRows();
+                    }}
+                />
+            );
+        }
 
         return (
             <View style={styles.screenContainer}>
@@ -515,7 +573,7 @@ class AlarmDetail extends Component {
                     />
                     {/* <Text style={{ alignSelf: "flex-end" }}>My profile</Text> */}
                 </Animated.View>
-
+                {touchableBackdrop}
                 <Interactable.View
                     ref={interactableRef}
                     style={[styles.animatedView, { width: this.width }]}
@@ -574,6 +632,7 @@ class AlarmDetail extends Component {
                             />
                             {/* <View style={{ height: 5 }} /> */}
                         </View>
+                        {touchableBackdrop}
                         <View style={[styles.taskListContainer]}>
                             <View style={styles.taskListHeader}>
                                 <Text
@@ -596,6 +655,7 @@ class AlarmDetail extends Component {
                                     />
                                 </TouchableOpacity>
                             </View>
+                            {touchableBackdrop}
                             {taskArea}
                         </View>
                     </View>

@@ -135,8 +135,8 @@ class Alarms extends Component {
     };
 
     _onSnap = (row, rowState) => {
-        //console.log("=========== row swiped ============", row);
-        //console.log("=========== rowState ============", rowState);
+        // console.log("=========== row swiped ============", row);
+        // console.log("=========== rowState ============", rowState);
 
         if (rowState == "active") {
             this.setState({ activeRow: row.item.id });

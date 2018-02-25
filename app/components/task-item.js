@@ -3,7 +3,15 @@
  */
 
 import React, { Component } from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import {
+    StyleSheet,
+    Text,
+    View,
+    TouchableOpacity,
+    TouchableWithoutFeedback
+} from "react-native";
+import Interactable from "react-native-interactable";
+
 import DurationText from "./duration-text";
 // import CheckBox from "react-native-check-box";
 import { CheckBox } from "native-base";
@@ -11,7 +19,7 @@ import Colors from "../styles/colors";
 
 import { TaskListStyle, TaskItemStyle } from "../styles/list";
 import { TextStyle } from "../styles/text";
-import Interactable from "react-native-interactable";
+import TouchableBackdrop from "../components/touchable-backdrop";
 
 class TaskItem extends React.PureComponent {
     /*
@@ -46,16 +54,44 @@ class TaskItem extends React.PureComponent {
         let duration = this.props.data.duration
             ? this.props.data.duration
             : this.props.data.task.defaultDuration;
+
+        let interactableRef = el => (this.interactiveRef = el);
+
+        console.log(
+            "Checking whether to setTimeout. close : " + this.props.closed
+        );
+
+        let touchableBackdrop = null;
+        if (this.props.closed == true) {
+            setTimeout(() => {
+                console.log("Timeout closing task delete view...");
+                this.interactiveRef.snapTo({ index: 0 });
+            }, 0);
+        }
+        if (this.props.activeTask != null) {
+            touchableBackdrop = (
+                <TouchableBackdrop
+                    style={[
+                        TaskItemStyle.taskInfoWrap,
+                        { backgroundColor: "transparent" }
+                    ]}
+                    onPress={() => {
+                        this.props.closeTaskRows();
+                    }}
+                />
+            );
+        }
         return (
             <Interactable.View
+                ref={interactableRef}
                 style={[TaskListStyle.taskRow]}
                 horizontalOnly={true}
                 snapPoints={[{ x: 0, id: "closed" }, { x: -85, id: "active" }]}
                 dragWithSpring={{ tension: 500, damping: 0.5 }}
                 animatedNativeDriver={true}
                 onSnap={e => {
-                    // this.props.onSnap(e.nativeEvent.id);
                     console.log("Snapping");
+                    this.props.onSnapTask(e.nativeEvent.id);
                 }}
             >
                 <TouchableOpacity
@@ -100,6 +136,7 @@ class TaskItem extends React.PureComponent {
                         ]}
                     />
                 </TouchableOpacity>
+                {touchableBackdrop}
                 <TouchableOpacity
                     style={[TaskItemStyle.deleteBtn]}
                     onPress={this._onPressDelete}
