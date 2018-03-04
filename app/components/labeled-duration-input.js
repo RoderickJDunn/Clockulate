@@ -40,11 +40,14 @@ class LabeledDurationInput extends Component {
         let minutes = calcMinutes(this.state.data.time, hours);
         Picker.init({
             pickerData: this._createDurationData(),
+            pickerTitleText: "TASK DURATION",
             selectedValue: [hours + " hours", minutes + " minutes"],
+            onPickerConfirm: this._onPickerConfirm,
             pickerToolBarFontSize: 16,
             pickerFontSize: 16,
-            pickerFontColor: [255, 0, 0, 1],
-            onPickerConfirm: this._onPickerConfirm
+            pickerFontColor: [34, 9, 87, 1],
+            pickerCancelBtnColor: [100, 100, 100, 1],
+            pickerConfirmBtnColor: [34, 9, 87, 1]
             // onPickerCancel: (pickedValue, pickedIndex) => {
             //     // console.log('duration', pickedValue, pickedIndex);
             // },
