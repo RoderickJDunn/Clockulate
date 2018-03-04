@@ -508,7 +508,7 @@ class AlarmDetail extends Component {
 
         let editTasksBtn;
         if (!this.state.isEditingTasks) {
-            editTasksBtn = <EntypoIcon name="edit" size={17} color="#7a7677" />;
+            editTasksBtn = <EntypoIcon name="edit" size={20} color="#7a7677" />;
         } else {
             editTasksBtn = <Text style={{ color: "blue" }}>DONE</Text>;
         }
@@ -656,18 +656,27 @@ class AlarmDetail extends Component {
                         {touchableBackdrop}
                         <View style={[styles.taskListContainer]}>
                             <View style={styles.taskListHeader}>
+                                <TouchableOpacity
+                                    style={{
+                                        alignSelf: "center"
+                                    }}
+                                    onPress={this._onPressEditTasks.bind(this)}
+                                    /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
+                                >
+                                    {editTasksBtn}
+                                </TouchableOpacity>
                                 <View
                                     style={{
-                                        position: "absolute",
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
                                         justifyContent: "center",
                                         alignItems: "center"
                                     }}
                                 >
-                                    <Text style={[TextStyle.labelText]}>
+                                    <Text
+                                        style={[
+                                            TextStyle.labelText,
+                                            { fontSize: 14 }
+                                        ]}
+                                    >
                                         TASKS
                                     </Text>
                                 </View>
