@@ -118,7 +118,7 @@ class TaskItem extends React.PureComponent {
                 ref={interactableRef}
                 style={[TaskListStyle.taskRow]}
                 horizontalOnly={true}
-                snapPoints={[{ x: 0, id: "closed" }, { x: -85, id: "active" }]}
+                snapPoints={[{ x: 0, id: "closed" }, { x: -90, id: "active" }]}
                 dragWithSpring={{ tension: 500, damping: 0.5 }}
                 animatedNativeDriver={true}
                 onSnap={e => {
@@ -141,9 +141,7 @@ class TaskItem extends React.PureComponent {
                         ellipsizeMode="tail"
                         selectable={false}
                     >
-                        {this.props.data.task.name +
-                            " -- " +
-                            this.props.data.order}
+                        {this.props.data.task.name}
                     </Text>
                     <DurationText
                         duration={duration}

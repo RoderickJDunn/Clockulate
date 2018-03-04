@@ -4,8 +4,10 @@
 
 "use strict";
 
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
 import Colors from "./colors";
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
 export const ListStyle = StyleSheet.create({
     container: {
         flex: 1,
@@ -25,7 +27,7 @@ export const AlarmListStyle = StyleSheet.create({
         flexDirection: "row",
         borderBottomColor: "#FFFFFF",
         borderBottomWidth: 1,
-        width: 480
+        width: SCREEN_WIDTH + 100
     },
     toggleButton: {
         flex: 2
@@ -61,11 +63,9 @@ export const TaskListStyle = StyleSheet.create({
         flexDirection: "row",
         paddingTop: 10,
         paddingBottom: 10,
-        width: 440,
+        width: SCREEN_WIDTH + 90 - 20, // 440
         height: 55,
         alignContent: "stretch",
-        borderBottomColor: "#acacac",
-        borderBottomWidth: 1,
         alignItems: "center",
         backgroundColor: "#dbd6dd",
         justifyContent: "space-between"
@@ -81,15 +81,15 @@ export const TaskListStyle = StyleSheet.create({
 
 export const TaskItemStyle = StyleSheet.create({
     taskInfoWrap: {
-        flex: 0.8,
         flexDirection: "row",
         paddingTop: 10,
         paddingBottom: 10,
-        width: 480,
+        paddingRight: 10,
+        width: SCREEN_WIDTH - 20 + 10, // SIDE_PADDING = 10 * 2.  PAD_DURATION_DELETE = 5
         height: 55,
         alignContent: "stretch",
         borderBottomColor: "#acacac",
-        borderBottomWidth: 1,
+        borderBottomWidth: 0.8,
         alignItems: "center",
         backgroundColor: "#dbd6dd",
         justifyContent: "space-between"
@@ -110,6 +110,7 @@ export const TaskItemStyle = StyleSheet.create({
     deleteBtn: {
         position: "absolute",
         backgroundColor: Colors.deleteBtnRed,
+        marginLeft: 20,
         right: 0,
         width: 80,
         height: 55,
