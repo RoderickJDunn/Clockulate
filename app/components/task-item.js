@@ -11,6 +11,7 @@ import {
     TouchableWithoutFeedback
 } from "react-native";
 import Interactable from "react-native-interactable";
+import EntypoIcon from "react-native-vector-icons/Entypo";
 
 import DurationText from "./duration-text";
 // import CheckBox from "react-native-check-box";
@@ -33,10 +34,10 @@ class TaskItem extends React.PureComponent {
 
     _onPress = () => {
         console.debug("TaskItem: onPress");
-        console.debug("TaskItem: onPress");
         // console.debug(this.props.data);
-
-        this.props.onPressItem(this.props.data);
+        if (!this.props.disabled) {
+            this.props.onPressItem(this.props.data);
+        }
     };
 
     _onPressDelete = () => {
@@ -50,6 +51,7 @@ class TaskItem extends React.PureComponent {
     };
 
     render() {
+        console.debug("render task-item");
         // console.debug("render task-item", this.props);
         let duration = this.props.data.duration
             ? this.props.data.duration
@@ -57,14 +59,14 @@ class TaskItem extends React.PureComponent {
 
         let interactableRef = el => (this.interactiveRef = el);
 
-        console.log(
-            "Checking whether to setTimeout. close : " + this.props.closed
-        );
+        // console.log(
+        //     "Checking whether to setTimeout. close : " + this.props.closed
+        // );
 
         let touchableBackdrop = null;
         if (this.props.closed == true) {
             setTimeout(() => {
-                console.log("Timeout closing task delete view...");
+                // console.log("Timeout closing task delete view...");
                 this.interactiveRef.snapTo({ index: 0 });
             }, 0);
         }
@@ -81,6 +83,36 @@ class TaskItem extends React.PureComponent {
                 />
             );
         }
+
+        let leftBtn;
+        if (this.props.isEditingTasks) {
+            leftBtn = (
+                <EntypoIcon
+                    name="dots-three-horizontal"
+                    size={17}
+                    color="#7a7677"
+                />
+            );
+        } else {
+            leftBtn = (
+                <CheckBox
+                    onPress={() => this._onTapCheckBox(this.props.data)}
+                    checked={this.props.data.enabled}
+                    style={{
+                        marginLeft: -7,
+                        paddingTop: 1,
+                        backgroundColor: Colors.brandLightPurple,
+                        borderColor: "transparent"
+                    }}
+                    hitSlop={{
+                        top: 15,
+                        bottom: 15,
+                        left: 5,
+                        right: 15
+                    }}
+                />
+            );
+        }
         return (
             <Interactable.View
                 ref={interactableRef}
@@ -90,32 +122,16 @@ class TaskItem extends React.PureComponent {
                 dragWithSpring={{ tension: 500, damping: 0.5 }}
                 animatedNativeDriver={true}
                 onSnap={e => {
-                    console.log("Snapping");
+                    // console.log("Snapping");
                     this.props.onSnapTask(e.nativeEvent.id);
                 }}
             >
                 <TouchableOpacity
                     style={TaskItemStyle.taskInfoWrap}
-                    onPress={this._onPress}
+                    onPress={this._onPress.bind(this)}
+                    {...this.props.sortHandlers}
                 >
-                    <View style={TaskItemStyle.checkbox}>
-                        <CheckBox
-                            onPress={() => this._onTapCheckBox(this.props.data)}
-                            checked={this.props.data.enabled}
-                            style={{
-                                marginLeft: -7,
-                                paddingTop: 1,
-                                backgroundColor: Colors.brandLightPurple,
-                                borderColor: "transparent"
-                            }}
-                            hitSlop={{
-                                top: 15,
-                                bottom: 15,
-                                left: 5,
-                                right: 15
-                            }}
-                        />
-                    </View>
+                    <View style={TaskItemStyle.checkbox}>{leftBtn}</View>
                     <Text
                         style={[
                             TaskListStyle.allChildren,
@@ -123,9 +139,11 @@ class TaskItem extends React.PureComponent {
                         ]}
                         numberOfLines={2}
                         ellipsizeMode="tail"
-                        {...this.props} // the '...' is JavaScript way to expand variable # of args
+                        selectable={false}
                     >
-                        {this.props.data.task.name}
+                        {this.props.data.task.name +
+                            " -- " +
+                            this.props.data.order}
                     </Text>
                     <DurationText
                         duration={duration}

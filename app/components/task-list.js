@@ -4,6 +4,8 @@
 
 import React, { Component } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
+import SortableListView from "react-native-sortable-listview";
+
 import TaskItem from "./task-item";
 import TouchableBackdrop from "../components/touchable-backdrop";
 
@@ -16,14 +18,18 @@ class TaskList extends React.PureComponent {
 
     _keyExtractor = (item, index) => item.id;
 
-    _renderItem = ({ item, index }) => {
-        let { onSnapTask, ...other } = this.props;
-        console.log("other", other);
-        console.log("onSnapTask", onSnapTask);
-        console.log("index", index);
+    _renderItem = (item, sectionId, rowID) => {
+        // console.log("_renderItem");
+
+        let { onSnapTask, sortHandlers, ...other } = this.props;
+        // console.log("onSnapTask prop", onSnapTask);
+        // console.log("other props", other);
+        // console.log("sectionId", sectionId);
+        // console.log("rowID", rowID);
+        // console.log("item", item);
         onSnapTask.bind(item);
         let closed = true;
-        if (this.props.activeTask == index) {
+        if (this.props.activeTask == rowID) {
             closed = false;
         }
         return (
@@ -31,22 +37,25 @@ class TaskList extends React.PureComponent {
                 {...other} // the props expanded here include 'onPressItem' callback, and the onPressItemCheckBox callback
                 data={item}
                 id={item.id}
-                onSnapTask={this._onSnapTask.bind(this, item, index)}
+                onSnapTask={this._onSnapTask.bind(this, item, rowID)}
                 closed={closed}
+                disabled={this.props.isEditingTasks}
+                {...sortHandlers}
             />
         );
     };
 
     _onSnapTask(item, index, rowState) {
-        console.log("onSnapTask in TaskList");
-        console.log("item", item);
-        console.log("index", index);
-        console.log("rowState", rowState);
+        // console.log("onSnapTask in TaskList");
+        // console.log("item", item);
+        // console.log("index", index);
+        // console.log("rowState", rowState);
         this.props.onSnapTask(item, index, rowState);
     }
 
     render() {
-        console.debug("Render TaskList: props: ", this.props);
+        console.debug("Render TaskList");
+        console.debug("props: ", this.props);
         let tasksArr = [];
         for (let id in this.props.data) {
             tasksArr.push(this.props.data[id]);
@@ -72,10 +81,25 @@ class TaskList extends React.PureComponent {
         // console.log("taskArr", tasksArr);
         return (
             <View style={listStyle.container}>
-                <FlatList
+                <SortableListView
                     data={tasksArr}
-                    renderItem={this._renderItem.bind(this)}
+                    renderRow={(item, sectionId, rowID) =>
+                        this._renderItem(item, sectionId, rowID)
+                    }
                     keyExtractor={this._keyExtractor}
+                    disableSorting={!this.props.isEditingTasks}
+                    moveOnPressIn={this.props.isEditingTasks}
+                    onRowMoved={moveInfo => {
+                        console.log("moveInfo.from", moveInfo.from);
+                        console.log("moveInfo.to", moveInfo.to);
+                        console.log("row", moveInfo.row);
+                        this.props.reorderTasks(
+                            tasksArr,
+                            moveInfo.row.data.id,
+                            moveInfo.from,
+                            moveInfo.to
+                        );
+                    }}
                 />
                 {touchableBackdrop}
             </View>
@@ -85,6 +109,7 @@ class TaskList extends React.PureComponent {
 
 const listStyle = StyleSheet.create({
     container: {
+        flex: 0.9,
         backgroundColor: "transparent",
         flexDirection: "row"
     },

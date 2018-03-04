@@ -66,12 +66,9 @@ class AlarmDetail extends Component {
                 this.state = {
                     alarm: realm.create("Alarm", new AlarmModel(alarmsCount)),
                     isDatePickerVisible: false,
-                    path: `M74.5,218.5 C114.817,218.5 147.5,185.817 147.5,145.5
-                    C147.5,65.419 114.369,0.5 73.5,0.5 C33.183,0.5 0.5,
-                    65.419 0.5,145.5 C0.5,185.817 33.183,218.5 73.5,218.5 Z`,
-                    segmentCount: 50,
                     animationDuration: 3000,
-                    activeTask: null
+                    activeTask: null, // holds the task ID of the task currently showing DELETE button. Otherwise null.
+                    isEditingTasks: false // indicates whether tasks are currently moveable.
                 };
                 // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
@@ -80,14 +77,9 @@ class AlarmDetail extends Component {
             this.state = {
                 alarm: params.alarm,
                 isDatePickerVisible: false,
-                // path: `M 156 155 Q 352 195 312 3`,
-                path: `M 180 125 Q 346 161 313 7 L 330 17 L 301 23 L 313 7`,
-                // path: `M74.5,218.5 C114.817,218.5 147.5,185.817 147.5,145.5
-                // C147.5,65.419 114.369,0.5 73.5,0.5 C33.183,0.5 0.5,
-                // 65.419 0.5,145.5 C0.5,185.817 33.183,218.5 73.5,218.5 Z`,
-                segmentCount: 50,
                 animationDuration: 3000,
-                activeTask: null
+                activeTask: null,
+                isEditingTasks: false
             };
         }
 
@@ -371,17 +363,43 @@ class AlarmDetail extends Component {
     }
 
     _onSnapTask(item, index, rowState) {
-        console.log("Snapping task");
-        console.log("1. ", item);
-        console.log("2. ", index);
-        console.log("3. ", rowState);
+        // console.log("Snapping task");
+        // console.log("1. ", item);
+        // console.log("2. ", index);
+        // console.log("3. ", rowState);
         if (rowState == "active") {
             this.setState({ activeTask: index });
         }
     }
 
+    _onPressEditTasks() {
+        console.log("_onPressEditTasks");
+        let editingTasks = !this.state.isEditingTasks;
+        this.setState({ isEditingTasks: editingTasks });
+    }
+
     _closeTaskRows() {
         this.setState({ activeTask: null });
+    }
+
+    _onReorderTasks(aTasks, aTaskId, from, to) {
+        console.log("aTasks", aTasks);
+        aTasks = aTasks.sort((t1, t2) => t1.order > t2.order);
+        realm.write(() => {
+            aTasks[from].order = to;
+
+            if (from < to) {
+                for (let i = from + 1; i <= to; i++) {
+                    aTasks[i].order--;
+                }
+            } else {
+                for (let i = from - 1; i >= to; i--) {
+                    aTasks[i].order++;
+                }
+            }
+        });
+
+        this.setState(this.state);
     }
 
     render() {
@@ -406,18 +424,8 @@ class AlarmDetail extends Component {
                 ? this.state.alarm.tasks.sorted("order")
                 : this.state.alarm.tasks;
 
-        const { path, segmentCount } = this.state;
         let taskArea = null;
         if (sortedTasks.length == 0) {
-            // taskArea = <TaskPlaceHolder />;
-            // taskArea = (
-            //     <AnimatedView
-            //         ref={this._setAnimatedViewRef}
-            //         path={path}
-            //         segmentCount={segmentCount}
-            //         animationDuration={this.state.animationDuration}
-            //     />
-            // );
             taskArea = (
                 <TouchableOpacity
                     style={{
@@ -456,9 +464,15 @@ class AlarmDetail extends Component {
                     data={sortedTasks}
                     activeTask={this.state.activeTask}
                     closeTaskRows={this._closeTaskRows.bind(this)}
+                    isEditingTasks={this.state.isEditingTasks}
+                    reorderTasks={this._onReorderTasks.bind(this)}
                 />
             );
         }
+
+        let disableDrag = this.state.isEditingTasks;
+
+        console.log("disableDrag", disableDrag);
 
         let wakeUpTime;
         // console.log("this.state.alarm.mode", this.state.alarm.mode);
@@ -492,6 +506,12 @@ class AlarmDetail extends Component {
             );
         }
 
+        let editTasksBtn;
+        if (!this.state.isEditingTasks) {
+            editTasksBtn = <EntypoIcon name="edit" size={17} color="#7a7677" />;
+        } else {
+            editTasksBtn = <Text style={{ color: "blue" }}>DONE</Text>;
+        }
         return (
             <View style={styles.screenContainer}>
                 {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
@@ -585,6 +605,7 @@ class AlarmDetail extends Component {
                     animatedValueY={this._clockTransform}
                     onSnap={this.onSnap.bind(this)}
                     initialPosition={{ y: initInterPosition }}
+                    dragEnabled={!disableDrag}
                 >
                     <TouchableOpacity
                         disabled={
@@ -635,23 +656,39 @@ class AlarmDetail extends Component {
                         {touchableBackdrop}
                         <View style={[styles.taskListContainer]}>
                             <View style={styles.taskListHeader}>
-                                <Text
-                                    style={[
-                                        TextStyle.labelText,
-                                        { alignSelf: "center" }
-                                    ]}
+                                <View
+                                    style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        justifyContent: "center",
+                                        alignItems: "center"
+                                    }}
                                 >
-                                    TASKS
-                                </Text>
+                                    <Text style={[TextStyle.labelText]}>
+                                        TASKS
+                                    </Text>
+                                </View>
                                 <TouchableOpacity
-                                    style={{ alignSelf: "flex-start" }}
+                                    style={{ alignSelf: "center" }}
+                                    onPress={this._onPressEditTasks.bind(this)}
+                                    /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
+                                >
+                                    {editTasksBtn}
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                        alignSelf: "center"
+                                    }}
                                     onPress={this.onPressAddTask.bind(this)}
                                     /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
                                 >
                                     <EntypoIcon
                                         name="add-to-list"
                                         size={30}
-                                        color={Colors.brandLightPurple}
+                                        color="#7a7677"
                                     />
                                 </TouchableOpacity>
                             </View>
@@ -746,12 +783,12 @@ const styles = StyleSheet.create({
         padding: 10,
         paddingTop: 10,
         alignSelf: "stretch"
-        // backgroundColor: "#dbd6dd"
     },
     taskListHeader: {
+        flex: 0.1,
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center"
+        paddingBottom: 5
     },
 
     nonClockBgImage: {
@@ -759,8 +796,6 @@ const styles = StyleSheet.create({
         width: 450,
         height: 500,
         top: -15
-        // borderColor: "red",
-        // borderWidth: 2
     },
     clockBackgroundNotImage: {
         justifyContent: "center",
