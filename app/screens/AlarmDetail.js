@@ -465,14 +465,12 @@ class AlarmDetail extends Component {
                     activeTask={this.state.activeTask}
                     closeTaskRows={this._closeTaskRows.bind(this)}
                     isEditingTasks={this.state.isEditingTasks}
-                    reorderTasks={this._onReorderTasks.bind(this)}
+                    onReorderTasks={this._onReorderTasks.bind(this)}
                 />
             );
         }
 
         let disableDrag = this.state.isEditingTasks;
-
-        console.log("disableDrag", disableDrag);
 
         let wakeUpTime;
         // console.log("this.state.alarm.mode", this.state.alarm.mode);
@@ -497,9 +495,9 @@ class AlarmDetail extends Component {
                         height: this.height
                     }}
                     onPress={() => {
-                        console.log(
-                            "Pressed touchable without feedback....~~~~~~!!!!"
-                        );
+                        // console.log(
+                        //     "Pressed touchable without feedback"
+                        // );
                         this._closeTaskRows();
                     }}
                 />

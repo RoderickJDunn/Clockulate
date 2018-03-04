@@ -93,7 +93,7 @@ class TaskList extends React.PureComponent {
                         console.log("moveInfo.from", moveInfo.from);
                         console.log("moveInfo.to", moveInfo.to);
                         console.log("row", moveInfo.row);
-                        this.props.reorderTasks(
+                        this.props.onReorderTasks(
                             tasksArr,
                             moveInfo.row.data.id,
                             moveInfo.from,
