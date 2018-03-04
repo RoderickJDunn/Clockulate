@@ -635,6 +635,9 @@ class AlarmDetail extends Component {
                                 separation={2}
                                 style={{ fontSize: 22 }}
                                 flex={1}
+                                autoResize={false}
+                                numberOfLines={1}
+                                multiline={false}
                             />
                             <LabeledTimeInput
                                 labelText="ARRIVAL TIME"
@@ -680,13 +683,6 @@ class AlarmDetail extends Component {
                                         TASKS
                                     </Text>
                                 </View>
-                                <TouchableOpacity
-                                    style={{ alignSelf: "center" }}
-                                    onPress={this._onPressEditTasks.bind(this)}
-                                    /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
-                                >
-                                    {editTasksBtn}
-                                </TouchableOpacity>
                                 <TouchableOpacity
                                     style={{
                                         alignSelf: "center"

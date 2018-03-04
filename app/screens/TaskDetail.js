@@ -125,8 +125,8 @@ class TaskDetail extends Component {
                     newTask.defaultDuration = prevAlarmTask.duration
                         ? prevAlarmTask.duration
                         : prevAlarmTask.task.defaultDuration
-                          ? prevAlarmTask.task.defaultDuration
-                          : 600;
+                            ? prevAlarmTask.task.defaultDuration
+                            : 600;
 
                     alarmTask = new AlarmTaskModel(newTask, orderOfAlmTask);
 
@@ -188,6 +188,7 @@ class TaskDetail extends Component {
                     fieldText={this.state.alarmTask.task.name}
                     handleTextInput={this._onTaskNameChange.bind(this)}
                     separation={3}
+                    autoResize={"editing"}
                 />
                 <View style={{ height: 13 }} />
                 <LabeledDurationInput
