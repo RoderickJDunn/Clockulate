@@ -31,7 +31,6 @@ class LabeledDurationInput extends Component {
     };
 
     componentWillUnmount() {
-        console.debug("AlarmDetail componentWillUnmount");
         Picker.hide();
     }
 

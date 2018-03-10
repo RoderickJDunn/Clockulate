@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     animatedView: {
         flex: 1,
         // top: -600,
-        width: window.width
+        width: window.width // FIXME: this is not imported. Seems to not be used though.
     },
     fieldsContainer: {
         flex: 3,

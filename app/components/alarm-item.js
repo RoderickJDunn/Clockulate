@@ -161,7 +161,7 @@ class AlarmItem extends React.PureComponent {
                                 {" " + amPmWakeUpTime}
                             </Text>
                         </Text>
-                        <Text style={{ color: textColor }}>
+                        <Text style={{ color: textColor }} numberOfLines={2}>
                             {this.props.alarm.label}
                         </Text>
                         <Text
