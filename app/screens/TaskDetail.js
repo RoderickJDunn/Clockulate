@@ -9,7 +9,8 @@ import {
     StatusBar,
     TouchableOpacity,
     Text,
-    StyleSheet
+    StyleSheet,
+    Button
 } from "react-native";
 import { NavigationActions } from "react-navigation";
 
@@ -24,11 +25,24 @@ This screen allows user to edit details about a Task: Specifically, its Name, Du
  */
 class TaskDetail extends Component {
     static navigationOptions = ({ navigation }) => ({
-        title: "Edit Task"
+        title: "Edit Task",
+        headerStyle: {
+            backgroundColor: Colors.brandDarkGrey
+        },
+        headerTitleStyle: {
+            color: Colors.brandLightGrey
+        },
+        headerRight: (
+            <Button
+                title="Save"
+                onPress={() => navigation.state.params.handleSave()}
+            />
+        )
     });
 
     nameChanged = false;
     initialName = "";
+    currName = "";
     /*
     Receives data about the Task that was tapped on the previous screen
      */
@@ -36,6 +50,8 @@ class TaskDetail extends Component {
         super(props);
         // console.log("TaskDetail -- Props: ", props);
         const { params } = props.navigation.state; // same as: " const params = props.navigation.state.params "
+        console.log("nav params", params);
+
         if (!params || !params.hasOwnProperty("alarmTaskId")) {
             // We are creating a brand new task. Create a stub TaskAlarm object with default Task values
 
@@ -43,7 +59,8 @@ class TaskDetail extends Component {
             this.state = {
                 alarmTask: new AlarmTaskModel(task, params.order),
                 onSaveState: params.onSaveState, // called when a task is Saved or Deleted
-                newTask: true
+                newTask: true,
+                willNavigateBack: params.willNavigateBack
             };
             // console.log(this.state.alarmTask);
         } else {
@@ -67,19 +84,21 @@ class TaskDetail extends Component {
                     enabled: alarmTask.enabled,
                     order: alarmTask.order
                 },
-                onSaveState: params.onSaveState // called when a task is Saved or Deleted
+                onSaveState: params.onSaveState, // called when a task is Saved or Deleted
+                willNavigateBack: params.willNavigateBack
             };
         }
 
         this.initialName = this.state.alarmTask.task.name;
     }
 
-    componentDidMount() {
-        // console.debug("TaskDetail --- ComponentDidMount");
+    componentWillMount() {
+        console.debug("TaskDetail --- ComponentDidMount");
         // setParams updates the object 'navigation.state.params'
         // When this Screen is going to be rendered, any code in navigationOptions is run (ie: the code within
         // the onPress property of a Button (in headerRight)). This code in navigationOptions can have access to
         // the navigation object that we are updating here - so long as you pass in navigation to navigationOptions
+        console.log("Binding handleSave task");
         this.props.navigation.setParams({
             handleSave: this.handleSave.bind(this)
         });
@@ -90,15 +109,18 @@ class TaskDetail extends Component {
         // 1. Is this a newly created Task being saved for the first time? Or it a task that's been edited?
         // 2. Do we need to edit/create a new Task, or just a new AlarmTask? Depends on whether Task name was changed
 
-        // console.log("TaskDetail:handleSave: this.state", this.state);
+        console.log("TaskDetail:handleSave: this.state", this.state);
 
         // Check if newTask
         let alarmTask;
         let prevAlarmTask = this.state.alarmTask;
 
+        prevAlarmTask.task.name = this.currName; // update alarmTask name, based on current value of TextInput
+
         if (this.state.newTask) {
             // Create new Task and associated AlarmTask
             // console.log(this.state);
+            alert("Creating new task");
             prevAlarmTask = this.state.alarmTask;
             realm.write(() => {
                 // NOTE: even though we need both a new Task and AlarmTask, we just need to create the AlarmTask,
@@ -111,7 +133,7 @@ class TaskDetail extends Component {
             let { navigation } = this.props;
             if (this.nameChanged) {
                 // create a new Task and associated AlarmTask.
-                // alert("Name was changed, saving as new Task and AlarmTask");
+                alert("Name was changed, saving as new Task and AlarmTask");
                 realm.write(() => {
                     let idToDelete = prevAlarmTask.id; // get Id of AlarmTask to delete
                     let orderOfAlmTask = prevAlarmTask.order; // store the Order of AlarmTask to be deleted, to apply to the new one
@@ -134,7 +156,7 @@ class TaskDetail extends Component {
                 });
             } else {
                 // create/update the AlarmTask with the new duration
-                // console.log("Name NOT changed, updating existing AlarmTask");
+                alert("Name NOT changed, updating existing AlarmTask");
                 realm.write(() => {
                     // NOTE: Here we are updating the AlarmTask in the DB by passing 'true' as the 3rd param of create()
                     //        This param specifies that it should be an update operation, rather than a creation.
@@ -145,10 +167,13 @@ class TaskDetail extends Component {
         }
 
         this.state.onSaveState(alarmTask);
+        this.state.willNavigateBack();
         this.props.navigation.dispatch(NavigationActions.back());
     }
 
     _onDeleteTask() {
+        console.log("TaskDetail: _onDeleteTask");
+        console.log("this.state.alarmTask", this.state.alarmTask);
         let alarmTaskRlmObject = realm.objectForPrimaryKey(
             "AlarmTask",
             this.state.alarmTask.id
@@ -159,13 +184,15 @@ class TaskDetail extends Component {
             });
         }
         this.state.onSaveState();
+        this.state.willNavigateBack();
         this.props.navigation.dispatch(NavigationActions.back());
     }
 
     _onTaskNameChange(text) {
-        const updatedAlmTask = this.state.alarmTask;
-        updatedAlmTask.task.name = text;
-        this.setState({ alarmTask: updatedAlmTask });
+        this.currName = text;
+        // const updatedAlmTask = this.state.alarmTask;
+        // updatedAlmTask.task.name = text;
+        // this.setState({ alarmTask: updatedAlmTask });
         if (this.initialName !== text) {
             this.nameChanged = true;
         }
@@ -179,7 +206,8 @@ class TaskDetail extends Component {
     }
 
     render() {
-        // console.log("this.state", this.state);
+        console.log("Render TaskDetail.");
+        console.log("this.state", this.state);
         return (
             <View style={ScreenStyles.TaskScreen}>
                 <LabeledInput

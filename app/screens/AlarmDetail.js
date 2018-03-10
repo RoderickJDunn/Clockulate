@@ -13,7 +13,8 @@ import {
     ImageBackground,
     Image,
     Animated,
-    TouchableWithoutFeedback
+    TouchableWithoutFeedback,
+    Keyboard
 } from "react-native";
 import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -36,6 +37,9 @@ import ArrowView from "../components/arrow-view-native";
 import TouchableBackdrop from "../components/touchable-backdrop";
 // TODO: Remove after we're done choosing fonts
 import { fontPreview } from "../styles/text.js";
+import { scale } from "../util/font-scale";
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 class AlarmDetail extends Component {
     static navigationOptions = () => ({
         title: "Edit Alarm"
@@ -68,7 +72,9 @@ class AlarmDetail extends Component {
                     isDatePickerVisible: false,
                     animationDuration: 3000,
                     activeTask: null, // holds the task ID of the task currently showing DELETE button. Otherwise null.
-                    isEditingTasks: false // indicates whether tasks are currently moveable.
+                    isEditingTasks: false, // indicates whether tasks are currently moveable.
+                    isEditingLabel: false, // indicates whether Label is being edited. Need to move Input when keyboard shows.
+                    keyboardHeight: null
                 };
                 // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
@@ -79,7 +85,9 @@ class AlarmDetail extends Component {
                 isDatePickerVisible: false,
                 animationDuration: 3000,
                 activeTask: null,
-                isEditingTasks: false
+                isEditingTasks: false,
+                isEditingLabel: false,
+                keyboardHeight: null
             };
         }
 
@@ -109,6 +117,32 @@ class AlarmDetail extends Component {
     //     // }, 1000);
     // }
 
+    componentWillMount() {
+        console.log("AlarmDetail: componentWillMount");
+        this.addKeyboardListeners();
+    }
+
+    componentWillUnmount() {
+        console.debug("AlarmDetail: componentWillUnmount");
+        this.removeKeyboardListeners();
+    }
+
+    addKeyboardListeners() {
+        this.keyboardWillShowSub = Keyboard.addListener(
+            "keyboardWillShow",
+            this.keyboardWillShow.bind(this)
+        );
+        this.keyboardWillHideSub = Keyboard.addListener(
+            "keyboardWillHide",
+            this.keyboardWillHide.bind(this)
+        );
+    }
+
+    removeKeyboardListeners() {
+        this.keyboardWillShowSub.remove();
+        this.keyboardWillHideSub.remove();
+    }
+
     componentDidMount() {
         // console.debug("AlarmDetail --- ComponentDidMount");
         this.props.navigation.setParams({
@@ -119,6 +153,26 @@ class AlarmDetail extends Component {
     _setAnimatedViewRef(ref) {
         this._animatedView = ref;
     }
+
+    keyboardWillShow = event => {
+        console.log("keyboardWillShow -------");
+        this.setState({ keyboardHeight: event.endCoordinates.height + 10 });
+        if (this.state.alarm.mode == "normal") {
+            setTimeout(() => {
+                this.interactiveRef.snapTo({ index: 2 }); // snap to "keyboard" snapPoint.
+            }, 0);
+        }
+    };
+
+    keyboardWillHide = event => {
+        console.log("keyboardWillHide");
+        let { mode } = this.state.alarm;
+        let modeInt = mode == "autocalc" ? 0 : 1;
+        setTimeout(() => {
+            this.interactiveRef.snapTo({ index: modeInt });
+            this.setState({ keyboardHeight: null, isEditingLabel: false });
+        }, 0);
+    };
 
     /*
     NOTE: This method DOES get called when you push 'Back' do go back to parent screen. However, no lifecycle
@@ -173,11 +227,21 @@ class AlarmDetail extends Component {
         setTimeout(this.props.navigation.state.params.reloadAlarms, 0);
     }
 
+    _willShowNavScreen() {
+        this.addKeyboardListeners();
+    }
+
+    _willLeaveNavScreen() {
+        this.removeKeyboardListeners();
+    }
+
     onPressAddTask() {
         if (this.state.activeTask == null) {
             let nextTaskPosition = this.state.alarm.tasks.length;
+            this._willLeaveNavScreen();
             this.props.navigation.navigate("TaskDetail", {
                 onSaveState: this.onTaskListChanged.bind(this),
+                willNavigateBack: this._willShowNavScreen.bind(this),
                 order: nextTaskPosition
             });
         } else {
@@ -212,9 +276,11 @@ class AlarmDetail extends Component {
         if (this.state.activeTask == null) {
             // Need to use a workaround to delete the object, otherwise app will crash due to Realm bug when navigating after deleting passed Object:
             // Pass TaskAlarm ID instead of TaskAlarm object.
+            this._willLeaveNavScreen();
             const params = {
                 alarmTaskId: task.id,
-                onSaveState: this.onTaskListChanged.bind(this)
+                onSaveState: this.onTaskListChanged.bind(this),
+                willNavigateBack: this._willShowNavScreen.bind(this)
             };
 
             this.props.navigation.navigate("TaskDetail", params);
@@ -240,17 +306,28 @@ class AlarmDetail extends Component {
     }
     /***************************************************/
 
-    onChangeLabel = text => {
-        console.log("Label text changed: ", text);
+    // onChangeLabel = text => {
+    //     console.log("Label text changed: ", text);
+    //     let tempAlarm = this.state.alarm;
+    //     realm.write(() => {
+    //         tempAlarm.label = text;
+    //     });
+    //     this.setState({ alarm: tempAlarm });
+    // };
+
+    onLabelInputBlur = e => {
+        console.log("Label textInput blurred: ");
         let tempAlarm = this.state.alarm;
         realm.write(() => {
-            tempAlarm.label = text;
+            tempAlarm.label = e.nativeEvent.text;
         });
         this.setState({ alarm: tempAlarm });
     };
 
-    onLabelInputBlur = () => {
-        console.log("Label text lost focus: ");
+    onLabelInputFocus = () => {
+        if (this.state.alarm.mode == "normal") {
+            this.setState({ isEditingLabel: true });
+        }
     };
 
     onChangeTaskEnabled = (taskToUpdate, enabled) => {
@@ -270,13 +347,16 @@ class AlarmDetail extends Component {
     };
 
     onSnap = event => {
+        console.log("onSnap");
         let alarmState = this.state.alarm;
         let snapId = event.nativeEvent.id;
-        if (snapId != alarmState.mode) {
+        // console.log("snapId", snapId);
+        // console.log("alarmState", alarmState);
+        if (snapId != alarmState.mode && snapId != "keyboard") {
             realm.write(() => {
                 if (event.nativeEvent.id == "normal") {
                     alarmState.mode = "normal";
-                } else {
+                } else if (event.nativeEvent.id == "autocalc") {
                     alarmState.mode = "autocalc";
                 }
                 this.setState({ alarm: alarmState });
@@ -404,7 +484,7 @@ class AlarmDetail extends Component {
 
     render() {
         console.debug("AlarmDetail render - ");
-        console.debug("AlarmDetail render - this.state: ", this.state);
+        // console.debug("AlarmDetail render - this.state: ", this.state);
         let imageHeight = this.height;
         let initInterPosition, initClockPosition, initHandlePosition;
 
@@ -510,9 +590,20 @@ class AlarmDetail extends Component {
         } else {
             editTasksBtn = <Text style={{ color: "blue" }}>DONE</Text>;
         }
+
+        let snapPoints = [
+            { y: 0, id: "autocalc" },
+            { y: this.height * 0.8, id: "normal" }
+        ];
+
+        if (this.state.isEditingLabel && this.state.keyboardHeight) {
+            snapPoints.push({ y: this.state.keyboardHeight, id: "keyboard" });
+        }
+
         return (
             <View style={styles.screenContainer}>
                 {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
+                {/*This is the actual Star image. It takes up the whole screen. */}
                 <Animated.Image
                     style={[
                         styles.clockBackground,
@@ -522,8 +613,8 @@ class AlarmDetail extends Component {
                                 {
                                     translateY: this._clockTransform.interpolate(
                                         {
-                                            inputRange: [0, 450],
-                                            outputRange: [0, 15]
+                                            inputRange: [0, this.height],
+                                            outputRange: [0, this.height / 30]
                                         }
                                     )
                                 }
@@ -533,6 +624,7 @@ class AlarmDetail extends Component {
                     source={require("../img/ClockBgV2.png")}
                     /* resizeMode="center" */
                 />
+                {/* This is the animated wrapper for the CLOCK display, and the label shown in Normal */}
                 <Animated.View
                     style={[
                         styles.clockContainer,
@@ -548,8 +640,8 @@ class AlarmDetail extends Component {
                                 {
                                     translateY: this._clockTransform.interpolate(
                                         {
-                                            inputRange: [0, 450],
-                                            outputRange: [0, 210]
+                                            inputRange: [0, this.height],
+                                            outputRange: [-20, this.height / 3]
                                         }
                                     )
                                 }
@@ -560,7 +652,8 @@ class AlarmDetail extends Component {
                     <TouchableOpacity
                         onPress={this.onPressClock.bind(this, interactableRef)}
                         style={{
-                            alignSelf: "stretch"
+                            alignSelf: "stretch",
+                            alignContent: "center"
                         }}
                     >
                         <Text style={[styles.timeText]}>
@@ -575,31 +668,37 @@ class AlarmDetail extends Component {
                         fieldText={this.state.alarm.label}
                         handleTextInput={this.onChangeLabel}
                         onTextInputBlur={this.onLabelInputBlur}
+                        onTextInputFocus={this.onLabelInputFocus}
                         separation={2}
                         style={{
-                            marginTop: 60,
+                            position: "absolute",
+                            top: this.height / 10,
+                            width: this.width,
                             fontSize: 16,
                             color: "#d5d5d5",
                             textAlign: "center",
                             alignSelf: "stretch",
-                            opacity: this._clockTransform.interpolate({
-                                inputRange: [200, 450],
-                                outputRange: [0, 1]
-                            })
+                            paddingLeft: 20,
+                            paddingRight: 20
                         }}
-                        flex={1}
+                        multiline={false}
+                        numberOfLines={10}
+                        autoResize={true}
                     />
                     {/* <Text style={{ alignSelf: "flex-end" }}>My profile</Text> */}
                 </Animated.View>
                 {touchableBackdrop}
                 <Interactable.View
                     ref={interactableRef}
-                    style={[styles.animatedView, { width: this.width }]}
-                    verticalOnly={true}
-                    snapPoints={[
-                        { y: 0, id: "autocalc" },
-                        { y: 460, id: "normal" }
+                    style={[
+                        styles.animatedView,
+                        {
+                            width: this.width
+                            // backgroundColor: "#456729"
+                        }
                     ]}
+                    verticalOnly={true}
+                    snapPoints={snapPoints}
                     animatedValueY={this._clockTransform}
                     onSnap={this.onSnap.bind(this)}
                     initialPosition={{ y: initInterPosition }}
@@ -610,9 +709,9 @@ class AlarmDetail extends Component {
                             this.state.alarm.mode == "normal" ? true : false
                         }
                         onPress={this.onPressClock.bind(this, interactableRef)}
-                        style={[styles.interactableHandle]}
+                        style={[styles.interactableHandle, { flex: 0.3 }]}
                     />
-                    <View style={[styles.nonClockWrapper]}>
+                    <View style={[styles.nonClockWrapper, { flex: 0.7 }]}>
                         <Image
                             style={[
                                 styles.nonClockBgImage,
@@ -711,8 +810,11 @@ class AlarmDetail extends Component {
                                 {
                                     translateY: this._clockTransform.interpolate(
                                         {
-                                            inputRange: [0, 450],
-                                            outputRange: [160, 120]
+                                            inputRange: [0, this.height],
+                                            outputRange: [
+                                                this.height * 0.24,
+                                                this.height * 0.02
+                                            ]
                                         }
                                     )
                                 }
@@ -739,7 +841,6 @@ class AlarmDetail extends Component {
 const styles = StyleSheet.create({
     screenContainer: {
         flex: 1,
-        justifyContent: "center",
         alignItems: "center",
         alignContent: "stretch",
         backgroundColor: Colors.backgroundGrey
@@ -749,8 +850,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         position: "absolute",
-        top: -40,
-        width: 450,
+        top: -40, // required for image parallax
+        width: SCREEN_WIDTH,
         height: 220
     },
     clockContainer: {
@@ -758,21 +859,21 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "transparent",
-        top: 20
+        height: SCREEN_HEIGHT * 0.3
+        // top: 20
     },
     interactableHandle: {
-        flex: 4,
         backgroundColor: "transparent"
+        // backgroundColor: "#0FF"
     },
     nonClockWrapper: {
-        flex: 11,
         alignItems: "stretch"
     },
     animatedView: {
-        flex: 1
+        flex: 0.85
     },
     fieldsContainer: {
-        flex: 3,
+        flex: 0.35,
         alignSelf: "stretch",
         alignItems: "flex-start",
         // backgroundColor: "yellow",
@@ -782,7 +883,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1
     },
     taskListContainer: {
-        flex: 8,
+        flex: 0.65,
         padding: 10,
         paddingTop: 10,
         alignSelf: "stretch"
@@ -796,8 +897,8 @@ const styles = StyleSheet.create({
 
     nonClockBgImage: {
         position: "absolute",
-        width: 450,
-        height: 500,
+        width: SCREEN_WIDTH,
+        height: SCREEN_HEIGHT,
         top: -15
     },
     clockBackgroundNotImage: {
@@ -805,13 +906,13 @@ const styles = StyleSheet.create({
         alignItems: "center",
         position: "absolute",
         top: -40,
-        width: 450,
+        width: SCREEN_WIDTH,
         height: 195,
         backgroundColor: "#220957"
     },
     timeText: {
         color: "#d5d5d5",
-        fontSize: 95,
+        fontSize: scale(85, 0.7),
         backgroundColor: "transparent",
         alignSelf: "center",
         fontFamily: "Baskerville-Bold"

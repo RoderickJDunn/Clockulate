@@ -14,7 +14,8 @@ class LabeledInput extends Component {
         // }
         this.state = {
             inputHeight: null,
-            isEditing: false
+            isEditing: false,
+            inputText: null
         };
     }
 
@@ -32,19 +33,28 @@ class LabeledInput extends Component {
         this.setState({ isEditing: false });
     }
 
+    _onChangeTextInput(text) {
+        this.props.handleTextInput(text);
+        this.setState({ inputText: text });
+    }
+
     render() {
-        let onBlur, height, labelBottomPadding, inputHeight, flex;
-        let multiline = false;
+        let onBlur, onFocus, height, labelBottomPadding, flex;
+        let multiline = this.props.multiline;
+        let inputHeight = 0;
         // console.log(this.props.placeholder);
         if (this.props.onTextInputBlur) {
             onBlur = this.props.onTextInputBlur;
         }
-        if (this.props.height) {
-            height = this.props.height;
+
+        if (this.props.onTextInputFocus) {
+            onFocus = this.props.onTextInputFocus;
         }
 
-        console.log("LabeledInput -- this.state", this.state);
-        console.log("LabeledInput -- this.props", this.props);
+        height = this.props.height;
+
+        // console.log("LabeledInput -- this.state", this.state);
+        // console.log("LabeledInput -- this.props", this.props);
 
         let { autoResize } = this.props;
         if (
@@ -64,7 +74,10 @@ class LabeledInput extends Component {
             <View
                 style={[
                     styles.container,
-                    { height: height, flex: this.props.flex }
+                    {
+                        height: height,
+                        flex: this.props.flex
+                    }
                 ]}
             >
                 <Text
@@ -81,16 +94,22 @@ class LabeledInput extends Component {
                         styles.fieldText,
                         TextStyle.editableText,
                         this.props.style,
-                        { height: inputHeight + 10 }
+                        {
+                            height: inputHeight + 35
+                        }
                     ]}
                     placeholder={this.props.placeholder}
-                    value={this.props.fieldText}
-                    onChangeText={this.props.handleTextInput.bind(this)}
-                    onBlur={() => {
+                    value={this.state.inputText || this.props.fieldText}
+                    onChangeText={this._onChangeTextInput.bind(this)}
+                    onBlur={e => {
+                        console.log("TextInput blurred");
                         this._onBlur(this);
-                        if (onBlur != null) onBlur();
+                        if (onBlur != null) onBlur(e);
                     }}
-                    onFocus={this._onFocus.bind(this)}
+                    onFocus={() => {
+                        this._onFocus.bind(this);
+                        if (onFocus != null) onFocus();
+                    }}
                     blurOnSubmit={true}
                     onContentSizeChange={e =>
                         this.updateSize(e.nativeEvent.contentSize.height)
@@ -115,8 +134,7 @@ const styles = StyleSheet.create({
         backgroundColor: "transparent"
     },
     fieldText: {
-        fontSize: 25,
-        height: 30
+        fontSize: 25
     }
 });
 

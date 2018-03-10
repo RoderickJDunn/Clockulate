@@ -9,18 +9,16 @@ import SortableListView from "react-native-sortable-listview";
 import TaskItem from "./task-item";
 import TouchableBackdrop from "../components/touchable-backdrop";
 
-class TaskList extends React.PureComponent {
+class TaskList extends React.Component {
     // TODO: Comment the structure of Props passed in (we don't need a constructor since we are not keeping state in this component)
 
-    componentWillReceiveProps(e) {
-        // console.log("\ncomponentWillReceiveProps", e);
-    }
+    // componentWillReceiveProps(e) {
+    //     // console.log("\ncomponentWillReceiveProps", e);
+    // }
 
     _keyExtractor = (item, index) => item.id;
 
     _renderItem = (item, sectionId, rowID) => {
-        // console.log("_renderItem");
-
         let { onSnapTask, sortHandlers, ...other } = this.props;
         // console.log("onSnapTask prop", onSnapTask);
         // console.log("other props", other);
@@ -52,6 +50,10 @@ class TaskList extends React.PureComponent {
         // console.log("rowState", rowState);
         this.props.onSnapTask(item, index, rowState);
     }
+
+    // shouldComponentUpdate(nState, nProps) {
+    //     return false;
+    // }
 
     render() {
         console.debug("Render TaskList");

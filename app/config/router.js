@@ -91,21 +91,7 @@ export const MainStack = StackNavigator(
             })
         },
         TaskDetail: {
-            screen: TaskDetail,
-            navigationOptions: ({ navigation }) => ({
-                headerStyle: {
-                    backgroundColor: Colors.brandDarkGrey
-                },
-                headerTitleStyle: {
-                    color: Colors.brandLightGrey
-                },
-                headerRight: (
-                    <Button
-                        title="Save"
-                        onPress={() => navigation.state.params.handleSave()}
-                    />
-                )
-            })
+            screen: TaskDetail
         }
     },
     navigationConfig
