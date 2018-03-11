@@ -46,6 +46,7 @@ class AlarmDetail extends Component {
     });
 
     _calculatedWakeUpTime;
+    alarmLabelCache;
 
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
@@ -306,21 +307,37 @@ class AlarmDetail extends Component {
     }
     /***************************************************/
 
-    // onChangeLabel = text => {
-    //     console.log("Label text changed: ", text);
-    //     let tempAlarm = this.state.alarm;
-    //     realm.write(() => {
-    //         tempAlarm.label = text;
-    //     });
-    //     this.setState({ alarm: tempAlarm });
-    // };
+    onChangeLabel = text => {
+        console.log("Label text changed: ", text);
+        // simply save to instance variable until the TextInput blurs.
+        // This avoids excessive re-renders!!!!
+        this.alarmLabelCache = text;
+
+        /////  DO NOT WRITE TO DB OR UPDATE STATE YET !!! WAIT UNTIL BLUR EVENT ! ////
+        /* We also need to handle saving the Label to DB if user presses BACK
+            while still editing the Label TextInput field, since BLUR event may not fire.
+        */
+
+        // let tempAlarm = this.state.alarm;
+        // realm.write(() => {
+        //     tempAlarm.label = text;
+        // });
+        // this.setState({ alarm: tempAlarm });
+    };
 
     onLabelInputBlur = e => {
-        console.log("Label textInput blurred: ");
+        console.log("Label textInput blurred: " + this.alarmLabelCache);
+        // using manually cached alarmLabel Text, since Android doesn't send 'Text' to onBlur...
+
         let tempAlarm = this.state.alarm;
-        realm.write(() => {
-            tempAlarm.label = e.nativeEvent.text;
-        });
+        if (
+            this.alarmLabelCache != null &&
+            typeof this.alarmLabelCache != "undefined"
+        ) {
+            realm.write(() => {
+                tempAlarm.label = this.alarmLabelCache;
+            });
+        }
         this.setState({ alarm: tempAlarm });
     };
 
