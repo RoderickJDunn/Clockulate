@@ -726,6 +726,7 @@ class AlarmDetail extends Component {
                     onSnap={this.onSnap.bind(this)}
                     initialPosition={{ y: initInterPosition }}
                     dragEnabled={!disableDrag}
+                    animatedNativeDriver={true}
                 >
                     <TouchableOpacity
                         disabled={
