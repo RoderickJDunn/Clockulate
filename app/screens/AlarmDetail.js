@@ -37,7 +37,7 @@ import ArrowView from "../components/arrow-view-native";
 import TouchableBackdrop from "../components/touchable-backdrop";
 // TODO: Remove after we're done choosing fonts
 import { fontPreview } from "../styles/text.js";
-import { scale } from "../util/font-scale";
+import { scale, scaleByFactor } from "../util/font-scale";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 class AlarmDetail extends Component {
@@ -632,16 +632,13 @@ class AlarmDetail extends Component {
                             width: this.width,
                             transform: [
                                 {
-                                    scale: this._clockTransform.interpolate({
-                                        inputRange: [-150, -150, 0, 0],
-                                        outputRange: [0.3, 0.3, 1, 1]
-                                    })
-                                },
-                                {
                                     translateY: this._clockTransform.interpolate(
                                         {
                                             inputRange: [0, this.height],
-                                            outputRange: [-20, this.height / 3]
+                                            outputRange: [
+                                                -this.height / 8,
+                                                this.height / 4
+                                            ]
                                         }
                                     )
                                 }
@@ -658,7 +655,7 @@ class AlarmDetail extends Component {
                     >
                         <Text style={[styles.timeText]}>
                             {fWakeUpTime}
-                            <Text style={[{ fontSize: 50 }]}>
+                            <Text style={[{ fontSize: scale(40) }]}>
                                 {" " + amPmWakeUpTime}
                             </Text>
                         </Text>
@@ -669,21 +666,30 @@ class AlarmDetail extends Component {
                         handleTextInput={this.onChangeLabel}
                         onTextInputBlur={this.onLabelInputBlur}
                         onTextInputFocus={this.onLabelInputFocus}
-                        separation={2}
                         style={{
+                            opacity: this._clockTransform.interpolate({
+                                inputRange: [0, this.height],
+                                outputRange: [0, 1]
+                            })
+                        }}
+                        viewStyle={{
                             position: "absolute",
-                            top: this.height / 10,
+                            top: "85%",
                             width: this.width,
-                            fontSize: 16,
-                            color: "#d5d5d5",
-                            textAlign: "center",
                             alignSelf: "stretch",
                             paddingLeft: 20,
-                            paddingRight: 20
+                            paddingRight: 20,
+                            height: 100,
+                            flex: 1
                         }}
+                        textInputStyle={{
+                            fontSize: 16,
+                            textAlign: "center",
+                            color: "white"
+                        }}
+                        autoResize={false}
+                        numberOfLines={1}
                         multiline={false}
-                        numberOfLines={10}
-                        autoResize={true}
                     />
                     {/* <Text style={{ alignSelf: "flex-end" }}>My profile</Text> */}
                 </Animated.View>
@@ -728,17 +734,18 @@ class AlarmDetail extends Component {
                                 fieldText={this.state.alarm.label}
                                 handleTextInput={this.onChangeLabel}
                                 onTextInputBlur={this.onLabelInputBlur}
-                                height={15}
                                 separation={2}
-                                style={{ fontSize: 22 }}
-                                flex={1}
+                                textInputStyle={{
+                                    fontSize: 22
+                                }}
+                                flex={0.5}
                                 autoResize={false}
                                 numberOfLines={1}
                                 multiline={false}
                             />
                             <LabeledTimeInput
                                 labelText="ARRIVAL TIME"
-                                flex={1}
+                                flex={0.5}
                                 fieldText={moment
                                     .utc(this.state.alarm.arrivalTime)
                                     .local()
@@ -750,6 +757,7 @@ class AlarmDetail extends Component {
                                 handleArrivalChange={this._onArrivalTimePicked}
                                 timePickerPrompt="What time do you need to arrive?"
                                 inputFontSize={29}
+                                separation={scaleByFactor(5, 0.3)}
                             />
                             {/* <View style={{ height: 5 }} /> */}
                         </View>
@@ -800,11 +808,11 @@ class AlarmDetail extends Component {
                     </View>
                     <this.AnimatedHandle
                         name="drag-handle"
-                        size={25}
+                        size={scaleByFactor(25, 0.5)}
                         color={Colors.disabledGrey}
                         style={{
                             position: "absolute",
-                            left: this.width / 2 - 12.5,
+                            left: this.width / 2 - scaleByFactor(25, 0.5) / 2,
                             backgroundColor: "transparent",
                             transform: [
                                 {
@@ -812,8 +820,8 @@ class AlarmDetail extends Component {
                                         {
                                             inputRange: [0, this.height],
                                             outputRange: [
-                                                this.height * 0.24,
-                                                this.height * 0.02
+                                                this.height / 3.5,
+                                                -this.height / 20
                                             ]
                                         }
                                     )
@@ -859,7 +867,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "transparent",
-        height: SCREEN_HEIGHT * 0.3
+        height: SCREEN_HEIGHT * 0.5
+        // backgroundColor: "#9DD033"
         // top: 20
     },
     interactableHandle: {
@@ -870,26 +879,27 @@ const styles = StyleSheet.create({
         alignItems: "stretch"
     },
     animatedView: {
-        flex: 0.85
+        // flex: 0.85
+        flex: 1
     },
     fieldsContainer: {
-        flex: 0.35,
+        flex: 0.25,
         alignSelf: "stretch",
         alignItems: "flex-start",
+        justifyContent: "center",
         // backgroundColor: "yellow",
-        padding: 10,
+        padding: scaleByFactor(10, 0.4),
         paddingBottom: 8,
         borderBottomColor: "#e9e9e9",
         borderBottomWidth: 1
     },
     taskListContainer: {
-        flex: 0.65,
-        padding: 10,
-        paddingTop: 10,
+        flex: 0.75,
+        padding: scaleByFactor(10, 0.4),
         alignSelf: "stretch"
     },
     taskListHeader: {
-        flex: 0.1,
+        flex: 0.05,
         flexDirection: "row",
         justifyContent: "space-between",
         paddingBottom: 5
@@ -912,7 +922,7 @@ const styles = StyleSheet.create({
     },
     timeText: {
         color: "#d5d5d5",
-        fontSize: scale(85, 0.7),
+        fontSize: scaleByFactor(85, 0.8),
         backgroundColor: "transparent",
         alignSelf: "center",
         fontFamily: "Baskerville-Bold"

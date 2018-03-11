@@ -35,7 +35,12 @@ class LabeledTimeInput extends Component {
     render() {
         return (
             <View style={[styles.container, { flex: this.props.flex }]}>
-                <Text style={[TextStyle.labelText, styles.fieldLabelText]}>
+                <Text
+                    style={[
+                        TextStyle.labelText,
+                        { paddingBottom: this.props.separation || 2 }
+                    ]}
+                >
                     {this.state.data.labelText}
                 </Text>
                 <TouchableOpacity onPress={this._showDateTimePicker}>
@@ -66,9 +71,6 @@ const styles = StyleSheet.create({
         // flex: 1,
         alignSelf: "stretch",
         backgroundColor: "transparent"
-    },
-    fieldLabelText: {
-        paddingBottom: 2
     }
 });
 

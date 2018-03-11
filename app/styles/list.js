@@ -6,6 +6,8 @@
 
 import { StyleSheet, Dimensions } from "react-native";
 import Colors from "./colors";
+import { scale, scaleByFactor } from "../util/font-scale";
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export const ListStyle = StyleSheet.create({
@@ -63,7 +65,7 @@ export const TaskListStyle = StyleSheet.create({
         flexDirection: "row",
         paddingTop: 10,
         paddingBottom: 10,
-        width: SCREEN_WIDTH + 90 - 20, // 440
+        width: SCREEN_WIDTH + 90 - scaleByFactor(20, 0.4), // 440
         height: 55,
         alignContent: "stretch",
         alignItems: "center",
@@ -85,7 +87,7 @@ export const TaskItemStyle = StyleSheet.create({
         paddingTop: 10,
         paddingBottom: 10,
         paddingRight: 10,
-        width: SCREEN_WIDTH - 20 + 10, // SIDE_PADDING = 10 * 2.  PAD_DURATION_DELETE = 5
+        width: SCREEN_WIDTH - scaleByFactor(20, 0.4) + 10, // SIDE_PADDING = 10 * 2.  PAD_DURATION_DELETE = 5
         height: 55,
         alignContent: "stretch",
         borderBottomColor: "#acacac",

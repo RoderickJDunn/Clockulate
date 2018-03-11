@@ -217,6 +217,7 @@ class TaskDetail extends Component {
                     handleTextInput={this._onTaskNameChange.bind(this)}
                     separation={3}
                     autoResize={"editing"}
+                    style={{ flex: 0.1 }}
                 />
                 <View style={{ height: 13 }} />
                 <LabeledDurationInput
@@ -228,6 +229,7 @@ class TaskDetail extends Component {
                     }
                     onChange={this._onTaskDurationChanged.bind(this)}
                     inputFontSize={28}
+                    style={{ flex: 0.1 }}
                 />
                 <TouchableOpacity
                     style={Styles.DeleteButton}
@@ -235,6 +237,7 @@ class TaskDetail extends Component {
                 >
                     <Text style={{ color: "white", fontSize: 18 }}>Delete</Text>
                 </TouchableOpacity>
+                <View />
             </View>
         );
     }

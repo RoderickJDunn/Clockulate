@@ -5,6 +5,7 @@ import React, { Component } from "react";
 import { StyleSheet, Text, View, TextInput, Button } from "react-native";
 import { randomColor } from "../styles/colors";
 import { TextStyle } from "../styles/text";
+import { scale, scaleByFactor } from "../util/font-scale";
 
 class LabeledInput extends Component {
     constructor(props) {
@@ -75,9 +76,10 @@ class LabeledInput extends Component {
                 style={[
                     styles.container,
                     {
-                        height: height,
-                        flex: this.props.flex
-                    }
+                        height: height
+                    },
+                    this.props.style,
+                    this.props.viewStyle
                 ]}
             >
                 <Text
@@ -93,16 +95,16 @@ class LabeledInput extends Component {
                     style={[
                         styles.fieldText,
                         TextStyle.editableText,
-                        this.props.style,
+                        this.props.textInputStyle,
                         {
-                            height: inputHeight + 35
+                            height: inputHeight + scaleByFactor(30, 0.5)
                         }
                     ]}
                     placeholder={this.props.placeholder}
                     value={this.state.inputText || this.props.fieldText}
                     onChangeText={this._onChangeTextInput.bind(this)}
                     onBlur={e => {
-                        console.log("TextInput blurred");
+                        // console.log("TextInput blurred: " + e.nativeEvent.text);
                         this._onBlur(this);
                         if (onBlur != null) onBlur(e);
                     }}
@@ -114,8 +116,7 @@ class LabeledInput extends Component {
                     onContentSizeChange={e =>
                         this.updateSize(e.nativeEvent.contentSize.height)
                     }
-                    {...this.props}
-                    multiline={multiline}
+                    multiline={false}
                 />
             </View>
         );
@@ -124,7 +125,7 @@ class LabeledInput extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flex: 0.5,
         alignSelf: "stretch",
         justifyContent: "center",
         paddingTop: 2
