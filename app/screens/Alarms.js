@@ -117,7 +117,7 @@ class Alarms extends Component {
     };
 
     _onAlarmToggled = alarm => {
-        // //console.log("alarm toggled: ", alarm);
+        // console.log("alarm toggled: ");
         realm.write(() => {
             alarm.enabled = !alarm.enabled;
         });

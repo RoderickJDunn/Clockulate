@@ -3,7 +3,7 @@
  */
 
 import React from "react";
-import { Text, View, TouchableOpacity, Dimensions } from "react-native";
+import { Text, View, TouchableOpacity, Dimensions, Switch } from "react-native";
 import Svg, { Defs, Circle, RadialGradient, Stop } from "react-native-svg";
 import moment from "moment";
 import Interactable from "react-native-interactable";
@@ -11,6 +11,7 @@ import Interactable from "react-native-interactable";
 import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { ListStyle, AlarmListStyle } from "../styles/list";
+import { scaleByFactor } from "../util/font-scale";
 
 class AlarmItem extends React.PureComponent {
     /*
@@ -35,12 +36,19 @@ class AlarmItem extends React.PureComponent {
     //     }
     // };
 
+    constructor(props) {
+        super(props);
+        this.state = {
+            switchValue: false
+        };
+    }
+
     componentDidMount() {
         //console.log("AlarmItem ----- Component did mount ");
     }
 
     render() {
-        // console.debug("alarm-item render(): ", this.props.alarm);
+        console.debug("alarm-item render(): ", this.props);
         // //console.log("index", index);
 
         const config = {
@@ -87,109 +95,102 @@ class AlarmItem extends React.PureComponent {
 
         // let { listItemAnimation } = this.state;
         return (
-            <Interactable.View
-                ref={interactableRef}
-                style={[AlarmListStyle.alarmRow, ListStyle.item]}
-                horizontalOnly={true}
-                snapPoints={[{ x: 0, id: "closed" }, { x: -100, id: "active" }]}
-                dragWithSpring={{ tension: 1000, damping: 0.5 }}
-                animatedNativeDriver={true}
-                onSnap={e => {
-                    this.props.onSnap(e.nativeEvent.id);
+            <View
+                style={{
+                    borderBottomColor: Colors.disabledGrey,
+                    borderBottomWidth: 1
                 }}
             >
-                <TouchableOpacity
-                    activeOpacity={touchedOpacity}
-                    id={this.props.alarm.id}
-                    label={this.props.alarm.label}
-                    onPress={() => this.props.onPress(this.props.alarm)}
-                    style={{
-                        width: this.width - 20, // subtract padding
-                        flexDirection: "row"
+                <Interactable.View
+                    ref={interactableRef}
+                    style={[AlarmListStyle.alarmRow, ListStyle.item]}
+                    horizontalOnly={true}
+                    snapPoints={[
+                        { x: 0, id: "closed" },
+                        { x: -100, id: "active" }
+                    ]}
+                    dragWithSpring={{ tension: 1000, damping: 0.5 }}
+                    animatedNativeDriver={true}
+                    onSnap={e => {
+                        this.props.onSnap(e.nativeEvent.id);
                     }}
                 >
                     <TouchableOpacity
-                        style={AlarmListStyle.toggleButton}
-                        onPressOut={this.props.onToggle.bind(
-                            this,
-                            this.props.alarm
-                        )}
+                        activeOpacity={touchedOpacity}
+                        id={this.props.alarm.id}
+                        label={this.props.alarm.label}
+                        onPress={() => this.props.onPress(this.props.alarm)}
+                        style={{
+                            width: this.width - 20, // subtract padding
+                            flexDirection: "row"
+                        }}
                     >
-                        <Svg height="100" width="70">
-                            <Defs>
-                                <RadialGradient
-                                    id="mainGrad"
-                                    cx="35"
-                                    cy="35"
-                                    rx="50"
-                                    ry="50"
-                                    fx="23"
-                                    fy="47"
-                                    gradientUnits="userSpaceOnUse"
-                                >
-                                    <Stop
-                                        offset="0"
-                                        stopColor={buttonColor}
-                                        stopOpacity="1"
-                                    />
-                                    <Stop
-                                        offset="1"
-                                        stopColor={Colors.brandDarkGrey}
-                                        stopOpacity="1"
-                                    />
-                                </RadialGradient>
-                            </Defs>
-
-                            <Circle
-                                cx="25"
-                                cy="45"
-                                r="22"
-                                fill="url(#mainGrad)"
+                        <View style={[AlarmListStyle.toggleButton]}>
+                            <Switch
+                                value={this.props.alarm.enabled}
+                                onValueChange={val => {
+                                    console.log("Pressed switch");
+                                    this.props.onToggle(this.props.alarm);
+                                }}
+                                onTintColor={"rgba(50, 163, 50, 1)"}
+                                tintColor={"rgba(200, 200, 200, 1)"}
                             />
-                        </Svg>
-                    </TouchableOpacity>
-                    <View style={AlarmListStyle.infoContainer}>
-                        <Text
-                            style={[
-                                AlarmListStyle.timeText,
-                                TextStyle.timeText,
-                                { color: textColor }
-                            ]}
-                        >
-                            {fWakeUpTime}
-                            <Text style={TextStyle.AmPm}>
-                                {" " + amPmWakeUpTime}
-                            </Text>
-                        </Text>
-                        <Text style={{ color: textColor }} numberOfLines={2}>
-                            {this.props.alarm.label}
-                        </Text>
-                        <Text
-                            style={[
-                                {
-                                    alignSelf: "flex-end",
-                                    fontSize: 17,
-                                    color: textColor
-                                },
-                                TextStyle.timeText
-                            ]}
-                        >
-                            {fArriveTime}
+                        </View>
+                        <View style={AlarmListStyle.infoContainer}>
                             <Text
-                                style={[{ fontSize: 12 }, TextStyle.timeText]}
+                                style={[
+                                    {
+                                        alignSelf: "flex-end",
+                                        position: "absolute",
+                                        fontSize: 25,
+                                        top: 0,
+                                        right: 0,
+                                        color: textColor
+                                    },
+                                    TextStyle.timeText
+                                ]}
                             >
-                                {" " + amPmArriveTime}
+                                {fArriveTime}
+                                <Text
+                                    style={[
+                                        { fontSize: 22 },
+                                        TextStyle.timeText
+                                    ]}
+                                >
+                                    {" " + amPmArriveTime}
+                                </Text>
                             </Text>
-                        </Text>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[AlarmListStyle.deleteBtn]}
-                    onPressOut={alarm => this.props.onDelete(alarm)}
-                >
-                    <Text style={AlarmListStyle.deleteBtnText}>DELETE</Text>
-                </TouchableOpacity>
-            </Interactable.View>
+                            <Text
+                                style={[
+                                    AlarmListStyle.timeText,
+                                    TextStyle.timeText,
+                                    {
+                                        color: textColor,
+                                        backgroundColor: "transparent"
+                                    }
+                                ]}
+                            >
+                                {fWakeUpTime}
+                                <Text style={TextStyle.AmPm}>
+                                    {" " + amPmWakeUpTime}
+                                </Text>
+                            </Text>
+                            <Text
+                                style={{ color: textColor }}
+                                numberOfLines={2}
+                            >
+                                {this.props.alarm.label}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[AlarmListStyle.deleteBtn]}
+                        onPressOut={alarm => this.props.onDelete(alarm)}
+                    >
+                        <Text style={AlarmListStyle.deleteBtnText}>DELETE</Text>
+                    </TouchableOpacity>
+                </Interactable.View>
+            </View>
         );
     }
 }

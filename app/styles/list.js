@@ -18,7 +18,7 @@ export const ListStyle = StyleSheet.create({
         zIndex: 50
     },
     item: {
-        height: 120,
+        height: scaleByFactor(130, 0.2),
         padding: 10
     }
 });
@@ -27,26 +27,28 @@ export const AlarmListStyle = StyleSheet.create({
     alarmRow: {
         flex: 1,
         flexDirection: "row",
-        borderBottomColor: "#FFFFFF",
-        borderBottomWidth: 1,
         width: SCREEN_WIDTH + 100
     },
     toggleButton: {
-        flex: 2
+        flex: 0.2,
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingRight: scaleByFactor(17, 0.1)
     },
     infoContainer: {
-        flex: 8,
-        justifyContent: "space-between"
+        flex: 0.8,
+        justifyContent: "center"
     },
     timeText: {
-        fontSize: 55
+        fontSize: 75
     },
     deleteBtn: {
         position: "absolute",
         backgroundColor: Colors.deleteBtnRed,
         right: 0,
         width: 100,
-        height: 120,
+        height: scaleByFactor(130, 0.2),
         justifyContent: "center",
         zIndex: 10000
     },

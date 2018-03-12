@@ -90,6 +90,7 @@ class TaskDetail extends Component {
         }
 
         this.initialName = this.state.alarmTask.task.name;
+        this.currName = this.state.alarmTask.task.name;
     }
 
     componentWillMount() {
@@ -228,7 +229,8 @@ class TaskDetail extends Component {
                             : this.state.alarmTask.task.defaultDuration
                     }
                     onChange={this._onTaskDurationChanged.bind(this)}
-                    inputFontSize={28}
+                    inputFontSize={37}
+                    separation={5}
                     style={{ flex: 0.1 }}
                 />
                 <TouchableOpacity

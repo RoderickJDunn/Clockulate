@@ -31,7 +31,8 @@ export const TextStyle = StyleSheet.create({
         fontFamily: "Baskerville-Bold"
     },
     timeText: {
-        fontFamily: "Baskerville"
+        // fontFamily: "Baskerville"
+        fontFamily: "Quesha"
     }
 });
 

@@ -145,10 +145,12 @@ class TaskItem extends React.PureComponent {
                     </Text>
                     <DurationText
                         duration={duration}
+                        short={true}
                         style={[
                             TaskListStyle.allChildren,
                             TaskItemStyle.duration,
-                            TextStyle.timeText
+                            TextStyle.timeText,
+                            { fontSize: 24 }
                         ]}
                     />
                 </TouchableOpacity>

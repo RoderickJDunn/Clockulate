@@ -23,13 +23,16 @@ class DurationText extends Component {
         let hours = calcWholeHours(seconds);
         let minutes = calcMinutes(seconds, hours);
 
+        let hourUnit = this.props.short ? "h" : "hours";
+        let minUnit = this.props.short ? "m" : "minutes";
+
         let duration = "";
         if (!hours) {
             duration = minutes ? `${minutes}m` : "0m";
         } else if (hours && !minutes) {
-            duration = `${hours}h`;
+            duration = `${hours} ${hourUnit}`;
         } else {
-            duration = `${hours}h, ${minutes}m`;
+            duration = `${hours} ${hourUnit}, ${minutes} ${minUnit}`;
         }
         return duration;
     }

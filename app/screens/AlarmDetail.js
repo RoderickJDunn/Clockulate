@@ -774,7 +774,7 @@ class AlarmDetail extends Component {
                                     .toDate()}
                                 handleArrivalChange={this._onArrivalTimePicked}
                                 timePickerPrompt="What time do you need to arrive?"
-                                inputFontSize={29}
+                                inputFontSize={33}
                                 separation={scaleByFactor(5, 0.3)}
                             />
                             {/* <View style={{ height: 5 }} /> */}
