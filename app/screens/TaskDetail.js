@@ -216,11 +216,11 @@ class TaskDetail extends Component {
                     placeholder="Enter a task name"
                     fieldText={this.state.alarmTask.task.name}
                     handleTextInput={this._onTaskNameChange.bind(this)}
-                    separation={3}
+                    separation={5}
                     autoResize={"editing"}
                     style={{ flex: 0.1 }}
                 />
-                <View style={{ height: 13 }} />
+                <View style={{ height: 10 }} />
                 <LabeledDurationInput
                     labelText="DURATION"
                     time={
@@ -230,9 +230,10 @@ class TaskDetail extends Component {
                     }
                     onChange={this._onTaskDurationChanged.bind(this)}
                     inputFontSize={37}
-                    separation={5}
+                    separation={7}
                     style={{ flex: 0.1 }}
                 />
+                <View style={{ height: 10 }} />
                 <TouchableOpacity
                     style={Styles.DeleteButton}
                     onPress={this._onDeleteTask.bind(this)}

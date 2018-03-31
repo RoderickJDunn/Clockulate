@@ -73,6 +73,7 @@ class LabeledDurationInput extends Component {
                 <Text style={[styles.fieldLabelText, TextStyle.labelText]}>
                     {this.state.data.labelText}
                 </Text>
+                <View style={{ height: 3 }} />
                 <TouchableOpacity onPress={this._showTimePicker}>
                     <DurationText
                         duration={this.state.data.time}

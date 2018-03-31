@@ -128,14 +128,14 @@ const styles = StyleSheet.create({
         flex: 0.5,
         alignSelf: "stretch",
         justifyContent: "center",
-        paddingTop: 2
+        paddingTop: scale(3)
     },
     fieldLabelText: {
-        paddingBottom: 7,
+        // paddingBottom: 0,
         backgroundColor: "transparent"
     },
     fieldText: {
-        fontSize: 25
+        fontSize: scale(20)
     }
 });
 

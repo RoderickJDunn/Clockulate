@@ -770,13 +770,14 @@ class AlarmDetail extends Component {
                                 onTextInputBlur={this.onLabelInputBlur}
                                 separation={2}
                                 textInputStyle={{
-                                    fontSize: 22
+                                    fontSize: scale(20)
                                 }}
                                 flex={0.5}
                                 autoResize={false}
                                 numberOfLines={1}
                                 multiline={false}
                             />
+                            <View style={{ height: scale(3) }} />
                             <LabeledTimeInput
                                 labelText="ARRIVAL TIME"
                                 flex={0.5}
@@ -790,7 +791,7 @@ class AlarmDetail extends Component {
                                     .toDate()}
                                 handleArrivalChange={this._onArrivalTimePicked}
                                 timePickerPrompt="What time do you need to arrive?"
-                                inputFontSize={33}
+                                inputFontSize={scale(33)}
                                 separation={scaleByFactor(5, 0.3)}
                             />
                             {/* <View style={{ height: 5 }} /> */}
@@ -922,6 +923,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: "transparent",
         height: SCREEN_HEIGHT * 0.5
+        // backgroundColor: "#9DD033"
         // top: 20
     },
     interactableHandle: {
@@ -936,7 +938,7 @@ const styles = StyleSheet.create({
         flex: 1
     },
     fieldsContainer: {
-        flex: 0.25,
+        flex: 0.3,
         alignSelf: "stretch",
         alignItems: "flex-start",
         justifyContent: "center",
@@ -947,12 +949,12 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1
     },
     taskListContainer: {
-        flex: 0.75,
+        flex: 0.65,
         padding: scaleByFactor(10, 0.4),
         alignSelf: "stretch"
     },
     taskListHeader: {
-        flex: 0.05,
+        flex: 0.1,
         flexDirection: "row",
         justifyContent: "space-between",
         paddingBottom: 5
