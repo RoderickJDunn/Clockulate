@@ -395,6 +395,18 @@ class AlarmDetail extends Component {
         }
     };
 
+    saveSound = sound => {
+        console.info("Sound changed: ", sound);
+        // console.log("Arrival Time textInput changed: ", moment(time).unix());
+        let { alarm } = this.state;
+        realm.write(() => {
+            alarm.sound = sound;
+        });
+        // this.setState({
+        //     alarm: alarm
+        // });
+    };
+
     _onArrivalTimePicked = time => {
         console.info("Arrival Time textInput changed: ", time);
         // console.log("Arrival Time textInput changed: ", moment(time).unix());
@@ -860,7 +872,10 @@ class AlarmDetail extends Component {
                         padding: 20
                     }}
                     onPress={() => {
-                        this.props.navigation.navigate("Sounds", {});
+                        this.props.navigation.navigate("Sounds", {
+                            saveSound: this.saveSound.bind(this),
+                            currSound: this.state.alarm.sound
+                        });
                     }}
                 >
                     <SimpleLineIcons
@@ -907,7 +922,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: "transparent",
         height: SCREEN_HEIGHT * 0.5
-        // backgroundColor: "#9DD033"
         // top: 20
     },
     interactableHandle: {

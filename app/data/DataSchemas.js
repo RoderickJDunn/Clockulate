@@ -20,7 +20,8 @@ AlarmSchema.schema = {
         enabled: "bool", // if true, it is active, and will Ring at wakeUpTime.
         visible: "bool", // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
         preset: "bool", // if true, this Alarm is persistent (remains saved as preset, even if removed from 'Alarms' list page.
-        order: "int" // used to re-arrange the Alarms list. When an alarm is added, it always gets the highest order (bottom of the list)
+        order: "int", // used to re-arrange the Alarms list. When an alarm is added, it always gets the highest order (bottom of the list)
+        sound: "string"
     }
 };
 

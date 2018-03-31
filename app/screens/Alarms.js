@@ -176,7 +176,7 @@ class Alarms extends Component {
                 message: alarm.label, // (required)
                 date: wakeUpDate.toDate(),
                 playSound: true,
-                soundName: "super_ringtone.mp3",
+                soundName: alarm.sound,
                 foreground: true
                 // repeatType: "minute",
                 // actions: '["Snooze", "Turn Off"]'

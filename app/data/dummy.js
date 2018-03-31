@@ -119,7 +119,8 @@ function insertDummyData() {
             enabled: true, // if true, it is active, and will Ring at wakeUpTime.
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
             preset: false, // if tr
-            order: 0
+            order: 0,
+            sound: ""
         });
 
         const alarm2 = realm.create("Alarm", {
@@ -132,7 +133,8 @@ function insertDummyData() {
             enabled: true, // if true, it is active, and will Ring at wakeUpTime.
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
             preset: false, // if tr
-            order: 1
+            order: 1,
+            sound: "super_ringtone.mp3"
         });
         console.log(alarm2, alarm1, task2, task4, task5);
     });
