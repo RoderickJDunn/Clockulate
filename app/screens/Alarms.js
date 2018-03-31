@@ -14,6 +14,9 @@ import {
     LayoutAnimation
 } from "react-native";
 import PushController from "../alarmservice/PushController";
+import PushNotification from "react-native-push-notification";
+import moment from "moment";
+
 import realm from "../data/DataSchemas";
 
 import { ListStyle } from "../styles/list";
@@ -23,9 +26,11 @@ class Alarms extends Component {
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
 
+    _didFocusListener = null;
+
     constructor() {
         super();
-        //console.log("Alarm -- Constructor");
+        console.log("AlarmsList -- Constructor");
         //console.log("Fetching Alarms...");
         this.state = {
             alarms: realm.objects("Alarm").sorted("order"), // TODO: filter by 'visible'=true
@@ -34,35 +39,53 @@ class Alarms extends Component {
     }
 
     componentWillUpdate() {
-        // //console.log("this.props.navigation", this.props.navigation);
+        // console.log("this.props.navigation", this.props.navigation);
+        console.log("AlarmsList - componentWillUpdate");
     }
 
     componentDidMount() {
-        console.debug("Alarms --- ComponentDidMount");
+        console.info("AlarmsList --- ComponentDidMount");
 
         // setParams updates the object 'navigation.state.params'
         // When this Screen is going to be rendered, any code in navigationOptions is run (ie: the code within
         // the onPress property of a Button (in headerRight)). This code in navigationOptions can have access to
         // the navigation object that we are updating here - so long as you pass in navigation to navigationOptions
+
         this.props.navigation.setParams({
             handleAddAlarm: this.handleAddAlarm.bind(this)
         });
+
+        // this._didFocusListener = this.props.navigation.addListener(
+        //     "didFocus",
+        //     payload => {
+        //         console.debug(
+        //             "^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n"
+        //         );
+        //         console.debug("didFocus", payload);
+        //     }
+        // );
     }
 
+    componentWillUnmount() {
+        console.info("AlarmsList --- componentWillUnmount");
+    }
     handleAddAlarm() {
-        // //console.log("Adding alarm");
+        console.info("Adding alarm");
         this.props.navigation.navigate("AlarmDetail", {
             newAlarm: true,
             reloadAlarms: this.reloadAlarms
         });
     }
 
-    reloadAlarms = animate => {
-        // console.debug("Reloading alarms list");
-        if (animate == true) {
-            // LayoutAnimation.easeInEaseOut(); // don't seem to need this actually
-        }
+    reloadAlarms = alarmId => {
+        console.info("AlarmsList - reloading alarms list");
+        // console.log("this: ", this.constructor.name); /* This is how you check a class's name (here i'm checking 'this') */
+        // console.debug(this.state);
         this.setState({ alarms: realm.objects("Alarm").sorted("order") }); // TODO: filter by 'visible'=true
+        // console.debug("Called set state from reloadAlarms");
+        // console.debug(this.state);
+
+        // TODO: schedule the notification for the alarmId passed in (the alarm that we were just editing)
     };
 
     /*
@@ -82,7 +105,7 @@ class Alarms extends Component {
     };
 
     _onPressItem = alarmItem => {
-        console.debug("_onPressItem called");
+        console.info("AlarmsList - _onPressItem called");
         if (this.state.activeRow == null) {
             this.props.navigation.navigate("AlarmDetail", {
                 alarm: alarmItem,
@@ -94,7 +117,7 @@ class Alarms extends Component {
     };
 
     _onPressDelete = (item, event) => {
-        //console.log("onPressDelete: ", item);
+        console.info("AlarmsList - onPressDelete: ", item);
         realm.write(() => {
             realm.delete(item);
         });
@@ -117,24 +140,55 @@ class Alarms extends Component {
     };
 
     _onAlarmToggled = alarm => {
-        // console.log("alarm toggled: ");
+        console.info("AlarmsList - alarm toggled: ");
         realm.write(() => {
             alarm.enabled = !alarm.enabled;
         });
-        // console.log("alarm toggled: ", alarm);
-        // if (alarm.enabled) {
-        //     //console.log("Setting alarm");
-        //     PushNotification.localNotificationSchedule({
-        //         message: "wake up ho!", // (required)
-        //         date: new Date(Date.now() + 30 * 1000) // in 60 secs
-        //     });
-        // }
+        console.log(alarm);
+
+        // create moment() by adding 'wakeup-time' (ms) and 00:00:00 today
+        // let wakeUpTime = moment()
+        //     .startOf("day")
+        //     .add(alarm.wakeUpTime, "s");
+        let wakeUpDate = moment();
+        console.log("Date right now: " + wakeUpDate.toDate());
+        let wakeUpTime = moment(alarm.wakeUpTime);
+        console.log("Straight from DB: " + wakeUpTime.toDate());
+
+        wakeUpDate
+            .set("hour", wakeUpTime.hour())
+            .set("minute", wakeUpTime.minute())
+            .set("second", 0);
+        console.log("Applied today's date: " + wakeUpDate.toDate());
+        // Check if this moment is in the past. If so add 1 day. // TODO: Doesn't work yet.
+        if (wakeUpDate.diff(moment()) < 0) {
+            wakeUpDate.add(1, "days");
+        }
+
+        // console.log(wakeUpTime);
+        console.log("Checked if date already passed: " + wakeUpDate.toDate());
+        if (alarm.enabled) {
+            console.log("Setting alarm");
+            PushNotification.localNotificationSchedule({
+                id: alarm.id, // FOR ANDROID
+                userInfo: { id: alarm.id }, // FOR IOS
+                // alertAction: "",
+                message: alarm.label, // (required)
+                date: wakeUpDate.toDate(),
+                playSound: true,
+                soundName: "super_ringtone.mp3",
+                foreground: true
+                // repeatType: "minute",
+                // actions: '["Snooze", "Turn Off"]'
+            });
+        }
 
         // //console.log("this.state", this.state);
         this.setState(this.state);
     };
 
     _onSnap = (row, rowState) => {
+        console.info("AlarmsList - _onSnap");
         // console.log("=========== row swiped ============", row);
         // console.log("=========== rowState ============", rowState);
 
@@ -144,7 +198,7 @@ class Alarms extends Component {
     };
 
     _onRowDismiss = (item, rowId, direction) => {
-        //console.log("*********** row dismissed **********");
+        console.info("AlarmsList - _onRowDismiss");
         if (
             item.id === this.state.activeRow &&
             typeof direction !== "undefined"
@@ -154,34 +208,25 @@ class Alarms extends Component {
     };
 
     _onPressBackground = () => {
-        //console.log("Pressed background");
+        console.info("AlarmsList - _onPressBackground");
         this.setState({ activeRow: null });
     };
 
     render() {
-        console.debug("AlarmsList Render");
+        console.info("AlarmsList - Render");
         // console.debug(this.state);
         let { alarms } = this.state;
         // console.log("alarms", alarms);
 
-        console.log("alarms order");
-        alarms.forEach(a => {
-            console.log(a.id);
-        });
+        // alarms.forEach(a => {
+        //     console.log(a.id);
+        // });
 
-        // for (let i = 0; i < alarms.length; i++) {
-        //     // //console.log("iterating...");
-        //     // //console.log("alarm", alarms[i]);
-        //     if (alarms[i].deleteShowing === true) {
-        //         //console.log("creating overlays");
-        //         // Based on the index of the row showing the delete button, create overlay(s) above and below if necessary
-        //         overlayBottom = this.overlay((i + 1) * 120, this.height);
-        //         if (i > 0) {
-        //             overlayTop = this.overlay(0, i * 120);
-        //         }
-        //         break;
-        //     }
-        // }
+        // TODO: Schedule Local notifications for active alarms
+        // make sure to check whether they have already been set.
+        // Figure out how to manage canceling previously set notifications, if alarm is changed.
+        // TODO: Don't schedule them from render(). Only when toggled or on navigate back to this screen
+        // TODO: We may need to store an additional field in database for notification ID. Or maybe we can just use the UUID
 
         return (
             <TouchableWithoutFeedback

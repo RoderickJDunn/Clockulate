@@ -5,10 +5,11 @@
 
 import { StyleSheet } from "react-native";
 import Colors from "./colors";
+import { scale, scaleByFactor } from "../util/font-scale";
 
 export const TextStyle = StyleSheet.create({
     AmPm: {
-        fontSize: 27
+        fontSize: scale(37)
     },
     allChildren: {
         marginLeft: 5,

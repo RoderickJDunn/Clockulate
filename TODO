@@ -29,7 +29,7 @@ Todo:
     ✔ Text Input style problem - figure out best way to do this when not so tired.
     ✔ Back button is really hard to Push
     ✔ Checkboxes are hard to push
-    ☐ If no tasks are on list, show text "Add some tasks" with an swooping arrow pointing to Add button
+    ☐ If no tasks are on list, show text "Add some tasks" with an swooping arrow pointing to
     ✔ Its in a really weird UI state right now for animation experimenting. Change it back. @done(17-11-19 08:44)
 
   - Task Detail
@@ -74,10 +74,7 @@ Todo:
             - Suggested tasks should provide the name (obviously) and an estimated duration...
             ☐ Assemble list of Tasks and estimated durations to include with the app.
 
-        ☐ Task Type - Travel
-            ☐ Open Google Maps view. Input start and destination. 
-            ☐ Clockulate will input the appropriate start time for the trip into Google's API, 
-                then use the output trip duration from Google Maps
+
         ☐ Annoying Checkmark layout issue. Can't get the overall circle+checkmark to layout properly without negative margins
             - Even with this hack, the checkmark itself is not exactly centered in the circle
         ☐ Delete tasks from the Alarm Detail screen (in V1 you have to Edit the task) 
@@ -117,11 +114,13 @@ Todo:
         - Font for field contents (times, task names, etc)
         - Font for Large Time (we have a decent one already)
 
-    ☐ Adjust fonts for times in alarms list
-    ☐ Add devisions in alarms list
-    ☐ Add label for arrival time in alarms list
+    ✔ Adjust fonts for times in alarms list @done(18-03-11 22:15)
+    ✔ Add devisions in alarms list @done(18-03-11 22:16)
+    x Add label for arrival time in alarms list
     ✔ Remove arrow from ADD TASKS TO THIS ALARM (save for tutorial) @done(18-02-25 16:00)
     ✔ Turn ADD TASKS TO THIS ALARM into a button @done(18-02-25 16:02)
+    ☐ Choose system sounds for Notification
+    ☐ Autocomplete Task Names. 
         
   
 ☐ V3
@@ -134,7 +133,10 @@ Todo:
             - Sometimes it would be useful to be able to change this label
   ☐ Android Support 
     ☐ LaunchScreen (Android) -- needs investigation
-  - 
+  ☐ Task Type - Travel
+     ☐ Open Google Maps view. Input start and destination. 
+    ☐ Clockulate will input the appropriate start time for the trip into Google's API, 
+      then use the output trip duration from Google Maps
 
 ☐ V4
     - Feature Additions

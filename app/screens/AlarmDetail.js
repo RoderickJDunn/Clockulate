@@ -19,6 +19,7 @@ import {
 import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
+import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import Interactable from "react-native-interactable";
 import DateTimePicker from "react-native-modal-datetime-picker";
 // import KeyframesView from "react-native-facebook-keyframes";
@@ -109,13 +110,6 @@ class AlarmDetail extends Component {
     }
 
     // componentDidMount() {
-    //     // setTimeout(() => {  // Temporarily disabled to save resources. (set back to setInterval).
-    //     //     // console.log("Updating time and date");
-    //     //     this.setState({
-    //     //         time: moment().format("LT"),
-    //     //         date: moment().format("LL"),
-    //     //     });
-    //     // }, 1000);
     // }
 
     componentWillMount() {
@@ -223,9 +217,13 @@ class AlarmDetail extends Component {
             }
             //////////////////////////////////
         });
-        // this.props.navigation.state.params.reloadAlarms();
+        // this.props.navigation.setParams({ shouldReload: true });
+
+        this.props.navigation.state.params.reloadAlarms(this.state.alarm.id);
         this.props.navigation.goBack();
-        setTimeout(this.props.navigation.state.params.reloadAlarms, 0);
+        // setTimeout(() => {
+        //     this.props.navigation.goBack();
+        // }, 500);
     }
 
     _willShowNavScreen() {
@@ -252,7 +250,8 @@ class AlarmDetail extends Component {
     }
 
     onTaskListChanged(newTask) {
-        // console.log("Task modified", newTask);
+        console.info("Task modified");
+        console.log("Task modified", newTask);
         // Check if Task is defined. This callback contains the newly created alarmTask,
         // or nothing if an existing alarmTask was updated.
         if (newTask) {
@@ -342,12 +341,14 @@ class AlarmDetail extends Component {
     };
 
     onLabelInputFocus = () => {
+        console.info("Focusing label input");
         if (this.state.alarm.mode == "normal") {
             this.setState({ isEditingLabel: true });
         }
     };
 
     onChangeTaskEnabled = (taskToUpdate, enabled) => {
+        console.info("onChangeTaskEnabled");
         let tasks = this.state.alarm.tasks;
         let taskToChange = tasks.find(task => task.id === taskToUpdate.id);
         if (!taskToChange) {
@@ -364,7 +365,7 @@ class AlarmDetail extends Component {
     };
 
     onSnap = event => {
-        console.log("onSnap");
+        console.info("onSnap");
         let alarmState = this.state.alarm;
         let snapId = event.nativeEvent.id;
         // console.log("snapId", snapId);
@@ -382,7 +383,7 @@ class AlarmDetail extends Component {
     };
 
     onPressClock = ref => {
-        console.log("onPressClock");
+        console.info("onPressClock");
         if (this.state.activeTask == null) {
             if (this.state.alarm.mode == "autocalc") {
                 this.interactiveRef.snapTo({ index: 1 });
@@ -395,11 +396,11 @@ class AlarmDetail extends Component {
     };
 
     _onArrivalTimePicked = time => {
-        console.log("Arrival Time textInput changed: ", time);
-        console.log("Arrival Time textInput changed: ", moment(time).unix());
+        console.info("Arrival Time textInput changed: ", time);
+        // console.log("Arrival Time textInput changed: ", moment(time).unix());
         let { alarm } = this.state;
         realm.write(() => {
-            alarm.arrivalTime = moment(time).unix() * 1000;
+            alarm.arrivalTime = time;
         });
         this.setState({
             alarm: alarm
@@ -407,10 +408,10 @@ class AlarmDetail extends Component {
     };
 
     _onWakeTimePicked = time => {
-        console.log("A date has been picked: ", time);
+        console.info("A date has been picked: ", time);
         let { alarm } = this.state;
         realm.write(() => {
-            alarm.wakeUpTime = moment(time).unix() * 1000;
+            alarm.wakeUpTime = time;
         });
         this._hideDateTimePicker();
     };
@@ -436,9 +437,9 @@ class AlarmDetail extends Component {
         // console.log(totalTaskDurations);
 
         // save calculated wakeUpTime to use for saving to DB when user presses back
-        this._calculatedWakeUpTime =
-            this.state.alarm.arrivalTime - totalTaskDurations;
+        let epochSec = this.state.alarm.arrivalTime - totalTaskDurations;
 
+        this._calculatedWakeUpTime = new Date(epochSec);
         return this._calculatedWakeUpTime;
     };
 
@@ -460,7 +461,7 @@ class AlarmDetail extends Component {
     }
 
     _onSnapTask(item, index, rowState) {
-        // console.log("Snapping task");
+        console.info("Snapping task");
         // console.log("1. ", item);
         // console.log("2. ", index);
         // console.log("3. ", rowState);
@@ -470,16 +471,18 @@ class AlarmDetail extends Component {
     }
 
     _onPressEditTasks() {
-        console.log("_onPressEditTasks");
+        console.info("_onPressEditTasks");
         let editingTasks = !this.state.isEditingTasks;
         this.setState({ isEditingTasks: editingTasks });
     }
 
     _closeTaskRows() {
+        console.info("_closeTaskRows");
         this.setState({ activeTask: null });
     }
 
     _onReorderTasks(aTasks, aTaskId, from, to) {
+        console.info("_onReorderTasks");
         console.log("aTasks", aTasks);
         aTasks = aTasks.sort((t1, t2) => t1.order > t2.order);
         realm.write(() => {
@@ -500,7 +503,7 @@ class AlarmDetail extends Component {
     }
 
     render() {
-        console.debug("AlarmDetail render - ");
+        console.info("AlarmDetail render - ");
         // console.debug("AlarmDetail render - this.state: ", this.state);
         let imageHeight = this.height;
         let initInterPosition, initClockPosition, initHandlePosition;
@@ -641,6 +644,23 @@ class AlarmDetail extends Component {
                     source={require("../img/ClockBgV2.png")}
                     /* resizeMode="center" */
                 />
+                <TouchableOpacity
+                    style={{
+                        position: "absolute",
+                        alignSelf: "flex-end",
+                        backgroundColor: "transparent",
+                        padding: 20
+                    }}
+                    onPress={() => {
+                        this.props.navigation.navigate("Sounds", {});
+                    }}
+                >
+                    <SimpleLineIcons
+                        name="music-tone"
+                        size={22}
+                        color="#ECECEC"
+                    />
+                </TouchableOpacity>
                 {/* This is the animated wrapper for the CLOCK display, and the label shown in Normal */}
                 <Animated.View
                     style={[

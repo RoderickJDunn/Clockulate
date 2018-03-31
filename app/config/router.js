@@ -11,6 +11,8 @@ import Alarms from "../screens/Alarms";
 import AlarmDetail from "../screens/AlarmDetail";
 import AlarmDetailBasic from "../screens/AlarmDetailBasic";
 import TaskDetail from "../screens/TaskDetail";
+import Sounds from "../screens/Sounds";
+
 import Colors from "../styles/colors";
 
 // export const AlarmTabs = TabNavigator({
@@ -92,6 +94,9 @@ export const MainStack = StackNavigator(
         },
         TaskDetail: {
             screen: TaskDetail
+        },
+        Sounds: {
+            screen: Sounds
         }
     },
     navigationConfig

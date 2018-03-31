@@ -140,6 +140,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-sound')
     compile project(':react-native-interactable')
     compile project(':react-native-push-notification')
     compile project(':react-native-calendar-events')

@@ -4,7 +4,7 @@
 
 import realm from "./DataSchemas";
 import uuid from "react-native-uuid";
-
+import moment from "moment";
 console.log("dummy data file");
 
 // Create Realm objects and write to local storage
@@ -111,8 +111,8 @@ function insertDummyData() {
         console.log("Adding dummy alarms");
         const alarm1 = realm.create("Alarm", {
             id: uuid.v1(),
-            wakeUpTime: 45000000, // 12:30 in seconds UTC -- (which is 7:30am local)
-            arrivalTime: 48600000, // 1:30 in seconds UTC -- (which is 8:30am local)
+            wakeUpTime: moment("8:35", "HH:mm").toDate(),
+            arrivalTime: moment("9:35", "HH:mm").toDate(),
             mode: "autocalc", // TODO: Change back to basic for testing
             tasks: [almTask1, almTask7, almTask3, almTask8],
             label: "Wake up on work-day",
@@ -124,8 +124,8 @@ function insertDummyData() {
 
         const alarm2 = realm.create("Alarm", {
             id: uuid.v1(),
-            wakeUpTime: 46800000,
-            arrivalTime: 50400000,
+            wakeUpTime: moment("10:00", "HH:mm").toDate(),
+            arrivalTime: moment("11:30", "HH:mm").toDate(),
             mode: "autocalc",
             tasks: [almTask6, almTask9, almTask1b, almTask3b],
             label: "Wake up for appointment",

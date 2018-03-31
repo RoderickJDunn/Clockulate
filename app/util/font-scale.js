@@ -6,21 +6,19 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SCALE = SCREEN_WIDTH / 320;
 
 export function scale(size) {
-    console.log("Normalizing... ");
-    console.log("size: " + size);
-    console.log("SCREEN_WIDTH", SCREEN_WIDTH);
-    console.log("scale", SCALE);
+    // console.log("Normalizing... ");
+    // console.log("size: " + size);
+    // console.log("SCREEN_WIDTH", SCREEN_WIDTH);
+    // console.log("scale", SCALE);
 
     if (Platform.OS === "ios") {
         let ret = Math.round(
             // PixelRatio.roundToNearestPixel(size) * (SCALE / bluntFactor)
             size * SCALE
         );
-        console.log("ret", ret);
         return ret;
     } else {
         let ret = Math.round(size * SCALE) - 2;
-        console.log("ret", ret);
         return ret;
     }
 }

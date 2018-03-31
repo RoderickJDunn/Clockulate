@@ -3,7 +3,14 @@
  */
 
 import React from "react";
-import { Text, View, TouchableOpacity, Dimensions, Switch } from "react-native";
+import {
+    Text,
+    View,
+    TouchableOpacity,
+    Dimensions,
+    Switch,
+    TouchableWithoutFeedback
+} from "react-native";
 import Svg, { Defs, Circle, RadialGradient, Stop } from "react-native-svg";
 import moment from "moment";
 import Interactable from "react-native-interactable";
@@ -38,17 +45,19 @@ class AlarmItem extends React.PureComponent {
 
     constructor(props) {
         super(props);
+        console.log("AlarmItem", "- constructor");
         this.state = {
             switchValue: false
         };
     }
 
     componentDidMount() {
-        //console.log("AlarmItem ----- Component did mount ");
+        console.log("AlarmItem - Component did mount ");
     }
 
     render() {
-        console.debug("alarm-item render(): ", this.props);
+        console.log("AlarmItem", "- render");
+        // console.debug("alarm-item render(): ", this.props);
         // //console.log("index", index);
 
         const config = {
@@ -77,11 +86,13 @@ class AlarmItem extends React.PureComponent {
         }
 
         // Format times
-        let wakeTimeMoment = moment.utc(this.props.alarm.wakeUpTime).local();
+        // let wakeTimeMoment = moment.utc(this.props.alarm.wakeUpTime).local();
+        let wakeTimeMoment = moment(this.props.alarm.wakeUpTime).local();
         let fWakeUpTime = wakeTimeMoment.format("h:mm");
         let amPmWakeUpTime = wakeTimeMoment.format("A");
 
-        let arriveTimeMoment = moment.utc(this.props.alarm.arrivalTime).local();
+        // let arriveTimeMoment = moment.utc(this.props.alarm.arrivalTime).local();
+        let arriveTimeMoment = moment(this.props.alarm.arrivalTime).local();
         let fArriveTime = arriveTimeMoment.format("h:mm");
         let amPmArriveTime = arriveTimeMoment.format("A");
 
@@ -89,7 +100,9 @@ class AlarmItem extends React.PureComponent {
 
         if (this.props.close == true) {
             setTimeout(() => {
-                this.interactiveRef.snapTo({ index: 0 });
+                if (this.interactiveRef) {
+                    this.interactiveRef.snapTo({ index: 0 });
+                }
             }, 0);
         }
 
@@ -125,7 +138,11 @@ class AlarmItem extends React.PureComponent {
                             flexDirection: "row"
                         }}
                     >
-                        <View style={[AlarmListStyle.toggleButton]}>
+                        {/* onStartShouldSetResponder: returning true prevents touches from bubbling up further! */}
+                        <View
+                            style={[AlarmListStyle.toggleButton]}
+                            onStartShouldSetResponder={evt => true}
+                        >
                             <Switch
                                 value={this.props.alarm.enabled}
                                 onValueChange={val => {

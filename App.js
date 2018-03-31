@@ -8,7 +8,7 @@ import {
     Text,
     Dimensions
 } from "react-native";
-import ArrowView from "./app/components/arrow-view-native";
+// import ArrowView from "./app/components/arrow-view-native";
 
 import insertDummyData from "./app/data/dummy";
 
@@ -16,7 +16,7 @@ export default class App extends React.Component {
     constructor() {
         super();
 
-        console.log("1");
+        console.info("App - constructor");
         // Arrows.createArrow();
         this.state = { firstLaunch: null };
         // console.log("Entry: Constructor");
@@ -24,7 +24,7 @@ export default class App extends React.Component {
     }
 
     componentDidMount() {
-        // console.log("Entry: Component did mount");
+        console.log("App: componentDidMount");
         try {
             AsyncStorage.getItem("alreadyLaunched").then(value => {
                 if (value === null) {
@@ -33,11 +33,11 @@ export default class App extends React.Component {
                         "alreadyLaunched",
                         JSON.stringify(true)
                     );
-                    this.setState({ firstLaunch: true });
+                    // this.setState({ firstLaunch: true });
                     insertDummyData();
                 } else {
                     console.log("Not the first Launch");
-                    this.setState({ firstLaunch: false });
+                    // this.setState({ firstLaunch: false });
                 }
             });
         } catch (error) {
@@ -83,4 +83,4 @@ export default class App extends React.Component {
     }
 }
 
-AppRegistry.registerComponent("Alarm_AutoSet", () => App);
+// AppRegistry.registerComponent("Clockulate", () => App);

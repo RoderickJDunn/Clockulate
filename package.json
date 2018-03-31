@@ -1,5 +1,5 @@
 {
-    "name": "Clock_Sample1",
+    "name": "Clockulate",
     "version": "0.1.0",
     "private": true,
     "devDependencies": {
@@ -27,12 +27,15 @@
         "react-native-animatable": "^1.2.4",
         "react-native-calendar-events": "^1.4.3",
         "react-native-check-box": "^2.0.1",
+        "react-native-customisable-switch": "^0.1.0",
         "react-native-elements": "^0.16.0",
         "react-native-interactable": "^0.1.7",
         "react-native-modal-datetime-picker": "^4.9.0",
         "react-native-picker": "^4.1.2",
-        "react-native-push-notification": "^3.0.1",
+        "react-native-push-notification": "^3.0.2",
+        "react-native-sortable-list": "0.0.21",
         "react-native-sortable-listview": "^0.2.8",
+        "react-native-sound": "^0.10.9",
         "react-native-svg": "^5.4.1",
         "react-native-swipe-gestures": "^1.0.2",
         "react-native-swipeable-flat-list": "0.0.5",
@@ -40,7 +43,12 @@
         "react-native-timepicker": "^1.0.3",
         "react-native-uuid": "^1.4.9",
         "react-native-vector-icons": "^4.3.0",
-        "react-navigation": "git+https://github.com/react-community/react-navigation.git",
+        "react-navigation": "^1.5.8",
         "realm": "^1.13.0"
+    },
+    "rnpm": {
+        "assets": [
+            "./assets/fonts/"
+        ]
     }
 }

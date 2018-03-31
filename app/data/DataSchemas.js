@@ -12,8 +12,8 @@ AlarmSchema.schema = {
     primaryKey: "id",
     properties: {
         id: "string",
-        wakeUpTime: "int",
-        arrivalTime: "int",
+        wakeUpTime: "date",
+        arrivalTime: "date",
         mode: "string", // "basic" or "autocalc"
         tasks: { type: "list", objectType: "AlarmTask" },
         label: "string",

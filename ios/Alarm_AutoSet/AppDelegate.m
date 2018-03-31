@@ -18,13 +18,18 @@
   NSURL *jsCodeLocation;
 
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
-
+//  jsCodeLocation = [NSURL URLWithString:@"http://192.168.2.25:8081/index.ios.bundle?platform=ios&dev=true"];
+  
+  
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
-                                                      moduleName:@"Alarm_AutoSet"
+                                                      moduleName:@"Clockulate"
                                                initialProperties:nil
                                                    launchOptions:launchOptions];
-  rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
-
+  
+  NSLog(@"Testing my own log in AppDelegate -------- ******************** ---------------");
+  NSLog(@"%@", jsCodeLocation.absoluteString);
+  NSLog (@" host:%@", [jsCodeLocation host]);
+  NSLog (@" port:%@", [jsCodeLocation port]);
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   UIViewController *rootViewController = [UIViewController new];
   rootViewController.view = rootView;
