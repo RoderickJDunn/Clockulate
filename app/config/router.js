@@ -37,7 +37,8 @@ const navigationConfig = {
         title: "Alarms",
         headerStyle: {
             // Style the header view itself (aka. the nav bar)
-            backgroundColor: Colors.brandDarkGrey
+            backgroundColor: Colors.brandDarkGrey,
+            borderBottomWidth: 0
         },
         headerTitleStyle: {
             // style the Title text of the header
@@ -70,7 +71,8 @@ export const MainStack = StackNavigator(
             screen: AlarmDetail,
             navigationOptions: ({ navigation }) => ({
                 headerStyle: {
-                    backgroundColor: Colors.brandDarkGrey
+                    backgroundColor: Colors.brandDarkGrey,
+                    borderBottomWidth: 0
                 },
                 headerTitleStyle: {
                     color: Colors.brandLightGrey
