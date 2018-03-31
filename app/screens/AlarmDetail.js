@@ -644,23 +644,7 @@ class AlarmDetail extends Component {
                     source={require("../img/ClockBgV2.png")}
                     /* resizeMode="center" */
                 />
-                <TouchableOpacity
-                    style={{
-                        position: "absolute",
-                        alignSelf: "flex-end",
-                        backgroundColor: "transparent",
-                        padding: 20
-                    }}
-                    onPress={() => {
-                        this.props.navigation.navigate("Sounds", {});
-                    }}
-                >
-                    <SimpleLineIcons
-                        name="music-tone"
-                        size={22}
-                        color="#ECECEC"
-                    />
-                </TouchableOpacity>
+
                 {/* This is the animated wrapper for the CLOCK display, and the label shown in Normal */}
                 <Animated.View
                     style={[
@@ -858,8 +842,8 @@ class AlarmDetail extends Component {
                                         {
                                             inputRange: [0, this.height],
                                             outputRange: [
-                                                this.height / 3.5,
-                                                -this.height / 20
+                                                this.height / 3.75,
+                                                -this.height / 18
                                             ]
                                         }
                                     )
@@ -868,6 +852,23 @@ class AlarmDetail extends Component {
                         }}
                     />
                 </Interactable.View>
+                <TouchableOpacity
+                    style={{
+                        position: "absolute",
+                        alignSelf: "flex-end",
+                        backgroundColor: "transparent",
+                        padding: 20
+                    }}
+                    onPress={() => {
+                        this.props.navigation.navigate("Sounds", {});
+                    }}
+                >
+                    <SimpleLineIcons
+                        name="music-tone"
+                        size={22}
+                        color="#ECECEC"
+                    />
+                </TouchableOpacity>
                 <DateTimePicker
                     date={moment
                         .utc(this.state.alarm.wakeUpTime)
