@@ -674,6 +674,18 @@ class AlarmDetail extends Component {
                                             ]
                                         }
                                     )
+                                },
+                                {
+                                    scale: this._clockTransform.interpolate({
+                                        inputRange: [
+                                            -this.height * 0.2,
+                                            0,
+                                            this.height * 0.8,
+                                            this.height
+                                        ],
+                                        outputRange: [1.2, 1, 1, 1.2],
+                                        extrapolate: "clamp"
+                                    })
                                 }
                             ]
                         }
