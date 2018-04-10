@@ -11,6 +11,6 @@ public class MainActivity extends ReactActivity {
      */
     @Override
     protected String getMainComponentName() {
-        return "Clock_Sample1";
+        return "Clockulate";
     }
 }
