@@ -9,7 +9,7 @@ import { scale, scaleByFactor } from "../util/font-scale";
 
 export const TextStyle = StyleSheet.create({
     AmPm: {
-        fontSize: scale(37)
+        fontSize: scaleByFactor(37, 0.3)
     },
     allChildren: {
         marginLeft: 5,

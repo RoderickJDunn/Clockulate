@@ -49,8 +49,10 @@ class AlarmDetail extends Component {
     _calculatedWakeUpTime;
     alarmLabelCache;
 
-    width = Dimensions.get("window").width; //full width
-    height = Dimensions.get("window").height; //full height
+    width = SCREEN_WIDTH; //full width
+    height = SCREEN_HEIGHT; //full height
+    snapAuto = 0;
+    snapNormal = SCREEN_HEIGHT * 1.2;
 
     AnimatedAlarmLabel = Animated.createAnimatedComponent(LabeledInput);
     AnimatedHandle = Animated.createAnimatedComponent(MaterialIcon);
@@ -252,13 +254,17 @@ class AlarmDetail extends Component {
     onTaskListChanged(newTask) {
         console.info("Task modified");
         console.log("Task modified", newTask);
-        // Check if Task is defined. This callback contains the newly created alarmTask,
+        // Check if Task is defined. This callback expects the newly created alarmTask,
         // or nothing if an existing alarmTask was updated.
-        if (newTask) {
-            realm.write(() => {
-                this.state.alarm.tasks.push(newTask);
-            });
-        }
+        let { alarm } = this.state;
+        realm.write(() => {
+            if (newTask) {
+                // only add task to list if new task was created
+                alarm.tasks.push(newTask);
+            }
+            // re-calculated wake-up time either way, since existing task duration may have been changed
+            alarm.wakeUpTime = this._calcWakeUpTime();
+        });
         let tempState = this.state;
         tempState.activeTask = null;
         this.setState(tempState);
@@ -349,7 +355,8 @@ class AlarmDetail extends Component {
 
     onChangeTaskEnabled = (taskToUpdate, enabled) => {
         console.info("onChangeTaskEnabled");
-        let tasks = this.state.alarm.tasks;
+        let { alarm } = this.state;
+        let tasks = alarm.tasks;
         let taskToChange = tasks.find(task => task.id === taskToUpdate.id);
         if (!taskToChange) {
             console.error(
@@ -360,8 +367,10 @@ class AlarmDetail extends Component {
         }
         realm.write(() => {
             taskToChange.enabled = !enabled;
+            alarm.wakeUpTime = this._calcWakeUpTime();
         });
         this.setState({ tasks: tasks });
+        // this.onTaskListChanged();
     };
 
     onSnap = event => {
@@ -402,17 +411,15 @@ class AlarmDetail extends Component {
         realm.write(() => {
             alarm.sound = sound;
         });
-        // this.setState({
-        //     alarm: alarm
-        // });
     };
 
     _onArrivalTimePicked = time => {
-        console.info("Arrival Time textInput changed: ", time);
+        console.info("Arrival Time input changed: ", time);
         // console.log("Arrival Time textInput changed: ", moment(time).unix());
         let { alarm } = this.state;
         realm.write(() => {
             alarm.arrivalTime = time;
+            alarm.wakeUpTime = this._calcWakeUpTime();
         });
         this.setState({
             alarm: alarm
@@ -433,14 +440,19 @@ class AlarmDetail extends Component {
     _hideDateTimePicker = () => this.setState({ isDatePickerVisible: false });
 
     _calcWakeUpTime = () => {
-        // console.log("Calculating wakeuptime");
+        console.log(
+            "Calculating wakeuptime with arrival time: " +
+                this.state.alarm.arrivalTime
+        );
         let totalTaskDurations = this.state.alarm.tasks
             .map(alarmTask => {
                 if (alarmTask.enabled) {
+                    console.log("Task enabled");
                     return alarmTask.duration
                         ? alarmTask.duration
                         : alarmTask.task.defaultDuration;
                 } else {
+                    console.log("Task DISabled");
                     return 0;
                 }
             })
@@ -452,6 +464,7 @@ class AlarmDetail extends Component {
         let epochSec = this.state.alarm.arrivalTime - totalTaskDurations;
 
         this._calculatedWakeUpTime = new Date(epochSec);
+
         return this._calculatedWakeUpTime;
     };
 
@@ -584,13 +597,13 @@ class AlarmDetail extends Component {
 
         let disableDrag = this.state.isEditingTasks;
 
-        let wakeUpTime;
+        let wakeUpTime = this.state.alarm.wakeUpTime;
         // console.log("this.state.alarm.mode", this.state.alarm.mode);
-        if (this.state.alarm.mode == "autocalc") {
-            wakeUpTime = this._calcWakeUpTime();
-        } else {
-            wakeUpTime = this.state.alarm.wakeUpTime;
-        }
+        // if (this.state.alarm.mode == "autocalc") {
+        //     wakeUpTime = this._calcWakeUpTime();
+        // } else {
+        //     wakeUpTime = this.state.alarm.wakeUpTime;
+        // }
 
         let wakeTimeMoment = moment.utc(wakeUpTime).local();
         let fWakeUpTime = wakeTimeMoment.format("h:mm");
@@ -624,8 +637,8 @@ class AlarmDetail extends Component {
         }
 
         let snapPoints = [
-            { y: 0, id: "autocalc" },
-            { y: this.height * 0.8, id: "normal" }
+            { y: this.snapAuto, id: "autocalc" },
+            { y: this.snapNormal, id: "normal" }
         ];
 
         if (this.state.isEditingLabel && this.state.keyboardHeight) {
@@ -645,7 +658,10 @@ class AlarmDetail extends Component {
                                 {
                                     translateY: this._clockTransform.interpolate(
                                         {
-                                            inputRange: [0, this.height],
+                                            inputRange: [
+                                                -this.height,
+                                                this.height
+                                            ],
                                             outputRange: [0, this.height / 30]
                                         }
                                     )
@@ -654,98 +670,17 @@ class AlarmDetail extends Component {
                         }
                     ]}
                     source={require("../img/ClockBgV2.png")}
-                    /* resizeMode="center" */
                 />
 
-                {/* This is the animated wrapper for the CLOCK display, and the label shown in Normal */}
-                <Animated.View
-                    style={[
-                        styles.clockContainer,
-                        {
-                            width: this.width,
-                            transform: [
-                                {
-                                    translateY: this._clockTransform.interpolate(
-                                        {
-                                            inputRange: [0, this.height],
-                                            outputRange: [
-                                                -this.height / 8,
-                                                this.height / 4
-                                            ]
-                                        }
-                                    )
-                                },
-                                {
-                                    scale: this._clockTransform.interpolate({
-                                        inputRange: [
-                                            -this.height * 0.2,
-                                            0,
-                                            this.height * 0.8,
-                                            this.height
-                                        ],
-                                        outputRange: [1.2, 1, 1, 1.2],
-                                        extrapolate: "clamp"
-                                    })
-                                }
-                            ]
-                        }
-                    ]}
-                >
-                    <TouchableOpacity
-                        onPress={this.onPressClock.bind(this, interactableRef)}
-                        style={{
-                            alignSelf: "stretch",
-                            alignContent: "center"
-                        }}
-                    >
-                        <Text style={[styles.timeText]}>
-                            {fWakeUpTime}
-                            <Text style={[{ fontSize: scale(40) }]}>
-                                {" " + amPmWakeUpTime}
-                            </Text>
-                        </Text>
-                    </TouchableOpacity>
-                    <this.AnimatedAlarmLabel
-                        placeholder="Enter a label"
-                        fieldText={this.state.alarm.label}
-                        handleTextInput={this.onChangeLabel}
-                        onTextInputBlur={this.onLabelInputBlur}
-                        onTextInputFocus={this.onLabelInputFocus}
-                        style={{
-                            opacity: this._clockTransform.interpolate({
-                                inputRange: [0, this.height],
-                                outputRange: [0, 1]
-                            })
-                        }}
-                        viewStyle={{
-                            position: "absolute",
-                            top: "85%",
-                            width: this.width,
-                            alignSelf: "stretch",
-                            paddingLeft: 20,
-                            paddingRight: 20,
-                            height: 100,
-                            flex: 1
-                        }}
-                        textInputStyle={{
-                            fontSize: 16,
-                            textAlign: "center",
-                            color: "white"
-                        }}
-                        autoResize={false}
-                        numberOfLines={1}
-                        multiline={false}
-                    />
-                    {/* <Text style={{ alignSelf: "flex-end" }}>My profile</Text> */}
-                </Animated.View>
                 {touchableBackdrop}
                 <Interactable.View
                     ref={interactableRef}
                     style={[
                         styles.animatedView,
                         {
-                            width: this.width
+                            width: this.width,
                             // backgroundColor: "#456729"
+                            backgroundColor: "transparent"
                         }
                     ]}
                     verticalOnly={true}
@@ -754,23 +689,116 @@ class AlarmDetail extends Component {
                     onSnap={this.onSnap.bind(this)}
                     initialPosition={{ y: initInterPosition }}
                     dragEnabled={!disableDrag}
+                    boundaries={{
+                        top: -this.height * 0.1,
+                        bottom: this.height * 1.3,
+                        bounce: 0.3
+                    }}
+                    // dragWithSpring={{ tension: 200, damping: 0.5 }}
+                    // frictionAreas={[
+                    //     { damping: 0.0, influenceArea: { right: 0 } }
+                    // ]}
                     animatedNativeDriver={true}
                 >
-                    <TouchableOpacity
-                        disabled={
-                            this.state.alarm.mode == "normal" ? true : false
-                        }
-                        onPress={this.onPressClock.bind(this, interactableRef)}
-                        style={[styles.interactableHandle, { flex: 0.3 }]}
-                    />
-                    <View style={[styles.nonClockWrapper, { flex: 0.7 }]}>
+                    {/* This is the animated wrapper for the CLOCK display, and the label shown in Normal */}
+                    <Animated.View
+                        style={[
+                            styles.clockContainer,
+                            {
+                                width: this.width,
+                                transform: [
+                                    {
+                                        translateY: this._clockTransform.interpolate(
+                                            {
+                                                inputRange: [
+                                                    this.snapAuto,
+                                                    this.snapNormal
+                                                ],
+                                                outputRange: [
+                                                    -this.height * 0.15,
+                                                    this.height * 0.18
+                                                ]
+                                            }
+                                        )
+                                    },
+                                    {
+                                        scale: this._clockTransform.interpolate(
+                                            {
+                                                inputRange: [
+                                                    this.snapAuto -
+                                                        this.height * 0.2,
+                                                    this.snapAuto,
+                                                    this.snapNormal,
+                                                    this.snapNormal +
+                                                        this.height * 0.2
+                                                ],
+                                                outputRange: [1.1, 1, 1, 1.1],
+                                                extrapolate: "clamp"
+                                            }
+                                        )
+                                    }
+                                ]
+                            }
+                        ]}
+                    >
+                        <TouchableOpacity
+                            onPress={this.onPressClock.bind(
+                                this,
+                                interactableRef
+                            )}
+                            style={{
+                                alignSelf: "stretch",
+                                alignContent: "center"
+                                // backgroundColor: "#AA6A3A"
+                            }}
+                        >
+                            <Text style={[styles.timeText]}>
+                                {fWakeUpTime}
+                                <Text style={[{ fontSize: scale(40) }]}>
+                                    {" " + amPmWakeUpTime}
+                                </Text>
+                            </Text>
+                        </TouchableOpacity>
+                        <this.AnimatedAlarmLabel
+                            placeholder="Enter a label"
+                            fieldText={this.state.alarm.label}
+                            handleTextInput={this.onChangeLabel}
+                            onTextInputBlur={this.onLabelInputBlur}
+                            onTextInputFocus={this.onLabelInputFocus}
+                            style={{
+                                opacity: this._clockTransform.interpolate({
+                                    inputRange: [0, this.height],
+                                    outputRange: [0, 1]
+                                })
+                            }}
+                            viewStyle={{
+                                position: "absolute",
+                                top: "85%",
+                                width: this.width,
+                                alignSelf: "stretch",
+                                paddingLeft: 20,
+                                paddingRight: 20,
+                                height: 100,
+                                flex: 1
+                            }}
+                            textInputStyle={{
+                                fontSize: 16,
+                                textAlign: "center",
+                                color: "white"
+                            }}
+                            autoResize={false}
+                            numberOfLines={1}
+                            multiline={false}
+                        />
+                        {/* <Text style={{ alignSelf: "flex-end" }}>My profile</Text> */}
+                    </Animated.View>
+                    <View style={[styles.nonClockWrapper]}>
                         <Image
                             style={[
                                 styles.nonClockBgImage,
                                 { height: imageHeight }
                             ]}
                             source={require("../img/NonClockBgV2.png")}
-                            /* resizeMode="center" */
                         />
 
                         <View style={[styles.fieldsContainer]}>
@@ -865,10 +893,10 @@ class AlarmDetail extends Component {
                                 {
                                     translateY: this._clockTransform.interpolate(
                                         {
-                                            inputRange: [0, this.height],
+                                            inputRange: [0, this.snapNormal],
                                             outputRange: [
-                                                this.height / 3.75,
-                                                -this.height / 18
+                                                this.height * 1.2,
+                                                this.height * 0.6
                                             ]
                                         }
                                     )
@@ -939,15 +967,20 @@ const styles = StyleSheet.create({
         // top: 20
     },
     interactableHandle: {
-        backgroundColor: "transparent"
-        // backgroundColor: "#0FF"
+        backgroundColor: "transparent",
+        // backgroundColor: "#0FF",
+        width: SCREEN_WIDTH
     },
     nonClockWrapper: {
-        alignItems: "stretch"
+        alignItems: "stretch",
+        height: SCREEN_HEIGHT * 3 * 0.4
     },
     animatedView: {
-        // flex: 0.85
-        flex: 1
+        // flex: 1,
+        position: "absolute",
+        top: -SCREEN_HEIGHT,
+        left: 0,
+        height: SCREEN_HEIGHT * 2
     },
     fieldsContainer: {
         flex: 0.3,
