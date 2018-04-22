@@ -23,6 +23,7 @@ import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import Interactable from "react-native-interactable";
 import DateTimePicker from "react-native-modal-datetime-picker";
 // import KeyframesView from "react-native-facebook-keyframes";
+import { isIphoneX } from "react-native-iphone-x-helper";
 
 import moment from "moment";
 
@@ -52,7 +53,9 @@ class AlarmDetail extends Component {
     width = SCREEN_WIDTH; //full width
     height = SCREEN_HEIGHT; //full height
     snapAuto = 0;
-    snapNormal = SCREEN_HEIGHT * 1.2;
+    snapNormal = SCREEN_HEIGHT;
+
+    xtraKeyboardHeight = 0; // this is always 0, except on iPhone X it is 34
 
     AnimatedAlarmLabel = Animated.createAnimatedComponent(LabeledInput);
     AnimatedHandle = Animated.createAnimatedComponent(MaterialIcon);
@@ -64,6 +67,9 @@ class AlarmDetail extends Component {
 
         // let av = ArrowView();
         // av.printHello();
+        if (isIphoneX()) {
+            this.xtraKeyboardHeight = 180;
+        }
 
         const { params } = props.navigation.state; // same as: " const params = props.navigation.state.params "
         if (params.newAlarm) {
@@ -97,11 +103,11 @@ class AlarmDetail extends Component {
 
         this._setAnimatedViewRef = this._setAnimatedViewRef.bind(this);
 
-        if (this.state.alarm.mode == "normal") {
-            setTimeout(() => {
-                this.interactiveRef.snapTo({ index: 1 });
-            }, 0);
-        }
+        // if (this.state.alarm.mode == "normal") {
+        //     setTimeout(() => {
+        //         this.interactiveRef.snapTo({ index: 1 });
+        //     }, 0);
+        // }
 
         // setTimeout(() => {
         //     this._animatedView.animate(this.state.animationDuration);
@@ -153,7 +159,9 @@ class AlarmDetail extends Component {
 
     keyboardWillShow = event => {
         console.log("keyboardWillShow -------");
-        this.setState({ keyboardHeight: event.endCoordinates.height + 10 });
+        console.log(event.endCoordinates);
+        console.log(SCREEN_HEIGHT);
+        this.setState({ keyboardHeight: event.endCoordinates.height });
         if (this.state.alarm.mode == "normal") {
             setTimeout(() => {
                 this.interactiveRef.snapTo({ index: 2 }); // snap to "keyboard" snapPoint.
@@ -528,16 +536,18 @@ class AlarmDetail extends Component {
     }
 
     render() {
-        console.info("AlarmDetail render - ");
+        console.info("AlarmDetail render ");
         // console.debug("AlarmDetail render - this.state: ", this.state);
         let imageHeight = this.height;
         let initInterPosition, initClockPosition, initHandlePosition;
 
         if (this.state.alarm.mode == "normal") {
+            console.info("NORMAL MODE ");
             initInterPosition = 450;
             initClockPosition = 210;
             initHandlePosition = 160;
         } else {
+            console.info("CALC MODE ");
             initInterPosition = 0;
             initClockPosition = 0;
             initHandlePosition = 120;
@@ -641,8 +651,20 @@ class AlarmDetail extends Component {
             { y: this.snapNormal, id: "normal" }
         ];
 
+        let labelForceVisible = null;
+        let handleForceHide = null;
+
         if (this.state.isEditingLabel && this.state.keyboardHeight) {
-            snapPoints.push({ y: this.state.keyboardHeight, id: "keyboard" });
+            snapPoints.push({
+                y:
+                    SCREEN_HEIGHT -
+                    this.state.keyboardHeight -
+                    50 -
+                    this.xtraKeyboardHeight,
+                id: "keyboard"
+            });
+            labelForceVisible = { opacity: 1 };
+            handleForceHide = { opacity: 0 };
         }
 
         return (
@@ -687,11 +709,11 @@ class AlarmDetail extends Component {
                     snapPoints={snapPoints}
                     animatedValueY={this._clockTransform}
                     onSnap={this.onSnap.bind(this)}
-                    initialPosition={{ y: initInterPosition }}
+                    // initialPosition={{ y: initInterPosition }}
                     dragEnabled={!disableDrag}
                     boundaries={{
                         top: -this.height * 0.1,
-                        bottom: this.height * 1.3,
+                        bottom: this.snapNormal * 1.15,
                         bounce: 0.3
                     }}
                     // dragWithSpring={{ tension: 200, damping: 0.5 }}
@@ -705,7 +727,6 @@ class AlarmDetail extends Component {
                         style={[
                             styles.clockContainer,
                             {
-                                width: this.width,
                                 transform: [
                                     {
                                         translateY: this._clockTransform.interpolate(
@@ -715,8 +736,8 @@ class AlarmDetail extends Component {
                                                     this.snapNormal
                                                 ],
                                                 outputRange: [
-                                                    -this.height * 0.15,
-                                                    this.height * 0.18
+                                                    this.height,
+                                                    this.height * 0.3
                                                 ]
                                             }
                                         )
@@ -748,13 +769,19 @@ class AlarmDetail extends Component {
                             )}
                             style={{
                                 alignSelf: "stretch",
-                                alignContent: "center"
-                                // backgroundColor: "#AA6A3A"
+                                alignContent: "center",
+                                justifyContent: "center",
+                                backgroundColor: "transparent",
+                                flex: 0.65
                             }}
                         >
                             <Text style={[styles.timeText]}>
                                 {fWakeUpTime}
-                                <Text style={[{ fontSize: scale(40) }]}>
+                                <Text
+                                    style={[
+                                        { fontSize: scaleByFactor(40, 0.8) }
+                                    ]}
+                                >
                                     {" " + amPmWakeUpTime}
                                 </Text>
                             </Text>
@@ -767,9 +794,15 @@ class AlarmDetail extends Component {
                             onTextInputFocus={this.onLabelInputFocus}
                             style={{
                                 opacity: this._clockTransform.interpolate({
-                                    inputRange: [0, this.height],
+                                    inputRange: [
+                                        this.snapAuto,
+                                        this.snapNormal
+                                    ],
                                     outputRange: [0, 1]
-                                })
+                                }),
+                                // backgroundColor: "#AA6",
+                                flex: 0.35,
+                                ...labelForceVisible
                             }}
                             viewStyle={{
                                 position: "absolute",
@@ -796,7 +829,10 @@ class AlarmDetail extends Component {
                         <Image
                             style={[
                                 styles.nonClockBgImage,
-                                { height: imageHeight }
+                                {
+                                    height: SCREEN_HEIGHT * 1.2,
+                                    resizeMode: "cover"
+                                }
                             ]}
                             source={require("../img/NonClockBgV2.png")}
                         />
@@ -893,15 +929,19 @@ class AlarmDetail extends Component {
                                 {
                                     translateY: this._clockTransform.interpolate(
                                         {
-                                            inputRange: [0, this.snapNormal],
+                                            inputRange: [
+                                                this.snapAuto,
+                                                this.snapNormal
+                                            ],
                                             outputRange: [
                                                 this.height * 1.2,
-                                                this.height * 0.6
+                                                this.height * 0.8
                                             ]
                                         }
                                     )
                                 }
-                            ]
+                            ],
+                            ...handleForceHide
                         }}
                     />
                 </Interactable.View>
@@ -921,7 +961,7 @@ class AlarmDetail extends Component {
                 >
                     <SimpleLineIcons
                         name="music-tone"
-                        size={22}
+                        size={scaleByFactor(17, 0.7)}
                         color="#ECECEC"
                     />
                 </TouchableOpacity>
@@ -954,15 +994,18 @@ const styles = StyleSheet.create({
         alignItems: "center",
         position: "absolute",
         top: -40, // required for image parallax
-        width: SCREEN_WIDTH,
-        height: 220
+        width: SCREEN_WIDTH * 1.2,
+        backgroundColor: "transparent",
+        padding: 10
     },
     clockContainer: {
-        position: "absolute",
-        justifyContent: "center",
-        alignItems: "center",
+        // position: "absolute",
+        // justifyContent: "center",
+        // alignItems: "center",
         backgroundColor: "transparent",
-        height: SCREEN_HEIGHT * 0.5
+        height: SCREEN_HEIGHT * 0.3,
+        width: SCREEN_WIDTH,
+        top: 0
         // backgroundColor: "#9DD033"
         // top: 20
     },
@@ -973,7 +1016,8 @@ const styles = StyleSheet.create({
     },
     nonClockWrapper: {
         alignItems: "stretch",
-        height: SCREEN_HEIGHT * 3 * 0.4
+        height: SCREEN_HEIGHT * 2 * 0.4,
+        top: SCREEN_HEIGHT * 0.9
     },
     animatedView: {
         // flex: 1,
@@ -1009,7 +1053,8 @@ const styles = StyleSheet.create({
         position: "absolute",
         width: SCREEN_WIDTH,
         height: SCREEN_HEIGHT,
-        top: -15
+        top: -15,
+        left: 0
     },
     clockBackgroundNotImage: {
         justifyContent: "center",
@@ -1022,7 +1067,7 @@ const styles = StyleSheet.create({
     },
     timeText: {
         color: "#d5d5d5",
-        fontSize: scaleByFactor(85, 0.8),
+        fontSize: scaleByFactor(85, 0.5),
         backgroundColor: "transparent",
         alignSelf: "center",
         fontFamily: "Baskerville-Bold"

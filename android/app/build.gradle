@@ -140,6 +140,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-sound')
     compile (project(':react-native-sound')) {
         exclude group: "com.android.support"
     }

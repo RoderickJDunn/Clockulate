@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.facebook.react.ReactApplication;
 import com.zmxv.RNSound.RNSoundPackage;
+import com.zmxv.RNSound.RNSoundPackage;
 // import com.reactlibrary.RNArrowsPackage;
 import com.facebook.react.uimanager.ViewManager;
 import com.wix.interactable.Interactable;
@@ -33,6 +34,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNSoundPackage(),
             new RNSoundPackage(),
             // new RNArrowsPackage(),
             new Interactable(),
