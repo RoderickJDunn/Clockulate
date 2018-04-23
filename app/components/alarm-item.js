@@ -159,7 +159,7 @@ class AlarmItem extends React.PureComponent {
                                     {
                                         alignSelf: "flex-end",
                                         position: "absolute",
-                                        fontSize: 25,
+                                        fontSize: scaleByFactor(25, 0.3),
                                         top: 0,
                                         right: 0,
                                         color: textColor
@@ -170,7 +170,7 @@ class AlarmItem extends React.PureComponent {
                                 {fArriveTime}
                                 <Text
                                     style={[
-                                        { fontSize: 22 },
+                                        { fontSize: scaleByFactor(22, 0.3) },
                                         TextStyle.timeText
                                     ]}
                                 >
@@ -193,7 +193,10 @@ class AlarmItem extends React.PureComponent {
                                 </Text>
                             </Text>
                             <Text
-                                style={{ color: textColor }}
+                                style={{
+                                    color: textColor,
+                                    fontSize: scaleByFactor(10, 0.4)
+                                }}
                                 numberOfLines={2}
                             >
                                 {this.props.alarm.label}

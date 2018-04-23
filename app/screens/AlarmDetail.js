@@ -19,7 +19,7 @@ import {
 import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Interactable from "react-native-interactable";
 import DateTimePicker from "react-native-modal-datetime-picker";
 // import KeyframesView from "react-native-facebook-keyframes";
@@ -393,6 +393,8 @@ class AlarmDetail extends Component {
                     alarmState.mode = "normal";
                 } else if (event.nativeEvent.id == "autocalc") {
                     alarmState.mode = "autocalc";
+                    // TODO: Re-calculate
+                    alarmState.wakeUpTime = this._calcWakeUpTime();
                 }
                 this.setState({ alarm: alarmState });
             });
@@ -641,9 +643,22 @@ class AlarmDetail extends Component {
 
         let editTasksBtn;
         if (!this.state.isEditingTasks) {
-            editTasksBtn = <EntypoIcon name="edit" size={20} color="#7a7677" />;
+            editTasksBtn = (
+                <EntypoIcon
+                    name="edit"
+                    size={scaleByFactor(20, 0.2)}
+                    // color="#7a7677"
+                    color={Colors.brandLightOpp}
+                />
+            );
         } else {
-            editTasksBtn = <Text style={{ color: "blue" }}>DONE</Text>;
+            editTasksBtn = (
+                <Text
+                    style={{ color: "blue", fontSize: scaleByFactor(15, 0.15) }}
+                >
+                    DONE
+                </Text>
+            );
         }
 
         let snapPoints = [
@@ -691,7 +706,7 @@ class AlarmDetail extends Component {
                             ]
                         }
                     ]}
-                    source={require("../img/ClockBgV2.png")}
+                    source={require("../img/ClockBgd_v5.png")}
                 />
 
                 {touchableBackdrop}
@@ -753,7 +768,7 @@ class AlarmDetail extends Component {
                                                     this.snapNormal +
                                                         this.height * 0.2
                                                 ],
-                                                outputRange: [1.1, 1, 1, 1.1],
+                                                outputRange: [1.0, 0.9, 1, 1.1],
                                                 extrapolate: "clamp"
                                             }
                                         )
@@ -777,11 +792,7 @@ class AlarmDetail extends Component {
                         >
                             <Text style={[styles.timeText]}>
                                 {fWakeUpTime}
-                                <Text
-                                    style={[
-                                        { fontSize: scaleByFactor(40, 0.8) }
-                                    ]}
-                                >
+                                <Text style={[{ fontSize: scaleByFactor(40) }]}>
                                     {" " + amPmWakeUpTime}
                                 </Text>
                             </Text>
@@ -815,9 +826,13 @@ class AlarmDetail extends Component {
                                 flex: 1
                             }}
                             textInputStyle={{
-                                fontSize: 16,
+                                fontSize: scaleByFactor(16, 0.6),
                                 textAlign: "center",
-                                color: "white"
+                                color: Colors.brandOffWhiteBlue,
+                                fontWeight: "400",
+                                justifyContent: "center",
+                                opacity: 1,
+                                height: 100
                             }}
                             autoResize={false}
                             numberOfLines={1}
@@ -846,7 +861,7 @@ class AlarmDetail extends Component {
                                 onTextInputBlur={this.onLabelInputBlur}
                                 separation={2}
                                 textInputStyle={{
-                                    fontSize: scale(20)
+                                    fontSize: scaleByFactor(20, 0.5)
                                 }}
                                 flex={0.5}
                                 autoResize={false}
@@ -867,7 +882,7 @@ class AlarmDetail extends Component {
                                     .toDate()}
                                 handleArrivalChange={this._onArrivalTimePicked}
                                 timePickerPrompt="What time do you need to arrive?"
-                                inputFontSize={scale(33)}
+                                inputFontSize={scaleByFactor(33, 0.5)}
                                 separation={scaleByFactor(5, 0.3)}
                             />
                             {/* <View style={{ height: 5 }} /> */}
@@ -893,7 +908,7 @@ class AlarmDetail extends Component {
                                     <Text
                                         style={[
                                             TextStyle.labelText,
-                                            { fontSize: 14 }
+                                            { fontSize: scaleByFactor(14, 0.3) }
                                         ]}
                                     >
                                         TASKS
@@ -908,8 +923,9 @@ class AlarmDetail extends Component {
                                 >
                                     <EntypoIcon
                                         name="add-to-list"
-                                        size={30}
-                                        color="#7a7677"
+                                        size={scaleByFactor(30, 0.2)}
+                                        // color="#7a7677"
+                                        color={Colors.brandLightOpp}
                                     />
                                 </TouchableOpacity>
                             </View>
@@ -934,7 +950,7 @@ class AlarmDetail extends Component {
                                                 this.snapNormal
                                             ],
                                             outputRange: [
-                                                this.height * 1.2,
+                                                this.height * 1.205,
                                                 this.height * 0.8
                                             ]
                                         }
@@ -950,7 +966,21 @@ class AlarmDetail extends Component {
                         position: "absolute",
                         alignSelf: "flex-end",
                         backgroundColor: "transparent",
-                        padding: 20
+                        padding: scaleByFactor(20, 0.6),
+                        transform: [
+                            {
+                                scale: this._clockTransform.interpolate({
+                                    inputRange: [
+                                        this.snapAuto - this.height * 0.2,
+                                        this.snapAuto,
+                                        this.snapNormal,
+                                        this.snapNormal + this.height * 0.2
+                                    ],
+                                    outputRange: [1.0, 0.9, 1, 1.1],
+                                    extrapolate: "clamp"
+                                })
+                            }
+                        ]
                     }}
                     onPress={() => {
                         this.props.navigation.navigate("Sounds", {
@@ -959,10 +989,15 @@ class AlarmDetail extends Component {
                         });
                     }}
                 >
-                    <SimpleLineIcons
-                        name="music-tone"
-                        size={scaleByFactor(17, 0.7)}
-                        color="#ECECEC"
+                    <FontAwesome
+                        name="music"
+                        size={scaleByFactor(23, 0.4)}
+                        // color="#ECECEC"
+                        color={Colors.brandOffWhiteBlue}
+                        // color="#10ac84"
+                        iconStyle={{
+                            color: "blue"
+                        }}
                     />
                 </TouchableOpacity>
                 <DateTimePicker
@@ -993,7 +1028,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         position: "absolute",
-        top: -40, // required for image parallax
+        top: -100, // required for image parallax
         width: SCREEN_WIDTH * 1.2,
         backgroundColor: "transparent",
         padding: 10
@@ -1027,7 +1062,7 @@ const styles = StyleSheet.create({
         height: SCREEN_HEIGHT * 2
     },
     fieldsContainer: {
-        flex: 0.3,
+        flex: 0.2,
         alignSelf: "stretch",
         alignItems: "flex-start",
         justifyContent: "center",
@@ -1038,7 +1073,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1
     },
     taskListContainer: {
-        flex: 0.65,
+        flex: 0.75,
         padding: scaleByFactor(10, 0.4),
         alignSelf: "stretch"
     },
@@ -1066,8 +1101,9 @@ const styles = StyleSheet.create({
         backgroundColor: "#220957"
     },
     timeText: {
-        color: "#d5d5d5",
-        fontSize: scaleByFactor(85, 0.5),
+        // color: "#d5d5d5",
+        color: Colors.brandOffWhiteBlue,
+        fontSize: scaleByFactor(85, 0.7),
         backgroundColor: "transparent",
         alignSelf: "center",
         fontFamily: "Baskerville-Bold"

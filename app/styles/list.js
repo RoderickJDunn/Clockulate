@@ -30,18 +30,19 @@ export const AlarmListStyle = StyleSheet.create({
         width: SCREEN_WIDTH + 100
     },
     toggleButton: {
-        flex: 0.2,
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        paddingRight: scaleByFactor(17, 0.1)
+        paddingLeft: scaleByFactor(15, 0.4),
+        paddingRight: scaleByFactor(17, 0.5)
     },
     infoContainer: {
-        flex: 0.8,
-        justifyContent: "center"
+        flex: 1,
+        justifyContent: "center",
+        alignContent: "stretch"
     },
     timeText: {
-        fontSize: 75
+        fontSize: scaleByFactor(75, 0.2)
     },
     deleteBtn: {
         position: "absolute",
@@ -71,8 +72,7 @@ export const TaskListStyle = StyleSheet.create({
         height: 55,
         alignContent: "stretch",
         alignItems: "center",
-        backgroundColor: "#dbd6dd",
-        justifyContent: "space-between"
+        backgroundColor: "#dbd6dd"
     },
 
     allChildren: {
@@ -95,21 +95,26 @@ export const TaskItemStyle = StyleSheet.create({
         borderBottomColor: "#acacac",
         borderBottomWidth: 0.8,
         alignItems: "center",
-        backgroundColor: "#dbd6dd",
-        justifyContent: "space-between"
+        backgroundColor: "#dbd6dd"
+        // justifyContent: "space-between"
     },
     checkbox: {
-        flexBasis: "11%"
+        // flex: 0.1
         // height: 50,
+        width: 50
     },
     description: {
-        flexBasis: "71%"
+        // flex: 0.7,
+        color: Colors.black,
+        opacity: 0.8
     },
     duration: {
         // alignSelf: 'stretch',
         textAlign: "right",
-        flexBasis: "18%",
-        fontSize: 16
+        // flex: 0.2,
+        fontSize: 16,
+        position: "absolute",
+        right: 10
     },
     deleteBtn: {
         position: "absolute",

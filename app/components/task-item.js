@@ -21,6 +21,7 @@ import Colors from "../styles/colors";
 import { TaskListStyle, TaskItemStyle } from "../styles/list";
 import { TextStyle } from "../styles/text";
 import TouchableBackdrop from "../components/touchable-backdrop";
+import { scaleByFactor } from "../util/font-scale";
 
 class TaskItem extends React.PureComponent {
     /*
@@ -89,7 +90,7 @@ class TaskItem extends React.PureComponent {
             leftBtn = (
                 <EntypoIcon
                     name="dots-three-horizontal"
-                    size={17}
+                    size={scaleByFactor(17, 0.3)}
                     color="#7a7677"
                 />
             );
@@ -99,10 +100,12 @@ class TaskItem extends React.PureComponent {
                     onPress={() => this._onTapCheckBox(this.props.data)}
                     checked={this.props.data.enabled}
                     style={{
-                        marginLeft: -7,
+                        marginLeft: 0,
                         paddingTop: 1,
+                        paddingLeft: 0,
                         backgroundColor: Colors.brandLightPurple,
-                        borderColor: "transparent"
+                        borderColor: "transparent",
+                        alignItems: "center"
                     }}
                     hitSlop={{
                         top: 15,
@@ -116,7 +119,7 @@ class TaskItem extends React.PureComponent {
         return (
             <Interactable.View
                 ref={interactableRef}
-                style={[TaskListStyle.taskRow]}
+                style={[TaskListStyle.taskRow, { alignContent: "flex-start" }]}
                 horizontalOnly={true}
                 snapPoints={[{ x: 0, id: "closed" }, { x: -90, id: "active" }]}
                 dragWithSpring={{ tension: 500, damping: 0.5 }}
