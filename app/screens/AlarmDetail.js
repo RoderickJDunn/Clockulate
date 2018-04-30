@@ -490,6 +490,24 @@ class AlarmDetail extends Component {
         if (alarmTaskRlmObject) {
             realm.write(() => {
                 realm.delete(alarmTaskRlmObject);
+
+                // Update order of task list
+                let { tasks } = this.state.alarm;
+                console.log("Deleted task. --> Now Tasks:", tasks);
+                let idx = 0;
+                for (var taskId in tasks) {
+                    if (tasks.hasOwnProperty(taskId)) {
+                        if (idx == tasks[taskId].order) {
+                            console.log(tasks[taskId]);
+                            console.log("-----> Order OK");
+                        } else {
+                            console.log(tasks[taskId]);
+                            console.log("-----> Order WRong. Decrementing...");
+                            tasks[taskId].order--;
+                        }
+                    }
+                    idx++;
+                }
             });
         }
         this.onTaskListChanged();
