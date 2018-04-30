@@ -3,15 +3,16 @@
  */
 
 export const DefaultAlarm = {
-    wakeUpTime: 45000000, // 8:00 am
-    arrivalTime: 45000000,
+    wakeUpTime: getDateForHour(8), // 8:00 am
+    arrivalTime: getDateForHour(8),
     mode: "autocalc",
     tasks: [],
     label: "",
     enabled: true,
     visible: true,
     preset: false,
-    order: null
+    order: null,
+    sound: ""
 };
 
 export const DefaultTask = {
@@ -45,3 +46,11 @@ export const hourRange = () => {
     hourArr = hourArr.length ? hourArr : _hourArr();
     return hourArr;
 };
+
+function getDateForHour(hour) {
+    let d = new Date();
+    d.setHours(hour);
+    d.setMinutes(0);
+    d.setMilliseconds(0);
+    return d;
+}
