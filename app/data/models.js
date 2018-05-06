@@ -17,6 +17,7 @@ export class AlarmModel {
         this.visible = DefaultAlarm.visible;
         this.preset = DefaultAlarm.preset;
         this.order = order;
+        this.sound = DefaultAlarm.sound;
     }
 
     static isDefault(alarm) {
