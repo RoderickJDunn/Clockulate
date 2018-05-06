@@ -80,7 +80,7 @@ class TaskList extends React.Component {
                 />
             );
         }
-        // console.log("taskArr", tasksArr);
+        // console.log("tasksArr in task-list", tasksArr);
         return (
             <View style={listStyle.container}>
                 <SortableListView
@@ -92,9 +92,14 @@ class TaskList extends React.Component {
                     disableSorting={!this.props.isEditingTasks}
                     moveOnPressIn={this.props.isEditingTasks}
                     onRowMoved={moveInfo => {
-                        console.log("moveInfo.from", moveInfo.from);
-                        console.log("moveInfo.to", moveInfo.to);
-                        console.log("row", moveInfo.row);
+                        // console.log("'this' now: " + this.constructor.name);
+                        // console.log("moveInfo.from", moveInfo.from);
+                        // console.log("moveInfo.to", moveInfo.to);
+                        // console.log("row", moveInfo.row);
+                        // console.log(
+                        //     "tasksArr in onRowMoved callback in task-list",
+                        //     tasksArr
+                        // );
                         this.props.onReorderTasks(
                             tasksArr,
                             moveInfo.row.data.id,

@@ -247,6 +247,7 @@ class AlarmDetail extends Component {
     onPressAddTask() {
         if (this.state.activeTask == null) {
             let nextTaskPosition = this.state.alarm.tasks.length;
+            // console.log("passing position of new task: ", nextTaskPosition);
             this._willLeaveNavScreen();
             this.props.navigation.navigate("TaskDetail", {
                 onSaveState: this.onTaskListChanged.bind(this),
@@ -534,8 +535,13 @@ class AlarmDetail extends Component {
         this.setState({ activeTask: null });
     }
 
-    _onReorderTasks(aTasks, aTaskId, from, to) {
+    _onReorderTasks(aTasks, aTaskId, from, to, anotherArg) {
         console.info("_onReorderTasks");
+        // console.info("aTaskId", aTaskId);
+        // console.info("from", from);
+        // console.info("to", to);
+        // console.log("anotherArg", anotherArg);
+
         console.log("aTasks", aTasks);
         aTasks = aTasks.sort((t1, t2) => t1.order > t2.order);
         realm.write(() => {
@@ -579,6 +585,12 @@ class AlarmDetail extends Component {
                 ? this.state.alarm.tasks.sorted("order")
                 : this.state.alarm.tasks;
 
+        console.log("sortedTasks", sortedTasks);
+        // let sortedTasks = [];
+        // for (let id in sortedTasksRealm) {
+        //     sortedTasks.push(sortedTasksRealm[id]);
+        // }
+
         let taskArea = null;
         if (sortedTasks.length == 0) {
             taskArea = (
@@ -610,6 +622,7 @@ class AlarmDetail extends Component {
                 </TouchableOpacity>
             );
         } else {
+            console.log("Passing new list of tasks to TaskList");
             taskArea = (
                 <TaskList
                     onPressItem={this._onPressTask.bind(this)}
@@ -976,6 +989,10 @@ class AlarmDetail extends Component {
                                 }
                             ],
                             ...handleForceHide
+                        }}
+                        onPress={() => {
+                            let idx = this.state.alarm.mode == "normal" ? 0 : 1;
+                            this.interactiveRef.snapTo({ index: idx });
                         }}
                     />
                 </Interactable.View>
