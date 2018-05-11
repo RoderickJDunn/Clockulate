@@ -1,5 +1,5 @@
 import React from "react";
-import { MainStack } from "./app/config/router";
+import { DrawerRoot } from "./app/config/router";
 import {
     AppRegistry,
     AsyncStorage,
@@ -77,7 +77,7 @@ export default class App extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 <StatusBar animated={true} barStyle={"light-content"} />
-                <MainStack />
+                <DrawerRoot />
             </View>
         );
     }

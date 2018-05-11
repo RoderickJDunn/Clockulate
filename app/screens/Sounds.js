@@ -31,7 +31,8 @@ const SOUNDS = [
 
 export default class Sounds extends Component {
     static navigationOptions = () => ({
-        title: "Sounds"
+        title: "Sounds",
+        drawerLockMode: "locked-closed" // prevents drawer from being opening by swipe-back gesture
     });
 
     width = Dimensions.get("window").width; //full width

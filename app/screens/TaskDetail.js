@@ -26,6 +26,7 @@ This screen allows user to edit details about a Task: Specifically, its Name, Du
 class TaskDetail extends Component {
     static navigationOptions = ({ navigation }) => ({
         title: "Edit Task",
+        drawerLockMode: "locked-closed",
         headerStyle: {
             backgroundColor: Colors.brandDarkGrey
         },
