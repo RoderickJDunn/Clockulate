@@ -6,21 +6,21 @@ import React, { Component } from "react";
 import {
     View,
     FlatList,
-    TouchableOpacity,
     TouchableWithoutFeedback,
     Dimensions,
-    Animated,
-    Easing,
-    LayoutAnimation
+    LayoutAnimation,
+    Platform
 } from "react-native";
-import PushController from "../alarmservice/PushController";
-import PushNotification from "react-native-push-notification";
+import { ALARM_CAT } from "../alarmservice/PushController";
+import NotificationsIOS from "react-native-notifications";
 import moment from "moment";
-
 import realm from "../data/DataSchemas";
 
 import { ListStyle } from "../styles/list";
 import AlarmItem from "../components/alarm-item";
+import RNSound from "react-native-sound";
+
+var loadedSound = null;
 
 class Alarms extends Component {
     width = Dimensions.get("window").width; //full width
@@ -34,8 +34,209 @@ class Alarms extends Component {
         //console.log("Fetching Alarms...");
         this.state = {
             alarms: realm.objects("Alarm").sorted("order"), // TODO: filter by 'visible'=true
-            activeRow: null
+            activeRow: null,
+            menuVisible: false
         };
+
+        console.log("Setting up notifications");
+
+        // setup notifications
+        // NotificationsIOS.addEventListener(
+        //     "remoteNotificationsRegistered",
+        //     this.onPushRegistered.bind(this)
+        // );
+        if (Platform.OS === "ios") {
+            NotificationsIOS.requestPermissions([ALARM_CAT]);
+
+            NotificationsIOS.consumeBackgroundQueue();
+
+            // NotificationsIOS.addEventListener(
+            //     "pushKitRegistered",
+            //     this.onPushKitRegistered.bind(this)
+            // );
+            // NotificationsIOS.registerPushKit();
+
+            NotificationsIOS.addEventListener(
+                "notificationReceivedForeground",
+                this.onNotificationReceivedForeground.bind(this)
+            );
+            NotificationsIOS.addEventListener(
+                "notificationReceivedBackground",
+                this.onNotificationReceivedBackground.bind(this)
+            );
+            NotificationsIOS.addEventListener(
+                "notificationOpened",
+                this.onNotificationOpened.bind(this)
+            );
+        }
+    }
+
+    onPushRegistered(deviceToken) {
+        console.log("Device Token Received: " + deviceToken);
+    }
+
+    onPushKitRegistered(deviceToken) {
+        console.log("PushKit Token Received: " + deviceToken);
+    }
+
+    onNotificationReceivedForeground(notification) {
+        console.log(
+            "Notification Received Foreground: " + JSON.stringify(notification)
+        );
+    }
+
+    onNotificationReceivedBackground(notification) {
+        NotificationsIOS.log(
+            "Notification Received Background: " + JSON.stringify(notification)
+        );
+        console.log("Got background notification");
+
+        // this.playRingtone("super_ringtone.mp3");
+        // this.playLoadedRintone();
+        // logs.push(notification.getCategory());
+        // logs.push(notification.getData());
+        // logs.push(notification.getType());
+        // let localNotification = NotificationsIOS.localNotification({
+        //     alertBody: "Received background notificiation!",
+        //     alertTitle: "Local Notification Title",
+        //     alertAction: "Click here to open",
+        //     soundName: "chime.aiff",
+        //     category: "ALARM_CATEGORY",
+        //     userInfo: notification.getData()
+        // });
+
+        // if you want to fire the local notification 10 seconds later,
+        // add the following line to the notification payload:
+        //      fireDate: new Date(Date.now() + (10 * 1000)).toISOString()
+
+        // NotificationsIOS.backgroundTimeRemaining(time => NotificationsIOS.log("remaining background time: " + time));
+
+        // NotificationsIOS.cancelLocalNotification(localNotification);
+    }
+
+    playRingtone(soundFile) {
+        RNSound.setCategory("Playback");
+
+        var ringtone = new RNSound(soundFile, RNSound.MAIN_BUNDLE, error => {
+            if (error) {
+                console.log("failed to load the sound", error);
+                return;
+            }
+            // loaded successfully
+            console.log(
+                "duration in seconds: " +
+                    ringtone.getDuration() +
+                    "number of channels: " +
+                    ringtone.getNumberOfChannels()
+            );
+
+            // Play the sound with an onEnd callback
+            ringtone.play(success => {
+                if (success) {
+                    console.log("successfully finished playing");
+                } else {
+                    console.log("playback failed due to audio decoding errors");
+                    // reset the player to its uninitialized state (android only)
+                    // this is the only option to recover after an error occured and use the player again
+                    ringtone.reset();
+                }
+
+                ringtone.release();
+            });
+
+            ringtone.setVolume(0.5);
+        });
+    }
+
+    playLoadedRintone() {
+        RNSound.setCategory("Playback");
+        if (loadedSound) {
+            // Play the sound with an onEnd callback
+            loadedSound.play(success => {
+                if (success) {
+                    console.log("successfully finished playing");
+                } else {
+                    console.log("playback failed due to audio decoding errors");
+                    // reset the player to its uninitialized state (android only)
+                    // this is the only option to recover after an error occured and use the player again
+                    loadedSound.reset();
+                }
+
+                loadedSound.release();
+            });
+        }
+        // ringtone.setVolume(0.5);
+    }
+
+    scheduleNotification(alarm, wakeUpDate) {
+        let localNotification;
+        let wakeMoment = moment(wakeUpDate);
+        if (Platform.OS === "ios") {
+            // schedule notifications for this Alarm, staggering them by the "SNOOZE Time"
+            // NOTE: "Snooze Time" will likely be changable option for users per Alarm.
+            //         TODO: Add "snoozePeriod" as a property to Alarm entity in database
+            //         TODO: Add UI and functionality to set a Snooze time from AlarmDetail screen (menu maybe?)
+
+            // For now, use a constant 1 minute as a Snooze Time
+            let snoozeTime = 60;
+            let notiCount = 10;
+            for (let i = 0; i < notiCount; i++) {
+                NotificationsIOS.localNotification({
+                    alertBody: alarm.label,
+                    alertTitle: "Clockulate",
+                    alertAction: "Click here to open",
+                    soundName: alarm.sound,
+                    // silent: true,
+                    category: "ALARM_CATEGORY",
+                    fireDate: wakeMoment.toDate(),
+                    // fireDate: new Date(Date.now() + 10 * 1000).toISOString(),
+                    userInfo: { alarmId: alarm.id }
+                });
+                wakeMoment.add(snoozeTime, "s");
+            }
+        }
+
+        // lastNotificationIds.push(
+        //     NotificationsIOS.localNotification({
+        //         alertBody: alarm.label,
+        //         alertTitle: "Clockulate",
+        //         alertAction: "Click here to open",
+        //         soundName: alarm.sound,
+        //         // silent: true,
+        //         category: "ALARM_CATEGORY",
+        //         // fireDate: wakeUpDate.toDate()
+        //         fireDate: new Date(Date.now() + 60 * 1000).toISOString()
+        //     })
+        // );
+        //     id: alarm.id, // FOR ANDROID
+        //     userInfo: { id: alarm.id }, // FOR IOS
+        //     // alertAction: "",
+        //     message: alarm.label, // (required)
+        //     date: wakeUpDate.toDate(),
+        //     playSound: true,
+        //     soundName: alarm.sound,
+        //     foreground: true
+        //     // repeatType: "minute",
+        //     // actions: '["Snooze", "Turn Off"]'
+
+        console.log("notification IDs: ", localNotification);
+    }
+
+    onNotificationOpened(notification) {
+        console.log("Notification Opened: " + JSON.stringify(notification));
+    }
+
+    _onNotification(notification) {
+        AlertIOS.alert(
+            "Notification Received",
+            "Alert message: " + notification.getMessage(),
+            [
+                {
+                    text: "Dismiss",
+                    onPress: null
+                }
+            ]
+        );
     }
 
     componentWillUpdate() {
@@ -50,9 +251,11 @@ class Alarms extends Component {
         // When this Screen is going to be rendered, any code in navigationOptions is run (ie: the code within
         // the onPress property of a Button (in headerRight)). This code in navigationOptions can have access to
         // the navigation object that we are updating here - so long as you pass in navigation to navigationOptions
+        console.info("adding show menu");
 
         this.props.navigation.setParams({
-            handleAddAlarm: this.handleAddAlarm.bind(this)
+            handleAddAlarm: this.handleAddAlarm.bind(this),
+            showMenu: () => this.props.navigation.navigate("DrawerRoot")
         });
 
         // this._didFocusListener = this.props.navigation.addListener(
@@ -68,6 +271,20 @@ class Alarms extends Component {
 
     componentWillUnmount() {
         console.info("AlarmsList --- componentWillUnmount");
+        if (Platform.OS === "ios") {
+            NotificationsIOS.removeEventListener(
+                "notificationReceivedForeground",
+                this.onNotificationReceivedForeground.bind(this)
+            );
+            NotificationsIOS.removeEventListener(
+                "notificationReceivedBackground",
+                this.onNotificationReceivedBackground.bind(this)
+            );
+            NotificationsIOS.removeEventListener(
+                "notificationOpened",
+                this.onNotificationOpened.bind(this)
+            );
+        }
     }
     handleAddAlarm() {
         console.info("Adding alarm");
@@ -150,37 +367,46 @@ class Alarms extends Component {
         // let wakeUpTime = moment()
         //     .startOf("day")
         //     .add(alarm.wakeUpTime, "s");
-        let wakeUpDate = moment();
-        console.log("Date right now: " + wakeUpDate.toDate());
-        let wakeUpTime = moment(alarm.wakeUpTime);
-        console.log("Straight from DB: " + wakeUpTime.toDate());
 
-        wakeUpDate
-            .set("hour", wakeUpTime.hour())
-            .set("minute", wakeUpTime.minute())
-            .set("second", 0);
-        console.log("Applied today's date: " + wakeUpDate.toDate());
-        // Check if this moment is in the past. If so add 1 day. // TODO: Doesn't work yet.
-        if (wakeUpDate.diff(moment()) < 0) {
-            wakeUpDate.add(1, "days");
-        }
+        /* TODO: TEST WITHOUT THE FOLLOWING : Trying without this code here, since this functionality should be 
+        performed in AlarmDetail now (whenever ArrivalTime or WakeupTime are set)
+        */
+        // let wakeUpDate = moment();
+        // console.log("Date right now: " + wakeUpDate.toDate());
+        // let wakeUpTime = moment(alarm.wakeUpTime);
+        // console.log("Straight from DB: " + wakeUpTime.toDate());
+
+        // wakeUpDate
+        //     .set("hour", wakeUpTime.hour())
+        //     .set("minute", wakeUpTime.minute())
+        //     .set("second", 0);
+        // console.log("Applied today's date: " + wakeUpDate.toDate());
+        // // Check if this moment is in the past. If so add 1 day.
+        // if (wakeUpDate.diff(moment()) < 0) {
+        //     wakeUpDate.add(1, "days");
+        // }
+        /* END TEST */
 
         // console.log(wakeUpTime);
-        console.log("Checked if date already passed: " + wakeUpDate.toDate());
+        console.log("WakeUpTime: " + alarm.wakeUpTime);
         if (alarm.enabled) {
             console.log("Setting alarm");
-            PushNotification.localNotificationSchedule({
-                id: alarm.id, // FOR ANDROID
-                userInfo: { id: alarm.id }, // FOR IOS
-                // alertAction: "",
-                message: alarm.label, // (required)
-                date: wakeUpDate.toDate(),
-                playSound: true,
-                soundName: alarm.sound,
-                foreground: true
-                // repeatType: "minute",
-                // actions: '["Snooze", "Turn Off"]'
-            });
+            // this.playRingtone(alarm.sound);
+            // this.playRingtone("super_ringtone.mp3");
+            // this.playRingtoneAsVid("super_ringtone.mp3");
+            this.scheduleNotification(alarm, alarm.wakeUpTime);
+            // PushNotification.localNotificationSchedule({
+            //     id: alarm.id, // FOR ANDROID
+            //     userInfo: { id: alarm.id }, // FOR IOS
+            //     // alertAction: "",
+            //     message: alarm.label, // (required)
+            //     date: wakeUpDate.toDate(),
+            //     playSound: true,
+            //     soundName: alarm.sound,
+            //     foreground: true
+            //     // repeatType: "minute",
+            //     // actions: '["Snooze", "Turn Off"]'
+            // });
         }
 
         // //console.log("this.state", this.state);
@@ -227,14 +453,14 @@ class Alarms extends Component {
         // Figure out how to manage canceling previously set notifications, if alarm is changed.
         // TODO: Don't schedule them from render(). Only when toggled or on navigate back to this screen
         // TODO: We may need to store an additional field in database for notification ID. Or maybe we can just use the UUID
-
+        // const menu = <Menu navigator={navigator} />;
         return (
             <TouchableWithoutFeedback
                 style={ListStyle.container}
                 onPressIn={this._onPressBackground}
             >
                 <View style={{ flex: 1 }}>
-                    <PushController />
+                    {/* <PushController /> */}
                     <FlatList
                         data={this.state.alarms}
                         renderItem={alarm => {

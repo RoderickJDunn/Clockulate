@@ -11,6 +11,8 @@
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
 #import <React/RCTPushNotificationManager.h>
+#import "RNNotifications.h"
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -38,6 +40,11 @@
   return YES;
 }
 
+// Required for the notification event.
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)notification {
+  [RNNotifications didReceiveRemoteNotification:notification];
+}
+
 - (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
 {
   [RCTPushNotificationManager didRegisterUserNotificationSettings:notificationSettings];
@@ -61,6 +68,20 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 // Required for the localNotification event.
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
 {
+  NSLog(@"didReceiveLocalNotification");
   [RCTPushNotificationManager didReceiveLocalNotification:notification];
+}
+
+// Required for the notification actions.
+- (void)application:(UIApplication *)application handleActionWithIdentifier:(NSString *)identifier forLocalNotification:(UILocalNotification *)notification withResponseInfo:(NSDictionary *)responseInfo completionHandler:(void (^)())completionHandler
+{
+  NSLog(@"handleActionWithIdentifier local");
+  [RNNotifications handleActionWithIdentifier:identifier forLocalNotification:notification withResponseInfo:responseInfo completionHandler:completionHandler];
+}
+
+- (void)application:(UIApplication *)application handleActionWithIdentifier:(NSString *)identifier forRemoteNotification:(NSDictionary *)userInfo withResponseInfo:(NSDictionary *)responseInfo completionHandler:(void (^)())completionHandler
+{
+  NSLog(@"handleActionWithIdentifier remote");
+  [RNNotifications handleActionWithIdentifier:identifier forRemoteNotification:userInfo withResponseInfo:responseInfo completionHandler:completionHandler];
 }
 @end

@@ -44,7 +44,7 @@
 		</dict>
 	</dict>
 	<key>NSCalendarsUsageDescription</key>
-	<string>I need permission to access your calender to set alarms in the background</string>
+	<string>Please allow clockulate to set alarms in the background</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string/>
 	<key>UIAppFonts</key>
