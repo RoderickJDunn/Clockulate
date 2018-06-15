@@ -33,8 +33,9 @@ export const AlarmListStyle = StyleSheet.create({
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        paddingLeft: scaleByFactor(15, 0.4),
-        paddingRight: scaleByFactor(17, 0.5)
+        flex: 0.24,
+        // paddingLeft: scaleByFactor(15, 0.4),
+        marginRight: 15
     },
     infoContainer: {
         flex: 1,

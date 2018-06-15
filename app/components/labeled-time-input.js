@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
+import moment from "moment";
 
 import DateTimePicker from "react-native-modal-datetime-picker";
 
@@ -28,7 +29,26 @@ class LabeledTimeInput extends Component {
 
     _handleDatePicked = time => {
         console.log("A date has been picked: ", time);
-        this.props.handleArrivalChange(time);
+
+        // This 'time' is in fact a 'Date' object. We must make sure that this date
+        // is the next instance of the specified time
+
+        let arrivalDate = moment();
+        console.log("Date right now: " + arrivalDate.toDate());
+        let arrivalTime = moment(time);
+        console.log("Selected date/time: " + arrivalTime.toDate());
+
+        arrivalDate
+            .set("hour", arrivalTime.hour())
+            .set("minute", arrivalTime.minute())
+            .set("second", 0);
+        console.log("Applied today's date: " + arrivalDate.toDate());
+        // Check if this moment is in the past. If so add 1 day. // TODO: Doesn't work yet.
+        if (arrivalDate.diff(moment()) < 0) {
+            arrivalDate.add(1, "days");
+        }
+
+        this.props.handleArrivalChange(arrivalDate.toDate());
         this._hideDateTimePicker();
     };
 

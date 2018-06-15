@@ -3,6 +3,8 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.airbnb.android.react.lottie.LottiePackage;
+import com.wix.reactnativenotifications.RNNotificationsPackage;
 import com.zmxv.RNSound.RNSoundPackage;
 import com.zmxv.RNSound.RNSoundPackage;
 // import com.reactlibrary.RNArrowsPackage;
@@ -34,7 +36,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-            new RNSoundPackage(),
+            new LottiePackage(),
+            new RNNotificationsPackage(this.getApplication()),
             new RNSoundPackage(),
             // new RNArrowsPackage(),
             new Interactable(),

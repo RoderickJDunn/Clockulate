@@ -440,8 +440,24 @@ class AlarmDetail extends Component {
     _onWakeTimePicked = time => {
         console.info("A date has been picked: ", time);
         let { alarm } = this.state;
+
+        /* This code finds the date that is next instance of the time passed in */
+        let wakeUpDate = moment();
+        console.log("Date right now: " + wakeUpDate.toDate());
+        let wakeUpTime = moment(time);
+        console.log("Selected date/time: " + wakeUpTime.toDate());
+
+        wakeUpDate
+            .set("hour", wakeUpTime.hour())
+            .set("minute", wakeUpTime.minute())
+            .set("second", 0);
+        console.log("Applied today's date: " + wakeUpDate.toDate());
+        if (wakeUpDate.diff(moment()) < 0) {
+            wakeUpDate.add(1, "days");
+        }
+
         realm.write(() => {
-            alarm.wakeUpTime = time;
+            alarm.wakeUpTime = wakeUpDate.toDate();
         });
         this._hideDateTimePicker();
     };
@@ -564,7 +580,7 @@ class AlarmDetail extends Component {
     render() {
         console.info("AlarmDetail render ");
         // console.debug("AlarmDetail render - this.state: ", this.state);
-        let imageHeight = this.height;
+        let imageHeight = this.height + 30;
         let initInterPosition, initClockPosition, initHandlePosition;
 
         if (this.state.alarm.mode == "normal") {

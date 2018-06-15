@@ -9,11 +9,15 @@ import {
     TouchableOpacity,
     Dimensions,
     Switch,
-    TouchableWithoutFeedback
+    TouchableWithoutFeedback,
+    Animated,
+    Easing,
+    StyleSheet
 } from "react-native";
 import Svg, { Defs, Circle, RadialGradient, Stop } from "react-native-svg";
 import moment from "moment";
 import Interactable from "react-native-interactable";
+import LottieView from "lottie-react-native";
 
 import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
@@ -46,8 +50,10 @@ class AlarmItem extends React.PureComponent {
     constructor(props) {
         super(props);
         console.log("AlarmItem", "- constructor");
+        let initAnimProgress = props.alarm.enabled ? 0.9 : 0;
         this.state = {
-            switchValue: false
+            switchValue: props.alarm.enabled,
+            animProgress: new Animated.Value(initAnimProgress)
         };
     }
 
@@ -55,9 +61,51 @@ class AlarmItem extends React.PureComponent {
         console.log("AlarmItem - Component did mount ");
     }
 
+    componentWillReceiveProps(props) {
+        console.log("componentWillReceiveProps");
+        if (this.state.switchValue != props.alarm.enabled) {
+            console.log("Triggering animation");
+            this._triggerAnimation(props.alarm.enabled, false);
+        }
+    }
+
+    _triggerAnimation(nextAlarmState, notifyParentOnCompletion) {
+        let toValue = 0.9;
+        let duration = 1000;
+        let easing = Easing.linear;
+        console.log("starting animation");
+
+        // if (this.state.animProgress._value == 0.9) {
+        //     toValue = 0;
+        //     duration = 1000;
+        //     easing = Easing.log;
+        // }
+        toValue = nextAlarmState ? 0.9 : 0;
+        duration = 1000;
+        easing = nextAlarmState ? Easing.linear : Easing.log;
+
+        console.log(
+            "this.state.animProgress._value",
+            this.state.animProgress._value
+        );
+        console.log("toValue", toValue);
+
+        Animated.timing(this.state.animProgress, {
+            toValue: toValue,
+            duration: duration,
+            easing: easing,
+            useNativeDriver: true
+        }).start(() => {
+            if (notifyParentOnCompletion) {
+                this.props.onToggle(this.props.alarm);
+            }
+        });
+        this.setState({ switchValue: nextAlarmState });
+    }
+
     render() {
         console.log("AlarmItem", "- render");
-        // console.debug("alarm-item render(): ", this.props);
+        console.debug("alarm-item props", this.props);
         // //console.log("index", index);
 
         const config = {
@@ -78,7 +126,7 @@ class AlarmItem extends React.PureComponent {
         // Grab correct colors depending on whether alarm is enabled/disabled
         let textColor, buttonColor;
         if (this.props.alarm.enabled) {
-            textColor = Colors.black;
+            textColor = Colors.darkGreyText;
             buttonColor = Colors.buttonOnGreen;
         } else {
             textColor = Colors.disabledGrey;
@@ -139,23 +187,46 @@ class AlarmItem extends React.PureComponent {
                         }}
                     >
                         {/* onStartShouldSetResponder: returning true prevents touches from bubbling up further! */}
-                        <View
-                            style={[AlarmListStyle.toggleButton]}
+                        <TouchableOpacity
+                            style={[
+                                AlarmListStyle.toggleButton,
+                                {
+                                    alignContent: "center",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    flexDirection: "row"
+                                }
+                            ]}
                             onStartShouldSetResponder={evt => true}
+                            onPress={this._triggerAnimation.bind(
+                                this,
+                                !this.state.switchValue,
+                                true
+                            )}
                         >
-                            <Switch
-                                value={this.props.alarm.enabled}
-                                onValueChange={val => {
-                                    console.log("Pressed switch");
-                                    this.props.onToggle(this.props.alarm);
-                                }}
-                                onTintColor={"rgba(50, 163, 50, 1)"}
-                                tintColor={"rgba(200, 200, 200, 1)"}
-                            />
-                        </View>
+                            <View
+                                style={[
+                                    {
+                                        flex: 1,
+                                        // backgroundColor: "green",
+                                        alignSelf: "stretch",
+                                        alignContent: "center",
+                                        justifyContent: "center"
+                                    }
+                                ]}
+                            >
+                                <LottieView
+                                    source={require("../img/off-to-clock-lottie.json")}
+                                    progress={this.state.animProgress}
+                                    resizeMode={"contain"}
+                                    style={[StyleSheet.absoluteFill]}
+                                />
+                            </View>
+                        </TouchableOpacity>
                         <View style={AlarmListStyle.infoContainer}>
                             <Text
                                 style={[
+                                    TextStyle.timeText,
                                     {
                                         alignSelf: "flex-end",
                                         position: "absolute",
@@ -163,15 +234,15 @@ class AlarmItem extends React.PureComponent {
                                         top: 0,
                                         right: 0,
                                         color: textColor
-                                    },
-                                    TextStyle.timeText
+                                    }
                                 ]}
                             >
                                 {fArriveTime}
                                 <Text
                                     style={[
-                                        { fontSize: scaleByFactor(22, 0.3) },
-                                        TextStyle.timeText
+                                        {
+                                            fontSize: scaleByFactor(22, 0.3)
+                                        }
                                     ]}
                                 >
                                     {" " + amPmArriveTime}
@@ -195,7 +266,7 @@ class AlarmItem extends React.PureComponent {
                             <Text
                                 style={{
                                     color: textColor,
-                                    fontSize: scaleByFactor(10, 0.4)
+                                    fontSize: scaleByFactor(12, 0.4)
                                 }}
                                 numberOfLines={2}
                             >
