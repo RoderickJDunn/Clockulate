@@ -89,6 +89,7 @@ class TaskList extends React.Component {
                         this._renderItem(item, sectionId, rowID)
                     }
                     keyExtractor={this._keyExtractor}
+                    disableAnimatedScrolling={true}
                     disableSorting={!this.props.isEditingTasks}
                     moveOnPressIn={this.props.isEditingTasks}
                     onRowMoved={moveInfo => {
