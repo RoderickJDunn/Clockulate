@@ -7,6 +7,7 @@
 import { StyleSheet, Dimensions } from "react-native";
 import Colors from "./colors";
 import { scale, scaleByFactor } from "../util/font-scale";
+import * as CONST_DIMENSIONS from "../styles/const_dimensions";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -122,8 +123,8 @@ export const TaskItemStyle = StyleSheet.create({
         backgroundColor: Colors.deleteBtnRed,
         marginLeft: 20,
         right: 0,
-        width: 80,
-        height: 55,
+        width: CONST_DIMENSIONS.TASK_DELETE_BTN_WIDTH,
+        height: CONST_DIMENSIONS.TASK_DELETE_BTN_HEIGHT,
         justifyContent: "center",
         zIndex: 10000
     },

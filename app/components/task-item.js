@@ -18,7 +18,6 @@ import Interactable from "react-native-interactable";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 
 import DurationText from "./duration-text";
-// import CheckBox from "react-native-check-box";
 import { CheckBox } from "native-base";
 import Colors from "../styles/colors";
 
@@ -26,6 +25,7 @@ import { TaskListStyle, TaskItemStyle } from "../styles/list";
 import { TextStyle } from "../styles/text";
 import TouchableBackdrop from "../components/touchable-backdrop";
 import { scaleByFactor } from "../util/font-scale";
+import * as CONST_DIMENSIONS from "../styles/const_dimensions";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -43,69 +43,37 @@ class TaskItem extends React.PureComponent {
     constructor() {
         super();
         this.state = {
-            tempDuration: null,
-            position: new Animated.Value(0)
+            tempDuration: null
         };
     }
 
     componentWillMount() {
-        this._animatedValue = 0;
-        this.state.position.addListener(
-            value => (this._animatedValue = value.value)
-        );
-
-        let longPressFired = false;
-        let longPressTmo = null;
-        let touchStartTime = null;
         this._panResponder = PanResponder.create({
             // Ask to be the responder:
             onMoveShouldSetPanResponder: (evt, gestureState) => {
-                console.log("onMoveShouldSetPanResponder");
-                // return touchStartTime == null ? true : longPressFired;
-                return true;
+                // console.log("onMoveShouldSetPanResponder");
+                // console.log("Returning: ", this.state.tempDuration != null);
+                return this.state.tempDuration != null;
             },
             onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
-                console.log("onMoveShouldSetPanResponderCapture");
-                // return longPressFired;
-                return true;
+                // console.log("onMoveShouldSetPanResponderCapture");
+                // console.log("Returning: ", this.state.tempDuration != null);
+                return this.state.tempDuration != null;
             },
-            // onStartShouldSetPanResponder: () => true,
-            // onStartShouldSetPanResponderCapture: (evt, gestureState) => {
-            //     // Set opacity of button to half
-            //     // PanResponder always capturing
-            //     return true;
-            // },
             // At each drag start
             onPanResponderGrant: (evt, gestureState) => {
                 console.log("onPanResponderGrant");
-                // Add offset of last position
-                // position.setOffset(position.__getValue());
-                // // Resets to x:0 and y:0
-                // position.setValue({ x: 0, y: 0 });
-
-                this.state.position.setOffset(this._animatedValue);
-                this.state.position.setValue(0); //Initial value
 
                 this._touchable.setOpacityTo(0.5, 100);
-                touchStartTime = new Date();
                 console.log("evt", evt.nativeEvent.locationX);
                 console.log("evt", evt.nativeEvent.pageX);
                 console.log("test log");
-                let tempDuration =
-                    (evt.nativeEvent.pageX /
-                        (SCREEN_WIDTH - scaleByFactor(10, 0.4))) *
-                    MAX_SLIDER_VALUE;
-                longPressTmo = setTimeout(() => {
-                    longPressFired = true;
-                    this._onLongPress(tempDuration);
-                }, 500);
+                // let tempDuration =
+                //     (evt.nativeEvent.pageX /
+                //         (SCREEN_WIDTH - scaleByFactor(10, 0.4))) *
+                //     MAX_SLIDER_VALUE;
             },
-            // onPanResponderMove: Animated.event([
-            //     null, // ignore the native event
-            //     // extract dx and dy from gestureState
-            //     // like 'pan.x = gestureState.dx, pan.y = gestureState.dy'
-            //     { dx: this.state.position }
-            // ]),
+
             onPanResponderMove: (event, gesture) => {
                 console.log("onPanResponderMove", event.nativeEvent.pageX);
 
@@ -116,61 +84,46 @@ class TaskItem extends React.PureComponent {
                     gesture.dy < -3 ||
                     gesture.dx < -3
                 ) {
-                    clearTimeout(longPressTmo);
-                    let now = new Date();
-                    let timeDiff = now.getTime() - touchStartTime.getTime();
-                    console.log("timediff", timeDiff);
-                    if (timeDiff < 500) {
-                        longPressFired = false;
-                    }
-                    if (longPressFired) {
-                        // Start moving the view around
-                        // position.setValue({ x: gesture.dx, y: gesture.dy });
-                        // // Reset button Opacity
-                        // this._touchable.setOpacityTo(1, 100);
-                        let tempDuration =
-                            (event.nativeEvent.pageX /
-                                (SCREEN_WIDTH - scaleByFactor(10, 0.4))) *
-                            MAX_SLIDER_VALUE;
-                        this.setState({ tempDuration: tempDuration });
-                    }
-                }
+                    let tempDuration =
+                        (event.nativeEvent.pageX /
+                            (SCREEN_WIDTH -
+                                CONST_DIMENSIONS.TASK_DELETE_BTN_WIDTH -
+                                scaleByFactor(10, 0.4))) *
+                        MAX_SLIDER_VALUE;
 
-                Animated.event([
-                    null, // ignore the native event
-                    // extract dx and dy from gestureState
-                    // like 'pan.x = gestureState.dx, pan.y = gestureState.dy'
-                    { dx: this.state.position }
-                ])(event, gesture);
+                    /* this line converts the value (currently in seconds with a decimal), to an seconds integer
+                     that is a multiple of 60 (so that it can be converted to minutes with no remainder)*/
+                    tempDuration = Math.trunc(tempDuration / 60) * 60;
+                    this.setState({ tempDuration: tempDuration });
+                }
             },
             // When the user releases touch
             onPanResponderRelease: (event, gesture) => {
                 console.log("onPanResponderRelease");
-                this.state.position.flattenOffset();
-                clearTimeout(longPressTmo);
+
                 // If the user didn't move more than 3px around, I consider it as a press on the button
                 if (
                     gesture.dx < 3 &&
                     gesture.dx > -3 &&
                     gesture.dy < 3 &&
                     gesture.dy > -3 &&
-                    longPressFired == false
+                    this.state.tempDuration == null
                 ) {
                     // Launch button on click
                     this._touchable.touchableHandlePress();
                     // Reset button opacity
                 } else {
                     this.setState({ tempDuration: null });
+                    this._onDurationChange();
                 }
                 // this._touchable.setOpacityTo(1, 100);
-                longPressFired = false;
             }
         });
     }
 
-    componentWillUnmount() {
-        this.state.position.removeAllListeners();
-    }
+    // componentWillUnmount() {
+    //     // this.state.position.removeAllListeners();
+    // }
 
     _onPress = () => {
         console.debug("TaskItem: onPress");
@@ -190,14 +143,27 @@ class TaskItem extends React.PureComponent {
         this.props.onPressItemCheckBox(data, data.enabled);
     };
 
+    _onDurationChange = () => {
+        // console.debug(data);
+        this.props.onChangeTaskDuration(
+            this.props.data,
+            this.state.tempDuration
+        );
+    };
+
     _onLongPress = initialVal => {
         console.log("_onLongPress task");
-        this.setState({ tempDuration: 600 });
+        let initialDuration = this.props.data.duration
+            ? this.props.data.duration
+            : this.props.data.task.defaultDuration;
+        this.setState({ tempDuration: initialDuration });
     };
 
     render() {
         console.debug("render task-item");
         // console.debug("render task-item", this.props);
+
+        // console.log("this.state.tempDuration", this.state.tempDuration);
 
         /* Statement Explanation: 
             - Use tempDuration if not null (this means the slider is showing)
@@ -210,22 +176,21 @@ class TaskItem extends React.PureComponent {
                 ? this.props.data.duration
                 : this.props.data.task.defaultDuration);
 
-        // let interactableRef = el => (this.interactiveRef = el);
-        console.log("duration", duration);
+        let interactableRef = el => (this.interactiveRef = el);
+        // console.log("duration", duration);
 
         // console.log(
         //     "Checking whether to setTimeout. close : " + this.props.closed
         // );
 
-        console.log("this.state.tempDuration", this.state.tempDuration);
-
         let touchableBackdrop = null;
-        // if (this.props.closed == true) {
-        //     setTimeout(() => {
-        //         // console.log("Timeout closing task delete view...");
-        //         this.interactiveRef.snapTo({ index: 0 });
-        //     }, 0);
-        // }
+        if (this.props.closed == true) {
+            setTimeout(() => {
+                // console.log("Timeout closing task delete view...");
+                this.interactiveRef.snapTo({ index: 0 });
+            }, 0);
+        }
+
         if (this.props.activeTask != null) {
             touchableBackdrop = (
                 <TouchableBackdrop
@@ -271,34 +236,31 @@ class TaskItem extends React.PureComponent {
                 />
             );
         }
+
         return (
-            <Animated.View
+            <Interactable.View
                 style={[
                     TaskListStyle.taskRow,
                     {
-                        alignContent: "flex-start",
-                        transform: [{ translateX: this.state.position }]
+                        alignContent: "flex-start"
                     }
                 ]}
-                // {...this.props.sortHandlers}
-                {...this._panResponder.panHandlers}
-                // snapPoints={[
-                //     { x: 0, id: "closed" },
-                //     { x: -90, id: "active" }
-                // ]}
-                // dragWithSpring={{ tension: 500, damping: 0.5 }}
-                // animatedNativeDriver={true}
-                // onSnap={e => {
-                //     // console.log("Snapping");
-                //     this.props.onSnapTask(e.nativeEvent.id);
-                // }}
+                ref={interactableRef}
+                horizontalOnly={true}
+                snapPoints={[{ x: 0, id: "closed" }, { x: -90, id: "active" }]}
+                dragWithSpring={{ tension: 500, damping: 0.5 }}
+                animatedNativeDriver={true}
+                onSnap={e => {
+                    // console.log("Snapping");
+                    this.props.onSnapTask(e.nativeEvent.id);
+                }}
             >
                 <View
                     style={TaskItemStyle.taskInfoWrap}
-                    // {...this._panResponder.panHandlers}
+                    {...this._panResponder.panHandlers}
                 >
                     <TouchableOpacity
-                        style={TaskItemStyle.taskInfoWrap}
+                        style={[TaskItemStyle.taskInfoWrap]}
                         ref={touchable => (this._touchable = touchable)}
                         onPress={this._onPress.bind(this)}
                         onLongPress={this._onLongPress.bind(this)}
@@ -362,7 +324,7 @@ class TaskItem extends React.PureComponent {
                 >
                     <Text style={TaskItemStyle.deleteBtnText}>DELETE</Text>
                 </TouchableOpacity>
-            </Animated.View>
+            </Interactable.View>
         );
     }
 }
@@ -375,7 +337,7 @@ const styles = StyleSheet.create({
     },
     slider: {
         position: "absolute",
-        backgroundColor: "blue",
+        backgroundColor: Colors.backgroundGrey,
         top: 0,
         left: 0,
         right: 70,
