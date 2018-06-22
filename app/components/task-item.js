@@ -53,11 +53,19 @@ class TaskItem extends React.PureComponent {
             onMoveShouldSetPanResponder: (evt, gestureState) => {
                 // console.log("onMoveShouldSetPanResponder");
                 // console.log("Returning: ", this.state.tempDuration != null);
+
+                /* If tempDuration is null, the slider is not showing, so return false
+                    Otherwise, if tempDuration is not null, the slider is showing, so we need to follow gestures. Return true
+                */
                 return this.state.tempDuration != null;
             },
             onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
                 // console.log("onMoveShouldSetPanResponderCapture");
                 // console.log("Returning: ", this.state.tempDuration != null);
+
+                /* If tempDuration is null, the slider is not showing, so return false
+                    Otherwise, if tempDuration is not null, the slider is showing, so we need to follow gestures. Return true
+                */
                 return this.state.tempDuration != null;
             },
             // At each drag start
@@ -205,7 +213,8 @@ class TaskItem extends React.PureComponent {
             );
         }
 
-        let leftBtn;
+        let leftBtn,
+            sortHandlers = null;
         if (this.props.isEditingTasks) {
             leftBtn = (
                 <EntypoIcon
@@ -214,6 +223,8 @@ class TaskItem extends React.PureComponent {
                     color="#7a7677"
                 />
             );
+
+            sortHandlers = this.props.sortHandlers;
         } else {
             leftBtn = (
                 <CheckBox
@@ -264,7 +275,8 @@ class TaskItem extends React.PureComponent {
                         ref={touchable => (this._touchable = touchable)}
                         onPress={this._onPress.bind(this)}
                         onLongPress={this._onLongPress.bind(this)}
-                        // {...this.props.sortHandlers}
+                        // disabled={this.props.isEditingTasks}
+                        {...sortHandlers}
                     >
                         <View style={TaskItemStyle.checkbox}>{leftBtn}</View>
                         <Text
