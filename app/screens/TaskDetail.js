@@ -122,11 +122,11 @@ class TaskDetail extends Component {
         if (this.state.newTask) {
             // Create new Task and associated AlarmTask
             // console.log(this.state);
-            alert("Creating new task");
+            // alert("Creating new task");
             prevAlarmTask = this.state.alarmTask;
             realm.write(() => {
                 // NOTE: even though we need both a new Task and AlarmTask, we just need to create the AlarmTask,
-                //        and the Task is automatically created. In fact, creating the Task then trying to create the
+                //        and the Task is automatically created by Realm framework. In fact, creating the Task then trying to create the
                 //        corresponding AlarmTask afterward gives an error (duplicate primary key).
                 alarmTask = realm.create("AlarmTask", prevAlarmTask);
             });

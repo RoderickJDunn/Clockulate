@@ -8,13 +8,16 @@ import {
     Text,
     View,
     TouchableOpacity,
-    TouchableWithoutFeedback
+    TouchableWithoutFeedback,
+    Slider,
+    PanResponder,
+    Dimensions,
+    Animated
 } from "react-native";
 import Interactable from "react-native-interactable";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 
 import DurationText from "./duration-text";
-// import CheckBox from "react-native-check-box";
 import { CheckBox } from "native-base";
 import Colors from "../styles/colors";
 
@@ -22,7 +25,11 @@ import { TaskListStyle, TaskItemStyle } from "../styles/list";
 import { TextStyle } from "../styles/text";
 import TouchableBackdrop from "../components/touchable-backdrop";
 import { scaleByFactor } from "../util/font-scale";
+import * as CONST_DIMENSIONS from "../styles/const_dimensions";
 
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+const MAX_SLIDER_VALUE = 7200; // this is 2 hours, in seconds
 class TaskItem extends React.PureComponent {
     /*
     Props: Receives an AlarmTask in the 'data' property:
@@ -32,6 +39,91 @@ class TaskItem extends React.PureComponent {
           task: { id:"_", name:"Task name", defaultDuration: # }
         }
      */
+
+    constructor() {
+        super();
+        this.state = {
+            tempDuration: null
+        };
+    }
+
+    componentWillMount() {
+        this._panResponder = PanResponder.create({
+            // Ask to be the responder:
+            onMoveShouldSetPanResponder: (evt, gestureState) => {
+                // console.log("onMoveShouldSetPanResponder");
+                // console.log("Returning: ", this.state.tempDuration != null);
+                return this.state.tempDuration != null;
+            },
+            onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
+                // console.log("onMoveShouldSetPanResponderCapture");
+                // console.log("Returning: ", this.state.tempDuration != null);
+                return this.state.tempDuration != null;
+            },
+            // At each drag start
+            onPanResponderGrant: (evt, gestureState) => {
+                console.log("onPanResponderGrant");
+
+                this._touchable.setOpacityTo(0.5, 100);
+                console.log("evt", evt.nativeEvent.locationX);
+                console.log("evt", evt.nativeEvent.pageX);
+                console.log("test log");
+                // let tempDuration =
+                //     (evt.nativeEvent.pageX /
+                //         (SCREEN_WIDTH - scaleByFactor(10, 0.4))) *
+                //     MAX_SLIDER_VALUE;
+            },
+
+            onPanResponderMove: (event, gesture) => {
+                console.log("onPanResponderMove", event.nativeEvent.pageX);
+
+                // If user drags more that 3px around
+                if (
+                    gesture.dx > 3 ||
+                    gesture.dy > 3 ||
+                    gesture.dy < -3 ||
+                    gesture.dx < -3
+                ) {
+                    let tempDuration =
+                        (event.nativeEvent.pageX /
+                            (SCREEN_WIDTH -
+                                CONST_DIMENSIONS.TASK_DELETE_BTN_WIDTH -
+                                scaleByFactor(10, 0.4))) *
+                        MAX_SLIDER_VALUE;
+
+                    /* this line converts the value (currently in seconds with a decimal), to an seconds integer
+                     that is a multiple of 60 (so that it can be converted to minutes with no remainder)*/
+                    tempDuration = Math.trunc(tempDuration / 60) * 60;
+                    this.setState({ tempDuration: tempDuration });
+                }
+            },
+            // When the user releases touch
+            onPanResponderRelease: (event, gesture) => {
+                console.log("onPanResponderRelease");
+
+                // If the user didn't move more than 3px around, I consider it as a press on the button
+                if (
+                    gesture.dx < 3 &&
+                    gesture.dx > -3 &&
+                    gesture.dy < 3 &&
+                    gesture.dy > -3 &&
+                    this.state.tempDuration == null
+                ) {
+                    // Launch button on click
+                    this._touchable.touchableHandlePress();
+                    // Reset button opacity
+                } else {
+                    this.setState({ tempDuration: null });
+                    this._onDurationChange();
+                }
+                // this._touchable.setOpacityTo(1, 100);
+            }
+        });
+    }
+
+    // componentWillUnmount() {
+    //     // this.state.position.removeAllListeners();
+    // }
 
     _onPress = () => {
         console.debug("TaskItem: onPress");
@@ -51,14 +143,41 @@ class TaskItem extends React.PureComponent {
         this.props.onPressItemCheckBox(data, data.enabled);
     };
 
+    _onDurationChange = () => {
+        // console.debug(data);
+        this.props.onChangeTaskDuration(
+            this.props.data,
+            this.state.tempDuration
+        );
+    };
+
+    _onLongPress = initialVal => {
+        console.log("_onLongPress task");
+        let initialDuration = this.props.data.duration
+            ? this.props.data.duration
+            : this.props.data.task.defaultDuration;
+        this.setState({ tempDuration: initialDuration });
+    };
+
     render() {
         console.debug("render task-item");
         // console.debug("render task-item", this.props);
-        let duration = this.props.data.duration
-            ? this.props.data.duration
-            : this.props.data.task.defaultDuration;
+
+        // console.log("this.state.tempDuration", this.state.tempDuration);
+
+        /* Statement Explanation: 
+            - Use tempDuration if not null (this means the slider is showing)
+            - Otherwise, check if there is a user-set duration for this AlarmTask, if there is, use it
+            - Otherwise, use the default duration for this Task
+        */
+        let duration =
+            this.state.tempDuration ||
+            (this.props.data.duration
+                ? this.props.data.duration
+                : this.props.data.task.defaultDuration);
 
         let interactableRef = el => (this.interactiveRef = el);
+        // console.log("duration", duration);
 
         // console.log(
         //     "Checking whether to setTimeout. close : " + this.props.closed
@@ -71,6 +190,7 @@ class TaskItem extends React.PureComponent {
                 this.interactiveRef.snapTo({ index: 0 });
             }, 0);
         }
+
         if (this.props.activeTask != null) {
             touchableBackdrop = (
                 <TouchableBackdrop
@@ -116,10 +236,16 @@ class TaskItem extends React.PureComponent {
                 />
             );
         }
+
         return (
             <Interactable.View
+                style={[
+                    TaskListStyle.taskRow,
+                    {
+                        alignContent: "flex-start"
+                    }
+                ]}
                 ref={interactableRef}
-                style={[TaskListStyle.taskRow, { alignContent: "flex-start" }]}
                 horizontalOnly={true}
                 snapPoints={[{ x: 0, id: "closed" }, { x: -90, id: "active" }]}
                 dragWithSpring={{ tension: 500, damping: 0.5 }}
@@ -129,34 +255,68 @@ class TaskItem extends React.PureComponent {
                     this.props.onSnapTask(e.nativeEvent.id);
                 }}
             >
-                <TouchableOpacity
+                <View
                     style={TaskItemStyle.taskInfoWrap}
-                    onPress={this._onPress.bind(this)}
-                    {...this.props.sortHandlers}
+                    {...this._panResponder.panHandlers}
                 >
-                    <View style={TaskItemStyle.checkbox}>{leftBtn}</View>
-                    <Text
-                        style={[
-                            TaskListStyle.allChildren,
-                            TaskItemStyle.description
-                        ]}
-                        numberOfLines={2}
-                        ellipsizeMode="tail"
-                        selectable={false}
+                    <TouchableOpacity
+                        style={[TaskItemStyle.taskInfoWrap]}
+                        ref={touchable => (this._touchable = touchable)}
+                        onPress={this._onPress.bind(this)}
+                        onLongPress={this._onLongPress.bind(this)}
+                        // {...this.props.sortHandlers}
                     >
-                        {this.props.data.task.name}
-                    </Text>
-                    <DurationText
-                        duration={duration}
-                        short={true}
-                        style={[
-                            TaskListStyle.allChildren,
-                            TaskItemStyle.duration,
-                            TextStyle.timeText,
-                            { fontSize: 24 }
-                        ]}
-                    />
-                </TouchableOpacity>
+                        <View style={TaskItemStyle.checkbox}>{leftBtn}</View>
+                        <Text
+                            style={[
+                                TaskListStyle.allChildren,
+                                TaskItemStyle.description
+                            ]}
+                            numberOfLines={2}
+                            ellipsizeMode="tail"
+                            selectable={false}
+                        >
+                            {this.props.data.task.name}
+                        </Text>
+                        <DurationText
+                            duration={duration}
+                            short={true}
+                            style={[
+                                TaskListStyle.allChildren,
+                                TaskItemStyle.duration,
+                                TextStyle.timeText,
+                                { fontSize: 24 }
+                            ]}
+                        />
+                    </TouchableOpacity>
+                    {this.state.tempDuration != null && (
+                        <Slider
+                            ref={component => (this._sliderRef = component)}
+                            style={[styles.slider]}
+                            maximumValue={MAX_SLIDER_VALUE}
+                            minimumValue={0}
+                            step={5}
+                            value={duration}
+                            onStartShouldSetResponder={() => {
+                                console.log("onStartShouldSetResponder");
+                                return true;
+                            }}
+                            onMoveShouldSetResponder={() => {
+                                console.log("onMoveShouldSetResponder");
+                                return true;
+                            }}
+                            onResponderReject={() => {
+                                console.log("onResponderReject");
+                            }}
+                            onSlidingComplete={value => {
+                                console.log(
+                                    "Finished sliding. Final value: " + value
+                                );
+                                this.setState({ tempDuration: null });
+                            }}
+                        />
+                    )}
+                </View>
                 {touchableBackdrop}
                 <TouchableOpacity
                     style={[TaskItemStyle.deleteBtn]}
@@ -168,5 +328,22 @@ class TaskItem extends React.PureComponent {
         );
     }
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 0.9,
+        backgroundColor: "transparent",
+        flexDirection: "row"
+    },
+    slider: {
+        position: "absolute",
+        backgroundColor: Colors.backgroundGrey,
+        top: 0,
+        left: 0,
+        right: 70,
+        bottom: 0,
+        flex: 1
+    }
+});
 
 export default TaskItem;

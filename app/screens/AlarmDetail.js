@@ -262,7 +262,7 @@ class AlarmDetail extends Component {
 
     onTaskListChanged(newTask) {
         console.info("Task modified");
-        console.log("Task modified", newTask);
+        // console.log("Task modified", newTask);
         // Check if Task is defined. This callback expects the newly created alarmTask,
         // or nothing if an existing alarmTask was updated.
         let { alarm } = this.state;
@@ -382,6 +382,27 @@ class AlarmDetail extends Component {
         // this.onTaskListChanged();
     };
 
+    onChangeTaskDuration = (taskToUpdate, newDuration) => {
+        console.info("onChangeTaskDuration");
+        let { alarm } = this.state;
+        let tasks = alarm.tasks;
+        let taskToChange = tasks.find(task => task.id === taskToUpdate.id);
+        if (!taskToChange) {
+            console.error(
+                "Could not find task to update with new 'enabled' value. Searching for AlarmTask id: ",
+                taskToChange.id
+            );
+            return;
+        }
+        realm.write(() => {
+            console.log("newDuration", newDuration);
+            taskToChange.duration = newDuration;
+            alarm.wakeUpTime = this._calcWakeUpTime();
+        });
+        this.setState({ tasks: tasks });
+        // this.onTaskListChanged();
+    };
+
     onSnap = event => {
         console.info("onSnap");
         let alarmState = this.state.alarm;
@@ -394,7 +415,7 @@ class AlarmDetail extends Component {
                     alarmState.mode = "normal";
                 } else if (event.nativeEvent.id == "autocalc") {
                     alarmState.mode = "autocalc";
-                    // TODO: Re-calculate
+                    // Re-calculate
                     alarmState.wakeUpTime = this._calcWakeUpTime();
                 }
                 this.setState({ alarm: alarmState });
@@ -643,6 +664,7 @@ class AlarmDetail extends Component {
                 <TaskList
                     onPressItem={this._onPressTask.bind(this)}
                     onPressItemCheckBox={this.onChangeTaskEnabled}
+                    onChangeTaskDuration={this.onChangeTaskDuration}
                     onPressDelete={this._onDeleteTask.bind(this)}
                     onSnapTask={this._onSnapTask.bind(this)}
                     data={sortedTasks}
