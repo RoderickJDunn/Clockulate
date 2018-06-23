@@ -92,6 +92,7 @@ class TaskList extends React.Component {
                     disableAnimatedScrolling={true}
                     disableSorting={!this.props.isEditingTasks}
                     moveOnPressIn={this.props.isEditingTasks}
+                    scrollEnabled={!this.props.isSlidingTask}
                     onRowMoved={moveInfo => {
                         // console.log("'this' now: " + this.constructor.name);
                         // console.log("moveInfo.from", moveInfo.from);

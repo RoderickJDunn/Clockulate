@@ -125,6 +125,17 @@ class TaskItem extends React.PureComponent {
                     this._onDurationChange();
                 }
                 // this._touchable.setOpacityTo(1, 100);
+            },
+            onPanResponderTerminationRequest: (evt, gestureState) => {
+                // console.log("onPanResponderTerminationRequest");
+                return true;
+            },
+            onPanResponderTerminate: (evt, gestureState) => {
+                // console.log("onPanResponderTerminate");
+                // Another component has become the responder, so this gesture
+                // should be cancelled
+                this.setState({ tempDuration: null });
+                this._onDurationChange();
             }
         });
     }
@@ -161,9 +172,18 @@ class TaskItem extends React.PureComponent {
 
     _onLongPress = initialVal => {
         console.log("_onLongPress task");
+        
+        /* first inform parent views that we are going to show the slider, so that they disable dragging functionality
+            1) AlarmDetail main Interactable-View dragging will be disabled
+            2) TaskList sortable-listview scrolling will be disabled
+            3) Disabling of TaskItem Interactable-View (show delete btn) is managed in render()
+        */
+       this.props.onShowDurationSlider();
+        
         let initialDuration = this.props.data.duration
             ? this.props.data.duration
             : this.props.data.task.defaultDuration;
+        
         this.setState({ tempDuration: initialDuration });
     };
 
@@ -265,6 +285,9 @@ class TaskItem extends React.PureComponent {
                     // console.log("Snapping");
                     this.props.onSnapTask(e.nativeEvent.id);
                 }}
+                /* Disable "Swipe-to-show DELETE" if slider is showing. Otherwise we get
+                    premature panResonder termination, especially on iOS */
+                dragEnabled={this.state.tempDuration == null}
             >
                 <View
                     style={TaskItemStyle.taskInfoWrap}

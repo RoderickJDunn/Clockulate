@@ -84,7 +84,8 @@ class AlarmDetail extends Component {
                     activeTask: null, // holds the task ID of the task currently showing DELETE button. Otherwise null.
                     isEditingTasks: false, // indicates whether tasks are currently moveable.
                     isEditingLabel: false, // indicates whether Label is being edited. Need to move Input when keyboard shows.
-                    keyboardHeight: null
+                    keyboardHeight: null,
+                    isSlidingTask: false
                 };
                 // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
@@ -97,7 +98,8 @@ class AlarmDetail extends Component {
                 activeTask: null,
                 isEditingTasks: false,
                 isEditingLabel: false,
-                keyboardHeight: null
+                keyboardHeight: null,
+                isSlidingTask: false
             };
         }
 
@@ -382,6 +384,12 @@ class AlarmDetail extends Component {
         // this.onTaskListChanged();
     };
 
+    /* Callback from TaskItem for when duration-slider has been released.
+        Two main responsibilites
+        1. Update the specified task in DB with the new duration value (set from slider)
+        2. Re-enable dragging of the main Interactable-View, as well as the TaskList child
+            - This is done by setting isSlidingTask==false
+    */
     onChangeTaskDuration = (taskToUpdate, newDuration) => {
         console.info("onChangeTaskDuration");
         let { alarm } = this.state;
@@ -399,7 +407,7 @@ class AlarmDetail extends Component {
             taskToChange.duration = newDuration;
             alarm.wakeUpTime = this._calcWakeUpTime();
         });
-        this.setState({ tasks: tasks });
+        this.setState({ tasks: tasks, isSlidingTask: false });
         // this.onTaskListChanged();
     };
 
@@ -616,6 +624,10 @@ class AlarmDetail extends Component {
             initHandlePosition = 120;
         }
 
+        /* I hope this means: If either isEditingTasks or isSlidingTask is true, set
+            disableDrag to true. Otherwise, set disableDrag to false (if both are false)*/
+        let disableDrag = this.state.isEditingTasks || this.state.isSlidingTask;
+
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
         let sortedTasks =
             this.state.alarm.tasks.length > 1
@@ -666,17 +678,19 @@ class AlarmDetail extends Component {
                     onPressItemCheckBox={this.onChangeTaskEnabled}
                     onChangeTaskDuration={this.onChangeTaskDuration}
                     onPressDelete={this._onDeleteTask.bind(this)}
+                    onShowDurationSlider={() =>
+                        this.setState({ isSlidingTask: true })
+                    }
                     onSnapTask={this._onSnapTask.bind(this)}
                     data={sortedTasks}
                     activeTask={this.state.activeTask}
                     closeTaskRows={this._closeTaskRows.bind(this)}
                     isEditingTasks={this.state.isEditingTasks}
+                    isSlidingTask={disableDrag}
                     onReorderTasks={this._onReorderTasks.bind(this)}
                 />
             );
         }
-
-        let disableDrag = this.state.isEditingTasks;
 
         let wakeUpTime = this.state.alarm.wakeUpTime;
         // console.log("this.state.alarm.mode", this.state.alarm.mode);
