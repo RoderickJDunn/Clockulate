@@ -40,6 +40,17 @@ class TaskItem extends React.PureComponent {
         }
      */
 
+    /* This flag is required to indicate that a user has actually started sliding (ie. onMoveShouldSetPanResponder 
+        has been called and returned true, and the PanResponder has been granted.) This is to distinguish from
+        the case where the user has longPressed a task and the slider is showing, but since they have not slided 
+        their finger yet, the panResponder has not been granted. Without this flag, the user could release from
+        the longPress without sliding at all, and there would be no functionality to remove the slider (since
+        this was previously all done in panResponder callbacks). Now, the 'onPressOut' callback of the 
+        TouchableOpacity will remove the slider from the view if the _isSliding flag is set to false (indicating
+        that the user never actually slid their finger).    
+    */
+    _isSliding = false;
+
     constructor() {
         super();
         this.state = {
@@ -75,7 +86,7 @@ class TaskItem extends React.PureComponent {
                 this._touchable.setOpacityTo(0.5, 100);
                 console.log("evt", evt.nativeEvent.locationX);
                 console.log("evt", evt.nativeEvent.pageX);
-                console.log("test log");
+                this._isSliding = true;
                 // let tempDuration =
                 //     (evt.nativeEvent.pageX /
                 //         (SCREEN_WIDTH - scaleByFactor(10, 0.4))) *
@@ -124,7 +135,9 @@ class TaskItem extends React.PureComponent {
                     this.setState({ tempDuration: null });
                     this._onDurationChange();
                 }
-                // this._touchable.setOpacityTo(1, 100);
+                this._touchable.setOpacityTo(1, 100);
+
+                this._isSliding = false;
             },
             onPanResponderTerminationRequest: (evt, gestureState) => {
                 // console.log("onPanResponderTerminationRequest");
@@ -136,6 +149,8 @@ class TaskItem extends React.PureComponent {
                 // should be cancelled
                 this.setState({ tempDuration: null });
                 this._onDurationChange();
+
+                this._isSliding = false;
             }
         });
     }
@@ -172,18 +187,18 @@ class TaskItem extends React.PureComponent {
 
     _onLongPress = initialVal => {
         console.log("_onLongPress task");
-        
+
         /* first inform parent views that we are going to show the slider, so that they disable dragging functionality
             1) AlarmDetail main Interactable-View dragging will be disabled
             2) TaskList sortable-listview scrolling will be disabled
             3) Disabling of TaskItem Interactable-View (show delete btn) is managed in render()
         */
-       this.props.onShowDurationSlider();
-        
+        this.props.onShowDurationSlider();
+
         let initialDuration = this.props.data.duration
             ? this.props.data.duration
             : this.props.data.task.defaultDuration;
-        
+
         this.setState({ tempDuration: initialDuration });
     };
 
@@ -298,6 +313,11 @@ class TaskItem extends React.PureComponent {
                         ref={touchable => (this._touchable = touchable)}
                         onPress={this._onPress.bind(this)}
                         onLongPress={this._onLongPress.bind(this)}
+                        onPressOut={() => {
+                            if (this.state.tempDuration != null && this._isSliding == false) {
+                                this.setState({ tempDuration: null });
+                            }
+                        }}
                         // disabled={this.props.isEditingTasks}
                         {...sortHandlers}
                     >
