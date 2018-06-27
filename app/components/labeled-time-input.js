@@ -54,7 +54,15 @@ class LabeledTimeInput extends Component {
 
     render() {
         return (
-            <View style={[styles.container, { flex: this.props.flex }]}>
+            <View
+                style={[
+                    styles.container,
+                    {
+                        flex: this.props.flex
+                        // height: inputHeight + scaleByFactor(23, 0.5),
+                    }
+                ]}
+            >
                 <Text
                     style={[
                         TextStyle.labelText,
@@ -90,7 +98,8 @@ const styles = StyleSheet.create({
     container: {
         // flex: 1,
         alignSelf: "stretch",
-        backgroundColor: "transparent"
+        backgroundColor: "transparent",
+        justifyContent: "center"
     }
 });
 

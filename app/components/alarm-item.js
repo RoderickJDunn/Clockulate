@@ -266,7 +266,7 @@ class AlarmItem extends React.PureComponent {
                             <Text
                                 style={{
                                     color: textColor,
-                                    fontSize: scaleByFactor(12, 0.4)
+                                    fontSize: scaleByFactor(15, 0.4)
                                 }}
                                 numberOfLines={2}
                             >

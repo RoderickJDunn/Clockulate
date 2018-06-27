@@ -14,7 +14,8 @@ import {
     Image,
     Animated,
     TouchableWithoutFeedback,
-    Keyboard
+    Keyboard,
+    TextInput
 } from "react-native";
 import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -57,7 +58,7 @@ class AlarmDetail extends Component {
 
     xtraKeyboardHeight = 0; // this is always 0, except on iPhone X it is 34
 
-    AnimatedAlarmLabel = Animated.createAnimatedComponent(LabeledInput);
+    AnimatedAlarmLabel = Animated.createAnimatedComponent(TextInput);
     AnimatedHandle = Animated.createAnimatedComponent(MaterialIcon);
 
     _clockTransform = new Animated.Value(0);
@@ -105,6 +106,7 @@ class AlarmDetail extends Component {
 
         this._setAnimatedViewRef = this._setAnimatedViewRef.bind(this);
 
+        this.alarmLabelCache = this.state.alarm.label;
         // if (this.state.alarm.mode == "normal") {
         //     setTimeout(() => {
         //         this.interactiveRef.snapTo({ index: 1 });
@@ -882,10 +884,13 @@ class AlarmDetail extends Component {
                         </TouchableOpacity>
                         <this.AnimatedAlarmLabel
                             placeholder="Enter a label"
-                            fieldText={this.state.alarm.label}
-                            handleTextInput={this.onChangeLabel}
-                            onTextInputBlur={this.onLabelInputBlur}
-                            onTextInputFocus={this.onLabelInputFocus}
+                            value={
+                                this.alarmLabelCache || this.state.alarm.label
+                            }
+                            onChangeText={this.onChangeLabel}
+                            onBlur={this.onLabelInputBlur}
+                            onFocus={this.onLabelInputFocus}
+                            underlineColorAndroid="transparent"
                             style={{
                                 opacity: this._clockTransform.interpolate({
                                     inputRange: [
@@ -895,27 +900,17 @@ class AlarmDetail extends Component {
                                     outputRange: [0, 1]
                                 }),
                                 // backgroundColor: "#AA6",
-                                flex: 0.35,
-                                ...labelForceVisible
-                            }}
-                            viewStyle={{
-                                position: "absolute",
-                                top: "85%",
-                                width: this.width,
-                                alignSelf: "stretch",
-                                paddingLeft: 20,
-                                paddingRight: 20,
-                                height: 100,
-                                flex: 1
-                            }}
-                            textInputStyle={{
                                 fontSize: scaleByFactor(16, 0.6),
                                 textAlign: "center",
                                 color: Colors.brandOffWhiteBlue,
                                 fontWeight: "400",
                                 justifyContent: "center",
-                                opacity: 1,
-                                height: 100
+                                height: 100,
+                                position: "absolute",
+                                bottom: "0%",
+                                width: this.width,
+                                alignSelf: "stretch",
+                                ...labelForceVisible
                             }}
                             autoResize={false}
                             numberOfLines={1}
@@ -939,12 +934,12 @@ class AlarmDetail extends Component {
                             <LabeledInput
                                 labelText="ALARM LABEL"
                                 placeholder="Enter a label"
-                                fieldText={this.state.alarm.label}
+                                fieldText={this.alarmLabelCache}
                                 handleTextInput={this.onChangeLabel}
                                 onTextInputBlur={this.onLabelInputBlur}
-                                separation={2}
+                                separation={4}
                                 textInputStyle={{
-                                    fontSize: scaleByFactor(20, 0.5)
+                                    fontSize: scaleByFactor(22, 0.5)
                                 }}
                                 flex={0.5}
                                 autoResize={false}
@@ -1149,9 +1144,8 @@ const styles = StyleSheet.create({
         height: SCREEN_HEIGHT * 2
     },
     fieldsContainer: {
-        flex: 0.2,
+        flex: 0.25,
         alignSelf: "stretch",
-        alignItems: "flex-start",
         justifyContent: "center",
         // backgroundColor: "yellow",
         padding: scaleByFactor(10, 0.4),

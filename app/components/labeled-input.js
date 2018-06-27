@@ -35,11 +35,15 @@ class LabeledInput extends Component {
     }
 
     _onChangeTextInput(text) {
+        // console.log("text", text);
         this.props.handleTextInput(text);
         this.setState({ inputText: text });
     }
 
     render() {
+        // console.log("render labeledInput");
+        // console.log("this.state.inputText", this.state.inputText);
+        // console.log("this.props.fieldText", this.props.fieldText);
         let onBlur, onFocus, height, labelBottomPadding, flex;
         let multiline = this.props.multiline;
         let inputHeight = 0;
@@ -86,7 +90,7 @@ class LabeledInput extends Component {
                     style={[
                         TextStyle.labelText,
                         styles.fieldLabelText,
-                        { paddingBottom: labelBottomPadding }
+                        { paddingBottom: this.props.separation }
                     ]}
                 >
                     {this.props.labelText}
@@ -97,11 +101,20 @@ class LabeledInput extends Component {
                         TextStyle.editableText,
                         this.props.textInputStyle,
                         {
-                            height: inputHeight + scaleByFactor(30, 0.5)
+                            // height: inputHeight + scaleByFactor(23, 0.5),
+                            paddingVertical: 3,
+                            margin: 0
+                            // backgroundColor: "#ededed"
+                            // borderRadius: 5
                         }
                     ]}
+                    // underlineColorAndroid="transparent"
                     placeholder={this.props.placeholder}
-                    value={this.state.inputText || this.props.fieldText}
+                    value={
+                        this.state.inputText != null
+                            ? this.state.inputText
+                            : this.props.fieldText
+                    }
                     onChangeText={this._onChangeTextInput.bind(this)}
                     onBlur={e => {
                         // console.log("TextInput blurred: " + e.nativeEvent.text);
@@ -117,6 +130,7 @@ class LabeledInput extends Component {
                         this.updateSize(e.nativeEvent.contentSize.height)
                     }
                     multiline={false}
+                    underlineColorAndroid="transparent"
                 />
             </View>
         );
