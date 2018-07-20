@@ -504,6 +504,8 @@ class AlarmDetail extends Component {
         );
         let totalTaskDurations = this.state.alarm.tasks
             .map(alarmTask => {
+                // console.log("mapping: ");
+                // console.log(alarmTask);
                 if (alarmTask.enabled) {
                     console.log("Task enabled");
                     return alarmTask.duration
@@ -1154,7 +1156,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1
     },
     taskListContainer: {
-        flex: 0.75,
+        flex: 0.63,
         padding: scaleByFactor(10, 0.4),
         alignSelf: "stretch"
     },
