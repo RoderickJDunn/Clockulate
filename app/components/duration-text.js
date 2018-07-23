@@ -28,7 +28,7 @@ class DurationText extends Component {
 
         let duration = "";
         if (!hours) {
-            duration = minutes ? `${minutes}m` : "0m";
+            duration = minutes ? `${minutes} m` : "0 m";
         } else if (hours && !minutes) {
             duration = `${hours} ${hourUnit}`;
         } else {
