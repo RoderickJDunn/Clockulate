@@ -67,9 +67,16 @@ class LabeledDurationInput extends Component {
         this.props.onChange(dataTemp.time);
     };
 
+    componentWillReceiveProps(nextProps) {
+        let { data } = this.state;
+        data.time = nextProps.time;
+        this.setState({ data: data });
+    }
+
     render() {
+        // console.log("this.state.data", this.state.data);
         return (
-            <View style={[styles.container, { flex: this.props.flex }]}>
+            <View style={this.props.style}>
                 <Text style={[styles.fieldLabelText, TextStyle.labelText]}>
                     {this.state.data.labelText}
                 </Text>
