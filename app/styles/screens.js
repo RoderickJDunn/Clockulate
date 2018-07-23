@@ -8,8 +8,7 @@ const ScreenStyles = StyleSheet.create({
         flex: 1,
         padding: 10,
         backgroundColor: Colors.backgroundGrey,
-        alignSelf: "stretch",
-        alignItems: "flex-start"
+        alignSelf: "stretch"
     }
 });
 

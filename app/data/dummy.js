@@ -7,6 +7,29 @@ import uuid from "react-native-uuid";
 import moment from "moment";
 console.log("dummy data file");
 
+let prePopTasks = [
+    {
+        name: "Take out trash and recycling (blue bin)",
+        defaultDuration: 600
+    },
+    {
+        name: "Take out recyling (black bin)",
+        defaultDuration: 300
+    },
+    {
+        name: "Make egg sandwhich",
+        defaultDuration: 180
+    },
+    {
+        name: "Eat cereal",
+        defaultDuration: 600
+    },
+    {
+        name: "Snooze Alarm",
+        defaultDuration: 1200
+    }
+];
+
 // Create Realm objects and write to local storage
 function insertDummyData() {
     realm.write(() => {
@@ -59,6 +82,15 @@ function insertDummyData() {
             name: "Travel to appointment",
             defaultDuration: 1200
         });
+
+        /* Create some more tasks */
+        for (let index = 0; index < prePopTasks.length; index++) {
+            realm.create("Task", {
+                id: uuid.v1(),
+                name: prePopTasks[index].name,
+                defaultDuration: prePopTasks[index].defaultDuration
+            });
+        }
 
         /**** Create AlarmTasks *****/
         // AlarmTasks for alarm1
