@@ -237,7 +237,6 @@ class TaskDetail extends Component {
         } else {
             // A Task with this name already exists in the DB (it is currently stored in prevAlarmTask.task)
 
-
             let { navigation } = this.props;
             if (isNewAlarmTask) {
                 // create a new Task and associated AlarmTask.
@@ -260,10 +259,13 @@ class TaskDetail extends Component {
                             ? prevAlarmTask.task.defaultDuration
                             : 600;
 
-                    alarmTask = new AlarmTaskModel(existingTask, orderOfAlmTask);
+                    alarmTask = new AlarmTaskModel(
+                        existingTask,
+                        orderOfAlmTask
+                    );
 
                     console.log("new alarmTask", alarmTask);
-                    alarmTask = realm.create("AlarmTask", alarmTask);
+                    alarmTask = realm.create("AlarmTask", alarmTask, true);
                 });
             } else {
                 // create/update the AlarmTask with the new duration
@@ -462,6 +464,9 @@ class TaskDetail extends Component {
                         listStyle={{
                             backgroundColor: Colors.backgroundGrey,
                             elevation: 3,
+                            margin: 0,
+                            borderLeftWidth: 0,
+                            borderRightWidth: 0,
                             maxHeight:
                                 SCREEN_HEIGHT -
                                 HEADER_HEIGHT -
@@ -545,7 +550,6 @@ const Styles = StyleSheet.create({
         shadowRadius: 3,
         elevation: 3,
         shadowColor: "black",
-        backgroundColor: "#0000",
         zIndex: 999
     },
     suggestionItemWrapper: {
