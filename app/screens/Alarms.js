@@ -448,12 +448,6 @@ class Alarms extends Component {
         //     console.log(a.id);
         // });
 
-        // TODO: Schedule Local notifications for active alarms
-        // make sure to check whether they have already been set.
-        // Figure out how to manage canceling previously set notifications, if alarm is changed.
-        // TODO: Don't schedule them from render(). Only when toggled or on navigate back to this screen
-        // TODO: We may need to store an additional field in database for notification ID. Or maybe we can just use the UUID
-        // const menu = <Menu navigator={navigator} />;
         return (
             <TouchableWithoutFeedback
                 style={ListStyle.container}
