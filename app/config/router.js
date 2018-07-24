@@ -3,7 +3,7 @@
  */
 
 import React from "react";
-import { View, Text, Button } from "react-native";
+import { View, Text, Button, TouchableOpacity } from "react-native";
 import { StackNavigator, DrawerNavigator } from "react-navigation";
 import { Icon } from "react-native-elements";
 
@@ -12,6 +12,7 @@ import AlarmDetail from "../screens/AlarmDetail";
 import AlarmDetailBasic from "../screens/AlarmDetailBasic";
 import TaskDetail from "../screens/TaskDetail";
 import Settings from "../screens/Settings";
+import About from "../screens/About";
 import Sounds from "../screens/Sounds";
 
 import Colors from "../styles/colors";
@@ -50,6 +51,64 @@ const navigationConfig = {
     }
 };
 
+const alarmListNavOptions = ({ navigation }) => ({
+    title: "Alarms",
+    drawerLabel: "Alarms",
+    headerRight: (
+        <Icon
+            name={"add"}
+            color={Colors.brandLightGrey}
+            underlayColor={Colors.brandDarkGrey}
+            size={28}
+            onPress={() => navigation.state.params.handleAddAlarm()}
+            hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
+            style={{ marginRight: scaleByFactor(8, 0.9) }}
+        />
+    ),
+    headerLeft: (
+        <Icon
+            name={"menu"}
+            color={Colors.brandLightGrey}
+            underlayColor={Colors.brandDarkGrey}
+            size={28}
+            /* "DrawerOpen" is a built-in navigation function. I did not define it anywhere*/
+            onPress={() => navigation.navigate("DrawerOpen")}
+            navigate={navigation.navigate}
+            hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
+            style={{ marginLeft: scaleByFactor(8, 0.9) }}
+        />
+    )
+});
+
+const otherDrawerNavOptions = title => {
+    return ({ navigation }) => ({
+        title: title,
+        drawerLabel: title,
+        headerStyle: {
+            // Style the header view itself (aka. the nav bar)
+            backgroundColor: Colors.brandDarkGrey,
+            borderBottomWidth: 0
+        },
+        headerTitleStyle: {
+            // style the Title text of the header
+            color: Colors.brandLightGrey
+        },
+        headerLeft: (
+            <Icon
+                name={"menu"}
+                color={Colors.brandLightGrey}
+                underlayColor={Colors.brandDarkGrey}
+                size={28}
+                /* "DrawerOpen" is a built-in navigation function. I did not define it anywhere*/
+                onPress={() => navigation.navigate("DrawerOpen")}
+                navigate={navigation.navigate}
+                hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
+                style={{ marginLeft: scaleByFactor(8, 0.9) }}
+            />
+        )
+    });
+};
+
 function fakePage() {
     return View;
 }
@@ -58,39 +117,12 @@ const MainStack = StackNavigator(
     {
         AlarmsList: {
             screen: Alarms,
-            navigationOptions: ({ navigation }) => ({
-                title: "Alarms",
-                drawerLabel: "Close",
-                headerRight: (
-                    <Icon
-                        name={"add"}
-                        color={Colors.brandLightGrey}
-                        underlayColor={Colors.brandDarkGrey}
-                        size={28}
-                        onPress={() => navigation.state.params.handleAddAlarm()}
-                        hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
-                        style={{ marginRight: scaleByFactor(8, 0.9) }}
-                    />
-                ),
-                headerLeft: (
-                    <Icon
-                        name={"menu"}
-                        color={Colors.brandLightGrey}
-                        underlayColor={Colors.brandDarkGrey}
-                        size={28}
-                        /* "DrawerOpen" is a built-in navigation function. I did not define it anywhere*/
-                        onPress={() => navigation.navigate("DrawerOpen")}
-                        navigate={navigation.navigate}
-                        hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
-                        style={{ marginLeft: scaleByFactor(8, 0.9) }}
-                    />
-                )
-            })
+            navigationOptions: alarmListNavOptions
         },
         AlarmDetail: {
             screen: AlarmDetail,
             navigationOptions: ({ navigation }) => ({
-                drawerLockMode: "locked-closed",
+                drawerLockMode: "locked-closed", // this prevents the drawer from opening when user swipes from left of screen to go Back
                 headerStyle: {
                     backgroundColor: Colors.brandDarkGrey,
                     borderBottomWidth: 0
@@ -102,16 +134,19 @@ const MainStack = StackNavigator(
                 //  perform any additional tasks before executing navigation.goBack(), otherwise, goBack() is called
                 //  automatically when the back button is pushed
                 headerLeft: (
-                    <Icon
-                        name={"chevron-left"}
-                        color={Colors.brandLightGrey}
-                        underlayColor={Colors.brandDarkGrey}
-                        size={33}
+                    <TouchableOpacity
                         onPress={() => {
                             navigation.state.params.handleBackBtn();
                         }}
                         hitSlop={{ top: 10, bottom: 10, left: 0, right: 20 }}
-                    />
+                    >
+                        <Icon
+                            name={"chevron-left"}
+                            color={Colors.brandLightGrey}
+                            underlayColor={Colors.brandDarkGrey}
+                            size={33}
+                        />
+                    </TouchableOpacity>
                 )
             })
         },
@@ -131,7 +166,28 @@ export const DrawerRoot = DrawerNavigator(
             screen: MainStack
         },
         Settings: {
-            screen: Settings
+            screen: StackNavigator(
+                {
+                    SettingsScreen: {
+                        screen: Settings
+                    }
+                },
+                {
+                    navigationOptions: otherDrawerNavOptions("Settings")
+                }
+            )
+        },
+        About: {
+            screen: StackNavigator(
+                {
+                    AboutScreen: {
+                        screen: About
+                    }
+                },
+                {
+                    navigationOptions: otherDrawerNavOptions("About")
+                }
+            )
         }
     },
     {
@@ -146,6 +202,7 @@ export const DrawerRoot = DrawerNavigator(
                 opacity: 1
             }
         },
-        order: ["Settings", "MainStack"]
+        headerMode: "screen",
+        order: ["MainStack", "Settings", "About"]
     }
 );

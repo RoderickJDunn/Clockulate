@@ -9,20 +9,22 @@ import {
 } from "react-native";
 
 // TODO:
-export default class Settings extends React.Component {
+export default class About extends React.Component {
     /*
     Props: 
      */
-    static navigationOptions = () => ({
-        title: "Settings"
-    });
 
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
     render() {
         return (
             <View style={{ flex: 1 }}>
-                <View />
+                <Text>About Clockulate</Text>
+                <Text>Version X.XX</Text>
+                <Text>Credits</Text>
+                <Text>Credits</Text>
+                <Text>Credits</Text>
+                <Text>Credits</Text>
             </View>
         );
     }
