@@ -25,6 +25,7 @@ import Interactable from "react-native-interactable";
 import DateTimePicker from "react-native-modal-datetime-picker";
 // import KeyframesView from "react-native-facebook-keyframes";
 import { isIphoneX } from "react-native-iphone-x-helper";
+import LinearGradient from "react-native-linear-gradient";
 
 import moment from "moment";
 
@@ -948,7 +949,13 @@ class AlarmDetail extends Component {
                                 numberOfLines={1}
                                 multiline={false}
                             />
-                            <View style={{ height: scale(3) }} />
+                            {/* <View style={{ height: scale(3) }} /> */}
+                            {/* <View
+                                style={{
+                                    height: 1,
+                                    backgroundColor: "#E0E0E0"
+                                }}
+                            /> */}
                             <LabeledTimeInput
                                 labelText="ARRIVAL TIME"
                                 flex={0.5}
@@ -966,9 +973,20 @@ class AlarmDetail extends Component {
                                 separation={scaleByFactor(5, 0.3)}
                             />
                             {/* <View style={{ height: 5 }} /> */}
+                            {/* <View
+                                style={{
+                                    height: 1,
+                                    backgroundColor: "#E0E0E0"
+                                }}
+                            /> */}
                         </View>
                         {touchableBackdrop}
-                        <View style={[styles.taskListContainer]}>
+                        <LinearGradient
+                            start={{ x: 0.5, y: 0 }}
+                            end={{ x: 0.5, y: 0.04 }}
+                            colors={["#D2CED4", Colors.backgroundGrey]}
+                            style={[styles.taskListContainer]}
+                        >
                             <View style={styles.taskListHeader}>
                                 <TouchableOpacity
                                     style={{
@@ -988,7 +1006,7 @@ class AlarmDetail extends Component {
                                     <Text
                                         style={[
                                             TextStyle.labelText,
-                                            { fontSize: scaleByFactor(14, 0.3) }
+                                            { fontSize: scaleByFactor(17, 0.3) }
                                         ]}
                                     >
                                         TASKS
@@ -1011,7 +1029,7 @@ class AlarmDetail extends Component {
                             </View>
                             {touchableBackdrop}
                             {taskArea}
-                        </View>
+                        </LinearGradient>
                     </View>
                     <this.AnimatedHandle
                         name="drag-handle"
@@ -1152,19 +1170,22 @@ const styles = StyleSheet.create({
         // backgroundColor: "yellow",
         padding: scaleByFactor(10, 0.4),
         paddingBottom: 8,
-        borderBottomColor: "#e9e9e9",
-        borderBottomWidth: 1
+        borderBottomColor: "#e9e9e9"
+        // borderBottomWidth: 1
     },
     taskListContainer: {
         flex: 0.63,
         padding: scaleByFactor(10, 0.4),
         alignSelf: "stretch"
+        // backgroundColor: Colors.backgroundGrey
+        // backgroundColor: "#afabb0"
     },
     taskListHeader: {
         flex: 0.1,
         flexDirection: "row",
         justifyContent: "space-between",
-        paddingBottom: 5
+        paddingBottom: 5,
+        paddingTop: 15
     },
 
     nonClockBgImage: {
