@@ -74,7 +74,7 @@ export const TaskListStyle = StyleSheet.create({
         height: 55,
         alignContent: "stretch",
         alignItems: "center",
-        backgroundColor: "#dbd6dd"
+        backgroundColor: "transparent"
     },
 
     allChildren: {
@@ -97,7 +97,7 @@ export const TaskItemStyle = StyleSheet.create({
         borderBottomColor: "#acacac",
         borderBottomWidth: 0.8,
         alignItems: "center",
-        backgroundColor: "#dbd6dd"
+        backgroundColor: "transparent"
         // justifyContent: "space-between"
     },
     checkbox: {

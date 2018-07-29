@@ -11,7 +11,7 @@ import {
     LayoutAnimation,
     Platform
 } from "react-native";
-import { ALARM_CAT } from "../alarmservice/PushController";
+import { ALARM_CAT, scheduleAlarm } from "../alarmservice/PushController";
 import NotificationsIOS from "react-native-notifications";
 import moment from "moment";
 import realm from "../data/DataSchemas";
@@ -194,6 +194,9 @@ class Alarms extends Component {
                 });
                 wakeMoment.add(snoozeTime, "s");
             }
+        }
+        else {
+            scheduleAlarm(alarm);
         }
 
         // lastNotificationIds.push(

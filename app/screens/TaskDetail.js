@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { Icon } from "react-native-elements";
 import EntypoIcon from "react-native-vector-icons/Entypo";
+import IonIcon from "react-native-vector-icons/Ionicons";
 import { NavigationActions } from "react-navigation";
 import Autocomplete from "react-native-autocomplete-input";
 import { isIphoneX } from "react-native-iphone-x-helper";
@@ -53,10 +54,16 @@ class TaskDetail extends Component {
                 color: Colors.brandLightGrey
             },
             headerRight: (
-                <Button
-                    title="Save"
+                <TouchableOpacity
+                    style={{ marginRight: 15 }}
                     onPress={() => navigation.state.params.handleSave()}
-                />
+                >
+                    <IonIcon
+                        name="md-done-all"
+                        size={30}
+                        color={Colors.brandOffWhiteBlue}
+                    />
+                </TouchableOpacity>
             )
         };
     };

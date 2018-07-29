@@ -3,6 +3,7 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.emekalites.react.alarm.notification.ANPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.airbnb.android.react.lottie.LottiePackage;
 import com.wix.reactnativenotifications.RNNotificationsPackage;
@@ -37,6 +38,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new ANPackage(),
             new LinearGradientPackage(),
             new LottiePackage(),
             new RNNotificationsPackage(this.getApplication()),

@@ -25,6 +25,7 @@
         "native-base": "^2.3.2",
         "react": "^16.2.0",
         "react-native": "^0.49.5",
+        "react-native-alarm-notification": "^1.1.0",
         "react-native-animatable": "^1.2.4",
         "react-native-autocomplete-input": "^3.5.0",
         "react-native-calendar-events": "^1.4.3",
