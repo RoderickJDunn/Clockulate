@@ -5,6 +5,7 @@
 import realm from "./DataSchemas";
 import uuid from "react-native-uuid";
 import moment from "moment";
+import { DefaultAlarm } from "./constants";
 console.log("dummy data file");
 
 let prePopTasks = [
@@ -152,7 +153,8 @@ function insertDummyData() {
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
             preset: false, // if tr
             order: 0,
-            sound: ""
+            sound: "",
+            snoozeTime: DefaultAlarm.snoozeTime
         });
 
         const alarm2 = realm.create("Alarm", {
@@ -166,7 +168,8 @@ function insertDummyData() {
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
             preset: false, // if tr
             order: 1,
-            sound: "super_ringtone.mp3"
+            sound: "super_ringtone.mp3",
+            snoozeTime: DefaultAlarm.snoozeTime
         });
         console.log(alarm2, alarm1, task2, task4, task5);
     });

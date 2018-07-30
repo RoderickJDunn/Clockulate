@@ -18,6 +18,8 @@ export class AlarmModel {
         this.preset = DefaultAlarm.preset;
         this.order = order;
         this.sound = DefaultAlarm.sound;
+        this.snoozeTime = DefaultAlarm.snoozeTime;
+        this.noticiationId = null;
     }
 
     static isDefault(alarm) {

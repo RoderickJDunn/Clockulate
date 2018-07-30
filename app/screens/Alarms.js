@@ -9,11 +9,17 @@ import {
     TouchableWithoutFeedback,
     Dimensions,
     LayoutAnimation,
-    Platform
+    Platform,
+    DeviceEventEmitter
 } from "react-native";
-import { ALARM_CAT, scheduleAlarm } from "../alarmservice/PushController";
+
+import PushNotificationAndroid from "react-native-push-notification";
+import {
+    ALARM_CAT,
+    scheduleAlarm,
+    clearAlarm
+} from "../alarmservice/PushController";
 import NotificationsIOS from "react-native-notifications";
-import moment from "moment";
 import realm from "../data/DataSchemas";
 
 import { ListStyle } from "../styles/list";
@@ -67,6 +73,34 @@ class Alarms extends Component {
             NotificationsIOS.addEventListener(
                 "notificationOpened",
                 this.onNotificationOpened.bind(this)
+            );
+        } else {
+            PushNotificationAndroid.cancelAllLocalNotifications();
+
+            // Register all the valid actions for notifications here and add the action handler for each action
+            PushNotificationAndroid.registerNotificationActions([
+                "Snooze",
+                "Turn Off"
+            ]);
+            DeviceEventEmitter.addListener(
+                "notificationActionReceived",
+                function(e) {
+                    console.log("Notifcation event: ", e);
+                    // console.log(
+                    //     "notificationActionReceived event received: " + e
+                    // );
+                    const info = JSON.parse(e.dataJSON);
+                    console.log("info", info);
+                    if (info.action == "Snooze") {
+                        // Do work pertaining to Accept action here
+                        // Nothing to do here if we have already scheduled all the snooze alarms
+                    } else if (info.action == "Turn Off") {
+                        // Do work pertaining to Reject action here
+                        // cancel all snooze notifs for this Alarm
+                        clearAlarm(null, info.notificationId.toString());
+                    }
+                    // Add all the required actions handlers
+                }
             );
         }
     }
@@ -123,12 +157,12 @@ class Alarms extends Component {
                 return;
             }
             // loaded successfully
-            console.log(
-                "duration in seconds: " +
-                    ringtone.getDuration() +
-                    "number of channels: " +
-                    ringtone.getNumberOfChannels()
-            );
+            // console.log(
+            //     "duration in seconds: " +
+            //         ringtone.getDuration() +
+            //         "number of channels: " +
+            //         ringtone.getNumberOfChannels()
+            // );
 
             // Play the sound with an onEnd callback
             ringtone.play(success => {
@@ -166,63 +200,6 @@ class Alarms extends Component {
             });
         }
         // ringtone.setVolume(0.5);
-    }
-
-    scheduleNotification(alarm, wakeUpDate) {
-        let localNotification;
-        let wakeMoment = moment(wakeUpDate);
-        if (Platform.OS === "ios") {
-            // schedule notifications for this Alarm, staggering them by the "SNOOZE Time"
-            // NOTE: "Snooze Time" will likely be changable option for users per Alarm.
-            //         TODO: Add "snoozePeriod" as a property to Alarm entity in database
-            //         TODO: Add UI and functionality to set a Snooze time from AlarmDetail screen (menu maybe?)
-
-            // For now, use a constant 1 minute as a Snooze Time
-            let snoozeTime = 60;
-            let notiCount = 10;
-            for (let i = 0; i < notiCount; i++) {
-                NotificationsIOS.localNotification({
-                    alertBody: alarm.label,
-                    alertTitle: "Clockulate",
-                    alertAction: "Click here to open",
-                    soundName: alarm.sound,
-                    // silent: true,
-                    category: "ALARM_CATEGORY",
-                    fireDate: wakeMoment.toDate(),
-                    // fireDate: new Date(Date.now() + 10 * 1000).toISOString(),
-                    userInfo: { alarmId: alarm.id }
-                });
-                wakeMoment.add(snoozeTime, "s");
-            }
-        }
-        else {
-            scheduleAlarm(alarm);
-        }
-
-        // lastNotificationIds.push(
-        //     NotificationsIOS.localNotification({
-        //         alertBody: alarm.label,
-        //         alertTitle: "Clockulate",
-        //         alertAction: "Click here to open",
-        //         soundName: alarm.sound,
-        //         // silent: true,
-        //         category: "ALARM_CATEGORY",
-        //         // fireDate: wakeUpDate.toDate()
-        //         fireDate: new Date(Date.now() + 60 * 1000).toISOString()
-        //     })
-        // );
-        //     id: alarm.id, // FOR ANDROID
-        //     userInfo: { id: alarm.id }, // FOR IOS
-        //     // alertAction: "",
-        //     message: alarm.label, // (required)
-        //     date: wakeUpDate.toDate(),
-        //     playSound: true,
-        //     soundName: alarm.sound,
-        //     foreground: true
-        //     // repeatType: "minute",
-        //     // actions: '["Snooze", "Turn Off"]'
-
-        console.log("notification IDs: ", localNotification);
     }
 
     onNotificationOpened(notification) {
@@ -306,6 +283,20 @@ class Alarms extends Component {
         // console.debug(this.state);
 
         // TODO: schedule the notification for the alarmId passed in (the alarm that we were just editing)
+        // Get the alarm that was just edited
+        let changedAlarm = this.state.alarms.filtered("id = $0", alarmId);
+
+        if (changedAlarm.length == 1) {
+            // first clear any notifications already scheduled for this alarm
+            clearAlarm(changedAlarm[0]);
+
+            // now schedule notification(s) for the changes
+            scheduleAlarm(changedAlarm[0]);
+        } else {
+            console.error(
+                `Found more than 1 alarm with alarmId ${alarmId}. This should never happen...`
+            );
+        }
     };
 
     /*
@@ -338,6 +329,10 @@ class Alarms extends Component {
 
     _onPressDelete = (item, event) => {
         console.info("AlarmsList - onPressDelete: ", item);
+
+        // TODO: FIRST THING TO DO IS WE !MUST! Clear all notifications for this alarm !!!!
+        // FIXME: DO THIS
+
         realm.write(() => {
             realm.delete(item);
         });
@@ -364,7 +359,7 @@ class Alarms extends Component {
         realm.write(() => {
             alarm.enabled = !alarm.enabled;
         });
-        console.log(alarm);
+        // console.log(alarm);
 
         // create moment() by adding 'wakeup-time' (ms) and 00:00:00 today
         // let wakeUpTime = moment()
@@ -394,22 +389,12 @@ class Alarms extends Component {
         console.log("WakeUpTime: " + alarm.wakeUpTime);
         if (alarm.enabled) {
             console.log("Setting alarm");
-            // this.playRingtone(alarm.sound);
-            // this.playRingtone("super_ringtone.mp3");
-            // this.playRingtoneAsVid("super_ringtone.mp3");
-            this.scheduleNotification(alarm, alarm.wakeUpTime);
-            // PushNotification.localNotificationSchedule({
-            //     id: alarm.id, // FOR ANDROID
-            //     userInfo: { id: alarm.id }, // FOR IOS
-            //     // alertAction: "",
-            //     message: alarm.label, // (required)
-            //     date: wakeUpDate.toDate(),
-            //     playSound: true,
-            //     soundName: alarm.sound,
-            //     foreground: true
-            //     // repeatType: "minute",
-            //     // actions: '["Snooze", "Turn Off"]'
-            // });
+            scheduleAlarm(alarm);
+        } else {
+            // Cancel all notification(s) for this alarm
+            //  - NOTE: For iOS there are multiple notifications for each Alarm (due to snoozes)
+            //          However, on Android the 'repeat' feature works, so there is only one notification
+            clearAlarm(alarm);
         }
 
         // //console.log("this.state", this.state);

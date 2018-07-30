@@ -84,11 +84,11 @@ class AlarmItem extends React.PureComponent {
         duration = 1000;
         easing = nextAlarmState ? Easing.linear : Easing.log;
 
-        console.log(
-            "this.state.animProgress._value",
-            this.state.animProgress._value
-        );
-        console.log("toValue", toValue);
+        // console.log(
+        //     "this.state.animProgress._value",
+        //     this.state.animProgress._value
+        // );
+        // console.log("toValue", toValue);
 
         Animated.timing(this.state.animProgress, {
             toValue: toValue,
@@ -105,7 +105,7 @@ class AlarmItem extends React.PureComponent {
 
     render() {
         console.log("AlarmItem", "- render");
-        console.debug("alarm-item props", this.props);
+        // console.debug("alarm-item props", this.props);
         // //console.log("index", index);
 
         const config = {

@@ -12,7 +12,8 @@ export const DefaultAlarm = {
     visible: true,
     preset: false,
     order: null,
-    sound: ""
+    sound: "",
+    snoozeTime: 10 // minutes
 };
 
 export const DefaultTask = {

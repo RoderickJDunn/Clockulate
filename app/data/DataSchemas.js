@@ -21,7 +21,15 @@ AlarmSchema.schema = {
         visible: "bool", // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
         preset: "bool", // if true, this Alarm is persistent (remains saved as preset, even if removed from 'Alarms' list page.
         order: "int", // used to re-arrange the Alarms list. When an alarm is added, it always gets the highest order (bottom of the list)
-        sound: "string"
+        sound: "string",
+        snoozeTime: {
+            type: "int", // TODO: not settable by user yet. For now it will default to 10 minutes
+            default: 10
+        },
+        notificationId: {
+            type: "string", // this is used for Android only since its the only way to cancel specific notifications.
+            optional: true
+        }
     }
 };
 
