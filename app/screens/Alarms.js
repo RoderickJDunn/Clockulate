@@ -25,6 +25,7 @@ import realm from "../data/DataSchemas";
 import { ListStyle } from "../styles/list";
 import AlarmItem from "../components/alarm-item";
 import RNSound from "react-native-sound";
+import * as DateUtils from "../util/date_utils";
 
 var loadedSound = null;
 
@@ -388,6 +389,11 @@ class Alarms extends Component {
         // console.log(wakeUpTime);
         console.log("WakeUpTime: " + alarm.wakeUpTime);
         if (alarm.enabled) {
+            let wakeUpTime = DateUtils.date_to_nextTimeInstance(alarm.wakeUpTime);
+
+            realm.write(() => {
+                alarm.wakeUpTime = wakeUpTime;
+            });
             console.log("Setting alarm");
             scheduleAlarm(alarm);
         } else {

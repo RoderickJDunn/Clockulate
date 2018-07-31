@@ -15,12 +15,18 @@ export let clearAlarm = (alarm, notificationID) => {
     if (alarm != null) {
         notificationID = alarm.notificationId;
     }
-    console.log("alarm", alarm);
 
     console.log("Clearing notification ID", notificationID);
     PushNotification.cancelLocalNotifications({
         id: notificationID
     });
+
+    realm.write(() => {
+        alarm.notificationId = null;
+    });
+
+    console.log("alarm", alarm);
+
     PushNotification.clearAllNotifications();
 };
 

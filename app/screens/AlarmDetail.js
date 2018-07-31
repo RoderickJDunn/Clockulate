@@ -42,6 +42,7 @@ import TouchableBackdrop from "../components/touchable-backdrop";
 // TODO: Remove after we're done choosing fonts
 import { fontPreview } from "../styles/text.js";
 import { scale, scaleByFactor } from "../util/font-scale";
+import * as DateUtils from "../util/date_utils";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 class AlarmDetail extends Component {
@@ -469,24 +470,11 @@ class AlarmDetail extends Component {
         });
     };
 
-    _onWakeTimePicked = time => {
-        console.info("A date has been picked: ", time);
+    _onWakeTimePicked = date => {
+        console.info("A date has been picked: ", date);
         let { alarm } = this.state;
 
-        /* This code finds the date that is next instance of the time passed in */
-        let wakeUpDate = moment();
-        console.log("Date right now: " + wakeUpDate.toDate());
-        let wakeUpTime = moment(time);
-        console.log("Selected date/time: " + wakeUpTime.toDate());
-
-        wakeUpDate
-            .set("hour", wakeUpTime.hour())
-            .set("minute", wakeUpTime.minute())
-            .set("second", 0);
-        console.log("Applied today's date: " + wakeUpDate.toDate());
-        if (wakeUpDate.diff(moment()) < 0) {
-            wakeUpDate.add(1, "days");
-        }
+        let wakeUpDate = DateUtils.date_to_nextTimeInstance(date);
 
         realm.write(() => {
             alarm.wakeUpTime = wakeUpDate.toDate();
