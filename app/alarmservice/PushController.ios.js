@@ -70,7 +70,7 @@ let disableAction = new NotificationAction(
 );
 
 export let clearAlarm = (alarm, notificationId) => {
-    PushNotificationIOS.cancelLocalNotifications(alarm.id);
+    PushNotificationIOS.cancelLocalNotifications({ alarmId: alarm.id });
 };
 
 export const ALARM_CAT = new NotificationCategory({
