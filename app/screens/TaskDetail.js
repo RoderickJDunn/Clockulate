@@ -525,7 +525,7 @@ class TaskDetail extends Component {
                                 : this.state.alarmTask.task.defaultDuration
                         }
                         onChange={this._onTaskDurationChanged.bind(this)}
-                        inputFontSize={37}
+                        inputFontSize={scaleByFactor(37, 0.55)}
                         separation={7}
                         style={{
                             position: "absolute",
@@ -568,7 +568,7 @@ const Styles = StyleSheet.create({
         backgroundColor: "transparent"
     },
     fieldText: {
-        fontSize: scale(20)
+        fontSize: scaleByFactor(25, 0.6)
     },
     autocompleteContainer: {
         flex: 1,
