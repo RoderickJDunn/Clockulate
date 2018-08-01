@@ -106,7 +106,7 @@ class AlarmItem extends React.PureComponent {
     render() {
         console.log("AlarmItem", "- render");
         // console.debug("alarm-item props", this.props);
-        // //console.log("index", index);
+        // console.log("index", index);
 
         const config = {
             velocityThreshold: 0.3,
@@ -207,7 +207,12 @@ class AlarmItem extends React.PureComponent {
                             <View
                                 style={[
                                     {
-                                        flex: 1,
+                                        flex:
+                                            1.8 *
+                                            Math.exp(
+                                                -1.46 *
+                                                    (this.width / this.height)
+                                            ),
                                         // backgroundColor: "green",
                                         alignSelf: "stretch",
                                         alignContent: "center",
