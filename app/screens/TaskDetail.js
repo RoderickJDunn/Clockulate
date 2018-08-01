@@ -127,7 +127,8 @@ class TaskDetail extends Component {
                 willNavigateBack: params.willNavigateBack,
                 suggestions: taskSuggestions,
                 hideSuggestions: true,
-                keyboardHeight: null
+                keyboardHeight: null,
+                newTask: false
             };
         }
 
@@ -193,13 +194,22 @@ class TaskDetail extends Component {
 
         console.log("TaskDetail:handleSave: this.state", this.state);
 
+        /* isNewAlarmTask:
+            Simple flag indicating whether user entered TaskDetail by tapping the add button (isNewAlarmTask == true)
+            or by tapping an existing AlarmTask (isNewAlarmTask == false)
+        */
         let isNewAlarmTask = this.state.newTask;
-        let isNewtask = false;
-        // Check if newTask
-        let alarmTask;
-        let prevAlarmTask = this.state.alarmTask;
 
-        prevAlarmTask.task.name = this.currName; // update alarmTask name, based on current value of TextInput
+        // Check if newTask
+        let alarmTaskRlm;
+        let prevAlarmTask = this.state.alarmTask;
+        let newTask = null;
+
+        // store the duration currently showing on the UI
+        let duration =
+            prevAlarmTask.duration != null
+                ? prevAlarmTask.duration
+                : prevAlarmTask.task.defaultDuration;
 
         // Check if a Task exists in the DB with the current name (this.currName)
         let taskLookup = realm
@@ -208,14 +218,24 @@ class TaskDetail extends Component {
 
         if (taskLookup.length == 1) {
             console.log("Found 1 task with name: " + this.currName);
-            // isNewTask = false;
-            // this.nameChanged = false;
             console.log("taskLookup[0]", taskLookup[0]);
+
             prevAlarmTask.task = taskLookup[0];
+
+            /* Even though we just found an existing Task with the set name, its duration probably differs from
+                that shown in the UI. Its possible that the UI is displaying the 'defaultDuration' of the old Task.
+                Therefore, apply the UI duration to the duration property of the AlarmTask being edited, otherwise 
+                the duration being displayed will be lost/ignored.
+            */
+            prevAlarmTask.duration = duration;
         } else if (taskLookup.length == 0) {
             console.log("No tasks found with name: " + this.currName);
-            isNewtask = true;
-            console.log("");
+            newTask = new TaskModel();
+
+            newTask.name = this.currName; // apply current name to new Task
+
+            // apply currently set duration to new Task's 'defaultDuration'
+            newTask.defaultDuration = duration;
         } else {
             console.warn(
                 "ERROR: Found more than 1 task with name: " + this.currName
@@ -224,18 +244,22 @@ class TaskDetail extends Component {
             prevAlarmTask.task = taskLookup[0];
         }
 
-        if (isNewtask) {
-            // Create new Task and associated AlarmTask
+        if (newTask) {
+            // Create a new Task, and depending on whether this 'isNewAlarmTask':
+            //  - false: update the alarmTask with the new Task
+            //  - true: create a new AlarmTask and Task
+
             // console.log(this.state);
             console.log(
                 "Creating new Task. 'isNewAlarmTask': " + isNewAlarmTask
             );
+            prevAlarmTask.task = newTask;
             // prevAlarmTask = this.state.alarmTask;
             realm.write(() => {
                 // NOTE: even though we need both a new Task and AlarmTask, we just need to create the AlarmTask,
                 //        and the Task is automatically created by Realm framework. In fact, creating the Task then trying to create the
                 //        corresponding AlarmTask afterward gives an error (duplicate primary key).
-                alarmTask = realm.create(
+                alarmTaskRlm = realm.create(
                     "AlarmTask",
                     prevAlarmTask,
                     !isNewAlarmTask // 3rd parameter: pass 'true' if this is an Update op.
@@ -244,9 +268,11 @@ class TaskDetail extends Component {
         } else {
             // A Task with this name already exists in the DB (it is currently stored in prevAlarmTask.task)
 
-            let { navigation } = this.props;
             if (isNewAlarmTask) {
-                // create a new Task and associated AlarmTask.
+                /* Create the new AlarmTask. 
+                    We only get here if user has tapped "Add new AlarmTask" AND we have found an existing Task
+                    in the DB with the name provided by the user
+                */
                 console.log("Creating a new AlarmTask");
                 realm.write(() => {
                     // let idToDelete = prevAlarmTask.id; // get Id of AlarmTask to delete
@@ -266,16 +292,23 @@ class TaskDetail extends Component {
                             ? prevAlarmTask.task.defaultDuration
                             : 600;
 
-                    alarmTask = new AlarmTaskModel(
+                    let newAlarmTask = new AlarmTaskModel(
                         existingTask,
                         orderOfAlmTask
                     );
 
-                    console.log("new alarmTask", alarmTask);
-                    alarmTask = realm.create("AlarmTask", alarmTask, true);
+                    console.log("new alarmTask", newAlarmTask);
+                    alarmTaskRlm = realm.create(
+                        "AlarmTask",
+                        newAlarmTask,
+                        true
+                    );
                 });
             } else {
-                // create/update the AlarmTask with the new duration
+                /* Update the AlarmTask with the new duration. We only get here if user tapped an existing AlarmTask for editing,
+                    AND we have found an existing Task in the DB with the name provided by the user. All that could have changed
+                    is the duration of the AlarmTask being edited. 
+                */
                 console.log("Updating existing AlarmTask");
                 realm.write(() => {
                     // NOTE: Here we are updating the AlarmTask in the DB by passing 'true' as the 3rd param of create()
@@ -286,7 +319,7 @@ class TaskDetail extends Component {
             }
         }
 
-        this.state.onSaveState(isNewAlarmTask ? alarmTask : null);
+        this.state.onSaveState(isNewAlarmTask ? alarmTaskRlm : null);
 
         this.state.willNavigateBack();
         this.props.navigation.dispatch(NavigationActions.back());
@@ -433,7 +466,7 @@ class TaskDetail extends Component {
 
     render() {
         console.log("Render TaskDetail.");
-        console.log("this.state", this.state);
+        // console.log("this.state", this.state);
 
         // console.log("this.currName", this.currName);
         let filteredSuggestions = this.state.suggestions.filtered(
