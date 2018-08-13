@@ -138,11 +138,11 @@ class AlarmDetail extends Component {
 
     addKeyboardListeners() {
         this.keyboardWillShowSub = Keyboard.addListener(
-            "keyboardWillShow",
+            "keyboardDidShow",
             this.keyboardWillShow.bind(this)
         );
         this.keyboardWillHideSub = Keyboard.addListener(
-            "keyboardWillHide",
+            "keyboardDidHide",
             this.keyboardWillHide.bind(this)
         );
     }
