@@ -208,7 +208,7 @@ class AlarmItem extends React.PureComponent {
                                 style={[
                                     {
                                         flex:
-                                            1.8 *
+                                            2.3 *
                                             Math.exp(
                                                 -1.46 *
                                                     (this.width / this.height)
