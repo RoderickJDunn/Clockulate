@@ -63,6 +63,7 @@
 		<string>Roboto.ttf</string>
 		<string>rubicon-icon-font.ttf</string>
 		<string>Quesha.ttf</string>
+		<string>Feather.ttf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

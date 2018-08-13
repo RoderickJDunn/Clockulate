@@ -36,3 +36,7 @@ export function scaleByFactor(size, bluntFactor = 1) {
         return Math.round(size + (scale(size) - size) * bluntFactor) - 2;
     }
 }
+
+export function expScaleByPixRatio(val) {
+    return val * Math.exp(-1.46 * (SCREEN_WIDTH / SCREEN_HEIGHT));
+}

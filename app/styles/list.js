@@ -87,36 +87,53 @@ export const TaskListStyle = StyleSheet.create({
 
 export const TaskItemStyle = StyleSheet.create({
     taskInfoWrap: {
+        // flex: 1,
         flexDirection: "row",
         paddingTop: 10,
         paddingBottom: 10,
-        paddingRight: 10,
+        // paddingRight: 10,
         width: SCREEN_WIDTH - scaleByFactor(20, 0.4) + 10, // SIDE_PADDING = 10 * 2.  PAD_DURATION_DELETE = 5
         height: 55,
         alignContent: "stretch",
-        borderBottomColor: "#acacac",
+        borderBottomColor: "black",
         borderBottomWidth: 0.8,
-        alignItems: "center",
-        backgroundColor: "transparent"
+        alignItems: "center"
+        // backgroundColor: "green"
         // justifyContent: "space-between"
     },
+    taskInfoTouchable: {
+        flex: 1,
+        flexDirection: "row",
+        height: 55,
+        alignContent: "center",
+        alignItems: "center",
+        // backgroundColor: "transparent"
+        // backgroundColor: "yellow"
+        justifyContent: "space-between"
+    },
     checkbox: {
-        // flex: 0.1
+        flex: 0.12
+        // flexShrink: 0.1
         // height: 50,
-        width: 50
+        // width: 50
     },
     description: {
-        // flex: 0.7,
+        flex: 0.78,
+        // flexGrow: 0.7,
         color: Colors.black,
         opacity: 0.8
+        // borderColor: "black",
+        // borderWidth: 2
     },
     duration: {
         // alignSelf: 'stretch',
         textAlign: "right",
-        // flex: 0.2,
+        flex: 0.13,
         fontSize: 16,
-        position: "absolute",
-        right: 10
+        alignSelf: "center",
+        marginRight: 10
+        // position: "absolute",
+        // right: 10
     },
     deleteBtn: {
         position: "absolute",

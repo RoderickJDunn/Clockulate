@@ -57,6 +57,27 @@ export function hour_min_toSec(hours_mins) {
     }
 }
 
+export function formatDuration(seconds, short) {
+    if (!seconds) {
+        seconds = 0;
+    }
+    let hours = calcWholeHours(seconds);
+    let minutes = calcMinutes(seconds, hours);
+
+    let hourUnit = short ? "h" : hours == 1 ? "hour" : "hours";
+    let minUnit = short ? "m" : minutes == 1 ? "minute" : "minutes";
+
+    let duration = "";
+    if (!hours) {
+        duration = minutes ? `${minutes} ${minUnit}` : `0 ${minUnit}`;
+    } else if (hours && !minutes) {
+        duration = `${hours} ${hourUnit}`;
+    } else {
+        duration = `${hours} ${hourUnit}, ${minutes} ${minUnit}`;
+    }
+    return duration;
+}
+
 export function date_to_nextTimeInstance(date) {
     /* This code finds the date that is next instance of the time passed in */
     let wakeUpDate = moment();

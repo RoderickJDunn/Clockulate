@@ -497,9 +497,7 @@ class AlarmDetail extends Component {
                 // console.log(alarmTask);
                 if (alarmTask.enabled) {
                     console.log("Task enabled");
-                    return alarmTask.duration
-                        ? alarmTask.duration
-                        : alarmTask.task.defaultDuration;
+                    return alarmTask.duration;
                 } else {
                     console.log("Task DISabled");
                     return 0;
@@ -639,6 +637,8 @@ class AlarmDetail extends Component {
                 <TouchableOpacity
                     style={{
                         flex: 1
+                        // borderColor: "black",
+                        // borderWidth: 3
                     }}
                     onPress={this.onPressAddTask.bind(this)}
                 >
@@ -1162,7 +1162,7 @@ const styles = StyleSheet.create({
         // borderBottomWidth: 1
     },
     taskListContainer: {
-        flex: 0.63,
+        flex: 0.6,
         padding: scaleByFactor(10, 0.4),
         alignSelf: "stretch"
         // backgroundColor: Colors.backgroundGrey

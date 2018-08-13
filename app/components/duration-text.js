@@ -5,7 +5,7 @@
 import React, { Component } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import PropTypes from "prop-types";
-import { calcWholeHours, calcMinutes } from "../util/date_utils";
+import { formatDuration } from "../util/date_utils";
 class DurationText extends Component {
     static propTypes = {
         seconds: PropTypes.number
@@ -16,30 +16,14 @@ class DurationText extends Component {
         // console.log(props);
     }
 
-    formatDuration(seconds) {
-        if (!seconds) {
-            seconds = 0;
-        }
-        let hours = calcWholeHours(seconds);
-        let minutes = calcMinutes(seconds, hours);
-
-        let hourUnit = this.props.short ? "h" : "hours";
-        let minUnit = this.props.short ? "m" : "minutes";
-
-        let duration = "";
-        if (!hours) {
-            duration = minutes ? `${minutes} m` : "0 m";
-        } else if (hours && !minutes) {
-            duration = `${hours} ${hourUnit}`;
-        } else {
-            duration = `${hours} ${hourUnit}, ${minutes} ${minUnit}`;
-        }
-        return duration;
-    }
+   
 
     render() {
         // console.log('rendering duration-text');
-        let duration = this.formatDuration(this.props.duration);
+        let duration = formatDuration(
+            this.props.duration,
+            this.props.short
+        );
         // console.log(duration);
         // console.log(this.props.style);
         return (

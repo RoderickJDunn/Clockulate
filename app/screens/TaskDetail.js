@@ -17,7 +17,7 @@ import {
 import { Icon } from "react-native-elements";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import IonIcon from "react-native-vector-icons/Ionicons";
-import { NavigationActions } from "react-navigation";
+import { NavigationActions, Header } from "react-navigation";
 import Autocomplete from "react-native-autocomplete-input";
 import { isIphoneX } from "react-native-iphone-x-helper";
 
@@ -30,10 +30,16 @@ import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { scale, scaleByFactor } from "../util/font-scale";
 import DurationText from "../components/duration-text";
+import { CheckBox, Container, StyleProvider } from "native-base";
+import getTheme from "../../native-base-theme/components";
+import material from "../../native-base-theme/variables/material";
+import AwesomeAlert from "react-native-awesome-alerts";
+import { formatDuration } from "../util/date_utils";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-const HEADER_HEIGHT = 20;
+const HEADER_HEIGHT = Header.HEIGHT;
+const AUTOCP_INPUT_HEIGHT = 75;
 /*
 This screen allows user to edit details about a Task: Specifically, its Name, Duration, and Enabled
  */
@@ -99,7 +105,9 @@ class TaskDetail extends Component {
                 willNavigateBack: params.willNavigateBack,
                 suggestions: taskSuggestions,
                 hideSuggestions: true,
-                keyboardHeight: null
+                keyboardHeight: null,
+                showDurationInfo: false,
+                setAsDefault: false
             };
             // console.log(this.state.alarmTask);
         } else {
@@ -128,7 +136,9 @@ class TaskDetail extends Component {
                 suggestions: taskSuggestions,
                 hideSuggestions: true,
                 keyboardHeight: null,
-                newTask: false
+                newTask: false,
+                showDurationInfo: false,
+                setAsDefault: false
             };
         }
 
@@ -174,7 +184,7 @@ class TaskDetail extends Component {
         console.log("keyboardWillShow -------");
         console.log(event.endCoordinates);
         console.log(SCREEN_HEIGHT);
-        this.setState({ keyboardHeight: event.endCoordinates.height });
+        this.setState({ keyboardHeight: event.endCoordinates.screenY });
         // setTimeout(() => {
         //     this.interactiveRef.snapTo({ index: 2 }); // snap to "keyboard" snapPoint.
         // }, 0);
@@ -206,10 +216,7 @@ class TaskDetail extends Component {
         let newTask = null;
 
         // store the duration currently showing on the UI
-        let duration =
-            prevAlarmTask.duration != null
-                ? prevAlarmTask.duration
-                : prevAlarmTask.task.defaultDuration;
+        let duration = prevAlarmTask.duration;
 
         // Check if a Task exists in the DB with the current name (this.currName)
         let taskLookup = realm
@@ -237,11 +244,10 @@ class TaskDetail extends Component {
             // apply currently set duration to new Task's 'defaultDuration'
             newTask.defaultDuration = duration;
         } else {
-            console.warn(
+            console.error(
                 "ERROR: Found more than 1 task with name: " + this.currName
             );
-            // FIXME: Apparently this occurs in some situations... for now just ignore and grab the first one.
-            prevAlarmTask.task = taskLookup[0];
+            // FIXME: This should never happen. Does it still happen?
         }
 
         if (newTask) {
@@ -286,16 +292,23 @@ class TaskDetail extends Component {
                     const existingTask = new TaskModel();
                     existingTask.name = prevAlarmTask.task.name;
                     existingTask.id = prevAlarmTask.task.id;
-                    existingTask.defaultDuration = prevAlarmTask.duration
-                        ? prevAlarmTask.duration
-                        : prevAlarmTask.task.defaultDuration
-                            ? prevAlarmTask.task.defaultDuration
-                            : 600;
+
+                    if (this.state.setAsDefault) {
+                        // only change the existing Task's default duration if 'Set as Default' is checked.
+                        existingTask.defaultDuration = prevAlarmTask.duration;
+                    }
+                    // ? prevAlarmTask.duration
+                    // : prevAlarmTask.task.defaultDuration
+                    //     ? prevAlarmTask.task.defaultDuration
+                    //     : 600;
 
                     let newAlarmTask = new AlarmTaskModel(
                         existingTask,
                         orderOfAlmTask
                     );
+
+                    // This is a new AlarmTask, so apply the duration showing in the UI to the newAlarmTask object.
+                    newAlarmTask.duration = prevAlarmTask.duration;
 
                     console.log("new alarmTask", newAlarmTask);
                     alarmTaskRlm = realm.create(
@@ -311,6 +324,12 @@ class TaskDetail extends Component {
                 */
                 console.log("Updating existing AlarmTask");
                 realm.write(() => {
+                    // only change the existing Task's default duration if 'Set as Default' is checked.
+                    if (this.state.setAsDefault) {
+                        prevAlarmTask.task.defaultDuration =
+                            prevAlarmTask.duration;
+                    }
+
                     // NOTE: Here we are updating the AlarmTask in the DB by passing 'true' as the 3rd param of create()
                     //        This param specifies that it should be an update operation, rather than a creation.
                     // console.log('alarmTask', this.state.alarmTask);
@@ -360,7 +379,7 @@ class TaskDetail extends Component {
         this.setState({ alarmTask: updatedAlmTask });
     }
 
-    /* Creates a new AlarmTask for the Task selected from the selection dropdown, then updates the UI
+    /* Updates the AlarmTask model on this screen using the Task selected from the selection dropdown, then updates the UI
         with the necessary info. */
     _loadTaskFromSuggestions(task) {
         console.log("_loadTaskFromSuggestions");
@@ -368,6 +387,7 @@ class TaskDetail extends Component {
         alarmTask.task.name = task.name;
         alarmTask.task.id = task.id;
         alarmTask.task.defaultDuration = task.defaultDuration;
+        alarmTask.duration = task.defaultDuration;
 
         this.currName = alarmTask.task.name;
         this.setState({ alarmTask: alarmTask, hideSuggestions: true });
@@ -375,7 +395,7 @@ class TaskDetail extends Component {
 
     _renderAutoCompInput = props => {
         return (
-            <View>
+            <View style={{ flexDirection: "row" }}>
                 <TextInput
                     style={[
                         Styles.fieldText,
@@ -387,8 +407,10 @@ class TaskDetail extends Component {
                             margin: 0,
                             borderWidth: 0,
                             borderColor: "transparent",
-                            paddingHorizontal: 0
-                            // backgroundColor: "#ededed"
+                            paddingHorizontal: 0,
+                            // backgroundColor: "green",
+                            flex: 0.95
+
                             // borderRadius: 5
                         }
                     ]}
@@ -420,10 +442,11 @@ class TaskDetail extends Component {
                             this.setState(this.state);
                         }}
                         style={{
-                            position: "absolute",
-                            right: 0,
-                            top: 0,
-                            bottom: 0,
+                            flex: 0.05,
+                            // position: "absolute",
+                            // right: 0,
+                            // top: 0,
+                            // bottom: 0,
                             justifyContent: "center",
                             alignItems: "center"
                         }}
@@ -440,6 +463,16 @@ class TaskDetail extends Component {
     };
 
     _renderSuggestionItem = task => {
+        // if (task.fake) {
+        //     return (
+        //         <View
+        //             style={[
+        //                 Styles.suggestionItemWrapper,
+        //                 { backgroundColor: "blue" }
+        //             ]}
+        //         />
+        //     );
+        // } else {
         let { name, defaultDuration } = task;
         return (
             <TouchableOpacity
@@ -462,21 +495,41 @@ class TaskDetail extends Component {
                 />
             </TouchableOpacity>
         );
+        // }
+    };
+
+    _onTapCheckBox = value => {
+        // console.log("_onTapCheckBox -> value", value);
+        this.setState({ setAsDefault: value });
     };
 
     render() {
         console.log("Render TaskDetail.");
-        // console.log("this.state", this.state);
+        console.log("this.state", this.state);
 
         // console.log("this.currName", this.currName);
         let filteredSuggestions = this.state.suggestions.filtered(
             `name CONTAINS[c] "${this.currName}"`
         );
 
+        /* Default Duration Info Checkbox STring: 
+            <Checked Box> "Set as default duration"
+            "When you add Tasks with this name, they will now have <AlarmTask_Duration> by default."
+
+            <Empty Box> "Set as default duration"
+            "When you add Tasks with this name, they will still have <Task_DefaultDuration> by default"
+        */
+
+        // filteredSuggestions.push({ fake: true });
+
         // for (let index = 0; index < this.state.suggestions.length; index++) {
         //     const element = this.state.suggestions[index];
         //     console.log("element", element);
         // }
+
+        let durationDisplayed = this.state.alarmTask.duration
+            ? this.state.alarmTask.duration
+            : this.state.alarmTask.task.defaultDuration;
         return (
             <View style={ScreenStyles.TaskScreen}>
                 <View>
@@ -507,32 +560,100 @@ class TaskDetail extends Component {
                             margin: 0,
                             borderLeftWidth: 0,
                             borderRightWidth: 0,
+                            // maxHeight:
+                            //     SCREEN_HEIGHT -
+                            //     HEADER_HEIGHT -
+                            //     AUTOCP_INPUT_HEIGHT -
+                            //     this.xtraKeyboardHeight -
+                            //     this.state.keyboardHeight
                             maxHeight:
-                                SCREEN_HEIGHT -
+                                this.state.keyboardHeight -
+                                StatusBar.currentHeight -
                                 HEADER_HEIGHT -
-                                110 -
-                                this.xtraKeyboardHeight -
-                                this.state.keyboardHeight
+                                AUTOCP_INPUT_HEIGHT
                         }}
                         // listStyle={[Styles.suggestionsContainer]}
                     />
 
-                    <LabeledDurationInput
-                        labelText="DURATION"
-                        time={
-                            this.state.alarmTask.duration
-                                ? this.state.alarmTask.duration
-                                : this.state.alarmTask.task.defaultDuration
-                        }
-                        onChange={this._onTaskDurationChanged.bind(this)}
-                        inputFontSize={scaleByFactor(37, 0.55)}
-                        separation={7}
+                    <View
                         style={{
+                            flexDirection: "row",
+                            // backgroundColor: "green",
+                            alignContent: "center",
+                            alignItems: "center",
                             position: "absolute",
-                            top: SCREEN_HEIGHT * 0.1,
-                            left: 0
+                            top: scaleByFactor(35, 0.6) + 35
                         }}
-                    />
+                    >
+                        <LabeledDurationInput
+                            labelText="DURATION"
+                            time={durationDisplayed}
+                            onChange={this._onTaskDurationChanged.bind(this)}
+                            inputFontSize={scaleByFactor(37, 0.55)}
+                            separation={7}
+                            style={{
+                                // backgroundColor: "red"
+                                backgroundColor: "transparent"
+                            }}
+                        />
+                        <View
+                            style={{
+                                flex: 1,
+                                flexDirection: "row",
+                                alignSelf: "flex-end",
+                                justifyContent: "flex-end",
+                                paddingLeft: 10,
+                                paddingBottom: 5
+                                // borderBottomColor: "black",
+                                // borderBottomWidth: 1
+                                // backgroundColor: "green"
+                            }}
+                        >
+                            <StyleProvider style={getTheme(material)}>
+                                <CheckBox
+                                    onPress={() =>
+                                        this._onTapCheckBox(
+                                            !this.state.setAsDefault
+                                        )
+                                    }
+                                    checked={this.state.setAsDefault}
+                                    style={{
+                                        paddingTop: 1,
+                                        paddingLeft: 0,
+                                        marginRight: 10,
+                                        marginBottom: 5,
+                                        backgroundColor:
+                                            Colors.brandLightPurple,
+                                        borderColor: "transparent",
+                                        alignItems: "center"
+                                    }}
+                                    hitSlop={{
+                                        top: 15,
+                                        bottom: 15,
+                                        left: 5,
+                                        right: 15
+                                    }}
+                                />
+                            </StyleProvider>
+                            <TouchableOpacity
+                                style={{
+                                    marginLeft: 10,
+                                    marginTop: 1
+                                }}
+                                onPress={() => {
+                                    this.setState({ showDurationInfo: true });
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        fontSize: scaleByFactor(14, 0.5)
+                                    }}
+                                >
+                                    Set as Default
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                     <TouchableOpacity
                         style={Styles.DeleteButton}
                         onPress={this._onDeleteTask.bind(this)}
@@ -543,6 +664,37 @@ class TaskDetail extends Component {
                     </TouchableOpacity>
                     <View />
                 </View>
+                <AwesomeAlert
+                    alertContainerStyle={{
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        width: "auto"
+                    }}
+                    // contentContainerStyle={{}}
+                    show={this.state.showDurationInfo}
+                    showProgress={false}
+                    title="Default Durations"
+                    message={`If checked, new tasks with this name will default to this duration (${formatDuration(
+                        durationDisplayed
+                    )}). \n\nOtherwise, new tasks with this name will default to their original duration (${formatDuration(
+                        this.state.alarmTask.task.defaultDuration
+                    )})`}
+                    closeOnTouchOutside={true}
+                    closeOnHardwareBackPress={false}
+                    showConfirmButton={true}
+                    confirmText="Got it!"
+                    confirmButtonColor="#DD6B55"
+                    onConfirmPressed={() => {
+                        this.setState({ showDurationInfo: false });
+                    }}
+                    onDismiss={() => {
+                        if (this.state.showDurationInfo) {
+                            this.setState({ showDurationInfo: false });
+                        }
+                    }}
+                />
             </View>
         );
     }
@@ -559,7 +711,7 @@ const Styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         position: "absolute",
-        top: SCREEN_HEIGHT * 0.2,
+        top: SCREEN_HEIGHT * 0.25,
         right: 0,
         left: 0
     },
@@ -576,6 +728,7 @@ const Styles = StyleSheet.create({
         position: "absolute",
         right: 0,
         top: 20,
+        minHeight: scaleByFactor(35, 0.6),
         paddingHorizontal: 0,
         zIndex: 1,
         borderWidth: 0,
