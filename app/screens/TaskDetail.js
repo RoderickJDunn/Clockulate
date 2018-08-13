@@ -12,7 +12,8 @@ import {
     StyleSheet,
     Button,
     Dimensions,
-    Keyboard
+    Keyboard,
+    Platform
 } from "react-native";
 import { Icon } from "react-native-elements";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -507,6 +508,16 @@ class TaskDetail extends Component {
         console.log("Render TaskDetail.");
         console.log("this.state", this.state);
 
+        let statusBarHeight =
+            Platform.OS == "android" ? StatusBar.currentHeight : 20;
+        let maxHeight_autocomplete =
+            this.state.keyboardHeight -
+            statusBarHeight -
+            HEADER_HEIGHT -
+            AUTOCP_INPUT_HEIGHT;
+
+        console.log("maxHeight", maxHeight_autocomplete);
+
         // console.log("this.currName", this.currName);
         let filteredSuggestions = this.state.suggestions.filtered(
             `name CONTAINS[c] "${this.currName}"`
@@ -566,11 +577,7 @@ class TaskDetail extends Component {
                             //     AUTOCP_INPUT_HEIGHT -
                             //     this.xtraKeyboardHeight -
                             //     this.state.keyboardHeight
-                            maxHeight:
-                                this.state.keyboardHeight -
-                                StatusBar.currentHeight -
-                                HEADER_HEIGHT -
-                                AUTOCP_INPUT_HEIGHT
+                            maxHeight: maxHeight_autocomplete
                         }}
                         // listStyle={[Styles.suggestionsContainer]}
                     />
