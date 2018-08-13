@@ -98,46 +98,54 @@ function insertDummyData() {
         const almTask1 = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task1,
-            order: 0
+            order: 0,
+            duration: 600
             // Since I'm not specifying 'duration' or 'enabled' values, the defaults will be used (see DataSchemas.js
             // to check the default values).
         });
         const almTask7 = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task7,
-            order: 1
+            order: 1,
+            duration: 180
         });
         const almTask3 = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task3,
-            order: 2
+            order: 2,
+            duration: 1200
         });
         const almTask8 = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task8,
-            order: 3
+            order: 3,
+            duration: 1800
         });
 
         // AlarmTasks for alarm2
         const almTask9 = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task9,
-            order: 3
+            order: 3,
+            duration: 1200
         });
         const almTask6 = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task6,
-            order: 1
+            order: 1,
+            duration: 1200
         });
         const almTask3b = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task3,
-            order: 2
+            order: 2,
+            duration: 1200
         });
         const almTask1b = realm.create("AlarmTask", {
             id: uuid.v1(),
             task: task1,
-            order: 0
+            order: 0,
+            duration: 600
         });
 
         /**** Create Alarms *****/
@@ -174,8 +182,8 @@ function insertDummyData() {
         console.log(alarm2, alarm1, task2, task4, task5);
     });
 
-    const longTasks = realm.objects("Task").filtered("defaultDuration > 1000");
-    console.log(`Tasks: ${longTasks}`);
+    // const longTasks = realm.objects("Task").filtered("defaultDuration > 1000");
+    // console.log(`Tasks: ${longTasks}`);
 }
 
 export default insertDummyData;

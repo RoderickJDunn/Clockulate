@@ -51,7 +51,7 @@ AlarmTaskSchema.schema = {
     properties: {
         id: "string",
         task: { type: "Task" },
-        duration: { type: "int", optional: true }, // if this is set, use this duration instead of the defaultDuration provided by 'Task'
+        duration: { type: "int" }, // This is no longer optional. It will now initially be set to the underlying Task's defaultDuration
         enabled: { type: "bool", default: true },
         order: "int"
     }
