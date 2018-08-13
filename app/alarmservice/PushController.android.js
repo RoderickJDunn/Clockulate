@@ -21,9 +21,11 @@ export let clearAlarm = (alarm, notificationID) => {
         id: notificationID
     });
 
-    realm.write(() => {
-        alarm.notificationId = null;
-    });
+    if (alarm) {
+        realm.write(() => {
+            alarm.notificationId = null;
+        });
+    }
 
     console.log("alarm", alarm);
 
