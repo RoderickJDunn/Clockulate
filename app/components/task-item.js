@@ -18,7 +18,10 @@ import Interactable from "react-native-interactable";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 
 import DurationText from "./duration-text";
-import { CheckBox } from "native-base";
+import { CheckBox, Container, StyleProvider } from "native-base";
+import getTheme from "../../native-base-theme/components";
+import material from "../../native-base-theme/variables/material";
+
 import Colors from "../styles/colors";
 
 import { TaskListStyle, TaskItemStyle } from "../styles/list";
@@ -238,7 +241,7 @@ class TaskItem extends React.PureComponent {
             touchableBackdrop = (
                 <TouchableBackdrop
                     style={[
-                        TaskItemStyle.taskInfoWrap,
+                        // TaskItemStyle.taskInfoWrap,
                         { backgroundColor: "transparent" }
                     ]}
                     onPress={() => {
@@ -262,24 +265,26 @@ class TaskItem extends React.PureComponent {
             sortHandlers = this.props.sortHandlers;
         } else {
             leftBtn = (
-                <CheckBox
-                    onPress={() => this._onTapCheckBox(this.props.data)}
-                    checked={this.props.data.enabled}
-                    style={{
-                        marginLeft: 0,
-                        paddingTop: 1,
-                        paddingLeft: 0,
-                        backgroundColor: Colors.brandLightPurple,
-                        borderColor: "transparent",
-                        alignItems: "center"
-                    }}
-                    hitSlop={{
-                        top: 15,
-                        bottom: 15,
-                        left: 5,
-                        right: 15
-                    }}
-                />
+                <StyleProvider style={getTheme(material)}>
+                    <CheckBox
+                        onPress={() => this._onTapCheckBox(this.props.data)}
+                        checked={this.props.data.enabled}
+                        style={{
+                            marginLeft: 0,
+                            paddingTop: 1,
+                            paddingLeft: 0,
+                            backgroundColor: Colors.brandLightPurple,
+                            borderColor: "transparent",
+                            alignItems: "center"
+                        }}
+                        hitSlop={{
+                            top: 15,
+                            bottom: 15,
+                            left: 5,
+                            right: 15
+                        }}
+                    />
+                </StyleProvider>
             );
         }
 
@@ -305,16 +310,22 @@ class TaskItem extends React.PureComponent {
                 dragEnabled={this.state.tempDuration == null}
             >
                 <View
-                    style={TaskItemStyle.taskInfoWrap}
+                    style={[TaskItemStyle.taskInfoWrap]}
                     {...this._panResponder.panHandlers}
                 >
                     <TouchableOpacity
-                        style={[TaskItemStyle.taskInfoWrap]}
+                        style={[
+                            TaskItemStyle.taskInfoTouchable
+                            // { backgroundColor: "blue" }
+                        ]}
                         ref={touchable => (this._touchable = touchable)}
                         onPress={this._onPress.bind(this)}
                         onLongPress={this._onLongPress.bind(this)}
                         onPressOut={() => {
-                            if (this.state.tempDuration != null && this._isSliding == false) {
+                            if (
+                                this.state.tempDuration != null &&
+                                this._isSliding == false
+                            ) {
                                 this.setState({ tempDuration: null });
                             }
                         }}
