@@ -105,10 +105,12 @@ class TaskDetail extends Component {
                 newTask: true,
                 willNavigateBack: params.willNavigateBack,
                 suggestions: taskSuggestions,
+                filteredSuggestions: [],
                 hideSuggestions: true,
                 keyboardHeight: null,
                 showDurationInfo: false,
-                setAsDefault: false
+                setAsDefault: false,
+                currNameHasMatch: false
             };
             // console.log(this.state.alarmTask);
         } else {
@@ -135,11 +137,13 @@ class TaskDetail extends Component {
                 onSaveState: params.onSaveState, // called when a task is Saved or Deleted
                 willNavigateBack: params.willNavigateBack,
                 suggestions: taskSuggestions,
+                filteredSuggestions: [],
                 hideSuggestions: true,
                 keyboardHeight: null,
                 newTask: false,
                 showDurationInfo: false,
-                setAsDefault: false
+                setAsDefault: false,
+                currNameHasMatch: true
             };
         }
 
@@ -193,8 +197,19 @@ class TaskDetail extends Component {
     };
 
     keyboardWillHide = event => {
-        console.log("keyboardWillHide");
-        this.setState({ keyboardHeight: null, hideSuggestions: true });
+        console.log("keyboardDidHide");
+        let exactMatch = [];
+        if (this.state.filteredSuggestions.length > 0) {
+            exactMatch = this.state.filteredSuggestions.filtered(
+                `name = "${this.currName}"`
+            );
+        }
+        let hasMatch = exactMatch.length > 0;
+        this.setState({
+            keyboardHeight: null,
+            hideSuggestions: true,
+            currNameHasMatch: hasMatch
+        });
     };
 
     handleSave() {
@@ -370,7 +385,15 @@ class TaskDetail extends Component {
         if (this.initialName !== text) {
             this.nameChanged = true;
         }
-        this.setState({ hideSuggestions: false });
+
+        let filteredSuggestions = this.state.suggestions.filtered(
+            `name CONTAINS[c] "${this.currName}"`
+        );
+
+        this.setState({
+            hideSuggestions: false,
+            filteredSuggestions: filteredSuggestions
+        });
     }
 
     _onTaskDurationChanged(duration) {
@@ -519,19 +542,7 @@ class TaskDetail extends Component {
         console.log("maxHeight", maxHeight_autocomplete);
 
         // console.log("this.currName", this.currName);
-        let filteredSuggestions = this.state.suggestions.filtered(
-            `name CONTAINS[c] "${this.currName}"`
-        );
-
-        /* Default Duration Info Checkbox STring: 
-            <Checked Box> "Set as default duration"
-            "When you add Tasks with this name, they will now have <AlarmTask_Duration> by default."
-
-            <Empty Box> "Set as default duration"
-            "When you add Tasks with this name, they will still have <Task_DefaultDuration> by default"
-        */
-
-        // filteredSuggestions.push({ fake: true });
+        // FIXME: This should not be run on every render. Should only be run when TaskName TextInput is being changed.
 
         // for (let index = 0; index < this.state.suggestions.length; index++) {
         //     const element = this.state.suggestions[index];
@@ -551,8 +562,9 @@ class TaskDetail extends Component {
                         placeholder="Enter a task name"
                         defaultValue={this.currName}
                         data={
-                            this.currName && filteredSuggestions.length > 0
-                                ? Array.from(filteredSuggestions)
+                            this.currName &&
+                            this.state.filteredSuggestions.length > 0
+                                ? Array.from(this.state.filteredSuggestions)
                                 : []
                         }
                         onChangeText={this._onTaskNameChange.bind(this)}
@@ -603,63 +615,69 @@ class TaskDetail extends Component {
                                 backgroundColor: "transparent"
                             }}
                         />
-                        <View
-                            style={{
-                                flex: 1,
-                                flexDirection: "row",
-                                alignSelf: "flex-end",
-                                justifyContent: "flex-end",
-                                paddingLeft: 10,
-                                paddingBottom: 5
-                                // borderBottomColor: "black",
-                                // borderBottomWidth: 1
-                                // backgroundColor: "green"
-                            }}
-                        >
-                            <StyleProvider style={getTheme(material)}>
-                                <CheckBox
-                                    onPress={() =>
-                                        this._onTapCheckBox(
-                                            !this.state.setAsDefault
-                                        )
-                                    }
-                                    checked={this.state.setAsDefault}
+                        {this.state.currNameHasMatch &&
+                            this.state.alarmTask.duration !=
+                                this.state.alarmTask.task.defaultDuration && (
+                                <View
                                     style={{
-                                        paddingTop: 1,
-                                        paddingLeft: 0,
-                                        marginRight: 10,
-                                        marginBottom: 5,
-                                        backgroundColor:
-                                            Colors.brandLightPurple,
-                                        borderColor: "transparent",
-                                        alignItems: "center"
-                                    }}
-                                    hitSlop={{
-                                        top: 15,
-                                        bottom: 15,
-                                        left: 5,
-                                        right: 15
-                                    }}
-                                />
-                            </StyleProvider>
-                            <TouchableOpacity
-                                style={{
-                                    marginLeft: 10,
-                                    marginTop: 1
-                                }}
-                                onPress={() => {
-                                    this.setState({ showDurationInfo: true });
-                                }}
-                            >
-                                <Text
-                                    style={{
-                                        fontSize: scaleByFactor(14, 0.5)
+                                        flex: 1,
+                                        flexDirection: "row",
+                                        alignSelf: "flex-end",
+                                        justifyContent: "flex-end",
+                                        paddingLeft: 10,
+                                        paddingBottom: 5
+                                        // borderBottomColor: "black",
+                                        // borderBottomWidth: 1
+                                        // backgroundColor: "green"
                                     }}
                                 >
-                                    Set as Default
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                                    <StyleProvider style={getTheme(material)}>
+                                        <CheckBox
+                                            onPress={() =>
+                                                this._onTapCheckBox(
+                                                    !this.state.setAsDefault
+                                                )
+                                            }
+                                            checked={this.state.setAsDefault}
+                                            style={{
+                                                paddingTop: 1,
+                                                paddingLeft: 0,
+                                                marginRight: 10,
+                                                marginBottom: 5,
+                                                backgroundColor:
+                                                    Colors.brandLightPurple,
+                                                borderColor: "transparent",
+                                                alignItems: "center"
+                                            }}
+                                            hitSlop={{
+                                                top: 15,
+                                                bottom: 15,
+                                                left: 5,
+                                                right: 15
+                                            }}
+                                        />
+                                    </StyleProvider>
+                                    <TouchableOpacity
+                                        style={{
+                                            marginLeft: 10,
+                                            marginTop: 1
+                                        }}
+                                        onPress={() => {
+                                            this.setState({
+                                                showDurationInfo: true
+                                            });
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                fontSize: scaleByFactor(14, 0.5)
+                                            }}
+                                        >
+                                            Set as Default
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
                     </View>
                     <TouchableOpacity
                         style={Styles.DeleteButton}
@@ -682,17 +700,21 @@ class TaskDetail extends Component {
                     // contentContainerStyle={{}}
                     show={this.state.showDurationInfo}
                     showProgress={false}
-                    title="Default Durations"
-                    message={`If checked, new tasks with this name will default to this duration (${formatDuration(
+                    title="About Default Durations"
+                    message={`Check this box if you want new tasks with this name to be created with this duration (${formatDuration(
                         durationDisplayed
-                    )}). \n\nOtherwise, new tasks with this name will default to their original duration (${formatDuration(
-                        this.state.alarmTask.task.defaultDuration
-                    )})`}
+                    )}) from now on.`}
+                    // message={`If checked, new tasks with this name will have this duration (${formatDuration(
+                    //     durationDisplayed
+                    // )}). \n\nIf unchecked, new tasks with this name will have the original duration (${formatDuration(
+                    //     this.state.alarmTask.task.defaultDuration
+                    // )})`}
+                    messageStyle={{ textAlign: "center" }}
                     closeOnTouchOutside={true}
                     closeOnHardwareBackPress={false}
                     showConfirmButton={true}
                     confirmText="Got it!"
-                    confirmButtonColor="#DD6B55"
+                    confirmButtonColor="#54c0ff"
                     onConfirmPressed={() => {
                         this.setState({ showDurationInfo: false });
                     }}
