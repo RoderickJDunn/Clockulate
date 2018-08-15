@@ -12,7 +12,8 @@ import {
     TouchableWithoutFeedback,
     Animated,
     Easing,
-    StyleSheet
+    StyleSheet,
+    Linking
 } from "react-native";
 import Svg, { Defs, Circle, RadialGradient, Stop } from "react-native-svg";
 import moment from "moment";
@@ -127,10 +128,10 @@ class AlarmItem extends React.PureComponent {
         let textColor, buttonColor;
         if (this.props.alarm.enabled) {
             textColor = Colors.darkGreyText;
-            buttonColor = Colors.buttonOnGreen;
+            buttonColor = "#6bf47b";
         } else {
             textColor = Colors.disabledGrey;
-            buttonColor = Colors.disabledGrey;
+            buttonColor = "#FEFEFE";
         }
 
         // Format times
@@ -277,6 +278,55 @@ class AlarmItem extends React.PureComponent {
                             >
                                 {this.props.alarm.label}
                             </Text>
+                        </View>
+                        <View
+                            style={{
+                                position: "absolute",
+                                right: 0,
+                                top: 0,
+                                left: 0,
+                                bottom: 0,
+                                justifyContent: "center",
+                                alignItems: "flex-end"
+                            }}
+                        >
+                            <TouchableOpacity
+                                style={{
+                                    padding: 5,
+                                    backgroundColor: "#47d35a",
+                                    borderRadius: 5,
+                                    shadowOffset: {
+                                        height: 2,
+                                        width: 0
+                                    },
+                                    shadowOpacity: 0.5,
+                                    shadowRadius: 2,
+                                    elevation: 3,
+                                    shadowColor: "black",
+                                    zIndex: 999
+                                }}
+                                hitSlop={{
+                                    top: 10,
+                                    bottom: 10,
+                                    left: 20,
+                                    right: 0
+                                }}
+                                onPress={() => {
+                                    Linking.openURL("fb162575247235://1900")
+                                        .then(() => {
+                                            console.log("Opening Sleep Cycle");
+                                        })
+                                        .catch(() => {
+                                            console.log(
+                                                "Failed to launch Sleep Cycle"
+                                            );
+                                        });
+                                }}
+                            >
+                                <Text style={{ fontSize: 18, color: "white" }}>
+                                    SC
+                                </Text>
+                            </TouchableOpacity>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity
