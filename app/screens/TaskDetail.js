@@ -597,11 +597,11 @@ class TaskDetail extends Component {
                     <View
                         style={{
                             flexDirection: "row",
-                            // backgroundColor: "green",
                             alignContent: "center",
                             alignItems: "center",
                             position: "absolute",
                             top: scaleByFactor(35, 0.6) + 35
+                            // backgroundColor: "green"
                         }}
                     >
                         <LabeledDurationInput
@@ -621,16 +621,38 @@ class TaskDetail extends Component {
                                 <View
                                     style={{
                                         flex: 1,
-                                        flexDirection: "row",
-                                        alignSelf: "flex-end",
-                                        justifyContent: "flex-end",
-                                        paddingLeft: 10,
-                                        paddingBottom: 5
+                                        alignSelf: "stretch",
+                                        alignContent: "flex-end",
+                                        alignItems: "flex-end"
+                                        // paddingLeft: 10,
+                                        // paddingBottom: 5,
                                         // borderBottomColor: "black",
                                         // borderBottomWidth: 1
                                         // backgroundColor: "green"
                                     }}
                                 >
+                                    <TouchableOpacity
+                                        style={{
+                                            marginLeft: 10,
+                                            flexDirection: "row"
+                                            // backgroundColor: "blue",
+                                        }}
+                                        onPress={() => {
+                                            this.setState({
+                                                showDurationInfo: true
+                                            });
+                                        }}
+                                    >
+                                        <EntypoIcon
+                                            name="info-with-circle"
+                                            size={15}
+                                        />
+                                        <View style={{ width: 5 }} />
+                                        <Text style={[TextStyle.labelText]}>
+                                            SET AS DEFAULT
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <View style={{ height: scale(8) }} />
                                     <StyleProvider style={getTheme(material)}>
                                         <CheckBox
                                             onPress={() =>
@@ -640,10 +662,10 @@ class TaskDetail extends Component {
                                             }
                                             checked={this.state.setAsDefault}
                                             style={{
-                                                paddingTop: 1,
+                                                // paddingTop: 1,
                                                 paddingLeft: 0,
                                                 marginRight: 10,
-                                                marginBottom: 5,
+                                                // marginBottom: 5,
                                                 backgroundColor:
                                                     Colors.brandLightPurple,
                                                 borderColor: "transparent",
@@ -657,25 +679,6 @@ class TaskDetail extends Component {
                                             }}
                                         />
                                     </StyleProvider>
-                                    <TouchableOpacity
-                                        style={{
-                                            marginLeft: 10,
-                                            marginTop: 1
-                                        }}
-                                        onPress={() => {
-                                            this.setState({
-                                                showDurationInfo: true
-                                            });
-                                        }}
-                                    >
-                                        <Text
-                                            style={{
-                                                fontSize: scaleByFactor(14, 0.5)
-                                            }}
-                                        >
-                                            Set as Default
-                                        </Text>
-                                    </TouchableOpacity>
                                 </View>
                             )}
                     </View>
