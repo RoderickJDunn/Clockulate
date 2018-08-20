@@ -270,12 +270,10 @@ class TaskItem extends React.PureComponent {
                         onPress={() => this._onTapCheckBox(this.props.data)}
                         checked={this.props.data.enabled}
                         style={{
-                            marginLeft: 0,
-                            paddingTop: 1,
-                            paddingLeft: 0,
                             backgroundColor: Colors.brandLightPurple,
                             borderColor: "transparent",
-                            alignItems: "center"
+                            alignItems: "center",
+                            left: 0
                         }}
                         hitSlop={{
                             top: 15,

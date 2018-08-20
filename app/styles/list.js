@@ -112,13 +112,15 @@ export const TaskItemStyle = StyleSheet.create({
         justifyContent: "space-between"
     },
     checkbox: {
-        flex: 0.12
+        flex: 0.08
+        // alignItems: "flex-start",
+        // backgroundColor: "blue"
         // flexShrink: 0.1
         // height: 50,
         // width: 50
     },
     description: {
-        flex: 0.78,
+        flex: 0.68,
         // flexGrow: 0.7,
         color: Colors.black,
         opacity: 0.8
@@ -128,7 +130,7 @@ export const TaskItemStyle = StyleSheet.create({
     duration: {
         // alignSelf: 'stretch',
         textAlign: "right",
-        flex: 0.13,
+        flex: 0.2,
         fontSize: 16,
         alignSelf: "center",
         marginRight: 10
