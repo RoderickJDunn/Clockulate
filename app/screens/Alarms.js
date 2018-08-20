@@ -379,6 +379,10 @@ class Alarms extends Component {
         this.setState(this.state);
     };
 
+    _onPressDuplicate = (item, event) => {
+        console.log("_onPressDuplicate");
+    };
+
     _onAlarmToggled = alarm => {
         console.info("AlarmsList - alarm toggled: ");
         realm.write(() => {
@@ -483,6 +487,10 @@ class Alarms extends Component {
                                     alarm={alarm.item}
                                     onPress={this._onPressItem}
                                     onDelete={this._onPressDelete.bind(
+                                        this,
+                                        alarm.item
+                                    )}
+                                    onDuplicate={this._onPressDuplicate.bind(
                                         this,
                                         alarm.item
                                     )}

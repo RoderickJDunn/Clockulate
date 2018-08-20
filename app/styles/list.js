@@ -28,7 +28,7 @@ export const AlarmListStyle = StyleSheet.create({
     alarmRow: {
         flex: 1,
         flexDirection: "row",
-        width: SCREEN_WIDTH + 100
+        width: SCREEN_WIDTH + 200
     },
     toggleButton: {
         flexDirection: "column",
@@ -50,6 +50,15 @@ export const AlarmListStyle = StyleSheet.create({
         position: "absolute",
         backgroundColor: Colors.deleteBtnRed,
         right: 0,
+        width: 100,
+        height: scaleByFactor(130, 0.2),
+        justifyContent: "center",
+        zIndex: 10000
+    },
+    duplicateBtn: {
+        position: "absolute",
+        backgroundColor: "#68BBBB",
+        right: 100,
         width: 100,
         height: scaleByFactor(130, 0.2),
         justifyContent: "center",

@@ -172,7 +172,7 @@ class AlarmItem extends React.PureComponent {
                     horizontalOnly={true}
                     snapPoints={[
                         { x: 0, id: "closed" },
-                        { x: -100, id: "active" }
+                        { x: -200, id: "active" }
                     ]}
                     dragWithSpring={{ tension: 1000, damping: 0.5 }}
                     animatedNativeDriver={true}
@@ -350,6 +350,14 @@ class AlarmItem extends React.PureComponent {
                         onPressOut={alarm => this.props.onDelete(alarm)}
                     >
                         <Text style={AlarmListStyle.deleteBtnText}>DELETE</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[AlarmListStyle.duplicateBtn]}
+                        onPressOut={alarm => this.props.onDuplicate(alarm)}
+                    >
+                        <Text style={AlarmListStyle.deleteBtnText}>
+                            DUPLICATE
+                        </Text>
                     </TouchableOpacity>
                 </Interactable.View>
             </View>
