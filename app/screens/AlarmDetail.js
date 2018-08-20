@@ -656,8 +656,6 @@ class AlarmDetail extends Component {
                 <TouchableOpacity
                     style={{
                         flex: 1
-                        // borderColor: "black",
-                        // borderWidth: 3
                     }}
                     onPress={this.onPressAddTask.bind(this)}
                 >
@@ -672,12 +670,24 @@ class AlarmDetail extends Component {
                             style={{
                                 alignSelf: "center",
                                 justifyContent: "center",
-                                position: "absolute"
+                                position: "absolute",
+                                // borderColor: "black",
+                                // borderWidth: 0.5,
+                                backgroundColor: "#603b91",
+                                padding: 12,
+                                borderRadius: 7,
+                                shadowOffset: {
+                                    height: 2,
+                                    width: 0
+                                },
+                                shadowOpacity: 0.5,
+                                shadowRadius: 2,
+                                elevation: 3,
+                                shadowColor: "black",
+                                zIndex: 999
                             }}
                         >
-                            <Text style={{ color: Colors.labelText }}>
-                                ADD TASKS TO THIS ALARM
-                            </Text>
+                            <Text style={{ color: "#FFFFFF" }}>ADD TASKS</Text>
                         </View>
                     </View>
                 </TouchableOpacity>
