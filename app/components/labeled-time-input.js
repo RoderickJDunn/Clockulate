@@ -66,16 +66,36 @@ class LabeledTimeInput extends Component {
                 <Text
                     style={[
                         TextStyle.labelText,
-                        { paddingBottom: this.props.separation || 2 }
+                        {
+                            paddingBottom: this.props.separation || 2,
+                            textAlign:
+                                this.props.textAlign == null
+                                    ? "left"
+                                    : this.props.textAlign
+                        }
                     ]}
                 >
                     {this.state.data.labelText}
                 </Text>
-                <TouchableOpacity onPress={this._showDateTimePicker}>
+                <TouchableOpacity
+                    onPress={this._showDateTimePicker}
+                    disabled={
+                        this.props.disabled == null
+                            ? false
+                            : this.props.disabled
+                    }
+                >
                     <Text
                         style={[
                             TextStyle.timeText,
-                            { fontSize: this.props.inputFontSize }
+                            {
+                                fontSize: this.props.inputFontSize,
+                                textAlign:
+                                    this.props.textAlign == null
+                                        ? "left"
+                                        : this.props.textAlign
+                                // backgroundColor: "red"
+                            }
                         ]}
                     >
                         {this.props.fieldText}

@@ -131,6 +131,8 @@ class LabeledInput extends Component {
                     }
                     multiline={false}
                     underlineColorAndroid="transparent"
+                    editable={this.props.editable == null ? true : this.props.editable}
+                    textAlign={this.props.textAlign == null ? "left" : this.props.textAlign}
                 />
             </View>
         );

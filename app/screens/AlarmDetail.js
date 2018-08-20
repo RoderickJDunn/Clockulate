@@ -477,7 +477,7 @@ class AlarmDetail extends Component {
         let wakeUpDate = DateUtils.date_to_nextTimeInstance(date);
 
         realm.write(() => {
-            alarm.wakeUpTime = wakeUpDate.toDate();
+            alarm.wakeUpTime = wakeUpDate;
         });
         this._hideDateTimePicker();
     };
@@ -513,6 +513,25 @@ class AlarmDetail extends Component {
         this._calculatedWakeUpTime = new Date(epochSec);
 
         return this._calculatedWakeUpTime;
+    };
+
+    _calculateHoursOfSleep = wakeUpTime => {
+        console.log("Calculating hours of sleep");
+
+        wakeUpTime = DateUtils.date_to_nextTimeInstance(wakeUpTime);
+
+        let now = new Date();
+
+        let secUntilAlarm = (wakeUpTime - now) / 1000;
+
+        let fmtTimeUntilAlarm;
+        if (secUntilAlarm > 0) {
+            fmtTimeUntilAlarm = DateUtils.formatDuration(secUntilAlarm, true);
+        } else {
+            fmtTimeUntilAlarm = "None";
+        }
+
+        return fmtTimeUntilAlarm;
     };
 
     _onDeleteTask(data) {
@@ -758,6 +777,8 @@ class AlarmDetail extends Component {
             handleForceHide = { opacity: 0 };
         }
 
+        let hoursOfSleep = this._calculateHoursOfSleep(wakeUpTime);
+
         return (
             <View style={styles.screenContainer}>
                 {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
@@ -944,22 +965,47 @@ class AlarmDetail extends Component {
                                     backgroundColor: "#E0E0E0"
                                 }}
                             /> */}
-                            <LabeledTimeInput
-                                labelText="ARRIVAL TIME"
-                                flex={0.5}
-                                fieldText={moment
-                                    .utc(this.state.alarm.arrivalTime)
-                                    .local()
-                                    .format("h:mm A")}
-                                time={moment
-                                    .utc(this.state.alarm.arrivalTime)
-                                    .local()
-                                    .toDate()}
-                                handleArrivalChange={this._onArrivalTimePicked}
-                                timePickerPrompt="What time do you need to arrive?"
-                                inputFontSize={scaleByFactor(33, 0.5)}
-                                separation={scaleByFactor(5, 0.3)}
-                            />
+                            <View
+                                style={{
+                                    flex: 0.5,
+                                    flexDirection: "row",
+                                    justifyContent: "space-between"
+                                    // backgroundColor: "blue"
+                                }}
+                            >
+                                <LabeledTimeInput
+                                    labelText="ARRIVAL TIME"
+                                    flex={0.6}
+                                    fieldText={moment
+                                        .utc(this.state.alarm.arrivalTime)
+                                        .local()
+                                        .format("h:mm A")}
+                                    time={moment
+                                        .utc(this.state.alarm.arrivalTime)
+                                        .local()
+                                        .toDate()}
+                                    handleArrivalChange={
+                                        this._onArrivalTimePicked
+                                    }
+                                    timePickerPrompt="What time do you need to arrive?"
+                                    inputFontSize={scaleByFactor(33, 0.5)}
+                                    separation={scaleByFactor(5, 0.3)}
+                                />
+                                <LabeledTimeInput
+                                    labelText="HOURS OF SLEEP"
+                                    fieldText={hoursOfSleep}
+                                    flex={0.4}
+                                    viewStyle={{
+                                        flex: 0.3,
+                                        height: "auto"
+                                        // backgroundColor: "green",
+                                    }}
+                                    inputFontSize={scaleByFactor(33, 0.5)}
+                                    separation={scaleByFactor(5, 0.3)}
+                                    disabled={true}
+                                    textAlign={"right"}
+                                />
+                            </View>
                             {/* <View style={{ height: 5 }} /> */}
                             {/* <View
                                 style={{
@@ -976,17 +1022,13 @@ class AlarmDetail extends Component {
                             style={[styles.taskListContainer]}
                         >
                             <View style={styles.taskListHeader}>
-                                <TouchableOpacity
-                                    style={{
-                                        alignSelf: "center"
-                                    }}
-                                    onPress={this._onPressEditTasks.bind(this)}
-                                    /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
-                                >
-                                    {editTasksBtn}
-                                </TouchableOpacity>
                                 <View
                                     style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
                                         justifyContent: "center",
                                         alignItems: "center"
                                     }}
@@ -1000,6 +1042,16 @@ class AlarmDetail extends Component {
                                         TASKS
                                     </Text>
                                 </View>
+                                <TouchableOpacity
+                                    style={{
+                                        alignSelf: "center"
+                                    }}
+                                    onPress={this._onPressEditTasks.bind(this)}
+                                    /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
+                                >
+                                    {editTasksBtn}
+                                </TouchableOpacity>
+
                                 <TouchableOpacity
                                     style={{
                                         alignSelf: "center"
@@ -1090,6 +1142,17 @@ class AlarmDetail extends Component {
                         }}
                     />
                 </TouchableOpacity>
+                {/* Measuring line -- dev view to check whether views are aligned properly */}
+                {/* <View
+                    style={{
+                        position: "absolute",
+                        left: 0,
+                        right: 0,
+                        top: 260,
+                        height: 2,
+                        backgroundColor: "black"
+                    }}
+                /> */}
                 <DateTimePicker
                     date={moment
                         .utc(this.state.alarm.wakeUpTime)
@@ -1172,8 +1235,7 @@ const styles = StyleSheet.create({
         flex: 0.1,
         flexDirection: "row",
         justifyContent: "space-between",
-        paddingBottom: 5,
-        paddingTop: 15
+        paddingVertical: 10
     },
 
     nonClockBgImage: {
