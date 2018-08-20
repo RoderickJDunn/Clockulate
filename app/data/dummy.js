@@ -58,7 +58,7 @@ function insertDummyData() {
         const task4 = realm.create("Task", {
             id: uuid.v1(),
             name: "Take a shower",
-            defaultDuration: 800
+            defaultDuration: 900
         });
         const task5 = realm.create("Task", {
             id: uuid.v1(),
