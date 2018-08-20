@@ -70,7 +70,7 @@ class AlarmItem extends React.PureComponent {
         }
     }
 
-    _triggerAnimation(nextAlarmState, notifyParentOnCompletion) {
+    _triggerAnimation(nextAlarmState, notifyParentOfToggle) {
         let toValue = 0.9;
         let duration = 1000;
         let easing = Easing.linear;
@@ -96,11 +96,14 @@ class AlarmItem extends React.PureComponent {
             duration: duration,
             easing: easing,
             useNativeDriver: true
-        }).start(() => {
-            if (notifyParentOnCompletion) {
+        }).start(/* () => {
+            if (notifyParentOfToggle) {
                 this.props.onToggle(this.props.alarm);
             }
-        });
+        } */);
+        if (notifyParentOfToggle) {
+            this.props.onToggle(this.props.alarm);
+        }
         this.setState({ switchValue: nextAlarmState });
     }
 
@@ -278,55 +281,68 @@ class AlarmItem extends React.PureComponent {
                             >
                                 {this.props.alarm.label}
                             </Text>
-                        </View>
-                        <View
-                            style={{
-                                position: "absolute",
-                                right: 0,
-                                top: 0,
-                                left: 0,
-                                bottom: 0,
-                                justifyContent: "center",
-                                alignItems: "flex-end"
-                            }}
-                        >
-                            <TouchableOpacity
+                            <View
                                 style={{
-                                    padding: 5,
-                                    backgroundColor: "#47d35a",
-                                    borderRadius: 5,
-                                    shadowOffset: {
-                                        height: 2,
-                                        width: 0
-                                    },
-                                    shadowOpacity: 0.5,
-                                    shadowRadius: 2,
-                                    elevation: 3,
-                                    shadowColor: "black",
-                                    zIndex: 999
-                                }}
-                                hitSlop={{
-                                    top: 10,
-                                    bottom: 10,
-                                    left: 20,
-                                    right: 0
-                                }}
-                                onPress={() => {
-                                    Linking.openURL("fb162575247235://1900")
-                                        .then(() => {
-                                            console.log("Opening Sleep Cycle");
-                                        })
-                                        .catch(() => {
-                                            console.log(
-                                                "Failed to launch Sleep Cycle"
-                                            );
-                                        });
+                                    position: "absolute",
+                                    right: 0,
+                                    top: 0,
+                                    left: 0,
+                                    bottom: 0,
+                                    justifyContent: "center",
+                                    alignItems: "flex-end"
                                 }}
                             >
-                                <Text style={{ fontSize: 18, color: "white" }}>
-                                    SC
-                                </Text>
-                            </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                        padding: 5,
+                                        backgroundColor: "#47d35a",
+                                        borderRadius: 5,
+                                        shadowOffset: {
+                                            height: 2,
+                                            width: 0
+                                        },
+                                        shadowOpacity: 0.5,
+                                        shadowRadius: 2,
+                                        elevation: 3,
+                                        shadowColor: "black",
+                                        zIndex: 999
+                                    }}
+                                    hitSlop={{
+                                        top: 10,
+                                        bottom: 10,
+                                        left: 20,
+                                        right: 0
+                                    }}
+                                    onPress={() => {
+                                        /* Before launching SleepCycle, disable the current Alarm (if its enabled), so that we don't get conflicts */
+
+                                        if (this.props.alarm.enabled) {
+                                            // this will disable the alarm and clear notifications
+                                            this.props.onToggle(
+                                                this.props.alarm
+                                            );
+                                        }
+
+                                        Linking.openURL("fb162575247235://1900")
+                                            .then(() => {
+                                                console.log(
+                                                    "Opening Sleep Cycle"
+                                                );
+                                            })
+                                            .catch(() => {
+                                                console.log(
+                                                    "Failed to launch Sleep Cycle"
+                                                );
+                                            });
+                                    }}
+                                >
+                                    <Text
+                                        style={{ fontSize: 18, color: "white" }}
+                                    >
+                                        SC
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity

@@ -6,25 +6,33 @@ import {
     View,
     StatusBar,
     Text,
-    Dimensions
+    Dimensions,
+    AppState,
+    Platform
 } from "react-native";
 // import ArrowView from "./app/components/arrow-view-native";
 
+import realm from "./app/data/DataSchemas";
 import insertDummyData from "./app/data/dummy";
-
+import {
+    cancelInAppAlarm,
+    setInAppAlarm
+} from "./app/alarmservice/PushController.ios";
 export default class App extends React.Component {
     constructor() {
         super();
 
         console.info("App - constructor");
         // Arrows.createArrow();
-        this.state = { firstLaunch: null };
+        this.state = { firstLaunch: null, appState: AppState.currentState };
         // console.log("Entry: Constructor");
         // let av = ArrowView();
     }
 
     componentDidMount() {
         console.log("App: componentDidMount");
+        AppState.addEventListener("change", this._handleAppStateChange);
+
         try {
             AsyncStorage.getItem("alreadyLaunched").then(value => {
                 if (value === null) {
@@ -46,6 +54,39 @@ export default class App extends React.Component {
             );
         }
     }
+
+    componentWillUnmount() {
+        AppState.removeEventListener("change", this._handleAppStateChange);
+    }
+
+    _handleAppStateChange = nextAppState => {
+        if (
+            this.state.appState.match(/inactive|background/) &&
+            nextAppState === "active"
+        ) {
+            console.log("App has come to the foreground!");
+
+            // set timers for in-app alarms
+            if (Platform.OS == "ios") {
+                let alarms = realm.objects("Alarm").filtered("enabled == true");
+                for (let i = 0; i < alarms.length; i++) {
+                    setInAppAlarm(alarms[i]);
+                }
+            }
+        } else if (nextAppState === "background") {
+            console.log("App is going into background");
+            // cancel any set timers for in-app alarms (iOS only)
+
+            if (Platform.OS == "ios") {
+                let alarms = realm.objects("Alarm").filtered("enabled == true");
+                for (let i = 0; i < alarms.length; i++) {
+                    cancelInAppAlarm(alarms[i]);
+                }
+            }
+        }
+
+        this.setState({ appState: nextAppState });
+    };
 
     render() {
         console.log(

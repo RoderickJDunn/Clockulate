@@ -29,6 +29,14 @@ AlarmSchema.schema = {
         notificationId: {
             type: "string", // this is used for Android only since its the only way to cancel specific notifications.
             optional: true
+        },
+        timeoutId: {
+            type: "int", // this is used in iOS only to allow for in-app notifications
+            optional: true
+        },
+        snoozeCount: {
+            type: "int", // this is used in iOS only in order to set the correct times for snoozed in-app nofications
+            optional: true
         }
     }
 };

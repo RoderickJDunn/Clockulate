@@ -6,6 +6,8 @@ import realm from "./DataSchemas";
 import uuid from "react-native-uuid";
 import moment from "moment";
 import { DefaultAlarm } from "./constants";
+import * as DateUtils from "../util/date_utils";
+
 console.log("dummy data file");
 
 let prePopTasks = [
@@ -150,14 +152,21 @@ function insertDummyData() {
 
         /**** Create Alarms *****/
         console.log("Adding dummy alarms");
+
+        let wake1 = moment("8:35", "HH:mm").toDate();
+        wake1 = DateUtils.date_to_nextTimeInstance(wake1);
+
+        let arrive1 = moment("9:35", "HH:mm").toDate();
+        arrive1 = DateUtils.date_to_nextTimeInstance(arrive1);
+
         const alarm1 = realm.create("Alarm", {
             id: uuid.v1(),
-            wakeUpTime: moment("8:35", "HH:mm").toDate(),
-            arrivalTime: moment("9:35", "HH:mm").toDate(),
+            wakeUpTime: wake1,
+            arrivalTime: arrive1,
             mode: "autocalc", // TODO: Change back to basic for testing
             tasks: [almTask1, almTask7, almTask3, almTask8],
             label: "Wake up on work-day",
-            enabled: true, // if true, it is active, and will Ring at wakeUpTime.
+            enabled: false, // if true, it is active, and will Ring at wakeUpTime.
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
             preset: false, // if tr
             order: 0,
@@ -165,14 +174,20 @@ function insertDummyData() {
             snoozeTime: DefaultAlarm.snoozeTime
         });
 
+        let wake2 = moment("10:00", "HH:mm").toDate();
+        wake2 = DateUtils.date_to_nextTimeInstance(wake2);
+
+        let arrive2 = moment("11:30", "HH:mm").toDate();
+        arrive2 = DateUtils.date_to_nextTimeInstance(arrive2);
+
         const alarm2 = realm.create("Alarm", {
             id: uuid.v1(),
-            wakeUpTime: moment("10:00", "HH:mm").toDate(),
-            arrivalTime: moment("11:30", "HH:mm").toDate(),
+            wakeUpTime: wake2,
+            arrivalTime: arrive2,
             mode: "autocalc",
             tasks: [almTask6, almTask9, almTask1b, almTask3b],
             label: "Wake up for appointment",
-            enabled: true, // if true, it is active, and will Ring at wakeUpTime.
+            enabled: false, // if true, it is active, and will Ring at wakeUpTime.
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
             preset: false, // if tr
             order: 1,

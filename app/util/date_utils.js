@@ -89,10 +89,9 @@ export function date_to_nextTimeInstance(date) {
         .set("hour", wakeUpTime.hour())
         .set("minute", wakeUpTime.minute())
         .set("second", 0);
-    console.log("Applied today's date: " + wakeUpDate.toDate());
     if (wakeUpDate.diff(moment()) < 0) {
         wakeUpDate.add(1, "days");
     }
-
+    console.log("Modded date: " + wakeUpDate.toDate());
     return wakeUpDate.toDate();
 }

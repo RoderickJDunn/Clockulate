@@ -10,7 +10,8 @@ import {
     Dimensions,
     LayoutAnimation,
     Platform,
-    DeviceEventEmitter
+    DeviceEventEmitter,
+    AppState
 } from "react-native";
 
 import PushNotificationAndroid from "react-native-push-notification";
@@ -42,7 +43,8 @@ class Alarms extends Component {
         this.state = {
             alarms: realm.objects("Alarm").sorted("order"), // TODO: filter by 'visible'=true
             activeRow: null,
-            menuVisible: false
+            menuVisible: false,
+            appState: AppState.currentState
         };
 
         console.log("Setting up notifications");
@@ -228,6 +230,8 @@ class Alarms extends Component {
     componentDidMount() {
         console.info("AlarmsList --- ComponentDidMount");
 
+        AppState.addEventListener("change", this._handleAppStateChange);
+
         // setParams updates the object 'navigation.state.params'
         // When this Screen is going to be rendered, any code in navigationOptions is run (ie: the code within
         // the onPress property of a Button (in headerRight)). This code in navigationOptions can have access to
@@ -266,7 +270,23 @@ class Alarms extends Component {
                 this.onNotificationOpened.bind(this)
             );
         }
+
+        AppState.removeEventListener("change", this._handleAppStateChange);
     }
+
+    _handleAppStateChange = nextAppState => {
+        if (
+            this.state.appState.match(/inactive|background/) &&
+            nextAppState === "active"
+        ) {
+            console.log("App has come to the foreground!");
+            // set timers for in-app alarms
+            this.reloadAlarms();
+        }
+
+        this.setState({ appState: nextAppState });
+    };
+
     handleAddAlarm() {
         console.info("Adding alarm");
         this.props.navigation.navigate("AlarmDetail", {
@@ -276,27 +296,31 @@ class Alarms extends Component {
     }
 
     reloadAlarms = alarmId => {
-        console.info("AlarmsList - reloading alarms list");
+        console.info(
+            "AlarmsList - reloading alarms list. Specific alarm to schedule: " +
+                alarmId
+        );
         // console.log("this: ", this.constructor.name); /* This is how you check a class's name (here i'm checking 'this') */
         // console.debug(this.state);
         this.setState({ alarms: realm.objects("Alarm").sorted("order") }); // TODO: filter by 'visible'=true
         // console.debug("Called set state from reloadAlarms");
         // console.debug(this.state);
 
-        // TODO: schedule the notification for the alarmId passed in (the alarm that we were just editing)
-        // Get the alarm that was just edited
-        let changedAlarm = this.state.alarms.filtered("id = $0", alarmId);
+        if (alarmId) {
+            let changedAlarm = this.state.alarms.filtered("id = $0", alarmId);
 
-        if (changedAlarm.length == 1) {
-            // first clear any notifications already scheduled for this alarm
-            clearAlarm(changedAlarm[0]);
+            if (changedAlarm.length == 1) {
+                console.log("wakeUpTime", changedAlarm.wakeUpTime);
+                console.log("enabled", changedAlarm.enabled);
 
-            // now schedule notification(s) for the changes
-            scheduleAlarm(changedAlarm[0]);
-        } else {
-            console.error(
-                `Found more than 1 alarm with alarmId ${alarmId}. This should never happen...`
-            );
+                /* Now schedule notification(s) for the changes */
+                // passing in reloadAlarms function for iOS in-app alarm to be able to refresh AlarmsList screen
+                scheduleAlarm(changedAlarm[0], this.reloadAlarms.bind(this));
+            } else if (changedAlarm.length > 1) {
+                console.error(
+                    `Found more than 1 alarm with alarmId ${alarmId}. This should never happen...`
+                );
+            }
         }
     };
 
@@ -389,7 +413,9 @@ class Alarms extends Component {
         // console.log(wakeUpTime);
         console.log("WakeUpTime: " + alarm.wakeUpTime);
         if (alarm.enabled) {
-            let wakeUpTime = DateUtils.date_to_nextTimeInstance(alarm.wakeUpTime);
+            let wakeUpTime = DateUtils.date_to_nextTimeInstance(
+                alarm.wakeUpTime
+            );
 
             realm.write(() => {
                 alarm.wakeUpTime = wakeUpTime;
@@ -435,7 +461,7 @@ class Alarms extends Component {
     render() {
         console.info("AlarmsList - Render");
         // console.debug(this.state);
-        let { alarms } = this.state;
+        // let { alarms } = this.state;
         // console.log("alarms", alarms);
 
         // alarms.forEach(a => {
