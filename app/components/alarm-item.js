@@ -353,7 +353,7 @@ class AlarmItem extends React.PureComponent {
                             </View>
                         </View>
                     </TouchableOpacity>
-                    <TouchableOpacity
+                    <Animated.View
                         style={[
                             AlarmListStyle.deleteBtn,
                             {
@@ -371,18 +371,26 @@ class AlarmItem extends React.PureComponent {
                                 })
                             }
                         ]}
-                        onPressOut={alarm => this.props.onDelete(alarm)}
                     >
-                        <Text
-                            numberOfLines={1}
-                            overflow="hidden"
-                            ellipsizeMode="clip"
-                            style={AlarmListStyle.deleteBtnText}
+                        <TouchableOpacity
+                            style={{
+                                flex: 1,
+                                height: scaleByFactor(130, 0.2),
+                                justifyContent: "center"
+                            }}
+                            onPressOut={alarm => this.props.onDelete(alarm)}
                         >
-                            DELETE
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
+                            <Text
+                                numberOfLines={1}
+                                overflow="hidden"
+                                ellipsizeMode="clip"
+                                style={AlarmListStyle.deleteBtnText}
+                            >
+                                DELETE
+                            </Text>
+                        </TouchableOpacity>
+                    </Animated.View>
+                    <Animated.View
                         style={[
                             AlarmListStyle.duplicateBtn,
                             {
@@ -400,17 +408,28 @@ class AlarmItem extends React.PureComponent {
                                 })
                             }
                         ]}
-                        onPressOut={alarm => this.props.onDuplicate(alarm)}
                     >
-                        <Text
-                            numberOfLines={1}
-                            overflow="hidden"
-                            ellipsizeMode="clip"
-                            style={AlarmListStyle.deleteBtnText}
+                        <TouchableOpacity
+                            style={{
+                                flex: 1,
+                                height: scaleByFactor(130, 0.2),
+                                justifyContent: "center"
+                            }}
+                            onPressOut={alarm => {
+                                console.log("pressed duplicate...");
+                                this.props.onDuplicate(alarm);
+                            }}
                         >
-                            DUPLICATE
-                        </Text>
-                    </TouchableOpacity>
+                            <Text
+                                numberOfLines={1}
+                                overflow="hidden"
+                                ellipsizeMode="clip"
+                                style={AlarmListStyle.deleteBtnText}
+                            >
+                                DUPLICATE
+                            </Text>
+                        </TouchableOpacity>
+                    </Animated.View>
                 </Interactable.View>
             </View>
         );
