@@ -32,6 +32,7 @@ class AlarmItem extends React.PureComponent {
 
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
+    _position = new Animated.Value(0);
     // _onPressItem = item => {
     //     // console.debug("_onPressItem called");
 
@@ -166,6 +167,12 @@ class AlarmItem extends React.PureComponent {
                     borderBottomWidth: 1
                 }}
             >
+                <View
+                    style={[
+                        StyleSheet.absoluteFill,
+                        { backgroundColor: Colors.disabledGrey }
+                    ]}
+                />
                 <Interactable.View
                     ref={interactableRef}
                     style={[AlarmListStyle.alarmRow, ListStyle.item]}
@@ -175,7 +182,8 @@ class AlarmItem extends React.PureComponent {
                         { x: -200, id: "active" }
                     ]}
                     dragWithSpring={{ tension: 1000, damping: 0.5 }}
-                    animatedNativeDriver={true}
+                    animatedNativeDriver={false}
+                    animatedValueX={this._position}
                     onSnap={e => {
                         this.props.onSnap(e.nativeEvent.id);
                     }}
@@ -346,16 +354,60 @@ class AlarmItem extends React.PureComponent {
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={[AlarmListStyle.deleteBtn]}
+                        style={[
+                            AlarmListStyle.deleteBtn,
+                            {
+                                flexWrap: "nowrap",
+                                overflow: "hidden",
+                                width: this._position.interpolate({
+                                    inputRange: [-200, 0],
+                                    outputRange: [100, 0],
+                                    extrapolate: "clamp"
+                                }),
+                                right: this._position.interpolate({
+                                    inputRange: [-200, 0],
+                                    outputRange: [0, 190],
+                                    extrapolate: "clamp"
+                                })
+                            }
+                        ]}
                         onPressOut={alarm => this.props.onDelete(alarm)}
                     >
-                        <Text style={AlarmListStyle.deleteBtnText}>DELETE</Text>
+                        <Text
+                            numberOfLines={1}
+                            overflow="hidden"
+                            ellipsizeMode="clip"
+                            style={AlarmListStyle.deleteBtnText}
+                        >
+                            DELETE
+                        </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={[AlarmListStyle.duplicateBtn]}
+                        style={[
+                            AlarmListStyle.duplicateBtn,
+                            {
+                                flexWrap: "nowrap",
+                                overflow: "hidden",
+                                width: this._position.interpolate({
+                                    inputRange: [-200, 0],
+                                    outputRange: [100, 0],
+                                    extrapolate: "clamp"
+                                }),
+                                right: this._position.interpolate({
+                                    inputRange: [-200, 0],
+                                    outputRange: [100, 190],
+                                    extrapolate: "clamp"
+                                })
+                            }
+                        ]}
                         onPressOut={alarm => this.props.onDuplicate(alarm)}
                     >
-                        <Text style={AlarmListStyle.deleteBtnText}>
+                        <Text
+                            numberOfLines={1}
+                            overflow="hidden"
+                            ellipsizeMode="clip"
+                            style={AlarmListStyle.deleteBtnText}
+                        >
                             DUPLICATE
                         </Text>
                     </TouchableOpacity>

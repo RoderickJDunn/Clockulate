@@ -14,7 +14,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 export const ListStyle = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.backgroundGrey,
+        backgroundColor: Colors.brandDarkPurple,
         flexDirection: "row",
         zIndex: 50
     },
@@ -28,7 +28,9 @@ export const AlarmListStyle = StyleSheet.create({
     alarmRow: {
         flex: 1,
         flexDirection: "row",
-        width: SCREEN_WIDTH + 200
+        width: SCREEN_WIDTH + 200,
+        opacity: 1,
+        backgroundColor: "#efefef"
     },
     toggleButton: {
         flexDirection: "column",
@@ -53,7 +55,8 @@ export const AlarmListStyle = StyleSheet.create({
         width: 100,
         height: scaleByFactor(130, 0.2),
         justifyContent: "center",
-        zIndex: 10000
+        zIndex: 10000,
+        padding: 5
     },
     duplicateBtn: {
         position: "absolute",
@@ -62,7 +65,8 @@ export const AlarmListStyle = StyleSheet.create({
         width: 100,
         height: scaleByFactor(130, 0.2),
         justifyContent: "center",
-        zIndex: 10000
+        zIndex: 10000,
+        padding: 5
     },
     deleteBtnText: {
         alignSelf: "stretch",
