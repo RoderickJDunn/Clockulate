@@ -11,7 +11,8 @@ import {
     LayoutAnimation,
     Platform,
     DeviceEventEmitter,
-    AppState
+    AppState,
+    NativeModules
 } from "react-native";
 
 import PushNotificationAndroid from "react-native-push-notification";
@@ -27,7 +28,9 @@ import { ListStyle } from "../styles/list";
 import AlarmItem from "../components/alarm-item";
 import RNSound from "react-native-sound";
 import * as DateUtils from "../util/date_utils";
+import { AlarmModel, AlarmTaskModel } from "../data/models";
 
+const { UIManager } = NativeModules;
 var loadedSound = null;
 
 class Alarms extends Component {
@@ -35,6 +38,7 @@ class Alarms extends Component {
     height = Dimensions.get("window").height; //full height
 
     _didFocusListener = null;
+    _duplicatedAlarmId = null;
 
     constructor() {
         super();
@@ -49,7 +53,9 @@ class Alarms extends Component {
 
         console.log("Setting up notifications");
 
-        // setup notifications
+        if (Platform.OS === 'android') {
+            UIManager.setLayoutAnimationEnabledExperimental(true)
+          }        // setup notifications
         // NotificationsIOS.addEventListener(
         //     "remoteNotificationsRegistered",
         //     this.onPushRegistered.bind(this)
@@ -376,11 +382,41 @@ class Alarms extends Component {
             }
         };
         LayoutAnimation.configureNext(config);
-        this.setState(this.state);
+        this.setState({ activeRow: null });
     };
 
     _onPressDuplicate = (item, event) => {
         console.log("_onPressDuplicate");
+        let newAlarm = new AlarmModel(this.state.alarms.length);
+        newAlarm.wakeUpTime = item.wakeUpTime;
+        newAlarm.arrivalTime = item.arrivalTime;
+        newAlarm.mode = item.mode;
+        newAlarm.tasks = []; // needs careful attention for copying due to nested objects...
+
+        for (let i = 0; i < item.tasks.length; i++) {
+            let almTask = new AlarmTaskModel(
+                item.tasks[i].task,
+                item.tasks[i].order
+            );
+            almTask.duration = item.tasks[i].duration;
+
+            newAlarm.tasks.push(almTask);
+        }
+
+        newAlarm.label = item.label;
+        newAlarm.enabled = false;
+        newAlarm.visible = item.visible;
+        newAlarm.preset = item.preset;
+        newAlarm.sound = item.sound;
+        newAlarm.snoozeTime = item.snoozeTime;
+        newAlarm.noticiationId = null;
+
+        realm.write(() => {
+            realm.create("Alarm", newAlarm);
+            this._duplicatedAlarmId = newAlarm.id;
+            this.setState({ activeRow: null });
+        });
+        // console.log("duplicated Alarm");
     };
 
     _onAlarmToggled = alarm => {
@@ -472,6 +508,11 @@ class Alarms extends Component {
         //     console.log(a.id);
         // });
 
+        // this.setState({ duplicatedAlarmId: null });
+        let justDuplicatedAlm = this._duplicatedAlarmId;
+
+        this._duplicatedAlarmId = null;
+
         return (
             <TouchableWithoutFeedback
                 style={ListStyle.container}
@@ -499,6 +540,9 @@ class Alarms extends Component {
                                     onClose={this._onRowDismiss}
                                     close={
                                         alarm.item.id !== this.state.activeRow
+                                    }
+                                    shouldAnimateIn={
+                                        alarm.item.id == justDuplicatedAlm
                                     }
                                 />
                             );

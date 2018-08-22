@@ -57,10 +57,23 @@ class AlarmItem extends React.PureComponent {
             switchValue: props.alarm.enabled,
             animProgress: new Animated.Value(initAnimProgress)
         };
+
+        this._appearAnim = new Animated.Value(0);
     }
 
     componentDidMount() {
         console.log("AlarmItem - Component did mount ");
+
+        if (this.props.shouldAnimateIn) {
+            Animated.spring(this._appearAnim, {
+                toValue: 1,
+                duration: 300,
+                bounciness: 12,
+                speed: 4
+            }).start();
+        } else {
+            this._appearAnim.setValue(1);
+        }
     }
 
     componentWillReceiveProps(props) {
@@ -161,10 +174,16 @@ class AlarmItem extends React.PureComponent {
 
         // let { listItemAnimation } = this.state;
         return (
-            <View
+            <Animated.View
                 style={{
                     borderBottomColor: Colors.disabledGrey,
-                    borderBottomWidth: 1
+                    borderBottomWidth: this._appearAnim,
+                    overflow: "hidden",
+                    // height: 0
+                    height: this._appearAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, scaleByFactor(130, 0.2)]
+                    })
                 }}
             >
                 <View
@@ -431,7 +450,7 @@ class AlarmItem extends React.PureComponent {
                         </TouchableOpacity>
                     </Animated.View>
                 </Interactable.View>
-            </View>
+            </Animated.View>
         );
     }
 }
