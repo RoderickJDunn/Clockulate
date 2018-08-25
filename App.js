@@ -14,10 +14,11 @@ import {
 
 import realm from "./app/data/DataSchemas";
 import insertDummyData from "./app/data/dummy";
+
 import {
     cancelInAppAlarm,
     setInAppAlarm
-} from "./app/alarmservice/PushController.ios";
+} from "./app/alarmservice/PushController";
 export default class App extends React.Component {
     constructor() {
         super();
