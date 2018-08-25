@@ -60,6 +60,12 @@ class AlarmItem extends React.PureComponent {
         };
 
         this._appearAnim = new Animated.Value(0);
+
+        let count = 0;
+        this._position.addListener(v => {
+            count++;
+            if (count % 10 == 0) console.log(v);
+        });
     }
 
     componentDidMount() {
@@ -199,7 +205,7 @@ class AlarmItem extends React.PureComponent {
                         { x: -200, id: "active" }
                     ]}
                     dragWithSpring={{ tension: 1000, damping: 0.5 }}
-                    animatedNativeDriver={false}
+                    animatedNativeDriver={true}
                     animatedValueX={this._position}
                     onSnap={e => {
                         this.props.onSnap(e.nativeEvent.id);
@@ -376,18 +382,24 @@ class AlarmItem extends React.PureComponent {
                             {
                                 flexWrap: "nowrap",
                                 overflow: "hidden",
-                                width: this._position.interpolate({
-                                    inputRange: [-200, 0],
-                                    outputRange: [100, 0],
-                                    extrapolate: "clamp"
-                                }),
-                                right: this._position.interpolate({
-                                    inputRange: [-200, 0],
-                                    outputRange: [0, 190],
-                                    extrapolate: "clamp"
-                                }),
                                 alignContent: "center",
-                                alignItems: "center"
+                                alignItems: "center",
+                                transform: [
+                                    {
+                                        translateX: this._position.interpolate({
+                                            inputRange: [-200, -150, -100, 0],
+                                            outputRange: [0, -35, -70, -150],
+                                            extrapolate: "clamp"
+                                        })
+                                    },
+                                    {
+                                        scaleX: this._position.interpolate({
+                                            inputRange: [-200, 0],
+                                            outputRange: [1, 0.001],
+                                            extrapolate: "clamp"
+                                        })
+                                    }
+                                ]
                             }
                         ]}
                     >
@@ -422,18 +434,34 @@ class AlarmItem extends React.PureComponent {
                             {
                                 flexWrap: "nowrap",
                                 overflow: "hidden",
-                                width: this._position.interpolate({
-                                    inputRange: [-200, 0],
-                                    outputRange: [100, 0],
-                                    extrapolate: "clamp"
-                                }),
-                                right: this._position.interpolate({
-                                    inputRange: [-200, 0],
-                                    outputRange: [100, 190],
-                                    extrapolate: "clamp"
-                                }),
+                                // width: this._position.interpolate({
+                                //     inputRange: [-200, 0],
+                                //     outputRange: [100, 0],
+                                //     extrapolate: "clamp"
+                                // }),
+                                // right: this._position.interpolate({
+                                //     inputRange: [-200, 0],
+                                //     outputRange: [100, 190],
+                                //     extrapolate: "clamp"
+                                // }),
                                 alignContent: "center",
-                                alignItems: "center"
+                                alignItems: "center",
+                                transform: [
+                                    {
+                                        translateX: this._position.interpolate({
+                                            inputRange: [-200, -150, -100, 0],
+                                            outputRange: [0, -10, -20, -50],
+                                            extrapolate: "clamp"
+                                        })
+                                    },
+                                    {
+                                        scaleX: this._position.interpolate({
+                                            inputRange: [-200, 0],
+                                            outputRange: [1, 0.001],
+                                            extrapolate: "clamp"
+                                        })
+                                    }
+                                ]
                             }
                         ]}
                     >
