@@ -13,7 +13,8 @@ import {
     Animated,
     Easing,
     StyleSheet,
-    Linking
+    Linking,
+    Platform
 } from "react-native";
 import Svg, { Defs, Circle, RadialGradient, Stop } from "react-native-svg";
 import moment from "moment";
@@ -176,10 +177,7 @@ class AlarmItem extends React.PureComponent {
         return (
             <Animated.View
                 style={{
-                    borderBottomColor: Colors.disabledGrey,
-                    borderBottomWidth: this._appearAnim,
                     overflow: "hidden",
-                    // height: 0
                     height: this._appearAnim.interpolate({
                         inputRange: [0, 1],
                         outputRange: [0, scaleByFactor(130, 0.2)]
@@ -387,7 +385,9 @@ class AlarmItem extends React.PureComponent {
                                     inputRange: [-200, 0],
                                     outputRange: [0, 190],
                                     extrapolate: "clamp"
-                                })
+                                }),
+                                alignContent: "center",
+                                alignItems: "center"
                             }
                         ]}
                     >
@@ -402,8 +402,15 @@ class AlarmItem extends React.PureComponent {
                             <Text
                                 numberOfLines={1}
                                 overflow="hidden"
-                                ellipsizeMode="clip"
-                                style={AlarmListStyle.deleteBtnText}
+                                ellipsizeMode={
+                                    Platform.OS == "ios" ? "clip" : "tail"
+                                }
+                                style={[
+                                    AlarmListStyle.deleteBtnText,
+                                    {
+                                        width: 75
+                                    }
+                                ]}
                             >
                                 DELETE
                             </Text>
@@ -424,7 +431,9 @@ class AlarmItem extends React.PureComponent {
                                     inputRange: [-200, 0],
                                     outputRange: [100, 190],
                                     extrapolate: "clamp"
-                                })
+                                }),
+                                alignContent: "center",
+                                alignItems: "center"
                             }
                         ]}
                     >
@@ -442,14 +451,27 @@ class AlarmItem extends React.PureComponent {
                             <Text
                                 numberOfLines={1}
                                 overflow="hidden"
-                                ellipsizeMode="clip"
-                                style={AlarmListStyle.deleteBtnText}
+                                ellipsizeMode={
+                                    Platform.OS == "ios" ? "clip" : "tail"
+                                }
+                                style={[
+                                    AlarmListStyle.deleteBtnText,
+                                    {
+                                        width: 75
+                                    }
+                                ]}
                             >
                                 DUPLICATE
                             </Text>
                         </TouchableOpacity>
                     </Animated.View>
                 </Interactable.View>
+                <View
+                    style={{
+                        height: 1,
+                        backgroundColor: Colors.backgroundGrey
+                    }}
+                />
             </Animated.View>
         );
     }
