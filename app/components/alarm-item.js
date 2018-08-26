@@ -72,13 +72,21 @@ class AlarmItem extends React.PureComponent {
     componentDidMount() {
         console.log("AlarmItem - Component did mount ");
 
-        if (this.props.shouldAnimateIn) {
+        if (this.props.animateConfig && this.props.animateConfig.enabled) {
+            console.log("AlarmItem - creating duplicate animation");
             Animated.spring(this._appearAnim, {
                 toValue: 1,
-                duration: 300,
-                bounciness: 12,
-                speed: 4
-            }).start();
+                friction: 7,
+                tension: 70,
+                useNativeDriver: true
+            }).start(() => {
+                // when this animation completes we can re-render the parent view (which currently holds both a FlatList,
+                // and this AlarmItem). The re-render will remove this animation-only AlarmItem, and un-hide the newly added
+                // AlarmItem that is part of the FlatList
+                if (this.props.animateConfig.onComplete) {
+                    this.props.animateConfig.onComplete();
+                }
+            });
         } else {
             this._appearAnim.setValue(1);
         }
@@ -180,16 +188,37 @@ class AlarmItem extends React.PureComponent {
             }, 0);
         }
 
-        // let { listItemAnimation } = this.state;
+        let restingLocation = 0;
+        let duplicationSrcPos = 0;
+
+        if (this.props.animateConfig && this.props.animateConfig.alarmCount) {
+            restingLocation =
+                (scaleByFactor(130, 0.2) + 1) * // added '1' for the 1-pixel row separator view
+                (this.props.animateConfig.alarmCount - 1);
+            duplicationSrcPos =
+                (scaleByFactor(130, 0.2) + 1) * // added '1' for the 1-pixel row separator view
+                this.props.animateConfig.sourceRow;
+        }
+
         return (
             <Animated.View
-                style={{
-                    overflow: "hidden",
-                    height: this._appearAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, scaleByFactor(130, 0.2)]
-                    })
-                }}
+                style={[
+                    this.props.style,
+                    {
+                        transform: [
+                            {
+                                translateY: this._appearAnim.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [
+                                        duplicationSrcPos,
+                                        restingLocation
+                                    ]
+                                })
+                            }
+                        ],
+                        opacity: this.props.hide ? 0 : 1
+                    }
+                ]}
             >
                 <View
                     style={[

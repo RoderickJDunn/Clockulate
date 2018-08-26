@@ -30,6 +30,7 @@ import AlarmItem from "../components/alarm-item";
 import RNSound from "react-native-sound";
 import * as DateUtils from "../util/date_utils";
 import { AlarmModel, AlarmTaskModel } from "../data/models";
+import { scaleByFactor } from "../util/font-scale";
 
 const { UIManager } = NativeModules;
 var loadedSound = null;
@@ -39,7 +40,7 @@ class Alarms extends Component {
     height = Dimensions.get("window").height; //full height
 
     _didFocusListener = null;
-    _duplicatedAlarmId = null;
+    _duplicationInfo = null;
 
     constructor() {
         super();
@@ -224,13 +225,16 @@ class Alarms extends Component {
         } else {
             // PushNotificationAndroid.cancelAllLocalNotifications();
 
+            // DeviceEventEmitter.addListener("remoteNotificationReceived", e => {
+            //     console.log("Notification event: ", e);
+            // });
             // Register all the valid actions for notifications here and add the action handler for each action
             PushNotificationAndroid.registerNotificationActions([
                 "Snooze",
                 "Turn Off"
             ]);
             DeviceEventEmitter.addListener("notificationActionReceived", e => {
-                console.log("Notifcation event: ", e);
+                console.log("Notification event: ", e);
                 // console.log(
                 //     "notificationActionReceived event received: " + e
                 // );
@@ -365,12 +369,10 @@ class Alarms extends Component {
     _onPressDelete = (item, event) => {
         console.info("AlarmsList - onPressDelete: ", item);
 
-        // TODO: FIRST THING TO DO IS WE !MUST! Clear all notifications for this alarm !!!!
-        // FIXME: DO THIS
+        // FIRST THING TO DO IS WE !MUST! Clear all notifications for this alarm !!!!
+        clearAlarm(item);
 
-        realm.write(() => {
-            realm.delete(item);
-        });
+        // Configure layout animation for when row disappears
         let config = {
             duration: 1000,
             update: {
@@ -386,7 +388,21 @@ class Alarms extends Component {
             }
         };
         LayoutAnimation.configureNext(config);
-        this.setState({ activeRow: null });
+
+        let { alarms } = this.state;
+        realm.write(() => {
+            // Update the 'order' field of the Alarms lower in the list than this one
+            let deletedAlmPos = item.order;
+
+            for (let i = deletedAlmPos + 1; i < alarms.length; i++) {
+                alarms[i].order -= 1;
+            }
+
+            // delete the Alarm from the DB
+            realm.delete(item);
+
+            this.setState({ activeRow: null, alarms: alarms });
+        });
     };
 
     _onPressDuplicate = (item, event) => {
@@ -417,7 +433,10 @@ class Alarms extends Component {
 
         realm.write(() => {
             realm.create("Alarm", newAlarm);
-            this._duplicatedAlarmId = newAlarm.id;
+            this._duplicationInfo = {
+                alarm: newAlarm,
+                srcPosition: item.order
+            };
             this.setState({ activeRow: null });
         });
         // console.log("duplicated Alarm");
@@ -513,10 +532,10 @@ class Alarms extends Component {
         // });
 
         // this.setState({ duplicatedAlarmId: null });
-        let justDuplicatedAlm = this._duplicatedAlarmId;
+        let duplicationInfo = this._duplicationInfo;
 
-        this._duplicatedAlarmId = null;
-
+        this._duplicationInfo = null;
+        console.log("this.state.alarms.length", this.state.alarms.length);
         return (
             <TouchableWithoutFeedback
                 style={ListStyle.container}
@@ -545,8 +564,10 @@ class Alarms extends Component {
                                     close={
                                         alarm.item.id !== this.state.activeRow
                                     }
-                                    shouldAnimateIn={
-                                        alarm.item.id == justDuplicatedAlm
+                                    hide={
+                                        duplicationInfo &&
+                                        duplicationInfo.alarm.id ==
+                                            alarm.item.id
                                     }
                                 />
                             );
@@ -554,6 +575,40 @@ class Alarms extends Component {
                         keyExtractor={this._keyExtractor}
                         extraData={this.state}
                     />
+                    {duplicationInfo && (
+                        <AlarmItem
+                            style={{
+                                position: "absolute",
+                                left: 0,
+                                top: 0
+                                // borderWidth: 3,
+                                // borderColor: "blue"
+                            }}
+                            alarm={duplicationInfo.alarm}
+                            onPress={this._onPressItem}
+                            onDelete={this._onPressDelete.bind(
+                                this,
+                                duplicationInfo.alarm
+                            )}
+                            onDuplicate={this._onPressDuplicate.bind(
+                                this,
+                                duplicationInfo.alarm
+                            )}
+                            onToggle={this._onAlarmToggled}
+                            onSnap={this._onSnap.bind(
+                                this,
+                                duplicationInfo.alarm
+                            )}
+                            onClose={this._onRowDismiss}
+                            close={true}
+                            animateConfig={{
+                                enabled: true,
+                                sourceRow: duplicationInfo.srcPosition,
+                                alarmCount: this.state.alarms.length,
+                                onComplete: this.setState.bind(this, this.state)
+                            }}
+                        />
+                    )}
                 </View>
             </TouchableWithoutFeedback>
         );
