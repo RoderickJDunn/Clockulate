@@ -2,6 +2,8 @@
  * Created by rdunn on 2017-08-25.
  */
 
+import * as DateUtils from "../util/date_utils";
+
 export const DefaultAlarm = {
     wakeUpTime: getDateForHour(8), // 8:00 am
     arrivalTime: getDateForHour(8),
@@ -53,5 +55,7 @@ function getDateForHour(hour) {
     d.setHours(hour);
     d.setMinutes(0);
     d.setMilliseconds(0);
+
+    d = DateUtils.date_to_nextTimeInstance(d);
     return d;
 }
