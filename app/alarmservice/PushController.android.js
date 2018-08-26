@@ -6,6 +6,17 @@ import realm from "../data/DataSchemas";
 
 let FAKE_CATEGORY = "MyFakeCategory";
 
+// export function configure() {
+//     console.log("configuring notifications *************");
+//     PushNotification.configure({
+//         options: {
+//             onNotification: notification => {
+//                 console.log("notification", notification);
+//             }
+//         }
+//     });
+// }
+
 function alarmUUID_to_notificationID(alarmId) {
     let notifId = alarmId.replace(/[^[0-9]/g, "");
     return notifId.substring(0, 9);
@@ -75,7 +86,7 @@ export let clearAlarm = (alarm, notificationID, reloadAlarmsList) => {
 
     PushNotification.clearAllNotifications();
 
-    // TODO: Reload AlarmsList ... (in case we got the notification while app is open)
+    // Reload AlarmsList ... (in case we got the notification while app is open)
     if (reloadAlarmsList) {
         reloadAlarmsList();
     }

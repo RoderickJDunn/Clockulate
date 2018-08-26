@@ -122,11 +122,11 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
     Also resets the snoozeCount of the alarm and sets the alarm to disabled
 */
 export let clearAlarm = (alarm, notificationId, disableAlarm = true) => {
-    if (alarm) {
-        console.log("clearAlarm", alarm.wakeUpTime);
-        console.log("snoozeCount", alarm.snoozeCount);
-        console.log("enabled", alarm.enabled);
-    }
+    // if (alarm) {
+    //     console.log("clearAlarm", alarm.wakeUpTime);
+    //     console.log("snoozeCount", alarm.snoozeCount);
+    //     console.log("enabled", alarm.enabled);
+    // }
 
     PushNotificationIOS.cancelLocalNotifications({ alarmId: alarm.id });
 
