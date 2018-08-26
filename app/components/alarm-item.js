@@ -16,7 +16,6 @@ import {
     Linking,
     Platform
 } from "react-native";
-import Svg, { Defs, Circle, RadialGradient, Stop } from "react-native-svg";
 import moment from "moment";
 import Interactable from "react-native-interactable";
 import LottieView from "lottie-react-native";
@@ -25,7 +24,7 @@ import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { ListStyle, AlarmListStyle } from "../styles/list";
 import { scaleByFactor } from "../util/font-scale";
-
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 class AlarmItem extends React.PureComponent {
     /*
     Props: 
@@ -62,10 +61,12 @@ class AlarmItem extends React.PureComponent {
         this._appearAnim = new Animated.Value(0);
 
         let count = 0;
-        this._position.addListener(v => {
-            count++;
-            if (count % 10 == 0) console.log(v);
-        });
+
+        /* DEV-only -- listen to animate value as it changes */
+        // this._position.addListener(v => {
+        //     count++;
+        //     if (count % 10 == 0) console.log(v);
+        // });
     }
 
     componentDidMount() {
@@ -211,6 +212,13 @@ class AlarmItem extends React.PureComponent {
                         this.props.onSnap(e.nativeEvent.id);
                     }}
                 >
+                    {this.props.alarm.snoozeCount > 0 && (
+                        <Icon
+                            name="sleep"
+                            size={25}
+                            style={{ padding: 7, position: "absolute" }}
+                        />
+                    )}
                     <TouchableOpacity
                         activeOpacity={touchedOpacity}
                         id={this.props.alarm.id}

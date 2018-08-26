@@ -19,7 +19,8 @@ import PushNotificationAndroid from "react-native-push-notification";
 import {
     ALARM_CAT,
     scheduleAlarm,
-    clearAlarm
+    clearAlarm,
+    snoozeAlarm
 } from "../alarmservice/PushController";
 import NotificationsIOS from "react-native-notifications";
 import realm from "../data/DataSchemas";
@@ -53,65 +54,13 @@ class Alarms extends Component {
 
         console.log("Setting up notifications");
 
-        if (Platform.OS === 'android') {
-            UIManager.setLayoutAnimationEnabledExperimental(true)
-          }        // setup notifications
+        if (Platform.OS === "android") {
+            UIManager.setLayoutAnimationEnabledExperimental(true);
+        } // setup notifications
         // NotificationsIOS.addEventListener(
         //     "remoteNotificationsRegistered",
         //     this.onPushRegistered.bind(this)
         // );
-        if (Platform.OS === "ios") {
-            NotificationsIOS.requestPermissions([ALARM_CAT]);
-
-            NotificationsIOS.consumeBackgroundQueue();
-
-            // NotificationsIOS.addEventListener(
-            //     "pushKitRegistered",
-            //     this.onPushKitRegistered.bind(this)
-            // );
-            // NotificationsIOS.registerPushKit();
-
-            NotificationsIOS.addEventListener(
-                "notificationReceivedForeground",
-                this.onNotificationReceivedForeground.bind(this)
-            );
-            NotificationsIOS.addEventListener(
-                "notificationReceivedBackground",
-                this.onNotificationReceivedBackground.bind(this)
-            );
-            NotificationsIOS.addEventListener(
-                "notificationOpened",
-                this.onNotificationOpened.bind(this)
-            );
-        } else {
-            PushNotificationAndroid.cancelAllLocalNotifications();
-
-            // Register all the valid actions for notifications here and add the action handler for each action
-            PushNotificationAndroid.registerNotificationActions([
-                "Snooze",
-                "Turn Off"
-            ]);
-            DeviceEventEmitter.addListener(
-                "notificationActionReceived",
-                function(e) {
-                    console.log("Notifcation event: ", e);
-                    // console.log(
-                    //     "notificationActionReceived event received: " + e
-                    // );
-                    const info = JSON.parse(e.dataJSON);
-                    console.log("info", info);
-                    if (info.action == "Snooze") {
-                        // Do work pertaining to Accept action here
-                        // Nothing to do here if we have already scheduled all the snooze alarms
-                    } else if (info.action == "Turn Off") {
-                        // Do work pertaining to Reject action here
-                        // cancel all snooze notifs for this Alarm
-                        clearAlarm(null, info.notificationId.toString());
-                    }
-                    // Add all the required actions handlers
-                }
-            );
-        }
     }
 
     onPushRegistered(deviceToken) {
@@ -248,6 +197,61 @@ class Alarms extends Component {
             handleAddAlarm: this.handleAddAlarm.bind(this),
             showMenu: () => this.props.navigation.navigate("DrawerRoot")
         });
+
+        if (Platform.OS === "ios") {
+            NotificationsIOS.requestPermissions([ALARM_CAT]);
+
+            NotificationsIOS.consumeBackgroundQueue();
+
+            // NotificationsIOS.addEventListener(
+            //     "pushKitRegistered",
+            //     this.onPushKitRegistered.bind(this)
+            // );
+            // NotificationsIOS.registerPushKit();
+
+            NotificationsIOS.addEventListener(
+                "notificationReceivedForeground",
+                this.onNotificationReceivedForeground.bind(this)
+            );
+            NotificationsIOS.addEventListener(
+                "notificationReceivedBackground",
+                this.onNotificationReceivedBackground.bind(this)
+            );
+            NotificationsIOS.addEventListener(
+                "notificationOpened",
+                this.onNotificationOpened.bind(this)
+            );
+        } else {
+            // PushNotificationAndroid.cancelAllLocalNotifications();
+
+            // Register all the valid actions for notifications here and add the action handler for each action
+            PushNotificationAndroid.registerNotificationActions([
+                "Snooze",
+                "Turn Off"
+            ]);
+            DeviceEventEmitter.addListener("notificationActionReceived", e => {
+                console.log("Notifcation event: ", e);
+                // console.log(
+                //     "notificationActionReceived event received: " + e
+                // );
+                const info = JSON.parse(e.dataJSON);
+                console.log("info", info);
+                if (info.action == "Snooze") {
+                    // Do work pertaining to Accept action here
+                    // Nothing to do here if we have already scheduled all the snooze alarms
+                    snoozeAlarm(info, this.reloadAlarms.bind(this));
+                } else if (info.action == "Turn Off") {
+                    // Do work pertaining to Reject action here
+                    // cancel all snooze notifs for this Alarm
+                    clearAlarm(
+                        null,
+                        info.notificationId.toString(),
+                        this.reloadAlarms.bind(this)
+                    );
+                }
+                // Add all the required actions handlers
+            });
+        }
 
         // this._didFocusListener = this.props.navigation.addListener(
         //     "didFocus",

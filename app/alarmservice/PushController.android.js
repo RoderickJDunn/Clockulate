@@ -11,9 +11,51 @@ function alarmUUID_to_notificationID(alarmId) {
     return notifId.substring(0, 9);
 }
 
-export let clearAlarm = (alarm, notificationID) => {
+function fetchAlarmByNotifId(notificationId) {
+    let alarms = realm
+        .objects("Alarm")
+        .filtered("notificationId = $0", notificationId);
+
+    if (alarms.length == 1) {
+        return alarms[0];
+    } else if (alarms.length == 0) {
+        console.warn(`No alarms found with notificationID ${notificationId}`);
+        return null;
+    } else {
+        console.warn(
+            `Found more than 1 alarm (${
+                alarms.length
+            })  with notificationID ${notificationId}`
+        );
+        return null;
+    }
+}
+
+export let snoozeAlarm = (notificationInfo, reloadAlarmsList) => {
+    let alarm = fetchAlarmByNotifId(notificationInfo.id);
+
+    if (!alarm) {
+        clearAlarm(null, notificationInfo.id, reloadAlarmsList);
+    } else {
+        realm.write(() => {
+            if (alarm.snoozeCount == null) {
+                alarm.snoozeCount = 1;
+            } else {
+                alarm.snoozeCount += 1;
+            }
+        });
+
+        if (reloadAlarmsList) {
+            reloadAlarmsList();
+        }
+    }
+};
+
+export let clearAlarm = (alarm, notificationID, reloadAlarmsList) => {
     if (alarm != null) {
         notificationID = alarm.notificationId;
+    } else {
+        alarm = fetchAlarmByNotifId(notificationID);
     }
 
     console.log("Clearing notification ID", notificationID);
@@ -24,12 +66,19 @@ export let clearAlarm = (alarm, notificationID) => {
     if (alarm) {
         realm.write(() => {
             alarm.notificationId = null;
+            alarm.snoozeCount = 0;
+            alarm.enabled = false;
         });
     }
 
     console.log("alarm", alarm);
 
     PushNotification.clearAllNotifications();
+
+    // TODO: Reload AlarmsList ... (in case we got the notification while app is open)
+    if (reloadAlarmsList) {
+        reloadAlarmsList();
+    }
 };
 
 export let scheduleAlarm = alarm => {
@@ -59,8 +108,8 @@ export let scheduleAlarm = alarm => {
         vibration: 100, // default: 100, no vibration if vibrate: false
         smallIcon: "icon.png", // Required
         largeIcon: "icon.png",
-        playSound: true,
-        soundName: "super_ringtone.mp3", // Plays custom notification ringtone if sound_name: null
+        playSound: alarm.sound == "" ? false : true,
+        soundName: alarm.sound, // Plays custom notification ringtone if sound_name: null
         color: Colors.brandLightPurple,
         // tag: "some_tag",
         date: alarm.wakeUpTime,
@@ -70,3 +119,6 @@ export let scheduleAlarm = alarm => {
         actions: '["Snooze", "Turn Off"]'
     });
 };
+
+export let cancelInAppAlarm = () => {};
+export let setInAppAlarm = () => {};

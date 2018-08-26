@@ -281,3 +281,5 @@ export let cancelInAppAlarm = alarm => {
         });
     }
 };
+
+export let snoozeAlarm = () => {};
