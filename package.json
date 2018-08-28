@@ -46,12 +46,13 @@
         "react-native-svg": "^5.4.1",
         "react-native-swipe-gestures": "^1.0.2",
         "react-native-swipeable-flat-list": "0.0.5",
-        "react-native-swipeout": "^2.2.2",
+        "react-native-swipeout": "^2.3.6",
         "react-native-timepicker": "^1.0.3",
         "react-native-uuid": "^1.4.9",
         "react-native-vector-icons": "^4.3.0",
         "react-navigation": "^1.5.8",
-        "realm": "^1.13.0"
+        "realm": "^2.15.3",
+        "url-parse": "^1.4.3"
     },
     "rnpm": {
         "assets": [
