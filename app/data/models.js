@@ -3,8 +3,10 @@
  */
 
 import uuid from "react-native-uuid";
-import { DefaultTask, DefaultAlarm } from "../data/constants";
+import { DefaultTask, DefaultAlarm, SOUND_TYPES } from "../data/constants";
 import { isEmpty } from "../util/general_util";
+import realm from "../data/DataSchemas";
+
 export class AlarmModel {
     constructor(order) {
         this.id = uuid.v1();
@@ -17,7 +19,9 @@ export class AlarmModel {
         this.visible = DefaultAlarm.visible;
         this.preset = DefaultAlarm.preset;
         this.order = order;
-        this.sound = DefaultAlarm.sound;
+        this.sound = realm
+            .objects("Sound")
+            .filtered("type = $0", SOUND_TYPES.SILENT)[0];
         this.snoozeTime = DefaultAlarm.snoozeTime;
         this.noticiationId = null;
     }

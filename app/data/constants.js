@@ -4,6 +4,11 @@
 
 import * as DateUtils from "../util/date_utils";
 
+
+export const DefaultSound = {
+    
+};
+
 export const DefaultAlarm = {
     wakeUpTime: getDateForHour(8), // 8:00 am
     arrivalTime: getDateForHour(8),
@@ -14,7 +19,7 @@ export const DefaultAlarm = {
     visible: true,
     preset: false,
     order: null,
-    sound: "",
+    sound: {},
     snoozeTime: 10 // minutes
 };
 
