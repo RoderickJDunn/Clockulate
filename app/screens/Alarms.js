@@ -449,30 +449,6 @@ class Alarms extends Component {
         });
         // console.log(alarm);
 
-        // create moment() by adding 'wakeup-time' (ms) and 00:00:00 today
-        // let wakeUpTime = moment()
-        //     .startOf("day")
-        //     .add(alarm.wakeUpTime, "s");
-
-        /* TODO: TEST WITHOUT THE FOLLOWING : Trying without this code here, since this functionality should be 
-        performed in AlarmDetail now (whenever ArrivalTime or WakeupTime are set)
-        */
-        // let wakeUpDate = moment();
-        // console.log("Date right now: " + wakeUpDate.toDate());
-        // let wakeUpTime = moment(alarm.wakeUpTime);
-        // console.log("Straight from DB: " + wakeUpTime.toDate());
-
-        // wakeUpDate
-        //     .set("hour", wakeUpTime.hour())
-        //     .set("minute", wakeUpTime.minute())
-        //     .set("second", 0);
-        // console.log("Applied today's date: " + wakeUpDate.toDate());
-        // // Check if this moment is in the past. If so add 1 day.
-        // if (wakeUpDate.diff(moment()) < 0) {
-        //     wakeUpDate.add(1, "days");
-        // }
-        /* END TEST */
-
         // console.log(wakeUpTime);
         console.log("WakeUpTime: " + alarm.wakeUpTime);
         if (alarm.enabled) {

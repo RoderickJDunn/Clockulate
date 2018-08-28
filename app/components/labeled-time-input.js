@@ -43,7 +43,7 @@ class LabeledTimeInput extends Component {
             .set("minute", arrivalTime.minute())
             .set("second", 0);
         console.log("Applied today's date: " + arrivalDate.toDate());
-        // Check if this moment is in the past. If so add 1 day. // TODO: Doesn't work yet.
+        // Check if this moment is in the past. If so add 1 day.
         if (arrivalDate.diff(moment()) < 0) {
             arrivalDate.add(1, "days");
         }

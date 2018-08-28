@@ -542,12 +542,6 @@ class TaskDetail extends Component {
         console.log("maxHeight", maxHeight_autocomplete);
 
         // console.log("this.currName", this.currName);
-        // FIXME: This should not be run on every render. Should only be run when TaskName TextInput is being changed.
-
-        // for (let index = 0; index < this.state.suggestions.length; index++) {
-        //     const element = this.state.suggestions[index];
-        //     console.log("element", element);
-        // }
 
         let durationDisplayed = this.state.alarmTask.duration
             ? this.state.alarmTask.duration
