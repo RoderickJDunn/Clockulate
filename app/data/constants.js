@@ -59,3 +59,10 @@ function getDateForHour(hour) {
     d = DateUtils.date_to_nextTimeInstance(d);
     return d;
 }
+
+export let SOUND_TYPES = {
+    SILENT: 0,
+    NORMAL: 1,
+    RANDOM: 2,
+    RANDOM_SUBSET: 3
+};

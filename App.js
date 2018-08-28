@@ -13,12 +13,15 @@ import {
 // import ArrowView from "./app/components/arrow-view-native";
 
 import realm from "./app/data/DataSchemas";
-import insertDummyData from "./app/data/dummy";
+import insertPrepopData from "./app/data/data-prepop";
 
 import {
     cancelInAppAlarm,
     setInAppAlarm
+    // configure
 } from "./app/alarmservice/PushController";
+
+// configure();
 export default class App extends React.Component {
     constructor() {
         super();
@@ -43,7 +46,7 @@ export default class App extends React.Component {
                         JSON.stringify(true)
                     );
                     // this.setState({ firstLaunch: true });
-                    insertDummyData();
+                    insertPrepopData();
                 } else {
                     console.log("Not the first Launch");
                     // this.setState({ firstLaunch: false });

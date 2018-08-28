@@ -6,7 +6,7 @@ import NotificationsIOS, {
 import { PushNotificationIOS } from "react-native";
 import moment from "moment";
 import Sound from "react-native-sound";
-
+import { SOUND_TYPES } from "../data/constants";
 import realm from "../data/DataSchemas";
 
 let snoozeAction = new NotificationAction(
@@ -92,7 +92,34 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
     */
     clearAlarm(alarm, null, false);
 
-    setInAppAlarm(alarm, reloadAlarmsList);
+    // Determine the sound file to use (30s version for system notification)
+    let shortSoundFile = "";
+    let longSoundFile = "";
+    let filesLen = alarm.sound.files.length;
+    if (alarm.sound.type == SOUND_TYPES.NORMAL) {
+        shortSoundFile = alarm.sound.files[0]; // this selects the first file in the file array which should be the short version
+        longSoundFile = alarm.sound.files[filesLen - 1]; // this selects the last file in the file array which should be the long version (might be the same)
+    } else if (alarm.sound.type == SOUND_TYPES.SILENT) {
+        shortSoundFile = "";
+        longSoundFile = "";
+    } else if (alarm.sound.type == SOUND_TYPES.RANDOM) {
+        /* Get all 'normal' Sounds (not Silent or Random) */
+        let allSounds = realm
+            .objects("Sound")
+            .filtered("type = $0", SOUND_TYPES.NORMAL);
+
+        /* randomly select any 'Sound' that is not "Vibrate Only" and not "Random"  */
+        let randomSound =
+            allSounds[Math.floor(Math.random() * allSounds.length)];
+        shortSoundFile = randomSound.files[0]; // this selects the first file in the file array which should be the short version
+        longSoundFile = randomSound.files[randomSound.files.length - 1]; // this selects the last file in the file array which should be the long version (might be the same)
+    } else if (alarm.sound.type == SOUND_TYPES.RANDOM_SUBSET) {
+        // TODO: This functionality will be a premium feature
+    }
+    console.log("shortSoundFile", shortSoundFile);
+    console.log("longSoundFile", longSoundFile);
+
+    setInAppAlarm(alarm, reloadAlarmsList, longSoundFile);
 
     // schedule notifications for this Alarm, staggering them by the "SNOOZE Time"
     // NOTE: "Snooze Time" will likely be changable option for users per Alarm.
@@ -107,8 +134,8 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
             alertBody: alarm.label,
             alertTitle: "Clockulate",
             alertAction: "Click here to open",
-            soundName: alarm.sound,
-            silent: alarm.sound == "" ? true : false,
+            soundName: shortSoundFile,
+            silent: shortSoundFile == "" ? true : false,
             category: "ALARM_CATEGORY",
             fireDate: wakeUpMoment.toDate(),
             // fireDate: new Date(Date.now() + 10 * 1000).toISOString(),
@@ -144,7 +171,7 @@ export let clearAlarm = (alarm, notificationId, disableAlarm = true) => {
     }
 };
 
-let onInAppSnoozePressed = (alarm, reloadAlarmsList, sound) => {
+let onInAppSnoozePressed = (alarm, reloadAlarmsList, sound, soundFile) => {
     console.log("onInAppSnoozePressed");
 
     sound.stop();
@@ -158,7 +185,7 @@ let onInAppSnoozePressed = (alarm, reloadAlarmsList, sound) => {
         }
     });
 
-    setInAppAlarm(alarm, reloadAlarmsList);
+    setInAppAlarm(alarm, reloadAlarmsList, soundFile);
 
     reloadAlarmsList();
 };
@@ -175,7 +202,7 @@ let onInAppTurnOffPressed = (alarm, reloadAlarmsList, sound) => {
     reloadAlarmsList();
 };
 
-export let setInAppAlarm = (alarm, reloadAlarmsList) => {
+export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
     console.log("setInAppAlarm");
 
     if (alarm) {
@@ -215,7 +242,7 @@ export let setInAppAlarm = (alarm, reloadAlarmsList) => {
         console.log("Alarm went off while app is open!");
 
         /* Start sound playback */
-        var sound = new Sound(alarm.sound, Sound.MAIN_BUNDLE, error => {
+        var sound = new Sound(soundFile, Sound.MAIN_BUNDLE, error => {
             if (error) {
                 console.log("failed to load the sound", error);
                 return;
@@ -250,7 +277,8 @@ export let setInAppAlarm = (alarm, reloadAlarmsList) => {
                         this,
                         alarm,
                         reloadAlarmsList,
-                        sound
+                        sound,
+                        soundFile
                     )
                 },
                 {

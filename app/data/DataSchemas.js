@@ -21,7 +21,7 @@ AlarmSchema.schema = {
         visible: "bool", // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
         preset: "bool", // if true, this Alarm is persistent (remains saved as preset, even if removed from 'Alarms' list page.
         order: "int", // used to re-arrange the Alarms list. When an alarm is added, it always gets the highest order (bottom of the list)
-        sound: "string",
+        sound: { type: "object", objectType: "Sound" },
         snoozeTime: {
             type: "int", // TODO: not settable by user yet. For now it will default to 10 minutes
             default: 10
@@ -65,8 +65,23 @@ AlarmTaskSchema.schema = {
     }
 };
 
+class SoundSchema extends Realm.Object {}
+SoundSchema.schema = {
+    name: "Sound",
+    primaryKey: "id",
+    properties: {
+        id: "string",
+        files: "string[]",
+        displayName: "string",
+        category: "string",
+        type: "int",
+        order: "int",
+        enabled: "bool" // this property will never be changed in the DB. It is just here to more easily create a functional array from this DB table
+    }
+};
+
 console.log("Realm path: ", Realm.defaultPath);
 
 export default new Realm({
-    schema: [AlarmSchema, TaskSchema, AlarmTaskSchema]
+    schema: [AlarmSchema, TaskSchema, AlarmTaskSchema, SoundSchema]
 });

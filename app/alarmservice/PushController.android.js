@@ -3,6 +3,7 @@
 import PushNotification from "react-native-push-notification";
 import Colors from "../styles/colors";
 import realm from "../data/DataSchemas";
+import { SOUND_TYPES } from "../data/constants";
 
 let FAKE_CATEGORY = "MyFakeCategory";
 
@@ -107,6 +108,24 @@ export let scheduleAlarm = alarm => {
     realm.write(() => {
         alarm.notificationId = notifId;
     });
+
+    let soundFile = "";
+    let filesLen = alarm.sound.files.length;
+    if (alarm.sound.type == SOUND_TYPES.NORMAL) {
+        soundFile = alarm.sound.files[filesLen - 1]; // this selects the last file in the file array (should be the FULL version if it exists)
+    } else if (alarm.sound.type == SOUND_TYPES.SILENT) {
+        soundFile = "";
+    } else if (alarm.sound.type == SOUND_TYPES.RANDOM) {
+        let allSounds = realm
+            .objects("Sound")
+            .filtered("type = $0", SOUND_TYPES.NORMAL);
+        let randomSound =
+            allSounds[Math.floor(Math.random() * allSounds.length)];
+        soundFile = randomSound.files[randomSound.files.length - 1];
+    } else if (alarm.sound.type == SOUND_TYPES.RANDOM_SUBSET) {
+        // TODO: This functionality will be a premium feature
+    }
+
     let snoozeTime = 60 * 1000; // in milliseconds
     // for (let i = 1; i <= notiCount; i++) {
     PushNotification.localNotificationSchedule({
@@ -119,8 +138,8 @@ export let scheduleAlarm = alarm => {
         vibration: 100, // default: 100, no vibration if vibrate: false
         smallIcon: "icon.png", // Required
         largeIcon: "icon.png",
-        playSound: alarm.sound == "" ? false : true,
-        soundName: alarm.sound, // Plays custom notification ringtone if sound_name: null
+        playSound: soundFile == "" ? false : true,
+        soundName: soundFile, // Plays custom notification ringtone if sound_name: null
         color: Colors.brandLightPurple,
         // tag: "some_tag",
         date: alarm.wakeUpTime,

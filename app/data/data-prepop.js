@@ -7,6 +7,7 @@ import uuid from "react-native-uuid";
 import moment from "moment";
 import { DefaultAlarm } from "./constants";
 import * as DateUtils from "../util/date_utils";
+import SOUND_DATA from "./sound-data";
 
 console.log("dummy data file");
 
@@ -34,8 +35,30 @@ let prePopTasks = [
 ];
 
 // Create Realm objects and write to local storage
-function insertDummyData() {
+function insertPrepopData() {
     realm.write(() => {
+        /* Insert Sounds data */
+        let defaultSound = realm.create("Sound", {
+            id: uuid.v1(),
+            files: SOUND_DATA[0].files,
+            displayName: SOUND_DATA[0].displayName,
+            category: SOUND_DATA[0].category,
+            order: SOUND_DATA[0].order,
+            enabled: false,
+            type: SOUND_DATA[0].type
+        });
+        for (let i = 1; i < SOUND_DATA.length; i++) {
+            realm.create("Sound", {
+                id: uuid.v1(),
+                files: SOUND_DATA[i].files,
+                displayName: SOUND_DATA[i].displayName,
+                category: SOUND_DATA[i].category,
+                order: SOUND_DATA[i].order,
+                enabled: false,
+                type: SOUND_DATA[i].type
+            });
+        }
+
         /**** Create Tasks *****/
 
         console.log("Adding dummy tasks");
@@ -170,7 +193,7 @@ function insertDummyData() {
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
             preset: false, // if tr
             order: 0,
-            sound: "",
+            sound: defaultSound,
             snoozeTime: DefaultAlarm.snoozeTime
         });
 
@@ -191,7 +214,7 @@ function insertDummyData() {
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
             preset: false, // if tr
             order: 1,
-            sound: "super_ringtone.mp3",
+            sound: defaultSound,
             snoozeTime: DefaultAlarm.snoozeTime
         });
         console.log(alarm2, alarm1, task2, task4, task5);
@@ -201,4 +224,4 @@ function insertDummyData() {
     // console.log(`Tasks: ${longTasks}`);
 }
 
-export default insertDummyData;
+export default insertPrepopData;
