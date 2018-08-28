@@ -10,7 +10,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.SILENT
     },
     {
-        files: ["Tone-0.1_Digital1.wav"],
+        files: ["Tone-0.1_Digital1.mp3"],
         displayName: "Digital 1",
         category: "",
         order: 1,
@@ -18,7 +18,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-0.2_Digital2.wav"],
+        files: ["Tone-0.2_Digital2.mp3"],
         displayName: "Digital 2",
         category: "",
         order: 2,
@@ -26,7 +26,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-0.3_Digital3.wav"],
+        files: ["Tone-0.3_Digital3.mp3"],
         displayName: "Digital 3",
         category: "",
         order: 3,
@@ -34,7 +34,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-0.4_Digital4.wav"],
+        files: ["Tone-0.4_Digital4.mp3"],
         displayName: "Digital 4",
         category: "",
         order: 4,
@@ -42,7 +42,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-1_CloudWalk_30s.wav", "Tone-1_CloudWalk_Full.wav"],
+        files: ["Tone-1_CloudWalk_30s.mp3", "Tone-1_CloudWalk_Full.mp3"],
         displayName: "Cloud Walk",
         category: "",
         order: 5,
@@ -50,7 +50,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-2_Walkwithme_30s.wav", "Tone-2_Walkwithme_Full.wav"],
+        files: ["Tone-2_Walkwithme_30s.mp3", "Tone-2_Walkwithme_Full.mp3"],
         displayName: "Walk With Me",
         category: "",
         order: 6,
@@ -58,7 +58,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-3_Skyride_30s.wav", "Tone-3_Skyride_Full.wav"],
+        files: ["Tone-3_Skyride_30s.mp3", "Tone-3_Skyride_Full.mp3"],
         displayName: "Sky Ride",
         category: "",
         order: 7,
@@ -66,7 +66,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-5_BrightandEarly.wav"],
+        files: ["Tone-5_BrightandEarly.mp3"],
         displayName: "Bright and Early",
         category: "",
         order: 8,
@@ -74,7 +74,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-6_ChildishBells_30s.wav"],
+        files: ["Tone-6_ChildishBells_30s.mp3"],
         displayName: "Childish Bells",
         category: "",
         order: 9,
@@ -82,7 +82,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-7_EpicBliss_30s.wav", "Tone-7_EpicBliss_Full.wav"],
+        files: ["Tone-7_EpicBliss_30s.mp3", "Tone-7_EpicBliss_Full.mp3"],
         displayName: "Epic Bliss",
         category: "",
         order: 10,
@@ -90,7 +90,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-8_TheSlinky_30s.wav"],
+        files: ["Tone-8_TheSlinky_30s.mp3"],
         displayName: "The Slinky",
         category: "",
         order: 11,
@@ -98,7 +98,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-9_LookAlive_30s.wav"],
+        files: ["Tone-9_LookAlive_30s.mp3"],
         displayName: "Look Alive",
         category: "",
         order: 12,
@@ -106,7 +106,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-9.5_LookAlive_30s.wav"],
+        files: ["Tone-9.5_LookAlive_30s.mp3"],
         displayName: "Look More Alive",
         category: "",
         order: 13,
@@ -114,7 +114,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-10_BounceOuttaBed.wav"],
+        files: ["Tone-10_BounceOuttaBed.mp3"],
         displayName: "Bounce Outta Bed",
         category: "",
         order: 14,
@@ -122,7 +122,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-11_HauntedSunrise.wav"],
+        files: ["Tone-11_HauntedSunrise.mp3"],
         displayName: "Haunted Sunrise",
         category: "",
         order: 15,
@@ -130,7 +130,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-12_RaysofLight.wav"],
+        files: ["Tone-12_RaysofLight.mp3"],
         displayName: "Rays of Light",
         category: "",
         order: 16,
@@ -138,7 +138,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["Tone-100_EDMSiren.wav"],
+        files: ["Tone-100_EDMSiren.mp3"],
         displayName: "EDM Siren",
         category: "",
         order: 17,
