@@ -223,7 +223,7 @@ class AlarmItem extends React.PureComponent {
                 <View
                     style={[
                         StyleSheet.absoluteFill,
-                        { backgroundColor: Colors.disabledGrey }
+                        { backgroundColor: Colors.brandLightGrey }
                     ]}
                 />
                 <Interactable.View
