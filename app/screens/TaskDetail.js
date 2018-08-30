@@ -594,6 +594,24 @@ class TaskDetail extends Component {
                         }}
                         // listStyle={[Styles.suggestionsContainer]}
                     />
+                    <KeyboardAvoidingView
+                        behavior="padding"
+                        // style={{ flex: 1 }}
+                        style={{ flex: 1 }}
+                        keyboardVerticalOffset={Header.HEIGHT + 20}
+                    >
+                        <View style={{ flex: 1 }}>
+                            <TouchableOpacity
+                                // style={Styles.DeleteButton}
+                                style={Styles.DeleteButton}
+                                onPress={this._onDeleteTask.bind(this)}
+                            >
+                                <Text style={{ color: "white", fontSize: 18 }}>
+                                    Delete
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </KeyboardAvoidingView>
 
                     <View
                         style={{
@@ -612,8 +630,9 @@ class TaskDetail extends Component {
                             inputFontSize={scaleByFactor(36, 0.55)}
                             separation={7}
                             style={{
-                                // backgroundColor: "red"
-                                backgroundColor: "transparent"
+                                backgroundColor: "red",
+                                // backgroundColor: "transparent",
+                                flex: 1
                             }}
                         />
                         {this.state.currNameHasMatch &&
@@ -683,25 +702,6 @@ class TaskDetail extends Component {
                                 </View>
                             )}
                     </View>
-                    <KeyboardAvoidingView
-                        behavior="padding"
-                        // style={{ flex: 1 }}
-                        style={{ flex: 1 }}
-                        keyboardVerticalOffset={Header.HEIGHT + 20}
-                    >
-                        <View style={{ flex: 1 }}>
-                            <TouchableOpacity
-                                // style={Styles.DeleteButton}
-                                style={Styles.DeleteButton}
-                                onPress={this._onDeleteTask.bind(this)}
-                            >
-                                <Text style={{ color: "white", fontSize: 18 }}>
-                                    Delete
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </KeyboardAvoidingView>
-                    <View />
                 </View>
                 <AwesomeAlert
                     alertContainerStyle={{
