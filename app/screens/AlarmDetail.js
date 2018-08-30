@@ -15,7 +15,8 @@ import {
     Animated,
     TouchableWithoutFeedback,
     Keyboard,
-    TextInput
+    TextInput,
+    ScrollView
 } from "react-native";
 import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -790,7 +791,10 @@ class AlarmDetail extends Component {
         let hoursOfSleep = this._calculateHoursOfSleep(wakeUpTime);
 
         return (
-            <View style={styles.screenContainer}>
+            <ScrollView
+                contentContainerStyle={styles.screenContainer}
+                keyboardShouldPersistTaps="handled"
+            >
                 {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
                 {/*This is the actual Star image. It takes up the whole screen. */}
                 <Animated.Image
@@ -1178,7 +1182,7 @@ class AlarmDetail extends Component {
                     onConfirm={this._onWakeTimePicked}
                     onCancel={this._hideDateTimePicker}
                 />
-            </View>
+            </ScrollView>
         );
     }
 }
