@@ -794,6 +794,7 @@ class AlarmDetail extends Component {
             <ScrollView
                 contentContainerStyle={styles.screenContainer}
                 keyboardShouldPersistTaps="handled"
+                scrollEnabled={false}
             >
                 {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
                 {/*This is the actual Star image. It takes up the whole screen. */}

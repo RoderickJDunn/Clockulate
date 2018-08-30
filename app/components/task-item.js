@@ -191,23 +191,27 @@ class TaskItem extends React.PureComponent {
     _onLongPress = initialVal => {
         console.log("_onLongPress task");
 
-        /* first inform parent views that we are going to show the slider, so that they disable dragging functionality
+        if (this.props.isEditingTasks) {
+            this.props.shouldStartMove();
+        } else {
+            /* first inform parent views that we are going to show the slider, so that they disable dragging functionality
             1) AlarmDetail main Interactable-View dragging will be disabled
             2) TaskList sortable-listview scrolling will be disabled
             3) Disabling of TaskItem Interactable-View (show delete btn) is managed in render()
         */
-        this.props.onShowDurationSlider();
+            this.props.onShowDurationSlider();
 
-        let initialDuration = this.props.data.duration
-            ? this.props.data.duration
-            : this.props.data.task.defaultDuration;
+            let initialDuration = this.props.data.duration
+                ? this.props.data.duration
+                : this.props.data.task.defaultDuration;
 
-        this.setState({ tempDuration: initialDuration });
+            this.setState({ tempDuration: initialDuration });
+        }
     };
 
     render() {
         console.debug("render task-item");
-        // console.debug("render task-item", this.props);
+        console.debug("render task-item", this.props);
 
         // console.log("this.state.tempDuration", this.state.tempDuration);
 
