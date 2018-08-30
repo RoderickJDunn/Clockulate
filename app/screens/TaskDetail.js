@@ -140,7 +140,7 @@ class TaskDetail extends Component {
                 onSaveState: params.onSaveState, // called when a task is Saved or Deleted
                 willNavigateBack: params.willNavigateBack,
                 suggestions: taskSuggestions,
-                filteredSuggestions: [],
+                filteredSuggestions: null,
                 hideSuggestions: true,
                 keyboardHeight: null,
                 newTask: false,
@@ -205,12 +205,16 @@ class TaskDetail extends Component {
 
     keyboardWillHide = event => {
         console.log("keyboardDidHide");
+        console.log("this.currName", this.currName);
+
         let exactMatch = [];
-        if (this.state.filteredSuggestions.length > 0) {
-            exactMatch = this.state.filteredSuggestions.filtered(
+        if (this.state.suggestions.length > 0) {
+            exactMatch = this.state.suggestions.filtered(
                 `name = "${this.currName}"`
             );
         }
+
+        console.log("exactMatch", exactMatch);
         let hasMatch = exactMatch.length > 0;
         this.setState({
             keyboardHeight: null,
@@ -404,7 +408,7 @@ class TaskDetail extends Component {
     }
 
     _onTaskDurationChanged(duration) {
-        // console.debug("Task duration changed: ", duration);
+        console.debug("Task duration changed: ", duration);
         const updatedAlmTask = this.state.alarmTask;
         updatedAlmTask.duration = duration;
         this.setState({ alarmTask: updatedAlmTask });
@@ -564,6 +568,7 @@ class TaskDetail extends Component {
                         defaultValue={this.currName}
                         data={
                             this.currName &&
+                            this.state.filteredSuggestions != null &&
                             this.state.filteredSuggestions.length > 0
                                 ? Array.from(this.state.filteredSuggestions)
                                 : []
@@ -630,9 +635,8 @@ class TaskDetail extends Component {
                             inputFontSize={scaleByFactor(36, 0.55)}
                             separation={7}
                             style={{
-                                backgroundColor: "red",
+                                backgroundColor: "red"
                                 // backgroundColor: "transparent",
-                                flex: 1
                             }}
                         />
                         {this.state.currNameHasMatch &&
