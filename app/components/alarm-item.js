@@ -76,6 +76,8 @@ class AlarmItem extends React.PureComponent {
             console.log("AlarmItem - creating duplicate animation");
             Animated.spring(this._appearAnim, {
                 toValue: 1,
+                // friction: 25,
+                // tension: 1,
                 friction: 7,
                 tension: 70,
                 useNativeDriver: true
@@ -140,6 +142,11 @@ class AlarmItem extends React.PureComponent {
     render() {
         console.log("AlarmItem", "- render");
         // console.debug("alarm-item props", this.props);
+        console.debug(
+            `wakeTime: ${this.props.alarm.wakeUpTime} | enabled: ${
+                this.props.alarm.enabled
+            }          |         (id: ${this.props.alarm.id}`
+        );
         // console.log("index", index);
 
         const config = {
@@ -193,10 +200,10 @@ class AlarmItem extends React.PureComponent {
 
         if (this.props.animateConfig && this.props.animateConfig.alarmCount) {
             restingLocation =
-                (scaleByFactor(130, 0.2) + 1) * // added '1' for the 1-pixel row separator view
+                (scaleByFactor(100, 0.2) + 1) * // added '1' for the 1-pixel row separator view
                 (this.props.animateConfig.alarmCount - 1);
             duplicationSrcPos =
-                (scaleByFactor(130, 0.2) + 1) * // added '1' for the 1-pixel row separator view
+                (scaleByFactor(100, 0.2) + 1) * // added '1' for the 1-pixel row separator view
                 this.props.animateConfig.sourceRow;
         }
 
@@ -280,7 +287,7 @@ class AlarmItem extends React.PureComponent {
                                 style={[
                                     {
                                         flex:
-                                            2.3 *
+                                            2.0 *
                                             Math.exp(
                                                 -1.46 *
                                                     (this.width / this.height)
@@ -307,7 +314,7 @@ class AlarmItem extends React.PureComponent {
                                     {
                                         alignSelf: "flex-end",
                                         position: "absolute",
-                                        fontSize: scaleByFactor(25, 0.3),
+                                        fontSize: scaleByFactor(23, 0.3),
                                         top: 0,
                                         right: 0,
                                         color: textColor
@@ -443,7 +450,7 @@ class AlarmItem extends React.PureComponent {
                         <TouchableOpacity
                             style={{
                                 flex: 1,
-                                height: scaleByFactor(130, 0.2),
+                                height: scaleByFactor(100, 0.2),
                                 justifyContent: "center"
                             }}
                             onPressOut={alarm => this.props.onDelete(alarm)}
@@ -505,7 +512,7 @@ class AlarmItem extends React.PureComponent {
                         <TouchableOpacity
                             style={{
                                 flex: 1,
-                                height: scaleByFactor(130, 0.2),
+                                height: scaleByFactor(100, 0.2),
                                 justifyContent: "center"
                             }}
                             onPressOut={alarm => {
