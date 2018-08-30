@@ -41,6 +41,7 @@ class LabeledInput extends Component {
     }
 
     render() {
+        console.log("render", "LabeledInput");
         // console.log("render labeledInput");
         // console.log("this.state.inputText", this.state.inputText);
         // console.log("this.props.fieldText", this.props.fieldText);
@@ -110,11 +111,7 @@ class LabeledInput extends Component {
                     ]}
                     // underlineColorAndroid="transparent"
                     placeholder={this.props.placeholder}
-                    value={
-                        this.state.inputText != null
-                            ? this.state.inputText
-                            : this.props.fieldText
-                    }
+                    defaultValue={this.props.fieldText}
                     onChangeText={this._onChangeTextInput.bind(this)}
                     onBlur={e => {
                         // console.log("TextInput blurred: " + e.nativeEvent.text);
@@ -131,8 +128,14 @@ class LabeledInput extends Component {
                     }
                     multiline={false}
                     underlineColorAndroid="transparent"
-                    editable={this.props.editable == null ? true : this.props.editable}
-                    textAlign={this.props.textAlign == null ? "left" : this.props.textAlign}
+                    editable={
+                        this.props.editable == null ? true : this.props.editable
+                    }
+                    textAlign={
+                        this.props.textAlign == null
+                            ? "left"
+                            : this.props.textAlign
+                    }
                 />
             </View>
         );

@@ -906,7 +906,7 @@ class AlarmDetail extends Component {
                         </TouchableOpacity>
                         <this.AnimatedAlarmLabel
                             placeholder="Enter a label"
-                            value={
+                            defaultValue={
                                 this.alarmLabelCache || this.state.alarm.label
                             }
                             onChangeText={this.onChangeLabel}
