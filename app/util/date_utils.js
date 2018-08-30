@@ -73,7 +73,7 @@ export function formatDuration(seconds, short) {
     } else if (hours && !minutes) {
         duration = `${hours} ${hourUnit}`;
     } else {
-        duration = `${hours} ${hourUnit}, ${minutes} ${minUnit}`;
+        duration = `${hours} ${hourUnit}  ${minutes} ${minUnit}`;
     }
     return duration;
 }

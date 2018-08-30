@@ -13,7 +13,8 @@ import {
     Button,
     Dimensions,
     Keyboard,
-    Platform
+    Platform,
+    KeyboardAvoidingView
 } from "react-native";
 import { Icon } from "react-native-elements";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -66,7 +67,9 @@ class TaskDetail extends Component {
                     onPress={() => navigation.state.params.handleSave()}
                 >
                     <IonIcon
-                        name="md-done-all"
+                        name="md-checkmark-circle-outline"
+                        // name="md-checkmark"
+                        // name="playlist-add-check" // MaterialIcons  -- looks like a list with a checkmark at bottom-right
                         size={30}
                         color={Colors.brandOffWhiteBlue}
                     />
@@ -162,6 +165,10 @@ class TaskDetail extends Component {
             handleSave: this.handleSave.bind(this)
         });
         this.addKeyboardListeners();
+    }
+
+    componentDidMount() {
+        this._nameInputRef.focus();
     }
 
     componentWillUnmount() {
@@ -424,7 +431,6 @@ class TaskDetail extends Component {
                     style={[
                         Styles.fieldText,
                         TextStyle.editableText,
-                        props.textInputStyle,
                         {
                             // height: inputHeight + scaleByFactor(23, 0.5),
                             paddingVertical: 2,
@@ -458,6 +464,7 @@ class TaskDetail extends Component {
                     // }
                     multiline={false}
                     underlineColorAndroid="transparent"
+                    ref={el => (this._nameInputRef = el)}
                 />
                 {this.currName != "" && (
                     <TouchableOpacity
@@ -548,9 +555,9 @@ class TaskDetail extends Component {
             : this.state.alarmTask.task.defaultDuration;
         return (
             <View style={ScreenStyles.TaskScreen}>
-                <View>
+                <View style={{ flex: 1 }}>
                     <Text style={[TextStyle.labelText, Styles.fieldLabelText]}>
-                        TASK NAME
+                        NAME
                     </Text>
                     <Autocomplete
                         placeholder="Enter a task name"
@@ -602,7 +609,7 @@ class TaskDetail extends Component {
                             labelText="DURATION"
                             time={durationDisplayed}
                             onChange={this._onTaskDurationChanged.bind(this)}
-                            inputFontSize={scaleByFactor(37, 0.55)}
+                            inputFontSize={scaleByFactor(36, 0.55)}
                             separation={7}
                             style={{
                                 // backgroundColor: "red"
@@ -676,14 +683,24 @@ class TaskDetail extends Component {
                                 </View>
                             )}
                     </View>
-                    <TouchableOpacity
-                        style={Styles.DeleteButton}
-                        onPress={this._onDeleteTask.bind(this)}
+                    <KeyboardAvoidingView
+                        behavior="padding"
+                        // style={{ flex: 1 }}
+                        style={{ flex: 1 }}
+                        keyboardVerticalOffset={Header.HEIGHT + 20}
                     >
-                        <Text style={{ color: "white", fontSize: 18 }}>
-                            Delete
-                        </Text>
-                    </TouchableOpacity>
+                        <View style={{ flex: 1 }}>
+                            <TouchableOpacity
+                                // style={Styles.DeleteButton}
+                                style={Styles.DeleteButton}
+                                onPress={this._onDeleteTask.bind(this)}
+                            >
+                                <Text style={{ color: "white", fontSize: 18 }}>
+                                    Delete
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </KeyboardAvoidingView>
                     <View />
                 </View>
                 <AwesomeAlert
@@ -737,7 +754,8 @@ const Styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         position: "absolute",
-        top: SCREEN_HEIGHT * 0.25,
+        // bottom: SCREEN_HEIGHT * 0.1,
+        bottom: 0,
         right: 0,
         left: 0
     },
@@ -746,14 +764,14 @@ const Styles = StyleSheet.create({
         backgroundColor: "transparent"
     },
     fieldText: {
-        fontSize: scaleByFactor(25, 0.6)
+        fontSize: scaleByFactor(33, 0.55)
     },
     autocompleteContainer: {
         flex: 1,
         left: 0,
         position: "absolute",
         right: 0,
-        top: 20,
+        top: 17,
         minHeight: scaleByFactor(35, 0.6),
         paddingHorizontal: 0,
         zIndex: 1,

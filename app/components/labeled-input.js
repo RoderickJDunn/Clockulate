@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
         backgroundColor: "transparent"
     },
     fieldText: {
-        fontSize: scale(20)
+        fontSize: scaleByFactor(25, 0.7)
     }
 });
 

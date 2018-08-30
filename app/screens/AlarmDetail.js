@@ -899,7 +899,11 @@ class AlarmDetail extends Component {
                         >
                             <Text style={[styles.timeText]}>
                                 {fWakeUpTime}
-                                <Text style={[{ fontSize: scaleByFactor(40) }]}>
+                                <Text
+                                    style={[
+                                        { fontSize: scaleByFactor(55, 0.7) }
+                                    ]}
+                                >
                                     {" " + amPmWakeUpTime}
                                 </Text>
                             </Text>
@@ -954,14 +958,14 @@ class AlarmDetail extends Component {
 
                         <View style={[styles.fieldsContainer]}>
                             <LabeledInput
-                                labelText="ALARM LABEL"
+                                labelText="LABEL"
                                 placeholder="Enter a label"
                                 fieldText={this.alarmLabelCache}
                                 handleTextInput={this.onChangeLabel}
                                 onTextInputBlur={this.onLabelInputBlur}
                                 separation={4}
                                 textInputStyle={{
-                                    fontSize: scaleByFactor(22, 0.5)
+                                    fontSize: scaleByFactor(32, 0.5)
                                 }}
                                 flex={0.5}
                                 autoResize={false}
@@ -984,7 +988,7 @@ class AlarmDetail extends Component {
                                 }}
                             >
                                 <LabeledTimeInput
-                                    labelText="ARRIVAL TIME"
+                                    labelText="ARRIVAL"
                                     flex={0.6}
                                     fieldText={moment
                                         .utc(this.state.alarm.arrivalTime)
@@ -1002,7 +1006,7 @@ class AlarmDetail extends Component {
                                     separation={scaleByFactor(5, 0.3)}
                                 />
                                 <LabeledTimeInput
-                                    labelText="HOURS OF SLEEP"
+                                    labelText="HRS OF SLEEP"
                                     fieldText={hoursOfSleep}
                                     flex={0.4}
                                     viewStyle={{
@@ -1267,10 +1271,12 @@ const styles = StyleSheet.create({
     timeText: {
         // color: "#d5d5d5",
         color: Colors.brandOffWhiteBlue,
-        fontSize: scaleByFactor(85, 0.7),
+        fontSize: scaleByFactor(115, 0.7),
         backgroundColor: "transparent",
         alignSelf: "center",
-        fontFamily: "Baskerville-Bold"
+        // fontFamily: "Baskerville-Bold"
+        fontFamily: "Quesha"
+        // fontWeight: "bold"
     },
     dateText: {
         color: "#d5d5d5",

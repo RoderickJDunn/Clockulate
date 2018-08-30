@@ -25,7 +25,8 @@ export const TextStyle = StyleSheet.create({
     },
     editableText: {
         // TODO: Figure out a good font for editable text (eg: alarm labels, time fields)
-        fontFamily: "Verdana",
+        fontFamily: "Quesha",
+        // fontFamily: "Verdana",
         color: Colors.black,
         opacity: 0.8
     },
