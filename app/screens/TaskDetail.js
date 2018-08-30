@@ -14,7 +14,8 @@ import {
     Dimensions,
     Keyboard,
     Platform,
-    KeyboardAvoidingView
+    KeyboardAvoidingView,
+    ScrollView
 } from "react-native";
 import { Icon } from "react-native-elements";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -558,7 +559,13 @@ class TaskDetail extends Component {
             ? this.state.alarmTask.duration
             : this.state.alarmTask.task.defaultDuration;
         return (
-            <View style={ScreenStyles.TaskScreen}>
+            <ScrollView
+                contentContainerStyle={[
+                    ScreenStyles.TaskScreen,
+                    { flexGrow: 1 }
+                ]}
+                keyboardShouldPersistTaps="handled"
+            >
                 <View style={{ flex: 1 }}>
                     <Text style={[TextStyle.labelText, Styles.fieldLabelText]}>
                         NAME
@@ -635,8 +642,9 @@ class TaskDetail extends Component {
                             inputFontSize={scaleByFactor(36, 0.55)}
                             separation={7}
                             style={{
-                                backgroundColor: "red"
-                                // backgroundColor: "transparent",
+                                backgroundColor: "transparent",
+                                // backgroundColor: "red",
+                                flex: 1
                             }}
                         />
                         {this.state.currNameHasMatch &&
@@ -742,7 +750,7 @@ class TaskDetail extends Component {
                         }
                     }}
                 />
-            </View>
+            </ScrollView>
         );
     }
 }
