@@ -64,6 +64,7 @@ export class AlarmTaskModel {
         this.id = uuid.v1();
         this.task = task;
         this.order = order;
+        this.duration = 0;
     }
 }
 
