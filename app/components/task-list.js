@@ -24,7 +24,6 @@ class TaskList extends React.Component {
     _keyExtractor = (item, index) => item.id;
 
     _renderItem = ({ item, rowID, move, moveEnd, isActive }) => {
-        console.log("move", move);
         let { onSnapTask, sortHandlers, ...other } = this.props;
         // console.log("onSnapTask prop", onSnapTask);
         // console.log("other props", other);
@@ -80,9 +79,9 @@ class TaskList extends React.Component {
                         height: this.height
                     }}
                     onPress={() => {
-                        console.log(
-                            "-----Pressed touchable backdrop of TaskList --------------------"
-                        );
+                        // console.log(
+                        //     "-----Pressed touchable backdrop of TaskList --------------------"
+                        // );
                         this._closeTaskRows();
                     }}
                 />

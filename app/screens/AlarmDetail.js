@@ -709,7 +709,7 @@ class AlarmDetail extends Component {
                     activeTask={this.state.activeTask}
                     closeTaskRows={this._closeTaskRows.bind(this)}
                     isEditingTasks={this.state.isEditingTasks}
-                    isSlidingTask={disableDrag}
+                    isSlidingTask={this.state.isSlidingTask}
                     onReorderTasks={this._onReorderTasks.bind(this)}
                 />
             );

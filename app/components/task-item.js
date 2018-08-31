@@ -33,7 +33,7 @@ import * as CONST_DIMENSIONS from "../styles/const_dimensions";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const MAX_SLIDER_VALUE = 7200; // this is 2 hours, in seconds
-class TaskItem extends React.PureComponent {
+class TaskItem extends React.Component {
     /*
     Props: Receives an AlarmTask in the 'data' property:
         data: { id:"_"   // this is the AlarmTask id
@@ -53,12 +53,21 @@ class TaskItem extends React.PureComponent {
         that the user never actually slid their finger).    
     */
     _isSliding = false;
+    _tempDuration = null;
 
-    constructor() {
+    constructor(props) {
         super();
         this.state = {
-            tempDuration: null
+            // tempDuration: null,
+            data: {
+                enabled: props.data.enabled,
+                duration: props.data.duration
+            },
+            isSlidingTask: false,
+            isEditingTasks: false
         };
+
+        // console.log("this.state", this.state);
     }
 
     componentWillMount() {
@@ -80,11 +89,11 @@ class TaskItem extends React.PureComponent {
                 /* If tempDuration is null, the slider is not showing, so return false
                     Otherwise, if tempDuration is not null, the slider is showing, so we need to follow gestures. Return true
                 */
-                return this.state.tempDuration != null;
+                return this._tempDuration != null;
             },
             // At each drag start
             onPanResponderGrant: (evt, gestureState) => {
-                console.log("onPanResponderGrant");
+                // console.log("onPanResponderGrant");
 
                 this._touchable.setOpacityTo(0.5, 100);
                 console.log("evt", evt.nativeEvent.locationX);
@@ -97,7 +106,7 @@ class TaskItem extends React.PureComponent {
             },
 
             onPanResponderMove: (event, gesture) => {
-                console.log("onPanResponderMove", event.nativeEvent.pageX);
+                // console.log("onPanResponderMove", event.nativeEvent.pageX);
 
                 // If user drags more that 3px around
                 if (
@@ -116,12 +125,14 @@ class TaskItem extends React.PureComponent {
                     /* this line converts the value (currently in seconds with a decimal), to an seconds integer
                      that is a multiple of 60 (so that it can be converted to minutes with no remainder)*/
                     tempDuration = Math.trunc(tempDuration / 60) * 60;
-                    this.setState({ tempDuration: tempDuration });
+                    // this.setState({ tempDuration: tempDuration });
+                    this._tempDuration = tempDuration;
+                    this.setState(this.state);
                 }
             },
             // When the user releases touch
             onPanResponderRelease: (event, gesture) => {
-                console.log("onPanResponderRelease");
+                // console.log("onPanResponderRelease");
 
                 // If the user didn't move more than 3px around, I consider it as a press on the button
                 if (
@@ -129,13 +140,15 @@ class TaskItem extends React.PureComponent {
                     gesture.dx > -3 &&
                     gesture.dy < 3 &&
                     gesture.dy > -3 &&
-                    this.state.tempDuration == null
+                    this._tempDuration == null
                 ) {
                     // Launch button on click
                     this._touchable.touchableHandlePress();
                     // Reset button opacity
                 } else {
-                    this.setState({ tempDuration: null });
+                    // this.setState({ tempDuration: null });
+                    // this._tempDuration = null;
+                    // this.setState(this.state); // TODO: ?
                     this._onDurationChange();
                 }
                 this._touchable.setOpacityTo(1, 100);
@@ -150,7 +163,9 @@ class TaskItem extends React.PureComponent {
                 // console.log("onPanResponderTerminate");
                 // Another component has become the responder, so this gesture
                 // should be cancelled
-                this.setState({ tempDuration: null });
+                // this.setState({ tempDuration: null });
+                this._tempDuration = null;
+                // this.setState(this.state); // TODO: ?
                 this._onDurationChange();
 
                 this._isSliding = false;
@@ -163,7 +178,7 @@ class TaskItem extends React.PureComponent {
     // }
 
     _onPress = () => {
-        console.debug("TaskItem: onPress");
+        // console.debug("TaskItem: onPress");
         // console.debug(this.props.data);
         if (!this.props.disabled) {
             this.props.onPressItem(this.props.data);
@@ -171,7 +186,7 @@ class TaskItem extends React.PureComponent {
     };
 
     _onPressDelete = () => {
-        console.debug("TaskItem: onPressDelete");
+        // console.debug("TaskItem: onPressDelete");
         this.props.onPressDelete(this.props.data);
     };
 
@@ -182,14 +197,12 @@ class TaskItem extends React.PureComponent {
 
     _onDurationChange = () => {
         // console.debug(data);
-        this.props.onChangeTaskDuration(
-            this.props.data,
-            this.state.tempDuration
-        );
+        this.props.onChangeTaskDuration(this.props.data, this._tempDuration);
+        this._tempDuration = null;
     };
 
     _onLongPress = initialVal => {
-        console.log("_onLongPress task");
+        // console.log("_onLongPress task");
 
         if (this.props.isEditingTasks) {
             this.props.shouldStartMove();
@@ -199,20 +212,71 @@ class TaskItem extends React.PureComponent {
             2) TaskList sortable-listview scrolling will be disabled
             3) Disabling of TaskItem Interactable-View (show delete btn) is managed in render()
         */
-            this.props.onShowDurationSlider();
 
             let initialDuration = this.props.data.duration
                 ? this.props.data.duration
                 : this.props.data.task.defaultDuration;
 
-            this.setState({ tempDuration: initialDuration });
+            // this.setState({ tempDuration: initialDuration });
+            this._tempDuration = initialDuration;
+
+            this.props.onShowDurationSlider();
         }
     };
 
-    render() {
-        console.debug("render task-item");
-        console.debug("render task-item", this.props);
+    componentWillReceiveProps(nextProps) {
+        // console.log("componentWillReceiveProps: nextProps", nextProps);
+        // console.log("componentWillReceiveProps: currState", this.state);
+        let tempDuration = null;
 
+        this.setState({
+            data: {
+                duration: nextProps.data.duration,
+                enabled: nextProps.data.enabled
+            },
+            isSlidingTask:
+                this._tempDuration != null && nextProps.isSlidingTask,
+            isEditingTasks: nextProps.isEditingTasks
+        });
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        // console.log("nextState", nextState);
+        // console.log("this.state", this.state);
+        // console.log("nextProps", nextProps);
+
+        // if we are sliding, return true right away. We need to re-render
+        if (nextState.isSlidingTask) {
+            return true;
+        }
+
+        let { enabled, name, duration } = this.state.data;
+        let { isEditingTasks } = this.state;
+
+        let {
+            enabled: nEnabled,
+            name: nName,
+            duration: nDuration
+        } = nextProps.data;
+        let { isEditingTasks: nIsEditingTasks } = nextProps;
+
+        if (
+            nEnabled == enabled &&
+            nName == name &&
+            nDuration == duration &&
+            nIsEditingTasks == isEditingTasks
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    render() {
+        // console.debug("render task-item");
+        // console.debug("render task-item props", this.props);
+        // console.debug("render task-item state", this.state);
+        // console.log("\n");
         // console.log("this.state.tempDuration", this.state.tempDuration);
 
         /* Statement Explanation: 
@@ -221,7 +285,7 @@ class TaskItem extends React.PureComponent {
             - Otherwise, use the default duration for this Task
         */
         let duration =
-            this.state.tempDuration ||
+            this._tempDuration ||
             (this.props.data.duration
                 ? this.props.data.duration
                 : this.props.data.task.defaultDuration);
@@ -309,7 +373,7 @@ class TaskItem extends React.PureComponent {
                 }}
                 /* Disable "Swipe-to-show DELETE" if slider is showing. Otherwise we get
                     premature panResonder termination, especially on iOS */
-                dragEnabled={this.state.tempDuration == null}
+                dragEnabled={this._tempDuration == null}
             >
                 <View
                     style={[TaskItemStyle.taskInfoWrap]}
@@ -324,11 +388,13 @@ class TaskItem extends React.PureComponent {
                         onPress={this._onPress.bind(this)}
                         onLongPress={this._onLongPress.bind(this)}
                         onPressOut={() => {
+                            console.log("onPressOut");
                             if (
-                                this.state.tempDuration != null &&
+                                this._tempDuration != null &&
                                 this._isSliding == false
                             ) {
-                                this.setState({ tempDuration: null });
+                                this._tempDuration = null;
+                                this.setState(this.state);
                             }
                         }}
                         // disabled={this.props.isEditingTasks}
@@ -357,7 +423,7 @@ class TaskItem extends React.PureComponent {
                             ]}
                         />
                     </TouchableOpacity>
-                    {this.state.tempDuration != null && (
+                    {this.state.isSlidingTask && (
                         <Slider
                             ref={component => (this._sliderRef = component)}
                             style={[styles.slider]}
@@ -366,21 +432,22 @@ class TaskItem extends React.PureComponent {
                             step={5}
                             value={duration}
                             onStartShouldSetResponder={() => {
-                                console.log("onStartShouldSetResponder");
+                                // console.log("onStartShouldSetResponder");
                                 return true;
                             }}
                             onMoveShouldSetResponder={() => {
-                                console.log("onMoveShouldSetResponder");
+                                // console.log("onMoveShouldSetResponder");
                                 return true;
                             }}
-                            onResponderReject={() => {
-                                console.log("onResponderReject");
-                            }}
+                            // onResponderReject={() => {
+                            //     // console.log("onResponderReject");
+                            // }}
                             onSlidingComplete={value => {
-                                console.log(
-                                    "Finished sliding. Final value: " + value
-                                );
-                                this.setState({ tempDuration: null });
+                                // console.log(
+                                //     "Finished sliding. Final value: " + value
+                                // );
+                                this._tempDuration = null;
+                                this.setState(this.state);
                             }}
                         />
                     )}
