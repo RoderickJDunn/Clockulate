@@ -42,13 +42,14 @@ class Alarms extends Component {
     _didFocusListener = null;
     _duplicationInfo = null;
 
+    _activeRow = null;
+
     constructor() {
         super();
         console.log("AlarmsList -- Constructor");
         //console.log("Fetching Alarms...");
         this.state = {
             alarms: realm.objects("Alarm").sorted("order"), // TODO: filter by 'visible'=true
-            activeRow: null,
             menuVisible: false,
             appState: AppState.currentState
         };
@@ -165,23 +166,10 @@ class Alarms extends Component {
         console.log("Notification Opened: " + JSON.stringify(notification));
     }
 
-    _onNotification(notification) {
-        AlertIOS.alert(
-            "Notification Received",
-            "Alert message: " + notification.getMessage(),
-            [
-                {
-                    text: "Dismiss",
-                    onPress: null
-                }
-            ]
-        );
-    }
-
-    componentWillUpdate() {
-        // console.log("this.props.navigation", this.props.navigation);
-        console.log("AlarmsList - componentWillUpdate");
-    }
+    // componentWillUpdate() {
+    //     // console.log("this.props.navigation", this.props.navigation);
+    //     console.log("AlarmsList - componentWillUpdate");
+    // }
 
     componentDidMount() {
         console.info("AlarmsList --- ComponentDidMount");
@@ -356,13 +344,14 @@ class Alarms extends Component {
 
     _onPressItem = alarmItem => {
         console.info("AlarmsList - _onPressItem called");
-        if (this.state.activeRow == null) {
+        if (this._activeRow == null) {
             this.props.navigation.navigate("AlarmDetail", {
                 alarm: alarmItem,
                 reloadAlarms: this.reloadAlarms
             });
         } else {
-            this.setState({ activeRow: null });
+            this._activeRow = null;
+            this.setState(this.state);
         }
     };
 
@@ -401,7 +390,8 @@ class Alarms extends Component {
             // delete the Alarm from the DB
             realm.delete(item);
 
-            this.setState({ activeRow: null, alarms: alarms });
+            this._activeRow = null;
+            this.setState({ alarms: alarms });
         });
     };
 
@@ -437,7 +427,9 @@ class Alarms extends Component {
                 alarm: newAlarm,
                 srcPosition: item.order
             };
-            this.setState({ activeRow: null });
+            this._activeRow = null;
+
+            this.setState(this.state);
         });
         // console.log("duplicated Alarm");
     };
@@ -478,23 +470,15 @@ class Alarms extends Component {
         // console.log("=========== rowState ============", rowState);
 
         if (rowState == "active") {
-            this.setState({ activeRow: row.item.id });
+            this._activeRow = row.item.id;
         }
     };
 
-    _onRowDismiss = (item, rowId, direction) => {
-        console.info("AlarmsList - _onRowDismiss");
-        if (
-            item.id === this.state.activeRow &&
-            typeof direction !== "undefined"
-        ) {
-            this.setState({ activeRow: null });
-        }
-    };
 
     _onPressBackground = () => {
         console.info("AlarmsList - _onPressBackground");
-        this.setState({ activeRow: null });
+        this._activeRow = null;
+        this.setState(this.state);
     };
 
     render() {
@@ -536,10 +520,7 @@ class Alarms extends Component {
                                     )}
                                     onToggle={this._onAlarmToggled}
                                     onSnap={this._onSnap.bind(this, alarm)}
-                                    onClose={this._onRowDismiss}
-                                    close={
-                                        alarm.item.id !== this.state.activeRow
-                                    }
+                                    close={alarm.item.id !== this._activeRow}
                                     hide={
                                         duplicationInfo &&
                                         duplicationInfo.alarm.id ==
@@ -549,14 +530,18 @@ class Alarms extends Component {
                             );
                         }}
                         keyExtractor={this._keyExtractor}
-                        extraData={this.state}
+                        extraData={this.state} // TODO: FIXME: May be able to fix flickering issue by being more careful about what extraData we pass in. THis may prevent unessesary re-renders of AlarmItems when they haven't changed
                     />
                     {duplicationInfo && (
                         <AlarmItem
                             style={{
                                 position: "absolute",
                                 left: 0,
-                                top: 0
+                                top: 0,
+                                shadowOpacity: 0.2,
+                                shadowRadius: 10,
+                                elevation: 3,
+                                shadowColor: "black"
                                 // borderWidth: 3,
                                 // borderColor: "blue"
                             }}
@@ -575,7 +560,6 @@ class Alarms extends Component {
                                 this,
                                 duplicationInfo.alarm
                             )}
-                            onClose={this._onRowDismiss}
                             close={true}
                             animateConfig={{
                                 enabled: true,
