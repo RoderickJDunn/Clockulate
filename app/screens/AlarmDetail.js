@@ -818,7 +818,9 @@ class AlarmDetail extends Component {
                             ]
                         }
                     ]}
-                    source={require("../img/ClockBgd_v5.png")}
+                    // source={require("../img/ClockBgd_v5.png")}
+                    source={require("../img/ClockBgd_v8_iphoneSE-5-6-7-8.png")}
+                    // source={require("../img/ClockBgd_v9_iphoneSE-5-6-7-8.png")}
                 />
 
                 {touchableBackdrop}
