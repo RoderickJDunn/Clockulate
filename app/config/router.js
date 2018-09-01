@@ -130,6 +130,7 @@ const MainStack = StackNavigator(
                 headerTitleStyle: {
                     color: Colors.brandLightGrey
                 },
+                headerBackTitle: null,
                 // This is how you define a custom back button. Apart from styling, this also seems like the best way to
                 //  perform any additional tasks before executing navigation.goBack(), otherwise, goBack() is called
                 //  automatically when the back button is pushed

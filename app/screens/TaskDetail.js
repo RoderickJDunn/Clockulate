@@ -568,10 +568,10 @@ class TaskDetail extends Component {
             >
                 <View style={{ flex: 1 }}>
                     <Text style={[TextStyle.labelText, Styles.fieldLabelText]}>
-                        NAME
+                        TASK
                     </Text>
                     <Autocomplete
-                        placeholder="Enter a task name"
+                        placeholder="Take a shower..."
                         defaultValue={this.currName}
                         data={
                             this.currName &&
@@ -631,7 +631,13 @@ class TaskDetail extends Component {
                             alignContent: "center",
                             alignItems: "center",
                             position: "absolute",
-                            top: scaleByFactor(35, 0.6) + 35
+                            top: scaleByFactor(35, 0.6) + 35,
+
+                            // borderRadius: 7,
+                            // backgroundColor: "#c8d6e5",
+                            // padding: 5,
+                            // borderWidth: 1
+
                             // backgroundColor: "green"
                         }}
                     >
@@ -644,7 +650,7 @@ class TaskDetail extends Component {
                             style={{
                                 backgroundColor: "transparent",
                                 // backgroundColor: "red",
-                                flex: 1
+                                flex: 2
                             }}
                         />
                         {this.state.currNameHasMatch &&
@@ -655,19 +661,24 @@ class TaskDetail extends Component {
                                         flex: 1,
                                         alignSelf: "stretch",
                                         alignContent: "flex-end",
-                                        alignItems: "flex-end"
+                                        alignItems: "flex-end",
+                                        flexDirection: "row",
+                                        justifyContent: "flex-end",
                                         // paddingLeft: 10,
-                                        // paddingBottom: 5,
+                                        paddingBottom: 7
                                         // borderBottomColor: "black",
                                         // borderBottomWidth: 1
                                         // backgroundColor: "green"
                                     }}
                                 >
+                                    <View style={{ width: scale(8) }} />
                                     <TouchableOpacity
                                         style={{
                                             marginLeft: 10,
+                                            marginBottom: 5,
                                             flexDirection: "row"
                                             // backgroundColor: "blue",
+                                            // flex: 1
                                         }}
                                         onPress={() => {
                                             this.setState({
@@ -675,16 +686,15 @@ class TaskDetail extends Component {
                                             });
                                         }}
                                     >
-                                        <EntypoIcon
+                                        {/* <EntypoIcon
                                             name="info-with-circle"
                                             size={15}
                                         />
-                                        <View style={{ width: 5 }} />
+                                        <View style={{ width: 5 }} /> */}
                                         <Text style={[TextStyle.labelText]}>
-                                            SET AS DEFAULT
+                                            Set as default
                                         </Text>
                                     </TouchableOpacity>
-                                    <View style={{ height: scale(8) }} />
                                     <StyleProvider style={getTheme(material)}>
                                         <CheckBox
                                             onPress={() =>
@@ -715,6 +725,7 @@ class TaskDetail extends Component {
                             )}
                     </View>
                 </View>
+                {/* <View style={{ position: "absolute", height: 1, backgroundColor: "black", left: 0, right:0, top: 140 }} /> */}
                 <AwesomeAlert
                     alertContainerStyle={{
                         top: 0,
@@ -763,6 +774,7 @@ const Styles = StyleSheet.create({
         backgroundColor: Colors.deleteBtnRed,
         alignSelf: "stretch",
         height: 50,
+        borderRadius: 7,
         alignItems: "center",
         justifyContent: "center",
         position: "absolute",
