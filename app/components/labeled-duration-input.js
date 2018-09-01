@@ -84,6 +84,10 @@ class LabeledDurationInput extends Component {
                 <TouchableOpacity onPress={this._showTimePicker}>
                     <DurationText
                         duration={this.state.data.time}
+                        overLongConfig={{
+                            charLimit: 19,
+                            fontSize: this.props.inputFontSize - 2
+                        }}
                         style={[
                             TextStyle.timeText,
                             { fontSize: this.props.inputFontSize }

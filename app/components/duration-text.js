@@ -16,21 +16,27 @@ class DurationText extends Component {
         // console.log(props);
     }
 
-   
-
     render() {
         // console.log('rendering duration-text');
-        let duration = formatDuration(
-            this.props.duration,
-            this.props.short
-        );
+        let duration = formatDuration(this.props.duration, this.props.short);
         // console.log(duration);
         // console.log(this.props.style);
+
+        let longFontSize = null;
+        console.log("this.props.style", this.props.style);
+        if (this.props.overLongConfig) {
+            if (duration.length > this.props.overLongConfig.charLimit) {
+                longFontSize = {
+                    fontSize: this.props.overLongConfig.fontSize
+                };
+            }
+        }
+
         return (
             <Text
                 numberOfLines={1}
                 ellipsizeMode="tail"
-                style={this.props.style}
+                style={[this.props.style, longFontSize]}
             >
                 {duration}
             </Text>
