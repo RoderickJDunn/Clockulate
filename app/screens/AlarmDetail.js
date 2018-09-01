@@ -997,10 +997,10 @@ class AlarmDetail extends Component {
                                 <LabeledTimeInput
                                     labelText="ARRIVAL"
                                     flex={0.6}
-                                    fieldText={moment
-                                        .utc(this.state.alarm.arrivalTime)
-                                        .local()
-                                        .format("h:mm A")}
+                                    // fieldText={moment
+                                    //     .utc(this.state.alarm.arrivalTime)
+                                    //     .local()
+                                    //     .format("h:mm A")}
                                     time={moment
                                         .utc(this.state.alarm.arrivalTime)
                                         .local()

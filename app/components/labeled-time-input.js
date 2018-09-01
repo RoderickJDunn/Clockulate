@@ -5,6 +5,7 @@ import moment from "moment";
 import DateTimePicker from "react-native-modal-datetime-picker";
 
 import { TextStyle } from "../styles/text";
+import { scaleByFactor } from "../util/font-scale";
 
 class LabeledTimeInput extends Component {
     constructor(props) {
@@ -53,6 +54,19 @@ class LabeledTimeInput extends Component {
     };
 
     render() {
+        let fieldText, amPmWakeUpTime;
+        if (this.props.fieldText) {
+            fieldText = this.props.fieldText;
+        } else {
+            let timeMoment = moment(this.props.time);
+            fieldText = timeMoment.format("h:mm");
+            amPmWakeUpTime = (
+                <Text style={{ fontSize: scaleByFactor(25, 0.5) }}>
+                    {" " + timeMoment.format("A")}
+                </Text>
+            );
+        }
+
         return (
             <View
                 style={[
@@ -98,7 +112,8 @@ class LabeledTimeInput extends Component {
                             }
                         ]}
                     >
-                        {this.props.fieldText}
+                        {fieldText}
+                        {amPmWakeUpTime}
                     </Text>
                 </TouchableOpacity>
                 <DateTimePicker
