@@ -24,6 +24,7 @@ import {
 } from "../alarmservice/PushController";
 import NotificationsIOS from "react-native-notifications";
 import realm from "../data/DataSchemas";
+import ProximityManager from "react-native-proximity-manager";
 
 import { ListStyle } from "../styles/list";
 import AlarmItem from "../components/alarm-item";
@@ -59,10 +60,9 @@ class Alarms extends Component {
         if (Platform.OS === "android") {
             UIManager.setLayoutAnimationEnabledExperimental(true);
         } // setup notifications
-        // NotificationsIOS.addEventListener(
-        //     "remoteNotificationsRegistered",
-        //     this.onPushRegistered.bind(this)
-        // );
+        else {
+            ProximityManager.enable();
+        }
     }
 
     onPushRegistered(deviceToken) {
@@ -245,15 +245,27 @@ class Alarms extends Component {
             });
         }
 
-        // this._didFocusListener = this.props.navigation.addListener(
-        //     "didFocus",
-        //     payload => {
-        //         console.debug(
-        //             "^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n"
-        //         );
-        //         console.debug("didFocus", payload);
-        //     }
-        // );
+        this._didBlurListener = this.props.navigation.addListener(
+            "didBlur",
+            payload => {
+                console.debug(
+                    "^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n"
+                );
+                console.debug("didBlur", payload);
+                ProximityManager.disable();
+            }
+        );
+
+        this._didFocusListener = this.props.navigation.addListener(
+            "didFocus",
+            payload => {
+                console.debug(
+                    "^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n"
+                );
+                console.debug("didFocus", payload);
+                ProximityManager.enable();
+            }
+        );
     }
 
     componentWillUnmount() {
@@ -474,7 +486,6 @@ class Alarms extends Component {
         }
     };
 
-
     _onPressBackground = () => {
         console.info("AlarmsList - _onPressBackground");
         this._activeRow = null;
@@ -490,6 +501,9 @@ class Alarms extends Component {
         // alarms.forEach(a => {
         //     console.log(a.id);
         // });
+
+        // TODO: Uncomment this line to monitor for inactivity, and enable ProxMonitor if no activity for x seconds
+        // this.resetTimer();
 
         // this.setState({ duplicatedAlarmId: null });
         let duplicationInfo = this._duplicationInfo;
