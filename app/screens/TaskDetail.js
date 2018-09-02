@@ -111,7 +111,7 @@ class TaskDetail extends Component {
                 suggestions: taskSuggestions,
                 filteredSuggestions: [],
                 hideSuggestions: true,
-                keyboardHeight: null,
+                keyboardHeight: 0,
                 showDurationInfo: false,
                 setAsDefault: false,
                 currNameHasMatch: false
@@ -143,7 +143,7 @@ class TaskDetail extends Component {
                 suggestions: taskSuggestions,
                 filteredSuggestions: null,
                 hideSuggestions: true,
-                keyboardHeight: null,
+                keyboardHeight: 0,
                 newTask: false,
                 showDurationInfo: false,
                 setAsDefault: false,
@@ -218,7 +218,7 @@ class TaskDetail extends Component {
         console.log("exactMatch", exactMatch);
         let hasMatch = exactMatch.length > 0;
         this.setState({
-            keyboardHeight: null,
+            keyboardHeight: 0,
             hideSuggestions: true,
             currNameHasMatch: hasMatch
         });
@@ -565,8 +565,31 @@ class TaskDetail extends Component {
                     { flexGrow: 1 }
                 ]}
                 keyboardShouldPersistTaps="handled"
+                scrollEnabled={false}
             >
                 <View style={{ flex: 1 }}>
+                    <KeyboardAvoidingView
+                        behavior="padding"
+                        // style={{ flex: 1 }}
+                        style={StyleSheet.absoluteFill}
+                        keyboardVerticalOffset={Header.HEIGHT + 20}
+                    >
+                        <View
+                            style={{
+                                flex: 1
+                            }}
+                        >
+                            <TouchableOpacity
+                                // style={Styles.DeleteButton}
+                                style={Styles.DeleteButton}
+                                onPress={this._onDeleteTask.bind(this)}
+                            >
+                                <Text style={{ color: "white", fontSize: 18 }}>
+                                    Delete
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </KeyboardAvoidingView>
                     <Text style={[TextStyle.labelText, Styles.fieldLabelText]}>
                         TASK
                     </Text>
@@ -606,24 +629,6 @@ class TaskDetail extends Component {
                         }}
                         // listStyle={[Styles.suggestionsContainer]}
                     />
-                    <KeyboardAvoidingView
-                        behavior="padding"
-                        // style={{ flex: 1 }}
-                        style={{ flex: 1 }}
-                        keyboardVerticalOffset={Header.HEIGHT + 20}
-                    >
-                        <View style={{ flex: 1 }}>
-                            <TouchableOpacity
-                                // style={Styles.DeleteButton}
-                                style={Styles.DeleteButton}
-                                onPress={this._onDeleteTask.bind(this)}
-                            >
-                                <Text style={{ color: "white", fontSize: 18 }}>
-                                    Delete
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </KeyboardAvoidingView>
 
                     <View
                         style={{
@@ -631,7 +636,7 @@ class TaskDetail extends Component {
                             alignContent: "center",
                             alignItems: "center",
                             position: "absolute",
-                            top: scaleByFactor(35, 0.6) + 35,
+                            top: scaleByFactor(35, 0.6) + 35
 
                             // borderRadius: 7,
                             // backgroundColor: "#c8d6e5",
@@ -778,8 +783,7 @@ const Styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         position: "absolute",
-        // bottom: SCREEN_HEIGHT * 0.1,
-        bottom: 0,
+        bottom: isIphoneX() ? 30 : 0,
         right: 0,
         left: 0
     },
