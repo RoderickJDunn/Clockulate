@@ -64,7 +64,7 @@ class TaskList extends React.Component {
 
     render() {
         console.debug("Render TaskList");
-        console.debug("props: ", this.props);
+        // console.debug("props: ", this.props);
         let tasksArr = [];
         for (let id in this.props.data) {
             tasksArr.push(this.props.data[id]);

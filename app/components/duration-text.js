@@ -23,7 +23,6 @@ class DurationText extends Component {
         // console.log(this.props.style);
 
         let longFontSize = null;
-        console.log("this.props.style", this.props.style);
         if (this.props.overLongConfig) {
             if (duration.length > this.props.overLongConfig.charLimit) {
                 longFontSize = {

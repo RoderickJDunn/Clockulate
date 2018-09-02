@@ -30,7 +30,7 @@ export const AlarmListStyle = StyleSheet.create({
         flexDirection: "row",
         width: SCREEN_WIDTH + 200,
         opacity: 1,
-        backgroundColor: "#efefef"
+        backgroundColor: "#ecebf4"
     },
     toggleButton: {
         flexDirection: "column",
@@ -87,7 +87,8 @@ export const TaskListStyle = StyleSheet.create({
         height: 55,
         alignContent: "stretch",
         alignItems: "center",
-        backgroundColor: "transparent"
+        backgroundColor: "transparent",
+        // backgroundColor: "yellow"
     },
 
     allChildren: {
@@ -102,15 +103,14 @@ export const TaskItemStyle = StyleSheet.create({
     taskInfoWrap: {
         // flex: 1,
         flexDirection: "row",
-        paddingTop: 10,
-        paddingBottom: 10,
-        // paddingRight: 10,
+        // paddingTop: 10,
+        // paddingBottom: 10,
         width: SCREEN_WIDTH - scaleByFactor(20, 0.4) + 10, // SIDE_PADDING = 10 * 2.  PAD_DURATION_DELETE = 5
         height: 55,
         alignContent: "stretch",
         borderBottomColor: "black",
         borderBottomWidth: 0.8,
-        alignItems: "center"
+        // alignItems: "center",
         // backgroundColor: "green"
         // justifyContent: "space-between"
     },
