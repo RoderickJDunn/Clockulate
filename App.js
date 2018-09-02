@@ -1,11 +1,9 @@
 import React from "react";
 import { DrawerRoot } from "./app/config/router";
 import {
-    AppRegistry,
     AsyncStorage,
     View,
     StatusBar,
-    Text,
     Dimensions,
     AppState,
     Platform
@@ -27,10 +25,10 @@ export default class App extends React.Component {
         super();
 
         console.info("App - constructor");
-        // Arrows.createArrow();
-        this.state = { firstLaunch: null, appState: AppState.currentState };
-        // console.log("Entry: Constructor");
-        // let av = ArrowView();
+        this.state = {
+            firstLaunch: null,
+            appState: AppState.currentState
+        };
     }
 
     componentDidMount() {
@@ -100,25 +98,6 @@ export default class App extends React.Component {
         let height = Dimensions.get("window").height;
         // console.log(`Width: ${width} | Height: ${height}`);
 
-        // return (
-        //     <View style={{ flex: 1 }}>
-        //         <ArrowView
-        //             style={{
-        //                 alignSelf: "flex-start",
-        //                 position: "absolute",
-        //                 width: width,
-        //                 height: height
-        //             }}
-        //             shape={{
-        //                 start: [100, 100],
-        //                 end: [300, 100]
-        //             }}
-        //             animateDrawIn={{
-        //                 duration: 1000
-        //             }}
-        //         />
-        //     </View>
-        // );
         return (
             <View style={{ flex: 1 }}>
                 <StatusBar animated={true} barStyle={"light-content"} />
@@ -127,5 +106,3 @@ export default class App extends React.Component {
         );
     }
 }
-
-// AppRegistry.registerComponent("Clockulate", () => App);

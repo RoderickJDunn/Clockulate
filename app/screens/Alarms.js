@@ -248,10 +248,6 @@ class Alarms extends Component {
         this._didBlurListener = this.props.navigation.addListener(
             "didBlur",
             payload => {
-                console.debug(
-                    "^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n"
-                );
-                console.debug("didBlur", payload);
                 ProximityManager.disable();
             }
         );
@@ -259,10 +255,6 @@ class Alarms extends Component {
         this._didFocusListener = this.props.navigation.addListener(
             "didFocus",
             payload => {
-                console.debug(
-                    "^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n^^^^^^^^^^^^^\n"
-                );
-                console.debug("didFocus", payload);
                 ProximityManager.enable();
             }
         );
