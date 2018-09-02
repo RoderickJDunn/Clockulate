@@ -476,11 +476,12 @@ const styles = StyleSheet.create({
     slider: {
         position: "absolute",
         backgroundColor: Colors.backgroundGrey,
-        top: 0,
+        // backgroundColor: "red",
+        top: 8,
         left: 0,
         right: 70,
-        bottom: 0,
-        flex: 1
+        bottom: 0
+        // flex: 1
     }
 });
 
