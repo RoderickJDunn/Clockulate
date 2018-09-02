@@ -13,7 +13,6 @@ import {
     ImageBackground,
     Image,
     Animated,
-    TouchableWithoutFeedback,
     Keyboard,
     TextInput,
     ScrollView
@@ -60,6 +59,7 @@ class AlarmDetail extends Component {
     snapNormal = SCREEN_HEIGHT;
 
     xtraKeyboardHeight = 0; // this is always 0, except on iPhone X it is 34
+    _animKeyboardHeight = new Animated.Value(0);
 
     AnimatedAlarmLabel = Animated.createAnimatedComponent(TextInput);
     AnimatedHandle = Animated.createAnimatedComponent(MaterialIcon);
@@ -110,11 +110,6 @@ class AlarmDetail extends Component {
         this._setAnimatedViewRef = this._setAnimatedViewRef.bind(this);
 
         this.alarmLabelCache = this.state.alarm.label;
-        // if (this.state.alarm.mode == "normal") {
-        //     setTimeout(() => {
-        //         this.interactiveRef.snapTo({ index: 1 });
-        //     }, 0);
-        // }
 
         // setTimeout(() => {
         //     this._animatedView.animate(this.state.animationDuration);
@@ -139,11 +134,11 @@ class AlarmDetail extends Component {
 
     addKeyboardListeners() {
         this.keyboardWillShowSub = Keyboard.addListener(
-            "keyboardDidShow",
+            "keyboardWillShow",
             this.keyboardWillShow.bind(this)
         );
         this.keyboardWillHideSub = Keyboard.addListener(
-            "keyboardDidHide",
+            "keyboardWillHide",
             this.keyboardWillHide.bind(this)
         );
     }
@@ -158,6 +153,12 @@ class AlarmDetail extends Component {
         this.props.navigation.setParams({
             handleBackBtn: this.handleBackPress.bind(this)
         });
+
+        if (this.state.alarm.mode == "normal") {
+            setTimeout(() => {
+                this.interactiveRef.snapTo({ index: 1 });
+            }, 0);
+        }
     }
 
     _setAnimatedViewRef(ref) {
@@ -166,24 +167,35 @@ class AlarmDetail extends Component {
 
     keyboardWillShow = event => {
         console.log("keyboardWillShow -------");
-        console.log(event.endCoordinates);
-        console.log(SCREEN_HEIGHT);
-        this.setState({ keyboardHeight: event.endCoordinates.height });
-        if (this.state.alarm.mode == "normal") {
-            setTimeout(() => {
-                this.interactiveRef.snapTo({ index: 2 }); // snap to "keyboard" snapPoint.
-            }, 0);
-        }
+        // console.log(event.endCoordinates);
+        // console.log(SCREEN_HEIGHT);
+        // this.setState({ keyboardHeight: event.endCoordinates.height });
+        // if (this.state.alarm.mode == "normal") {
+        //     setTimeout(() => {
+        //         this.interactiveRef.snapTo({ index: 2 }); // snap to "keyboard" snapPoint.
+        //     }, 0);
+        // }
+        Animated.timing(this._animKeyboardHeight, {
+            duration: event.duration,
+            toValue: event.endCoordinates.height,
+            useNativeDriver: true
+        }).start();
     };
 
     keyboardWillHide = event => {
         console.log("keyboardWillHide");
-        let { mode } = this.state.alarm;
-        let modeInt = mode == "autocalc" ? 0 : 1;
-        setTimeout(() => {
-            this.interactiveRef.snapTo({ index: modeInt });
-            this.setState({ keyboardHeight: null, isEditingLabel: false });
-        }, 0);
+        // let { mode } = this.state.alarm;
+        // let modeInt = mode == "autocalc" ? 0 : 1;
+        // setTimeout(() => {
+        //     this.interactiveRef.snapTo({ index: modeInt });
+        //     this.setState({ keyboardHeight: null, isEditingLabel: false });
+        // }, 0);
+
+        Animated.timing(this._animKeyboardHeight, {
+            duration: event.duration,
+            toValue: 0,
+            useNativeDriver: true
+        }).start();
     };
 
     /*
@@ -329,7 +341,7 @@ class AlarmDetail extends Component {
     /***************************************************/
 
     onChangeLabel = text => {
-        console.log("Label text changed: ", text);
+        // console.log("Label text changed: ", text);
         // simply save to instance variable until the TextInput blurs.
         // This avoids excessive re-renders!!!!
         this.alarmLabelCache = text;
@@ -450,7 +462,7 @@ class AlarmDetail extends Component {
     };
 
     saveSound = sound => {
-        console.info("Sound changed: ", sound);
+        // console.info("Sound changed: ", sound);
         // console.log("Arrival Time textInput changed: ", moment(time).unix());
         let { alarm } = this.state;
         realm.write(() => {
@@ -488,19 +500,19 @@ class AlarmDetail extends Component {
     _hideDateTimePicker = () => this.setState({ isDatePickerVisible: false });
 
     _calcWakeUpTime = () => {
-        console.log(
-            "Calculating wakeuptime with arrival time: " +
-                this.state.alarm.arrivalTime
-        );
+        // console.log(
+        //     "Calculating wakeuptime with arrival time: " +
+        //         this.state.alarm.arrivalTime
+        // );
         let totalTaskDurations = this.state.alarm.tasks
             .map(alarmTask => {
                 // console.log("mapping: ");
                 // console.log(alarmTask);
                 if (alarmTask.enabled) {
-                    console.log("Task enabled");
+                    // console.log("Task enabled");
                     return alarmTask.duration;
                 } else {
-                    console.log("Task DISabled");
+                    // console.log("Task DISabled");
                     return 0;
                 }
             })
@@ -537,8 +549,8 @@ class AlarmDetail extends Component {
 
     _onDeleteTask(data) {
         console.log("Deleting task");
-        console.log("data", data);
-        console.log("data.id", data.id);
+        // console.log("data", data);
+        // console.log("data.id", data.id);
 
         let alarmTaskRlmObject = realm.objectForPrimaryKey(
             "AlarmTask",
@@ -550,16 +562,16 @@ class AlarmDetail extends Component {
 
                 // Update order of task list
                 let { tasks } = this.state.alarm;
-                console.log("Deleted task. --> Now Tasks:", tasks);
+                // console.log("Deleted task. --> Now Tasks:", tasks);
                 let idx = 0;
                 for (var taskId in tasks) {
                     if (tasks.hasOwnProperty(taskId)) {
                         if (idx == tasks[taskId].order) {
-                            console.log(tasks[taskId]);
-                            console.log("-----> Order OK");
+                            // console.log(tasks[taskId]);
+                            // console.log("-----> Order OK");
                         } else {
                             console.log(tasks[taskId]);
-                            console.log("-----> Order WRong. Decrementing...");
+                            // console.log("-----> Order WRong. Decrementing...");
                             tasks[taskId].order--;
                         }
                     }
@@ -598,7 +610,7 @@ class AlarmDetail extends Component {
         // console.info("to", to);
         // console.log("anotherArg", anotherArg);
 
-        console.log("aTasks", aTasks);
+        // console.log("aTasks", aTasks);
         aTasks = aTasks.sort((t1, t2) => t1.order > t2.order);
         realm.write(() => {
             aTasks[from].order = to;
@@ -621,18 +633,39 @@ class AlarmDetail extends Component {
         console.info("AlarmDetail render ");
         // console.debug("AlarmDetail render - this.state: ", this.state);
         let imageHeight = this.height + 30;
-        let initInterPosition, initClockPosition, initHandlePosition;
 
+        /* clockAndLabelTranslation:
+            This is complicated. There are 2 Animated values that can effect the translateY value of
+            the Clock+Label view:
+                1) this._clockTransform -- tracks the vertical position of the Interactable.View
+                2) this._animKeyboardHeight -- follows the height of the keyboard with equal duration to that of keyboard appearance/disappearance
+            If we are in normal mode, we need the Clock+Label view to move out of the way for the keyboard (especially in small SE screen). So we 
+            use Animated.add to add the 2 animated values together. AnimKeyboardHeight is first interpolated since it doesn't need to move the full
+            keyboard height up (since there was already a decent size gap to begin with). The addition of the animKeyboardHeight interpolation and
+            the current clockTransform value, is then interpolated again mapping 'snap points' to screen height, so that the Clock+Label view movement
+            is lessened compared to the dragging gesture of the Interactable.View.
+        */
+        let clockAndLabelTranslation;
         if (this.state.alarm.mode == "normal") {
             console.info("NORMAL MODE ");
-            initInterPosition = 450;
-            initClockPosition = 210;
-            initHandlePosition = 160;
+            clockAndLabelTranslation = Animated.add(
+                this._clockTransform,
+                this._animKeyboardHeight.interpolate({
+                    inputRange: [0, 500],
+                    outputRange: [0, 250],
+                    extrapolate: "clamp"
+                })
+            ).interpolate({
+                inputRange: [this.snapAuto, this.snapNormal],
+                outputRange: [this.height, this.height * 0.3]
+            });
         } else {
             console.info("CALC MODE ");
-            initInterPosition = 0;
-            initClockPosition = 0;
-            initHandlePosition = 120;
+
+            clockAndLabelTranslation = this._clockTransform.interpolate({
+                inputRange: [this.snapAuto, this.snapNormal],
+                outputRange: [this.height, this.height * 0.3]
+            });
         }
 
         /* I hope this means: If either isEditingTasks or isSlidingTask is true, set
@@ -645,7 +678,7 @@ class AlarmDetail extends Component {
                 ? this.state.alarm.tasks.sorted("order")
                 : this.state.alarm.tasks;
 
-        console.log("sortedTasks", sortedTasks);
+        // console.log("sortedTasks", sortedTasks);
         // let sortedTasks = [];
         // for (let id in sortedTasksRealm) {
         //     sortedTasks.push(sortedTasksRealm[id]);
@@ -775,18 +808,18 @@ class AlarmDetail extends Component {
         let labelForceVisible = null;
         let handleForceHide = null;
 
-        if (this.state.isEditingLabel && this.state.keyboardHeight) {
-            snapPoints.push({
-                y:
-                    SCREEN_HEIGHT -
-                    this.state.keyboardHeight -
-                    50 -
-                    this.xtraKeyboardHeight,
-                id: "keyboard"
-            });
-            labelForceVisible = { opacity: 1 };
-            handleForceHide = { opacity: 0 };
-        }
+        // if (this.state.isEditingLabel && this.state.keyboardHeight) {
+            // snapPoints.push({
+            //     y:
+            //         SCREEN_HEIGHT -
+            //         this.state.keyboardHeight -
+            //         50 -
+            //         this.xtraKeyboardHeight,
+            //     id: "keyboard"
+            // });
+            // labelForceVisible = { opacity: 1 };
+            // handleForceHide = { opacity: 0 };
+        // }
 
         let hoursOfSleep = this._calculateHoursOfSleep(wakeUpTime);
 
@@ -858,18 +891,7 @@ class AlarmDetail extends Component {
                             {
                                 transform: [
                                     {
-                                        translateY: this._clockTransform.interpolate(
-                                            {
-                                                inputRange: [
-                                                    this.snapAuto,
-                                                    this.snapNormal
-                                                ],
-                                                outputRange: [
-                                                    this.height,
-                                                    this.height * 0.3
-                                                ]
-                                            }
-                                        )
+                                        translateY: clockAndLabelTranslation
                                     },
                                     {
                                         scale: this._clockTransform.interpolate(
@@ -1098,8 +1120,14 @@ class AlarmDetail extends Component {
                         color={Colors.disabledGrey}
                         style={{
                             position: "absolute",
-                            left: this.width / 2 - scaleByFactor(25, 0.5) / 2,
+                            left:
+                                this.width / 2 -
+                                scaleByFactor(25, 0.5) / 2 -
+                                30, // padding (30 left + 30 right / 2 == 30)
                             backgroundColor: "transparent",
+                            // backgroundColor: "blue",
+                            paddingHorizontal: 30,
+                            paddingVertical: 15,
                             transform: [
                                 {
                                     translateY: this._clockTransform.interpolate(
@@ -1109,8 +1137,8 @@ class AlarmDetail extends Component {
                                                 this.snapNormal
                                             ],
                                             outputRange: [
-                                                this.height * 1.205,
-                                                this.height * 0.8
+                                                this.height * 1.18,
+                                                this.height * 0.76
                                             ]
                                         }
                                     )
@@ -1119,9 +1147,11 @@ class AlarmDetail extends Component {
                             ...handleForceHide
                         }}
                         onPress={() => {
+                            console.log("onPress AnimatedHandle");
                             let idx = this.state.alarm.mode == "normal" ? 0 : 1;
                             this.interactiveRef.snapTo({ index: idx });
                         }}
+                        hitSlop={{ top: 70, bottom: 70, left: 70, right: 70 }}
                     />
                 </Interactable.View>
                 <TouchableOpacity
