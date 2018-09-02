@@ -156,6 +156,8 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-proximity-manager')
+    compile project(':react-native-proximity')
     compile project(':react-native-alarm-notification')
     compile project(':react-native-linear-gradient')
     compile project(':lottie-react-native')

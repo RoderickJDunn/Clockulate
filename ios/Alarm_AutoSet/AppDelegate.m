@@ -18,7 +18,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   
-  [UIDevice currentDevice].proximityMonitoringEnabled = YES;
+//  [UIDevice currentDevice].proximityMonitoringEnabled = YES;
   
   NSURL *jsCodeLocation;
 

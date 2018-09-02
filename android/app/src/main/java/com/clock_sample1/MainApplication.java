@@ -3,6 +3,8 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.reactlibrary.RNProximityManagerPackage;
+import com.RNProximity.RNProximityPackage;
 import com.emekalites.react.alarm.notification.ANPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.airbnb.android.react.lottie.LottiePackage;
@@ -38,6 +40,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNProximityManagerPackage(),
+            new RNProximityPackage(),
             new ANPackage(),
             new LinearGradientPackage(),
             new LottiePackage(),
