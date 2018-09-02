@@ -126,7 +126,11 @@ export let scheduleAlarm = alarm => {
         // TODO: This functionality will be a premium feature
     }
 
-    let snoozeTime = 60 * 1000; // in milliseconds
+    let snoozeTime = 600 * 1000;
+    if (__DEV__) {
+        snoozeTime = 15 * 1000;
+    }
+    // let snoozeTime = 600 * 1000; // in milliseconds
     // for (let i = 1; i <= notiCount; i++) {
     PushNotification.localNotificationSchedule({
         id: notifId,

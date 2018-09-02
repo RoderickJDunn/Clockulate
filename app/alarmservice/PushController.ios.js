@@ -127,7 +127,10 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
     //         TODO: Add UI and functionality to set a Snooze time from AlarmDetail screen (menu maybe?)
 
     // For now, use a constant 15 sec as a Snooze Time for testing
-    let snoozeTime = 15; // FIXME: Before 'releasing' v1.0-alpha, change to 600.
+    let snoozeTime = 600;
+    if (__DEV__) {
+        snoozeTime = 15;
+    }
     let notiCount = 10;
     for (let i = 0; i < notiCount; i++) {
         NotificationsIOS.localNotification({
