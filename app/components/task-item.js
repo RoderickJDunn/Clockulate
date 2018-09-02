@@ -61,7 +61,8 @@ class TaskItem extends React.Component {
             // tempDuration: null,
             data: {
                 enabled: props.data.enabled,
-                duration: props.data.duration
+                duration: props.data.duration,
+                task: props.data.task
             },
             isSlidingTask: false,
             isEditingTasks: false
@@ -232,7 +233,8 @@ class TaskItem extends React.Component {
         this.setState({
             data: {
                 duration: nextProps.data.duration,
-                enabled: nextProps.data.enabled
+                enabled: nextProps.data.enabled,
+                task: nextProps.data.task
             },
             isSlidingTask:
                 this._tempDuration != null && nextProps.isSlidingTask,
@@ -241,6 +243,7 @@ class TaskItem extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
+        // console.log("shouldComponentUpdate");
         // console.log("nextState", nextState);
         // console.log("this.state", this.state);
         // console.log("nextProps", nextProps);
@@ -250,19 +253,19 @@ class TaskItem extends React.Component {
             return true;
         }
 
-        let { enabled, name, duration } = this.state.data;
+        let { enabled, task, duration } = this.state.data;
         let { isEditingTasks } = this.state;
 
         let {
             enabled: nEnabled,
-            name: nName,
+            task: nTask,
             duration: nDuration
         } = nextProps.data;
         let { isEditingTasks: nIsEditingTasks } = nextProps;
 
         if (
             nEnabled == enabled &&
-            nName == name &&
+            nTask.name == task.name &&
             nDuration == duration &&
             nIsEditingTasks == isEditingTasks
         ) {
@@ -273,7 +276,7 @@ class TaskItem extends React.Component {
     }
 
     render() {
-        // console.debug("render task-item");
+        console.debug("render task-item");
         // console.debug("render task-item props", this.props);
         // console.debug("render task-item state", this.state);
         // console.log("\n");
