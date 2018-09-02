@@ -81,7 +81,7 @@ class TaskItem extends React.Component {
                 /* If tempDuration is null, the slider is not showing, so return false
                     Otherwise, if tempDuration is not null, the slider is showing, so we need to follow gestures. Return true
                 */
-                return this.state.tempDuration != null;
+                return this._tempDuration != null;
             },
             onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
                 // console.log("onMoveShouldSetPanResponderCapture");
@@ -254,7 +254,7 @@ class TaskItem extends React.Component {
         }
 
         let { enabled, task, duration } = this.state.data;
-        let { isEditingTasks } = this.state;
+        let { isEditingTasks, isSlidingTask } = this.state;
 
         let {
             enabled: nEnabled,
@@ -263,11 +263,14 @@ class TaskItem extends React.Component {
         } = nextProps.data;
         let { isEditingTasks: nIsEditingTasks } = nextProps;
 
+        let { isSlidingTask: nIsSlidingTask } = nextState;
+
         if (
             nEnabled == enabled &&
             nTask.name == task.name &&
             nDuration == duration &&
-            nIsEditingTasks == isEditingTasks
+            nIsEditingTasks == isEditingTasks &&
+            nIsSlidingTask == isSlidingTask
         ) {
             return false;
         }
@@ -390,14 +393,44 @@ class TaskItem extends React.Component {
                         ref={touchable => (this._touchable = touchable)}
                         onPress={this._onPress.bind(this)}
                         onLongPress={this._onLongPress.bind(this)}
-                        onPressOut={() => {
-                            console.log("onPressOut");
-                            if (
-                                this._tempDuration != null &&
-                                this._isSliding == false
-                            ) {
+                        onPressOut={e => {
+                            // console.log("----------- onPressOut ----------");
+
+                            // console.log("event", e.nativeEvent);
+
+                            /* Example of event.nativeEvent when user has started to slide */
+                            // 'event', { target: 287,
+                            //     pageX: 94.33332824707031,
+                            //     timestamp: 1694309947.8481343,
+                            //     locationX: 47.999994913736984,
+                            //     pageY: 525,
+                            //     force: 0,
+                            //     locationY: 22.3333333333332,
+                            //     identifier: 1,
+                            //     changedTouches: [ [Circular] ],
+                            //     touches: [ [Circular] ] }  ********
+
+                            /* Example of event.nativeEvent when releasing touch if user did NOT slide */
+                            // 'event', { target: 178,
+                            //     pageX: 122.66665649414062,
+                            //     timestamp: 1694283005.7050912,
+                            //     locationX: 76.3333231608073,
+                            //     pageY: 507.3333282470703,
+                            //     force: 0,
+                            //     locationY: 4.666661580403513,
+                            //     identifier: 1,
+                            //     changedTouches: [ [Circular] ],
+                            //     touches: [] }  ********
+
+                            /* The only different between the events is the 'touches' array. */
+                            if (e.nativeEvent.touches.length == 0) {
+                                console.log(
+                                    "Touches arr is empty. Released without sliding!"
+                                );
                                 this._tempDuration = null;
-                                this.setState(this.state);
+                                this.setState({ isSlidingTask: false });
+                            } else {
+                                console.log("Touches arr NOT empty!");
                             }
                         }}
                         // disabled={this.props.isEditingTasks}
