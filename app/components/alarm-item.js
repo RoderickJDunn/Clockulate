@@ -55,7 +55,8 @@ class AlarmItem extends React.PureComponent {
         let initAnimProgress = props.alarm.enabled ? 0.9 : 0;
         this.state = {
             switchValue: props.alarm.enabled,
-            animProgress: new Animated.Value(initAnimProgress)
+            animProgress: new Animated.Value(initAnimProgress),
+            isMoving: false
         };
 
         this._appearAnim = new Animated.Value(0);
@@ -95,9 +96,9 @@ class AlarmItem extends React.PureComponent {
     }
 
     componentWillReceiveProps(props) {
-        console.log("componentWillReceiveProps");
+        // console.log("componentWillReceiveProps");
         if (this.state.switchValue != props.alarm.enabled) {
-            console.log("Triggering animation");
+            // console.log("Triggering animation");
             this._triggerAnimation(props.alarm.enabled, false);
         }
     }
@@ -106,7 +107,7 @@ class AlarmItem extends React.PureComponent {
         let toValue = 0.9;
         let duration = 1000;
         let easing = Easing.linear;
-        console.log("starting animation");
+        // console.log("starting animation");
 
         // if (this.state.animProgress._value == 0.9) {
         //     toValue = 0;
@@ -142,11 +143,13 @@ class AlarmItem extends React.PureComponent {
     render() {
         console.log("AlarmItem", "- render");
         // console.debug("alarm-item props", this.props);
-        console.debug(
-            `wakeTime: ${this.props.alarm.wakeUpTime} | enabled: ${
-                this.props.alarm.enabled
-            }          |         (id: ${this.props.alarm.id}`
-        );
+        // console.debug(
+        //     `wakeTime: ${this.props.alarm.wakeUpTime} | enabled: ${
+        //         this.props.alarm.enabled
+        //     }  | order: ${this.props.alarm.order}         |         (id: ${
+        //         this.props.alarm.id
+        //     }`
+        // );
         // console.log("index", index);
 
         const config = {
@@ -207,6 +210,16 @@ class AlarmItem extends React.PureComponent {
                 this.props.animateConfig.sourceRow;
         }
 
+        let movingStyle = {};
+        if (this.props.isActive) {
+            movingStyle = {
+                shadowOpacity: 0.2,
+                shadowRadius: 10,
+                elevation: 3,
+                shadowColor: "black"
+            };
+        }
+
         return (
             <Animated.View
                 style={[
@@ -235,7 +248,11 @@ class AlarmItem extends React.PureComponent {
                 />
                 <Interactable.View
                     ref={interactableRef}
-                    style={[AlarmListStyle.alarmRow, ListStyle.item]}
+                    style={[
+                        AlarmListStyle.alarmRow,
+                        ListStyle.item,
+                        movingStyle
+                    ]}
                     horizontalOnly={true}
                     snapPoints={[
                         { x: 0, id: "closed" },
@@ -259,11 +276,28 @@ class AlarmItem extends React.PureComponent {
                         activeOpacity={touchedOpacity}
                         id={this.props.alarm.id}
                         label={this.props.alarm.label}
-                        onPress={() => this.props.onPress(this.props.alarm)}
-                        style={{
-                            width: this.width - 20, // subtract padding
-                            flexDirection: "row"
+                        onStartShouldSetResponder={evt => true}
+                        // onPressIn={() => this.setState({ isMoving: true })}
+                        onPress={() => {
+                            this.props.onPress(this.props.alarm);
                         }}
+                        onLongPress={() => {
+                            console.log("onLongPress");
+                            this.props.startMove();
+                        }}
+                        onPressOut={() => {
+                            console.log("onPressOut");
+                            if (this.props.isActive == true) {
+                                this.props.endMove();
+                            }
+                        }}
+                        style={[
+                            {
+                                width: this.width - 20, // subtract padding
+                                flexDirection: "row"
+                            }
+                            // movingStyle
+                        ]}
                     >
                         {/* onStartShouldSetResponder: returning true prevents touches from bubbling up further! */}
                         <TouchableOpacity
@@ -409,6 +443,9 @@ class AlarmItem extends React.PureComponent {
                                                     "Failed to launch Sleep Cycle"
                                                 );
                                             });
+                                    }}
+                                    onLongPress={() => {
+                                        this.setState({ isMoving: true });
                                     }}
                                 >
                                     <Text

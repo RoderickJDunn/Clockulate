@@ -13,6 +13,7 @@ import {
     DeviceEventEmitter,
     AppState,
     NativeModules
+    // TouchableOpacity
 } from "react-native";
 
 import PushNotificationAndroid from "react-native-push-notification";
@@ -24,6 +25,8 @@ import {
 } from "../alarmservice/PushController";
 import NotificationsIOS from "react-native-notifications";
 import realm from "../data/DataSchemas";
+import DraggableFlatList from "react-native-draggable-flatlist";
+
 import ProximityManager from "react-native-proximity-manager";
 
 import { ListStyle } from "../styles/list";
@@ -34,6 +37,10 @@ import { AlarmModel, AlarmTaskModel } from "../data/models";
 import { scaleByFactor } from "../util/font-scale";
 
 const { UIManager } = NativeModules;
+
+/* Dev only */
+import { populateDummyAlarms } from "../data/data-prepop";
+
 var loadedSound = null;
 
 class Alarms extends Component {
@@ -477,6 +484,54 @@ class Alarms extends Component {
             this._activeRow = row.item.id;
         }
     };
+    _onReorderAlarms(alarmId, from, to, data) {
+        console.info("_onReorderAlarms");
+        // console.info("alarmId", alarmId);
+        // console.info("from", from);
+        // console.info("to", to);
+
+        let alarms = realm.objects("Alarm").sorted("order");
+        // console.log("alarms", alarms);
+        // console.log(`alarms[${0}]`, alarms[0]);
+        // console.log(`alarms[from]`, alarms[from]);
+        let alarmsCopy = alarms.snapshot();
+        realm.write(() => {
+            for (const key in alarmsCopy) {
+                // console.log("key", key);
+                if (alarmsCopy.hasOwnProperty(key)) {
+                    const alarm = alarmsCopy[key];
+                    if (alarm.order == from) {
+                        alarm.order = to;
+                    } else {
+                        if (
+                            from < to &&
+                            alarm.order <= to &&
+                            alarm.order > from
+                        ) {
+                            alarm.order--;
+                        } else if (
+                            from > to &&
+                            alarm.order >= to &&
+                            alarm.order < from
+                        ) {
+                            alarm.order++;
+                        }
+                    }
+                }
+            }
+        });
+        // console.log("alarms", alarms);
+
+        let orderArr = alarms.map(alm => alm.order);
+
+        for (let i = 0; i < orderArr.length; i++) {
+            let idx = orderArr.indexOf(i);
+            if (idx == -1) {
+                alert("Failure!");
+            }
+        }
+        this.setState({ alarms: alarms });
+    }
 
     _onPressBackground = () => {
         console.info("AlarmsList - _onPressBackground");
@@ -501,7 +556,7 @@ class Alarms extends Component {
         let duplicationInfo = this._duplicationInfo;
 
         this._duplicationInfo = null;
-        console.log("this.state.alarms.length", this.state.alarms.length);
+        // console.log("this.state.alarms.length", this.state.alarms.length);
         return (
             <TouchableWithoutFeedback
                 style={ListStyle.container}
@@ -509,9 +564,10 @@ class Alarms extends Component {
             >
                 <View style={{ flex: 1 }}>
                     {/* <PushController /> */}
-                    <FlatList
+                    <DraggableFlatList
                         data={this.state.alarms}
                         renderItem={alarm => {
+                            let { move, moveEnd, isActive } = alarm;
                             return (
                                 <AlarmItem
                                     alarm={alarm.item}
@@ -532,11 +588,23 @@ class Alarms extends Component {
                                         duplicationInfo.alarm.id ==
                                             alarm.item.id
                                     }
+                                    startMove={move}
+                                    endMove={moveEnd}
+                                    isActive={isActive}
                                 />
                             );
                         }}
                         keyExtractor={this._keyExtractor}
-                        extraData={this.state} // TODO: FIXME: May be able to fix flickering issue by being more careful about what extraData we pass in. THis may prevent unessesary re-renders of AlarmItems when they haven't changed
+                        // extraData={this.state} // TODO: FIXME: May be able to fix flickering issue by being more careful about what extraData we pass in. THis may prevent unessesary re-renders of AlarmItems when they haven't changed
+                        onMoveEnd={moveInfo => {
+                            // console.log("moveInfo", moveInfo);
+                            this._onReorderAlarms(
+                                moveInfo.row.id,
+                                moveInfo.from,
+                                moveInfo.to,
+                                moveInfo.data
+                            );
+                        }}
                     />
                     {duplicationInfo && (
                         <AlarmItem
@@ -575,6 +643,27 @@ class Alarms extends Component {
                             }}
                         />
                     )}
+                    {/* <TouchableOpacity
+                        style={{
+                            position: "absolute",
+                            bottom: 0,
+                            right: 0,
+                            height: 100,
+                            width: 100,
+                            alignSelf: "flex-end",
+                            backgroundColor: "red"
+                        }}
+                        onPress={() => {
+                            if (this.state.alarms.length == 0) {
+                                populateDummyAlarms();
+                            } else {
+                                realm.write(() => {
+                                    realm.delete(this.state.alarms);
+                                });
+                            }
+                            this.setState(this.state);
+                        }}
+                    /> */}
                 </View>
             </TouchableWithoutFeedback>
         );
