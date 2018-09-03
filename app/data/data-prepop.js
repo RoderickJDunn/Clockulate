@@ -8,6 +8,7 @@ import moment from "moment";
 import { DefaultAlarm } from "./constants";
 import * as DateUtils from "../util/date_utils";
 import SOUND_DATA from "./sound-data";
+import { AlarmModel } from "./models";
 
 console.log("dummy data file");
 
@@ -222,6 +223,27 @@ function insertPrepopData() {
 
     // const longTasks = realm.objects("Task").filtered("defaultDuration > 1000");
     // console.log(`Tasks: ${longTasks}`);
+}
+
+export function populateDummyAlarms() {
+    let wake1 = moment("1:00", "HH:mm").toDate();
+    wake1 = DateUtils.date_to_nextTimeInstance(wake1);
+    let wake2 = moment("2:00", "HH:mm").toDate();
+    wake2 = DateUtils.date_to_nextTimeInstance(wake2);
+    let wake3 = moment("3:00", "HH:mm").toDate();
+    wake3 = DateUtils.date_to_nextTimeInstance(wake3);
+    let wake4 = moment("4:00", "HH:mm").toDate();
+    wake4 = DateUtils.date_to_nextTimeInstance(wake4);
+    let wake5 = moment("5:00", "HH:mm").toDate();
+    wake5 = DateUtils.date_to_nextTimeInstance(wake5);
+
+    realm.write(() => {
+        realm.create("Alarm", new AlarmModel(0, wake1));
+        realm.create("Alarm", new AlarmModel(1, wake2));
+        realm.create("Alarm", new AlarmModel(2, wake3));
+        realm.create("Alarm", new AlarmModel(3, wake4));
+        realm.create("Alarm", new AlarmModel(4, wake5));
+    });
 }
 
 export default insertPrepopData;

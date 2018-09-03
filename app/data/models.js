@@ -8,9 +8,9 @@ import { isEmpty } from "../util/general_util";
 import realm from "../data/DataSchemas";
 
 export class AlarmModel {
-    constructor(order) {
+    constructor(order, wakeUpTime = null) {
         this.id = uuid.v1();
-        this.wakeUpTime = DefaultAlarm.wakeUpTime;
+        this.wakeUpTime = wakeUpTime ? wakeUpTime : DefaultAlarm.wakeUpTime;
         this.arrivalTime = DefaultAlarm.arrivalTime;
         this.mode = DefaultAlarm.mode;
         this.tasks = DefaultAlarm.tasks;
