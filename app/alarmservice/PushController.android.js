@@ -110,19 +110,19 @@ export let scheduleAlarm = alarm => {
     });
 
     let soundFile = "";
-    let filesLen = alarm.sound.files.length;
-    if (alarm.sound.type == SOUND_TYPES.NORMAL) {
-        soundFile = alarm.sound.files[filesLen - 1]; // this selects the last file in the file array (should be the FULL version if it exists)
-    } else if (alarm.sound.type == SOUND_TYPES.SILENT) {
+    let filesLen = alarm.alarmSound.sound.files.length;
+    if (alarm.alarmSound.type == SOUND_TYPES.NORMAL) {
+        soundFile = alarm.alarmSound.sound.files[filesLen - 1]; // this selects the last file in the file array (should be the FULL version if it exists)
+    } else if (alarm.alarmSound.type == SOUND_TYPES.SILENT) {
         soundFile = "";
-    } else if (alarm.sound.type == SOUND_TYPES.RANDOM) {
+    } else if (alarm.alarmSound.type == SOUND_TYPES.RANDOM) {
         let allSounds = realm
             .objects("Sound")
             .filtered("type = $0", SOUND_TYPES.NORMAL);
         let randomSound =
             allSounds[Math.floor(Math.random() * allSounds.length)];
         soundFile = randomSound.files[randomSound.files.length - 1];
-    } else if (alarm.sound.type == SOUND_TYPES.RANDOM_SUBSET) {
+    } else if (alarm.alarmSound.type == SOUND_TYPES.RANDOM_SUBSET) {
         // TODO: This functionality will be a premium feature
     }
 

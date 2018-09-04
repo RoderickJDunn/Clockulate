@@ -3,6 +3,7 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.apsl.versionnumber.RNVersionNumberPackage;
 import com.reactlibrary.RNProximityManagerPackage;
 import com.RNProximity.RNProximityPackage;
 import com.emekalites.react.alarm.notification.ANPackage;
@@ -40,6 +41,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNVersionNumberPackage(),
             new RNProximityManagerPackage(),
             new RNProximityPackage(),
             new ANPackage(),

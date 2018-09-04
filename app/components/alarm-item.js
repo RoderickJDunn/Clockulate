@@ -212,12 +212,15 @@ class AlarmItem extends React.PureComponent {
 
         let movingStyle = {};
         if (this.props.isActive) {
+            console.log("isActive", "true");
             movingStyle = {
                 shadowOpacity: 0.2,
                 shadowRadius: 10,
                 elevation: 3,
                 shadowColor: "black"
             };
+        } else {
+            console.log("isActive", "false");
         }
 
         return (
@@ -281,10 +284,8 @@ class AlarmItem extends React.PureComponent {
                         onPress={() => {
                             this.props.onPress(this.props.alarm);
                         }}
-                        onLongPress={() => {
-                            console.log("onLongPress");
-                            this.props.startMove();
-                        }}
+                        onLongPress={this.props.startMove}
+                        // onPressOut={this.props.endMove}
                         onPressOut={() => {
                             console.log("onPressOut");
                             if (this.props.isActive == true) {
