@@ -423,7 +423,10 @@ class TaskItem extends React.Component {
                             //     touches: [] }  ********
 
                             /* The only different between the events is the 'touches' array. */
-                            if (e.nativeEvent.touches.length == 0) {
+                            if (
+                                e.nativeEvent.touches &&
+                                e.nativeEvent.touches.length == 0
+                            ) {
                                 console.log(
                                     "Touches arr is empty. Released without sliding!"
                                 );
