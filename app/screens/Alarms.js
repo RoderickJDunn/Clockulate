@@ -15,13 +15,17 @@ import {
     NativeModules
     // TouchableOpacity
 } from "react-native";
+import moment from "moment";
 
 import PushNotificationAndroid from "react-native-push-notification";
 import {
     ALARM_CAT,
     scheduleAlarm,
     clearAlarm,
-    snoozeAlarm
+    snoozeAlarm,
+    cancelInAppAlarm,
+    setInAppAlarm,
+    checkForImplicitSnooze
 } from "../alarmservice/PushController";
 import NotificationsIOS from "react-native-notifications";
 import realm from "../data/DataSchemas";
@@ -35,7 +39,6 @@ import RNSound from "react-native-sound";
 import * as DateUtils from "../util/date_utils";
 import { AlarmModel, AlarmTaskModel } from "../data/models";
 import { scaleByFactor } from "../util/font-scale";
-
 const { UIManager } = NativeModules;
 
 /* Dev only */
@@ -292,9 +295,37 @@ class Alarms extends Component {
             this.state.appState.match(/inactive|background/) &&
             nextAppState === "active"
         ) {
-            console.log("App has come to the foreground!");
-            // set timers for in-app alarms
+            console.log("App has come to the foreground! (ALARMS LIST)");
+
+            // Implicit Snoozing and In-App Timers: Check if we need to manually switch any Alarms into 'snooze'. (ie: snooze Count)
+            if (Platform.OS == "ios") {
+                // TODO: Remove platform check. We need similar function on Android (only transparent to user)
+                let mNow = moment();
+
+                let alarms = realm.objects("Alarm").filtered("enabled == true");
+                for (let i = 0; i < alarms.length; i++) {
+                    if (moment(alarms[i].wakeUpTime) > mNow) {
+                        // alarm is in the future. Set in app alarm. (On Android, the inAppAlarm is a transparent timer)
+                        setInAppAlarm(alarms[i], this.reloadAlarms.bind(this));
+                    } else {
+                        // the alarm has already triggered.
+                        // If snoozeCount is null set it to 1. Otherwise, calculate what it should be, and set it accordingly.
+                        checkForImplicitSnooze(alarms[i], mNow);
+                        setInAppAlarm(alarms[i], this.reloadAlarms.bind(this));
+                    }
+                }
+            }
             this.reloadAlarms();
+        } else if (nextAppState === "background") {
+            console.log("App is going into background");
+            // cancel any set timers for in-app alarms (iOS only)
+
+            if (Platform.OS == "ios") {
+                let alarms = realm.objects("Alarm").filtered("enabled == true");
+                for (let i = 0; i < alarms.length; i++) {
+                    cancelInAppAlarm(alarms[i]);
+                }
+            }
         }
 
         this.setState({ appState: nextAppState });
@@ -428,7 +459,7 @@ class Alarms extends Component {
         newAlarm.enabled = false;
         newAlarm.visible = item.visible;
         newAlarm.preset = item.preset;
-        newAlarm.sound = item.sound;
+        newAlarm.alarmSound = item.alarmSound;
         newAlarm.snoozeTime = item.snoozeTime;
         newAlarm.noticiationId = null;
 
@@ -463,7 +494,7 @@ class Alarms extends Component {
                 alarm.wakeUpTime = wakeUpTime;
             });
             console.log("Setting alarm");
-            scheduleAlarm(alarm);
+            scheduleAlarm(alarm, this.reloadAlarms.bind(this));
         } else {
             // Cancel all notification(s) for this alarm
             //  - NOTE: For iOS there are multiple notifications for each Alarm (due to snoozes)
@@ -522,14 +553,14 @@ class Alarms extends Component {
         });
         // console.log("alarms", alarms);
 
-        let orderArr = alarms.map(alm => alm.order);
+        // let orderArr = alarms.map(alm => alm.order);
 
-        for (let i = 0; i < orderArr.length; i++) {
-            let idx = orderArr.indexOf(i);
-            if (idx == -1) {
-                alert("Failure!");
-            }
-        }
+        // for (let i = 0; i < orderArr.length; i++) {
+        //     let idx = orderArr.indexOf(i);
+        //     if (idx == -1) {
+        //         alert("Failure!");
+        //     }
+        // }
         this.setState({ alarms: alarms });
     }
 

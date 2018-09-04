@@ -19,9 +19,9 @@ export class AlarmModel {
         this.visible = DefaultAlarm.visible;
         this.preset = DefaultAlarm.preset;
         this.order = order;
-        this.sound = realm
-            .objects("Sound")
-            .filtered("type = $0", SOUND_TYPES.SILENT)[0];
+
+        this.alarmSound = realm.create("AlarmSound", new AlarmSound());
+        console.log('this.sound', this.sound);
         this.snoozeTime = DefaultAlarm.snoozeTime;
         this.noticiationId = null;
     }
@@ -43,6 +43,17 @@ export class AlarmModel {
         } else {
             return false;
         }
+    }
+}
+
+export class AlarmSound {
+    constructor(sound) {
+        if (!sound) {
+            sound = realm.objects("Sound").filtered("order = $0", 0)[0];
+        }
+        this.id = uuid.v1();
+        this.sound = sound;
+        this.type = SOUND_TYPES.SILENT;
     }
 }
 

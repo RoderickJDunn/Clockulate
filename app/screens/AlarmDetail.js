@@ -213,6 +213,7 @@ class AlarmDetail extends Component {
 
     handleBackPress() {
         // console.debug("Going back to Alarms List");
+        // console.debug(this.state);
 
         // TODO: If activeTask != null, set it back to inactive (snap back to not showing Delete)
 
@@ -227,21 +228,21 @@ class AlarmDetail extends Component {
                 .objects("Alarm")
                 .filtered(`id = "${this.state.alarm.id}"`);
             if (alarm && alarm.length === 1) {
-                if (AlarmModel.isDefault(alarm[0])) {
-                    // Since this alarm has default settings, delete it before nav'ing back. User hasn't changed anything.
-                    realm.delete(alarm);
+                // if (AlarmModel.isDefault(alarm[0])) {
+                //     // Since this alarm has default settings, delete it before nav'ing back. User hasn't changed anything.
+                //     realm.delete(alarm);
+                // } else
+                alarm[0].label = this.state.alarm.label;
+                alarm[0].arrivalTime = this.state.alarm.arrivalTime;
+                alarm[0].enabled = true;
+                alarm[0].alarmSound = this.state.alarm.alarmSound;
+                if (
+                    this.state.alarm.mode === "autocalc" &&
+                    this._calculatedWakeUpTime
+                ) {
+                    alarm[0].wakeUpTime = this._calculatedWakeUpTime;
                 } else {
-                    alarm[0].label = this.state.alarm.label;
-                    alarm[0].arrivalTime = this.state.alarm.arrivalTime;
-                    alarm[0].enabled = true;
-                    if (
-                        this.state.alarm.mode === "autocalc" &&
-                        this._calculatedWakeUpTime
-                    ) {
-                        alarm[0].wakeUpTime = this._calculatedWakeUpTime;
-                    } else {
-                        alarm[0].wakeUpTime = this.state.alarm.wakeUpTime;
-                    }
+                    alarm[0].wakeUpTime = this.state.alarm.wakeUpTime;
                 }
             }
             //////////////////////////////////
@@ -466,7 +467,8 @@ class AlarmDetail extends Component {
         // console.log("Arrival Time textInput changed: ", moment(time).unix());
         let { alarm } = this.state;
         realm.write(() => {
-            alarm.sound = sound;
+            alarm.alarmSound.sound = sound;
+            alarm.alarmSound.type = sound.type; // for random sounds
         });
     };
 
@@ -809,16 +811,16 @@ class AlarmDetail extends Component {
         let handleForceHide = null;
 
         // if (this.state.isEditingLabel && this.state.keyboardHeight) {
-            // snapPoints.push({
-            //     y:
-            //         SCREEN_HEIGHT -
-            //         this.state.keyboardHeight -
-            //         50 -
-            //         this.xtraKeyboardHeight,
-            //     id: "keyboard"
-            // });
-            // labelForceVisible = { opacity: 1 };
-            // handleForceHide = { opacity: 0 };
+        // snapPoints.push({
+        //     y:
+        //         SCREEN_HEIGHT -
+        //         this.state.keyboardHeight -
+        //         50 -
+        //         this.xtraKeyboardHeight,
+        //     id: "keyboard"
+        // });
+        // labelForceVisible = { opacity: 1 };
+        // handleForceHide = { opacity: 0 };
         // }
 
         let hoursOfSleep = this._calculateHoursOfSleep(wakeUpTime);
@@ -1178,7 +1180,7 @@ class AlarmDetail extends Component {
                     onPress={() => {
                         this.props.navigation.navigate("Sounds", {
                             saveSound: this.saveSound.bind(this),
-                            currSound: this.state.alarm.sound
+                            currSound: this.state.alarm.alarmSound
                         });
                     }}
                 >

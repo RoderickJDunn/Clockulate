@@ -37,7 +37,7 @@ export default class Sounds extends Component {
         this.state = {
             sounds: sounds.map(sound => {
                 console.log(sound);
-                if (sound.id == currSound.id) {
+                if (sound.id == currSound.sound.id) {
                     console.log("Found match for passed in enabled sound");
                     sound.enabled = true;
                 } else {

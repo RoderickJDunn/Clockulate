@@ -8,7 +8,7 @@ import moment from "moment";
 import { DefaultAlarm } from "./constants";
 import * as DateUtils from "../util/date_utils";
 import SOUND_DATA from "./sound-data";
-import { AlarmModel } from "./models";
+import { AlarmModel, AlarmSound } from "./models";
 
 console.log("dummy data file");
 
@@ -174,6 +174,19 @@ function insertPrepopData() {
             duration: 600
         });
 
+        let aSound1 = new AlarmSound();
+        let aSound2 = new AlarmSound();
+        const alarmSound1 = realm.create("AlarmSound", {
+            id: aSound1.id,
+            sound: aSound1.sound,
+            type: aSound1.type
+        });
+        const alarmSound2 = realm.create("AlarmSound", {
+            id: aSound2.id,
+            sound: aSound2.sound,
+            type: aSound2.type
+        });
+
         /**** Create Alarms *****/
         console.log("Adding dummy alarms");
 
@@ -194,7 +207,7 @@ function insertPrepopData() {
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
             preset: false, // if tr
             order: 0,
-            sound: defaultSound,
+            alarmSound: alarmSound1,
             snoozeTime: DefaultAlarm.snoozeTime
         });
 
@@ -215,7 +228,7 @@ function insertPrepopData() {
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
             preset: false, // if tr
             order: 1,
-            sound: defaultSound,
+            alarmSound: alarmSound2,
             snoozeTime: DefaultAlarm.snoozeTime
         });
         console.log(alarm2, alarm1, task2, task4, task5);

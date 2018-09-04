@@ -95,14 +95,10 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
     // Determine the sound file to use (30s version for system notification)
     let shortSoundFile = "";
     let longSoundFile = "";
-    let filesLen = alarm.sound.files.length;
-    if (alarm.sound.type == SOUND_TYPES.NORMAL) {
-        shortSoundFile = alarm.sound.files[0]; // this selects the first file in the file array which should be the short version
-        longSoundFile = alarm.sound.files[filesLen - 1]; // this selects the last file in the file array which should be the long version (might be the same)
-    } else if (alarm.sound.type == SOUND_TYPES.SILENT) {
-        shortSoundFile = "";
-        longSoundFile = "";
-    } else if (alarm.sound.type == SOUND_TYPES.RANDOM) {
+    let filesLen = alarm.alarmSound.sound.files.length;
+    console.log("filesLen", filesLen);
+    console.log("alarm.alarmSound", alarm.alarmSound);
+    if (alarm.alarmSound.type == SOUND_TYPES.RANDOM) {
         /* Get all 'normal' Sounds (not Silent or Random) */
         let allSounds = realm
             .objects("Sound")
@@ -113,7 +109,17 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
             allSounds[Math.floor(Math.random() * allSounds.length)];
         shortSoundFile = randomSound.files[0]; // this selects the first file in the file array which should be the short version
         longSoundFile = randomSound.files[randomSound.files.length - 1]; // this selects the last file in the file array which should be the long version (might be the same)
-    } else if (alarm.sound.type == SOUND_TYPES.RANDOM_SUBSET) {
+        realm.write(() => {
+            alarm.alarmSound.sound = randomSound;
+        });
+    }
+    else if (alarm.alarmSound.type == SOUND_TYPES.NORMAL) {
+        shortSoundFile = alarm.alarmSound.sound.files[0]; // this selects the first file in the file array which should be the short version
+        longSoundFile = alarm.alarmSound.sound.files[filesLen - 1]; // this selects the last file in the file array which should be the long version (might be the same)
+    } else if (alarm.alarmSound.type == SOUND_TYPES.SILENT) {
+        shortSoundFile = "";
+        longSoundFile = "";
+    } else if (alarm.alarmSound.type == SOUND_TYPES.RANDOM_SUBSET) {
         // TODO: This functionality will be a premium feature
     }
     console.log("shortSoundFile", shortSoundFile);
@@ -127,10 +133,10 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
     //         TODO: Add UI and functionality to set a Snooze time from AlarmDetail screen (menu maybe?)
 
     // For now, use a constant 15 sec as a Snooze Time for testing
-    let snoozeTime = 600;
-    if (__DEV__) {
-        snoozeTime = 15;
-    }
+    let snoozeTime = 60;
+    // if (__DEV__) {
+    //     snoozeTime = 15;
+    // }
     let notiCount = 10;
     for (let i = 0; i < notiCount; i++) {
         NotificationsIOS.localNotification({
@@ -213,6 +219,10 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
         console.log("snoozeCount", alarm.snoozeCount);
         console.log("enabled", alarm.enabled);
     }
+    if (soundFile == null) {
+        let filesLen = alarm.alarmSound.sound.files.length;
+        soundFile = alarm.alarmSound.sound.files[filesLen - 1];
+    }
 
     // calculate time until alarm
     let now = new Date();
@@ -226,7 +236,7 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
     if (alarm.snoozeCount != null && alarm.snoozeCount > 0) {
         console.log("This is a snooze...");
         // For now use 0.25 minutes as the snooze time (15 sec) for dev/testing
-        let minutesToAdd = alarm.snoozeCount * 0.25; // FIXME: Make this '10' before alpha release. '10' is the hard-coded snooze time for now...
+        let minutesToAdd = alarm.snoozeCount * 1; // FIXME: Make this '10' before alpha release. '10' is the hard-coded snooze time for now...
         let inAppNotifTime = moment(alarm.wakeUpTime).add(
             minutesToAdd,
             "minute"
@@ -310,6 +320,44 @@ export let cancelInAppAlarm = alarm => {
         realm.write(() => {
             alarm.timeoutId = null;
         });
+    }
+};
+
+export let checkForImplicitSnooze = (alarm, mNow) => {
+    let mWakeupTime = moment(alarm.wakeUpTime);
+
+    let secondsDiff = (mNow - mWakeupTime) / 1000;
+    console.log("secondsDiff", secondsDiff);
+
+    // sanity check. secondsDiff should always be positive.
+    if (secondsDiff < 0) {
+        console.error(
+            "checkForImplicitSnooze: ",
+            `secondsDiff should always be positive, but now=${mNow} and wakeUpTime=${mWakeupTime}`
+        );
+    }
+
+    // let almSnoozeTime = alarm.snoozeTime * 60; // convert snoozeTime to seconds
+    let almSnoozeTime = 1 * 60; // convert snoozeTime to seconds TODO: Change 1 to alarm.snoozeTime
+    console.log("almSnoozeTime", almSnoozeTime);
+
+    let expectedSnoozeCount = Math.ceil(secondsDiff / almSnoozeTime);
+    console.log("expectedSnoozeCount", expectedSnoozeCount);
+
+    let newSnoozeCount;
+    if (alarm.snoozeCount == null || alarm.snoozeCount < expectedSnoozeCount) {
+        // user did not explicitly snooze for x number of notifications.
+        realm.write(() => {
+            alarm.snoozeCount = expectedSnoozeCount;
+        });
+    } else if (alarm.snoozeCount == expectedSnoozeCount) {
+        console.log("Got expected value for snoozeCount", expectedSnoozeCount);
+    } else {
+        // sanity check. Should never happen.
+        console.error(
+            "Expected snoozeCount was LOWER than actual snoozecount",
+            `Expected: ${expectedSnoozeCount} | Actual: ${alarm.snoozeCount}`
+        );
     }
 };
 
