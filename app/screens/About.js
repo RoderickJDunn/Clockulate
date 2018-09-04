@@ -7,7 +7,9 @@ import {
     Switch,
     TouchableWithoutFeedback
 } from "react-native";
+import VersionNumber from "react-native-version-number";
 
+// export var APP_VERSION = VersionNumber.appVersion;
 // TODO:
 export default class About extends React.Component {
     /*
@@ -20,7 +22,7 @@ export default class About extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 <Text>About Clockulate</Text>
-                <Text>Version X.XX</Text>
+                <Text>Version {VersionNumber.appVersion}</Text>
                 <Text>Credits</Text>
                 <Text>Credits</Text>
                 <Text>Credits</Text>
