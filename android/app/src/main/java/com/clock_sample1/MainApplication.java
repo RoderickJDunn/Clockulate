@@ -4,7 +4,6 @@ import android.app.Application;
 
 import com.facebook.react.ReactApplication;
 import com.apsl.versionnumber.RNVersionNumberPackage;
-import com.reactlibrary.RNProximityManagerPackage;
 import com.RNProximity.RNProximityPackage;
 import com.emekalites.react.alarm.notification.ANPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
@@ -31,52 +30,38 @@ import java.util.List;
 
 public class MainApplication extends Application implements ReactApplication {
 
-  private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
+    private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
+        @Override
+        public boolean getUseDeveloperSupport() {
+            return BuildConfig.DEBUG;
+        }
+
+        @Override
+        protected List<ReactPackage> getPackages() {
+            return Arrays.<ReactPackage>asList(new MainReactPackage(), new RNVersionNumberPackage(),
+                    new RNProximityPackage(), new ANPackage(), new LinearGradientPackage(), new LottiePackage(),
+                    new RNNotificationsPackage(this.getApplication()), new RNSoundPackage(),
+                    // new RNArrowsPackage(),
+                    new Interactable(), new ReactNativePushNotificationPackage(), new CalendarEventsPackage(),
+                    new SvgPackage(), new VectorIconsPackage(), new PickerViewPackage(), new RealmReactPackage(),
+                    new ArrowViewPackage());
+        }
+
+        @Override
+        protected String getJSMainModuleName() {
+            return "index";
+        }
+
+    };
+
     @Override
-    public boolean getUseDeveloperSupport() {
-      return BuildConfig.DEBUG;
+    public ReactNativeHost getReactNativeHost() {
+        return mReactNativeHost;
     }
 
     @Override
-    protected List<ReactPackage> getPackages() {
-      return Arrays.<ReactPackage>asList(
-          new MainReactPackage(),
-            new RNVersionNumberPackage(),
-            new RNProximityManagerPackage(),
-            new RNProximityPackage(),
-            new ANPackage(),
-            new LinearGradientPackage(),
-            new LottiePackage(),
-            new RNNotificationsPackage(this.getApplication()),
-            new RNSoundPackage(),
-            // new RNArrowsPackage(),
-            new Interactable(),
-            new ReactNativePushNotificationPackage(),
-            new CalendarEventsPackage(),
-            new SvgPackage(),
-            new VectorIconsPackage(),
-            new PickerViewPackage(),
-            new RealmReactPackage(),
-            new ArrowViewPackage()
-      );
+    public void onCreate() {
+        super.onCreate();
+        SoLoader.init(this, /* native exopackage */ false);
     }
-
-    @Override
-    protected String getJSMainModuleName() {
-      return "index";
-    }
-
-
-  };
-
-  @Override
-  public ReactNativeHost getReactNativeHost() {
-    return mReactNativeHost;
-  }
-
-  @Override
-  public void onCreate() {
-    super.onCreate();
-    SoLoader.init(this, /* native exopackage */ false);
-  }
 }

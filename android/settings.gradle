@@ -1,8 +1,6 @@
 rootProject.name = 'Clock_Sample1'
 include ':react-native-version-number'
 project(':react-native-version-number').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-version-number/android')
-include ':react-native-proximity-manager'
-project(':react-native-proximity-manager').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-proximity-manager/android')
 include ':react-native-proximity'
 project(':react-native-proximity').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-proximity/android')
 include ':react-native-alarm-notification'
