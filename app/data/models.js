@@ -20,7 +20,7 @@ export class AlarmModel {
         this.preset = DefaultAlarm.preset;
         this.order = order;
 
-        this.alarmSound = realm.create("AlarmSound", new AlarmSound());
+        this.alarmSound = new AlarmSound();
         console.log('this.sound', this.sound);
         this.snoozeTime = DefaultAlarm.snoozeTime;
         this.noticiationId = null;
