@@ -363,6 +363,20 @@ class TaskItem extends React.Component {
             );
         }
 
+        let movingStyle;
+        if (this.props.isMoving) {
+            console.log("isMoving", "true");
+            movingStyle = {
+                backgroundColor: Colors.brandSuperLightPurple,
+                shadowOpacity: 0.2,
+                shadowRadius: 10,
+                shadowColor: "black"
+                // elevation: 10
+            };
+        } else {
+            console.log("isMoving", "false");
+        }
+
         return (
             <Interactable.View
                 style={[
@@ -390,7 +404,8 @@ class TaskItem extends React.Component {
                 >
                     <TouchableOpacity
                         style={[
-                            TaskItemStyle.taskInfoTouchable
+                            TaskItemStyle.taskInfoTouchable,
+                            movingStyle
                             // { backgroundColor: "blue" }
                         ]}
                         ref={touchable => (this._touchable = touchable)}

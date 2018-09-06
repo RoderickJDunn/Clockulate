@@ -795,11 +795,28 @@ class AlarmDetail extends Component {
             );
         } else {
             editTasksBtn = (
-                <Text
-                    style={{ color: "blue", fontSize: scaleByFactor(15, 0.15) }}
+                <View
+                    style={{
+                        flex: 1,
+                        paddingHorizontal: 7,
+                        // paddingVertical: 3,
+                        borderRadius: 12,
+                        backgroundColor: Colors.brandLightPurple,
+                        alignItems: "center",
+                        alignContent: "center",
+                        justifyContent: "center"
+                    }}
                 >
-                    DONE
-                </Text>
+                    <Text
+                        style={{
+                            color: "white",
+                            fontSize: scaleByFactor(15, 0.1),
+                            textAlignVertical: "center"
+                        }}
+                    >
+                        DONE
+                    </Text>
+                </View>
             );
         }
 
@@ -1089,20 +1106,34 @@ class AlarmDetail extends Component {
                                 </View>
                                 <TouchableOpacity
                                     style={{
-                                        alignSelf: "center"
+                                        alignSelf: "center",
+                                        paddingRight: 25
                                     }}
                                     onPress={this._onPressEditTasks.bind(this)}
                                     /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
+                                    hitSlop={{
+                                        top: 10,
+                                        bottom: 10,
+                                        right: 20,
+                                        left: 0
+                                    }}
                                 >
                                     {editTasksBtn}
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
                                     style={{
-                                        alignSelf: "center"
+                                        alignSelf: "center",
+                                        paddingLeft: 25
                                     }}
                                     onPress={this.onPressAddTask.bind(this)}
                                     /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
+                                    hitSlop={{
+                                        top: 10,
+                                        bottom: 10,
+                                        left: 20,
+                                        right: 0
+                                    }}
                                 >
                                     <EntypoIcon
                                         name="add-to-list"

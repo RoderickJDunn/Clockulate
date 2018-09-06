@@ -23,7 +23,7 @@ class TaskList extends React.Component {
 
     _keyExtractor = (item, index) => item.id;
 
-    _renderItem = ({ item, index, move, moveEnd, isActive }) => {
+    _renderItem = ({ item, index, move, moveEnd, isActive: isMoving }) => {
         let { onSnapTask, sortHandlers, ...other } = this.props;
         // console.log("onSnapTask prop", onSnapTask);
         // console.log("other props", other);
@@ -41,6 +41,7 @@ class TaskList extends React.Component {
         return (
             <TaskItem
                 {...other} // the props expanded here include 'onPressItem' callback, and the onPressItemCheckBox callback
+                isMoving={isMoving}
                 data={item}
                 id={item.id}
                 onSnapTask={this._onSnapTask.bind(this, item, index)}
@@ -72,34 +73,11 @@ class TaskList extends React.Component {
         for (let id in this.props.data) {
             tasksArr.push(this.props.data[id]);
         }
-        let touchableBackdrop = null;
-        if (this.props.activeTask != null) {
-            console.log("this.props.activeTask != null");
-            touchableBackdrop = (
-                <TouchableBackdrop
-                    style={{
-                        top: 0,
-                        right: 0,
-                        left: 0,
-                        bottom: 0
-                    }}
-                    onPress={() => {
-                        // console.log(
-                        //     "-----Pressed touchable backdrop of TaskList --------------------"
-                        // );
-                        this.props.closeTaskRows();
-                    }}
-                />
-            );
-        }
         // console.log("tasksArr in task-list", tasksArr);
         return (
             // <View style={[listStyle.container]}>
             <TouchableWithoutFeedback
-                style={[
-                    listStyle.container,
-                    { borderWidth: 3, borderColor: "red" }
-                ]}
+                style={listStyle.container}
                 onPressIn={this.props.closeTaskRows}
             >
                 {/* This wrapper view is required for the TouchableWithoutFeedback to work within the TaskArea. */}
@@ -129,7 +107,6 @@ class TaskList extends React.Component {
                         onResponderRelease={() => {
                             console.log("onResponderRelease (task-list)");
                         }}
-                        style={{ borderWidth: 3, borderColor: "red" }}
                     />
                 </View>
             </TouchableWithoutFeedback>

@@ -3,6 +3,7 @@
  */
 
 const Colors = {
+    brandSuperLightPurple: "#bcb4ca",
     brandLightPurple: "#6D6088",
     brandDarkPurple: "#220957",
     // brandLightOpp: "#10ac84",
