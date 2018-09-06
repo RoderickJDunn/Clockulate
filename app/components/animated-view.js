@@ -81,7 +81,8 @@ export default class AnimatedView extends Component {
                         transition.interpolate(interpolationConfig.translateY),
                         -SQUARE_HEIGHT / 2 + PADDING
                     )
-                }
+                },
+                {perspective: 1000}
             ]
         };
 

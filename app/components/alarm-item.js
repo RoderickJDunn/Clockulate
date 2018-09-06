@@ -237,7 +237,8 @@ class AlarmItem extends React.PureComponent {
                                         restingLocation
                                     ]
                                 })
-                            }
+                            },
+                            {perspective: 1000}
                         ],
                         opacity: this.props.hide ? 0 : 1
                     }
@@ -480,7 +481,8 @@ class AlarmItem extends React.PureComponent {
                                             outputRange: [1, 0.001],
                                             extrapolate: "clamp"
                                         })
-                                    }
+                                    },
+                                    {perspective: 1000}
                                 ]
                             }
                         ]}
@@ -542,7 +544,8 @@ class AlarmItem extends React.PureComponent {
                                             outputRange: [1, 0.001],
                                             extrapolate: "clamp"
                                         })
-                                    }
+                                    },
+                                    {perspective: 1000}
                                 ]
                             }
                         ]}

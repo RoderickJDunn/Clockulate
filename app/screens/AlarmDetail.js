@@ -58,6 +58,7 @@ class AlarmDetail extends Component {
     height = SCREEN_HEIGHT; //full height
     snapAuto = 0;
     snapNormal = SCREEN_HEIGHT;
+    snapTaskList = -280;
 
     xtraKeyboardHeight = 0; // this is always 0, except on iPhone X it is 34
     _animKeyboardHeight = new Animated.Value(0);
@@ -436,7 +437,7 @@ class AlarmDetail extends Component {
         let snapId = event.nativeEvent.id;
         // console.log("snapId", snapId);
         // console.log("alarmState", alarmState);
-        if (snapId != alarmState.mode && snapId != "keyboard") {
+        if (snapId != alarmState.mode) {
             realm.write(() => {
                 if (event.nativeEvent.id == "normal") {
                     alarmState.mode = "normal";
@@ -444,6 +445,8 @@ class AlarmDetail extends Component {
                     alarmState.mode = "autocalc";
                     // Re-calculate
                     alarmState.wakeUpTime = this._calcWakeUpTime();
+                } else if (event.nativeEvent.id == "tasklist") {
+                    alarmState.mode = "tasklist"; // FIXME: tasklist view is not a 'mode'
                 }
                 this.setState({ alarm: alarmState });
             });
@@ -632,6 +635,18 @@ class AlarmDetail extends Component {
         this.setState(this.state);
     }
 
+    _onDragInteractable(event) {
+        console.log("drag:", event.nativeEvent);
+        let { state, y } = event.nativeEvent;
+        if (state == "start" && y < 50) {
+            console.log("y < 50");
+            // animate height increase of TaskList.... lol
+        
+            // first just set new height
+            this.setState({});
+        }
+    }
+
     render() {
         console.info("AlarmDetail render ");
         // console.debug("AlarmDetail render - this.state: ", this.state);
@@ -659,15 +674,23 @@ class AlarmDetail extends Component {
                     extrapolate: "clamp"
                 })
             ).interpolate({
-                inputRange: [this.snapAuto, this.snapNormal],
-                outputRange: [this.height, this.height * 0.3]
+                inputRange: [this.snapTaskList, this.snapAuto, this.snapNormal],
+                outputRange: [
+                    this.height * 0.97,
+                    this.height,
+                    this.height * 0.3
+                ]
             });
         } else {
             console.info("CALC MODE ");
 
             clockAndLabelTranslation = this._clockTransform.interpolate({
-                inputRange: [this.snapAuto, this.snapNormal],
-                outputRange: [this.height, this.height * 0.3]
+                inputRange: [this.snapTaskList, this.snapAuto, this.snapNormal],
+                outputRange: [
+                    this.height * 0.97,
+                    this.height,
+                    this.height * 0.3
+                ]
             });
         }
 
@@ -822,7 +845,8 @@ class AlarmDetail extends Component {
 
         let snapPoints = [
             { y: this.snapAuto, id: "autocalc" },
-            { y: this.snapNormal, id: "normal" }
+            { y: this.snapNormal, id: "normal" },
+            { y: this.snapTaskList, id: "tasklist" }
         ];
 
         let labelForceVisible = null;
@@ -867,7 +891,8 @@ class AlarmDetail extends Component {
                                             outputRange: [0, this.height / 30]
                                         }
                                     )
-                                }
+                                },
+                                { perspective: 1000 }
                             ]
                         }
                     ]}
@@ -893,7 +918,7 @@ class AlarmDetail extends Component {
                     // initialPosition={{ y: initInterPosition }}
                     dragEnabled={!disableDrag}
                     boundaries={{
-                        top: -this.height * 0.1,
+                        top: -this.height * 0.7,
                         bottom: this.snapNormal * 1.15,
                         bounce: 0.3
                     }}
@@ -902,6 +927,7 @@ class AlarmDetail extends Component {
                     //     { damping: 0.0, influenceArea: { right: 0 } }
                     // ]}
                     animatedNativeDriver={true}
+                    onDrag={this._onDragInteractable.bind(this)}
                 >
                     {/* This is the animated wrapper for the CLOCK display, and the label shown in Normal */}
                     <Animated.View
@@ -917,17 +943,26 @@ class AlarmDetail extends Component {
                                             {
                                                 inputRange: [
                                                     this.snapAuto -
-                                                        this.height * 0.2,
+                                                        this.height * 0.5,
+                                                    this.snapAuto -
+                                                        this.height * 0.1,
                                                     this.snapAuto,
                                                     this.snapNormal,
                                                     this.snapNormal +
                                                         this.height * 0.2
                                                 ],
-                                                outputRange: [1.0, 0.9, 1, 1.1],
+                                                outputRange: [
+                                                    0,
+                                                    0.5,
+                                                    0.9,
+                                                    1,
+                                                    1.1
+                                                ],
                                                 extrapolate: "clamp"
                                             }
                                         )
-                                    }
+                                    },
+                                    { perspective: 1000 }
                                 ]
                             }
                         ]}
@@ -1175,7 +1210,8 @@ class AlarmDetail extends Component {
                                             ]
                                         }
                                     )
-                                }
+                                },
+                                { perspective: 1000 }
                             ],
                             ...handleForceHide
                         }}
@@ -1187,7 +1223,7 @@ class AlarmDetail extends Component {
                         hitSlop={{ top: 70, bottom: 70, left: 70, right: 70 }}
                     />
                 </Interactable.View>
-                <TouchableOpacity
+                <Animated.View
                     style={{
                         position: "absolute",
                         alignSelf: "flex-end",
@@ -1205,27 +1241,35 @@ class AlarmDetail extends Component {
                                     outputRange: [1.0, 0.9, 1, 1.1],
                                     extrapolate: "clamp"
                                 })
-                            }
-                        ]
-                    }}
-                    onPress={() => {
-                        this.props.navigation.navigate("Sounds", {
-                            saveSound: this.saveSound.bind(this),
-                            currSound: this.state.alarm.alarmSound
-                        });
+                            },
+                            { perspective: 1000 }
+                        ],
+                        opacity: this._clockTransform.interpolate({
+                            inputRange: [this.snapTaskList, this.snapAuto],
+                            outputRange: [-2, 1]
+                        })
                     }}
                 >
-                    <FontAwesome
-                        name="music"
-                        size={scaleByFactor(23, 0.4)}
-                        // color="#ECECEC"
-                        color={Colors.brandOffWhiteBlue}
-                        // color="#10ac84"
-                        iconStyle={{
-                            color: "blue"
+                    <TouchableOpacity
+                        onPress={() => {
+                            this.props.navigation.navigate("Sounds", {
+                                saveSound: this.saveSound.bind(this),
+                                currSound: this.state.alarm.alarmSound
+                            });
                         }}
-                    />
-                </TouchableOpacity>
+                    >
+                        <FontAwesome
+                            name="music"
+                            size={scaleByFactor(23, 0.4)}
+                            // color="#ECECEC"
+                            color={Colors.brandOffWhiteBlue}
+                            // color="#10ac84"
+                            iconStyle={{
+                                color: "blue"
+                            }}
+                        />
+                    </TouchableOpacity>
+                </Animated.View>
                 {/* Measuring line -- dev view to check whether views are aligned properly */}
                 {/* <View
                     style={{
