@@ -15,7 +15,8 @@ import {
     Animated,
     Keyboard,
     TextInput,
-    ScrollView
+    ScrollView,
+    Platform
 } from "react-native";
 import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -134,11 +135,11 @@ class AlarmDetail extends Component {
 
     addKeyboardListeners() {
         this.keyboardWillShowSub = Keyboard.addListener(
-            "keyboardWillShow",
+            Platform.OS == "ios" ? "keyboardWillShow" : "keyboardDidShow",
             this.keyboardWillShow.bind(this)
         );
         this.keyboardWillHideSub = Keyboard.addListener(
-            "keyboardWillHide",
+            Platform.OS == "ios" ? "keyboardWillHide" : "keyboardDidHide",
             this.keyboardWillHide.bind(this)
         );
     }
@@ -176,7 +177,7 @@ class AlarmDetail extends Component {
         //     }, 0);
         // }
         Animated.timing(this._animKeyboardHeight, {
-            duration: event.duration,
+            duration: Platform.OS == "ios" ? event.duration : 100,
             toValue: event.endCoordinates.height,
             useNativeDriver: true
         }).start();
@@ -192,7 +193,7 @@ class AlarmDetail extends Component {
         // }, 0);
 
         Animated.timing(this._animKeyboardHeight, {
-            duration: event.duration,
+            duration: Platform.OS == "ios" ? event.duration : 100,
             toValue: 0,
             useNativeDriver: true
         }).start();
@@ -828,7 +829,7 @@ class AlarmDetail extends Component {
         return (
             <ScrollView
                 contentContainerStyle={styles.screenContainer}
-                keyboardShouldPersistTaps="handled"
+                keyboardShouldPersistTaps={"handled"}
                 scrollEnabled={false}
             >
                 {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
@@ -857,7 +858,6 @@ class AlarmDetail extends Component {
                     source={require("../img/ClockBgd_v8_iphoneSE-5-6-7-8.png")}
                     // source={require("../img/ClockBgd_v9_iphoneSE-5-6-7-8.png")}
                 />
-
                 {touchableBackdrop}
                 <Interactable.View
                     ref={interactableRef}
@@ -1228,6 +1228,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         alignContent: "stretch",
         backgroundColor: Colors.backgroundGrey
+        // backgroundColor: "green"
     },
 
     clockBackground: {

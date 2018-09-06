@@ -572,7 +572,11 @@ class TaskDetail extends Component {
                         behavior="padding"
                         // style={{ flex: 1 }}
                         style={StyleSheet.absoluteFill}
-                        keyboardVerticalOffset={Header.HEIGHT + 20}
+                        keyboardVerticalOffset={
+                            Platform.OS == "ios"
+                                ? Header.HEIGHT + 20
+                                : Header.HEIGHT + 20 - 500 // -500 is for Android-specific quirk
+                        }
                     >
                         <View
                             style={{
