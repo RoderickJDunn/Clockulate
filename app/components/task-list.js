@@ -3,7 +3,7 @@
  */
 
 import React, { Component } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 import SortableListView from "react-native-sortable-listview";
 import DraggableFlatList from "react-native-draggable-flatlist";
 
@@ -23,7 +23,7 @@ class TaskList extends React.Component {
 
     _keyExtractor = (item, index) => item.id;
 
-    _renderItem = ({ item, rowID, move, moveEnd, isActive }) => {
+    _renderItem = ({ item, index, move, moveEnd, isActive }) => {
         let { onSnapTask, sortHandlers, ...other } = this.props;
         // console.log("onSnapTask prop", onSnapTask);
         // console.log("other props", other);
@@ -32,15 +32,18 @@ class TaskList extends React.Component {
         // console.log("item", item);
         onSnapTask.bind(item);
         let closed = true;
-        if (this.props.activeTask == rowID) {
+        if (this.props.activeTask == index) {
             closed = false;
         }
+        console.log("\n");
+        // console.log("index: ", index);
+        // console.log("closed: ", closed);
         return (
             <TaskItem
                 {...other} // the props expanded here include 'onPressItem' callback, and the onPressItemCheckBox callback
                 data={item}
                 id={item.id}
-                onSnapTask={this._onSnapTask.bind(this, item, rowID)}
+                onSnapTask={this._onSnapTask.bind(this, item, index)}
                 closed={closed}
                 disabled={this.props.isEditingTasks}
                 shouldStartMove={move}
@@ -71,77 +74,65 @@ class TaskList extends React.Component {
         }
         let touchableBackdrop = null;
         if (this.props.activeTask != null) {
+            console.log("this.props.activeTask != null");
             touchableBackdrop = (
                 <TouchableBackdrop
                     style={{
                         top: 0,
-                        width: this.width,
-                        height: this.height
+                        right: 0,
+                        left: 0,
+                        bottom: 0
                     }}
                     onPress={() => {
                         // console.log(
                         //     "-----Pressed touchable backdrop of TaskList --------------------"
                         // );
-                        this._closeTaskRows();
+                        this.props.closeTaskRows();
                     }}
                 />
             );
         }
         // console.log("tasksArr in task-list", tasksArr);
         return (
-            <View style={listStyle.container}>
-                {/* <SortableListView
-                    data={tasksArr}
-                    renderRow={(item, sectionId, rowID) =>
-                        this._renderItem(item, sectionId, rowID)
-                    }
-                    keyExtractor={this._keyExtractor}
-                    disableAnimatedScrolling={true}
-                    disableSorting={!this.props.isEditingTasks}
-                    moveOnPressIn={this.props.isEditingTasks}
-                    scrollEnabled={!this.props.isSlidingTask}
-                    onRowMoved={moveInfo => {
-                        // console.log("'this' now: " + this.constructor.name);
-                        // console.log("moveInfo.from", moveInfo.from);
-                        // console.log("moveInfo.to", moveInfo.to);
-                        // console.log("row", moveInfo.row);
-                        // console.log(
-                        //     "tasksArr in onRowMoved callback in task-list",
-                        //     tasksArr
-                        // );
-                        this.props.onReorderTasks(
-                            tasksArr,
-                            moveInfo.row.data.id,
-                            moveInfo.from,
-                            moveInfo.to
-                        );
-                    }}
-                /> */}
-                <DraggableFlatList
-                    data={tasksArr}
-                    renderItem={this._renderItem}
-                    keyExtractor={this._keyExtractor}
-                    // scrollPercent={5}
-                    onMoveEnd={moveInfo => {
-                        // console.log("'this' now: " + this.constructor.name);
-                        // console.log("moveInfo.from", moveInfo.from);
-                        // console.log("moveInfo.to", moveInfo.to);
-                        // console.log("row", moveInfo.row);
-                        // console.log(
-                        //     "tasksArr in onRowMoved callback in task-list",
-                        //     tasksArr
-                        // );
-                        this.props.onReorderTasks(
-                            tasksArr,
-                            moveInfo.data.id,
-                            moveInfo.from,
-                            moveInfo.to
-                        );
-                    }}
-                    scrollEnabled={!this.props.isSlidingTask}
-                />
-                {touchableBackdrop}
-            </View>
+            // <View style={[listStyle.container]}>
+            <TouchableWithoutFeedback
+                style={[
+                    listStyle.container,
+                    { borderWidth: 3, borderColor: "red" }
+                ]}
+                onPressIn={this.props.closeTaskRows}
+            >
+                {/* This wrapper view is required for the TouchableWithoutFeedback to work within the TaskArea. */}
+                <View style={{ flex: 1 }}>
+                    <DraggableFlatList
+                        data={tasksArr}
+                        renderItem={this._renderItem}
+                        keyExtractor={this._keyExtractor}
+                        // scrollPercent={5}
+                        onMoveEnd={moveInfo => {
+                            // console.log("'this' now: " + this.constructor.name);
+                            // console.log("moveInfo.from", moveInfo.from);
+                            // console.log("moveInfo.to", moveInfo.to);
+                            // console.log("row", moveInfo.row);
+                            // console.log(
+                            //     "tasksArr in onRowMoved callback in task-list",
+                            //     tasksArr
+                            // );
+                            this.props.onReorderTasks(
+                                tasksArr,
+                                moveInfo.data.id,
+                                moveInfo.from,
+                                moveInfo.to
+                            );
+                        }}
+                        scrollEnabled={!this.props.isSlidingTask}
+                        onResponderRelease={() => {
+                            console.log("onResponderRelease (task-list)");
+                        }}
+                        style={{ borderWidth: 3, borderColor: "red" }}
+                    />
+                </View>
+            </TouchableWithoutFeedback>
         );
     }
 }

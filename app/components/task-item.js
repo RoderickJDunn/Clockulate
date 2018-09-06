@@ -65,7 +65,8 @@ class TaskItem extends React.Component {
                 task: props.data.task
             },
             isSlidingTask: false,
-            isEditingTasks: false
+            isEditingTasks: false,
+            closed: true
         };
 
         // console.log("this.state", this.state);
@@ -238,7 +239,8 @@ class TaskItem extends React.Component {
             },
             isSlidingTask:
                 this._tempDuration != null && nextProps.isSlidingTask,
-            isEditingTasks: nextProps.isEditingTasks
+            isEditingTasks: nextProps.isEditingTasks,
+            closed: nextProps.closed
         });
     }
 
@@ -254,14 +256,14 @@ class TaskItem extends React.Component {
         }
 
         let { enabled, task, duration } = this.state.data;
-        let { isEditingTasks, isSlidingTask } = this.state;
+        let { isEditingTasks, isSlidingTask, closed } = this.state;
 
         let {
             enabled: nEnabled,
             task: nTask,
             duration: nDuration
         } = nextProps.data;
-        let { isEditingTasks: nIsEditingTasks } = nextProps;
+        let { isEditingTasks: nIsEditingTasks, closed: nClosed } = nextProps;
 
         let { isSlidingTask: nIsSlidingTask } = nextState;
 
@@ -270,7 +272,8 @@ class TaskItem extends React.Component {
             nTask.name == task.name &&
             nDuration == duration &&
             nIsEditingTasks == isEditingTasks &&
-            nIsSlidingTask == isSlidingTask
+            nIsSlidingTask == isSlidingTask &&
+            nClosed == closed
         ) {
             return false;
         }
