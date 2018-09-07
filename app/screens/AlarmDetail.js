@@ -16,7 +16,8 @@ import {
     Keyboard,
     TextInput,
     ScrollView,
-    Platform
+    Platform,
+    LayoutAnimation
 } from "react-native";
 import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -91,7 +92,8 @@ class AlarmDetail extends Component {
                     isEditingTasks: false, // indicates whether tasks are currently moveable.
                     isEditingLabel: false, // indicates whether Label is being edited. Need to move Input when keyboard shows.
                     keyboardHeight: null,
-                    isSlidingTask: false
+                    isSlidingTask: false,
+                    taskListFullScreen: false
                 };
                 // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
@@ -105,7 +107,8 @@ class AlarmDetail extends Component {
                 isEditingTasks: false,
                 isEditingLabel: false,
                 keyboardHeight: null,
-                isSlidingTask: false
+                isSlidingTask: false,
+                taskListFullScreen: false
             };
         }
 
@@ -117,20 +120,20 @@ class AlarmDetail extends Component {
         //     this._animatedView.animate(this.state.animationDuration);
         // }, 0);
 
-        console.log(this.state);
-        console.log(params);
+        // console.log(this.state);
+        // console.log(params);
     }
 
     // componentDidMount() {
     // }
 
     componentWillMount() {
-        console.log("AlarmDetail: componentWillMount");
+        // console.log("AlarmDetail: componentWillMount");
         this.addKeyboardListeners();
     }
 
     componentWillUnmount() {
-        console.debug("AlarmDetail: componentWillUnmount");
+        // console.debug("AlarmDetail: componentWillUnmount");
         this.removeKeyboardListeners();
     }
 
@@ -168,7 +171,7 @@ class AlarmDetail extends Component {
     }
 
     keyboardWillShow = event => {
-        console.log("keyboardWillShow -------");
+        // console.log("keyboardWillShow -------");
         // console.log(event.endCoordinates);
         // console.log(SCREEN_HEIGHT);
         // this.setState({ keyboardHeight: event.endCoordinates.height });
@@ -185,7 +188,7 @@ class AlarmDetail extends Component {
     };
 
     keyboardWillHide = event => {
-        console.log("keyboardWillHide");
+        // console.log("keyboardWillHide");
         // let { mode } = this.state.alarm;
         // let modeInt = mode == "autocalc" ? 0 : 1;
         // setTimeout(() => {
@@ -385,7 +388,7 @@ class AlarmDetail extends Component {
     };
 
     onChangeTaskEnabled = (taskToUpdate, enabled) => {
-        console.info("onChangeTaskEnabled");
+        // console.info("onChangeTaskEnabled");
         let { alarm } = this.state;
         let tasks = alarm.tasks;
         let taskToChange = tasks.find(task => task.id === taskToUpdate.id);
@@ -423,7 +426,7 @@ class AlarmDetail extends Component {
             return;
         }
         realm.write(() => {
-            console.log("newDuration", newDuration);
+            // console.log("newDuration", newDuration);
             taskToChange.duration = newDuration;
             alarm.wakeUpTime = this._calcWakeUpTime();
         });
@@ -437,19 +440,21 @@ class AlarmDetail extends Component {
         let snapId = event.nativeEvent.id;
         // console.log("snapId", snapId);
         // console.log("alarmState", alarmState);
-        if (snapId != alarmState.mode) {
+        if (snapId == "tasklist") {
+            this.setState({ taskListFullScreen: true });
+        } else if (snapId != alarmState.mode) {
             realm.write(() => {
-                if (event.nativeEvent.id == "normal") {
+                if (snapId == "normal") {
                     alarmState.mode = "normal";
-                } else if (event.nativeEvent.id == "autocalc") {
+                } else if (snapId == "autocalc") {
                     alarmState.mode = "autocalc";
                     // Re-calculate
                     alarmState.wakeUpTime = this._calcWakeUpTime();
-                } else if (event.nativeEvent.id == "tasklist") {
-                    alarmState.mode = "tasklist"; // FIXME: tasklist view is not a 'mode'
                 }
-                this.setState({ alarm: alarmState });
+                this.setState({ alarm: alarmState, taskListFullScreen: false });
             });
+        } else {
+            this.setState({ taskListFullScreen: false });
         }
     };
 
@@ -635,22 +640,79 @@ class AlarmDetail extends Component {
         this.setState(this.state);
     }
 
+    _layoutAnimateToFullScreenTaskList() {
+        let config = {
+            duration: 300,
+            update: {
+                duration: 300,
+                type: "easeInEaseOut"
+                // springDamping: 0.5,
+                // property: "scaleXY"
+            }
+        };
+        LayoutAnimation.configureNext(config);
+
+        // This should be in TaskList full screen view
+
+        console.log("Setting taskArea to LARGE");
+        // first just set new height
+        this.setState({
+            nonClockHeight: SCREEN_HEIGHT * 1.1,
+            fieldAreaFlex: 0.17,
+            taskAreaFlex: 0.83
+        });
+    }
+
+    _layoutAnimateToCalcMode() {
+        let config = {
+            duration: 300,
+            update: {
+                duration: 300,
+                type: "easeInEaseOut"
+            }
+        };
+        LayoutAnimation.configureNext(config);
+
+        console.log("Setting taskArea to small");
+        // This should be in calc mode
+        this.setState({
+            nonClockHeight: SCREEN_HEIGHT * 0.7,
+            fieldAreaFlex: 0.17,
+            taskAreaFlex: 0.4
+        });
+    }
+
+    _onPressTasksHeader() {
+        console.log("_onPressTasksHeader");
+        if (this.state.taskListFullScreen == false) {
+            console.log("1");
+            this._layoutAnimateToFullScreenTaskList();
+            this.interactiveRef.snapTo({ index: 2 });
+        } else {
+            console.log("2");
+            this._layoutAnimateToCalcMode();
+            this.interactiveRef.snapTo({ index: 0 });
+        }
+    }
+
     _onDragInteractable(event) {
         console.log("drag:", event.nativeEvent);
-        let { state, y } = event.nativeEvent;
-        if (state == "start" && y < 50) {
+        let { state, y, targetSnapPointId } = event.nativeEvent;
+        if (state == "start" && y < 50 && y > -100) {
             console.log("y < 50");
             // animate height increase of TaskList.... lol
-        
-            // first just set new height
-            this.setState({});
+            this._layoutAnimateToFullScreenTaskList();
+        } else if (state == "end" && targetSnapPointId == "autocalc") {
+            console.log("y > 50");
+            // animate height increase of TaskList.... lol
+            this._layoutAnimateToCalcMode();
         }
     }
 
     render() {
         console.info("AlarmDetail render ");
         // console.debug("AlarmDetail render - this.state: ", this.state);
-        let imageHeight = this.height + 30;
+        let imageHeight = SCREEN_HEIGHT + 30;
 
         /* clockAndLabelTranslation:
             This is complicated. There are 2 Animated values that can effect the translateY value of
@@ -676,20 +738,20 @@ class AlarmDetail extends Component {
             ).interpolate({
                 inputRange: [this.snapTaskList, this.snapAuto, this.snapNormal],
                 outputRange: [
-                    this.height * 0.97,
-                    this.height,
-                    this.height * 0.3
+                    SCREEN_HEIGHT * 0.97,
+                    SCREEN_HEIGHT,
+                    SCREEN_HEIGHT * 0.3
                 ]
             });
         } else {
-            console.info("CALC MODE ");
+            console.info("CALC MODE");
 
             clockAndLabelTranslation = this._clockTransform.interpolate({
                 inputRange: [this.snapTaskList, this.snapAuto, this.snapNormal],
                 outputRange: [
-                    this.height * 0.97,
-                    this.height,
-                    this.height * 0.3
+                    SCREEN_HEIGHT * 0.97,
+                    SCREEN_HEIGHT,
+                    SCREEN_HEIGHT * 0.3
                 ]
             });
         }
@@ -753,7 +815,7 @@ class AlarmDetail extends Component {
                 </TouchableOpacity>
             );
         } else {
-            console.log("Passing new list of tasks to TaskList");
+            // console.log("Passing new list of tasks to TaskList");
             taskArea = (
                 <TaskList
                     onPressItem={this._onPressTask.bind(this)}
@@ -793,8 +855,8 @@ class AlarmDetail extends Component {
             touchableBackdrop = (
                 <TouchableBackdrop
                     style={{
-                        width: this.width,
-                        height: this.height
+                        width: SCREEN_WIDTH,
+                        height: SCREEN_HEIGHT
                     }}
                     onPress={() => {
                         // console.log(
@@ -885,10 +947,10 @@ class AlarmDetail extends Component {
                                     translateY: this._clockTransform.interpolate(
                                         {
                                             inputRange: [
-                                                -this.height,
-                                                this.height
+                                                -SCREEN_HEIGHT,
+                                                SCREEN_HEIGHT
                                             ],
-                                            outputRange: [0, this.height / 30]
+                                            outputRange: [0, SCREEN_HEIGHT / 30]
                                         }
                                     )
                                 },
@@ -906,9 +968,9 @@ class AlarmDetail extends Component {
                     style={[
                         styles.animatedView,
                         {
-                            width: this.width,
-                            // backgroundColor: "#456729"
+                            width: SCREEN_WIDTH,
                             backgroundColor: "transparent"
+                            // backgroundColor: "#456729"
                         }
                     ]}
                     verticalOnly={true}
@@ -918,7 +980,7 @@ class AlarmDetail extends Component {
                     // initialPosition={{ y: initInterPosition }}
                     dragEnabled={!disableDrag}
                     boundaries={{
-                        top: -this.height * 0.7,
+                        top: -SCREEN_HEIGHT * 0.5, // 0.7 before
                         bottom: this.snapNormal * 1.15,
                         bounce: 0.3
                     }}
@@ -942,18 +1004,18 @@ class AlarmDetail extends Component {
                                         scale: this._clockTransform.interpolate(
                                             {
                                                 inputRange: [
-                                                    this.snapAuto -
-                                                        this.height * 0.5,
-                                                    this.snapAuto -
-                                                        this.height * 0.1,
+                                                    // this.snapAuto -
+                                                    //     SCREEN_HEIGHT * 0.5,
+                                                    // this.snapAuto -
+                                                    //     SCREEN_HEIGHT * 0.1,
                                                     this.snapAuto,
                                                     this.snapNormal,
                                                     this.snapNormal +
-                                                        this.height * 0.2
+                                                        SCREEN_HEIGHT * 0.2
                                                 ],
                                                 outputRange: [
-                                                    0,
-                                                    0.5,
+                                                    // 0,
+                                                    // 0.5,
                                                     0.9,
                                                     1,
                                                     1.1
@@ -1017,7 +1079,7 @@ class AlarmDetail extends Component {
                                 height: 100,
                                 position: "absolute",
                                 bottom: "0%",
-                                width: this.width,
+                                width: SCREEN_WIDTH,
                                 alignSelf: "stretch",
                                 ...labelForceVisible
                             }}
@@ -1025,9 +1087,17 @@ class AlarmDetail extends Component {
                             numberOfLines={1}
                             multiline={false}
                         />
-                        {/* <Text style={{ alignSelf: "flex-end" }}>My profile</Text> */}
                     </Animated.View>
-                    <View style={[styles.nonClockWrapper]}>
+                    <View
+                        style={[
+                            styles.nonClockWrapper
+                            // {
+                            //     height:
+                            //         this.state.nonClockHeight ||
+                            //         SCREEN_HEIGHT * 0.7
+                            // }
+                        ]}
+                    >
                         <Image
                             style={[
                                 styles.nonClockBgImage,
@@ -1039,7 +1109,13 @@ class AlarmDetail extends Component {
                             source={require("../img/NonClockBgV2.png")}
                         />
 
-                        <View style={[styles.fieldsContainer]}>
+                        <View
+                            style={[
+                                styles.fieldsContainer,
+                                { flex: this.state.fieldAreaFlex || 0.17 }
+                                // { flex: 0 }
+                            ]}
+                        >
                             <LabeledInput
                                 labelText="LABEL"
                                 placeholder="Enter a label"
@@ -1116,7 +1192,10 @@ class AlarmDetail extends Component {
                             start={{ x: 0.5, y: 0 }}
                             end={{ x: 0.5, y: 0.04 }}
                             colors={["#D2CED4", Colors.backgroundGrey]}
-                            style={[styles.taskListContainer]}
+                            style={[
+                                styles.taskListContainer,
+                                { flex: this.state.taskAreaFlex || 0.4 }
+                            ]}
                         >
                             <View style={styles.taskListHeader}>
                                 <View
@@ -1130,14 +1209,26 @@ class AlarmDetail extends Component {
                                         alignItems: "center"
                                     }}
                                 >
-                                    <Text
-                                        style={[
-                                            TextStyle.labelText,
-                                            { fontSize: scaleByFactor(17, 0.3) }
-                                        ]}
+                                    <TouchableOpacity
+                                        // onPress={() => this.interactiveRef.snapTo({ index: 2 })}>
+                                        onPress={this._onPressTasksHeader.bind(
+                                            this
+                                        )}
                                     >
-                                        TASKS
-                                    </Text>
+                                        <Text
+                                            style={[
+                                                TextStyle.labelText,
+                                                {
+                                                    fontSize: scaleByFactor(
+                                                        17,
+                                                        0.3
+                                                    )
+                                                }
+                                            ]}
+                                        >
+                                            Tasks
+                                        </Text>
+                                    </TouchableOpacity>
                                 </View>
                                 <TouchableOpacity
                                     style={{
@@ -1189,7 +1280,7 @@ class AlarmDetail extends Component {
                         style={{
                             position: "absolute",
                             left:
-                                this.width / 2 -
+                                SCREEN_WIDTH / 2 -
                                 scaleByFactor(25, 0.5) / 2 -
                                 30, // padding (30 left + 30 right / 2 == 30)
                             backgroundColor: "transparent",
@@ -1205,8 +1296,8 @@ class AlarmDetail extends Component {
                                                 this.snapNormal
                                             ],
                                             outputRange: [
-                                                this.height * 1.18,
-                                                this.height * 0.76
+                                                SCREEN_HEIGHT * 1.18,
+                                                SCREEN_HEIGHT * 0.76
                                             ]
                                         }
                                     )
@@ -1216,7 +1307,7 @@ class AlarmDetail extends Component {
                             ...handleForceHide
                         }}
                         onPress={() => {
-                            console.log("onPress AnimatedHandle");
+                            // console.log("onPress AnimatedHandle");
                             let idx = this.state.alarm.mode == "normal" ? 0 : 1;
                             this.interactiveRef.snapTo({ index: idx });
                         }}
@@ -1233,21 +1324,31 @@ class AlarmDetail extends Component {
                             {
                                 scale: this._clockTransform.interpolate({
                                     inputRange: [
-                                        this.snapAuto - this.height * 0.2,
+                                        this.snapAuto - SCREEN_HEIGHT * 0.2,
                                         this.snapAuto,
                                         this.snapNormal,
-                                        this.snapNormal + this.height * 0.2
+                                        this.snapNormal + SCREEN_HEIGHT * 0.2
                                     ],
                                     outputRange: [1.0, 0.9, 1, 1.1],
                                     extrapolate: "clamp"
                                 })
                             },
+                            {
+                                translateY: this._clockTransform.interpolate({
+                                    inputRange: [
+                                        this.snapTaskList,
+                                        this.snapAuto
+                                    ],
+                                    outputRange: [-SCREEN_HEIGHT * 0.3, 0],
+                                    extrapolate: "clamp"
+                                })
+                            },
                             { perspective: 1000 }
-                        ],
-                        opacity: this._clockTransform.interpolate({
-                            inputRange: [this.snapTaskList, this.snapAuto],
-                            outputRange: [-2, 1]
-                        })
+                        ]
+                        // opacity: this._clockTransform.interpolate({
+                        //     inputRange: [this.snapTaskList, this.snapAuto],
+                        //     outputRange: [-2, 1]
+                        // })
                     }}
                 >
                     <TouchableOpacity
@@ -1333,18 +1434,20 @@ const styles = StyleSheet.create({
     },
     nonClockWrapper: {
         alignItems: "stretch",
-        height: SCREEN_HEIGHT * 2 * 0.4,
+        height: SCREEN_HEIGHT * 1.15,
         top: SCREEN_HEIGHT * 0.9
+        // borderWidth: 3,
+        // borderColor: "blue"
     },
     animatedView: {
         // flex: 1,
         position: "absolute",
         top: -SCREEN_HEIGHT,
         left: 0,
-        height: SCREEN_HEIGHT * 2
+        height: SCREEN_HEIGHT * 2.5
     },
     fieldsContainer: {
-        flex: 0.25,
+        flex: 0.28,
         alignSelf: "stretch",
         justifyContent: "center",
         // backgroundColor: "yellow",
@@ -1353,20 +1456,29 @@ const styles = StyleSheet.create({
         borderBottomColor: "#e9e9e9"
         // borderBottomWidth: 1
     },
-    taskListContainer: {
-        flex: 0.6,
-        padding: scaleByFactor(10, 0.4),
-        alignSelf: "stretch"
-        // backgroundColor: Colors.backgroundGrey
-        // backgroundColor: "#afabb0"
-    },
     taskListHeader: {
-        flex: 0.1,
+        flex: 0.05,
         flexDirection: "row",
         justifyContent: "space-between",
         paddingVertical: 10
+        // backgroundColor: "blue"
     },
-
+    taskListContainer: {
+        // flex: 0.22,
+        flex: 0.72,
+        padding: scaleByFactor(10, 0.4),
+        alignSelf: "stretch",
+        backgroundColor: Colors.backgroundGrey
+        // borderColor: "red",
+        // borderWidth: 5
+    },
+    // taskAreaFiller: {
+    //     flex: 0.75,
+    //     // padding: scaleByFactor(10, 0.4),
+    //     alignSelf: "stretch"
+    //     // backgroundColor: Colors.backgroundGrey
+    //     // backgroundColor: "#afabb0"
+    // },
     nonClockBgImage: {
         position: "absolute",
         width: SCREEN_WIDTH,
