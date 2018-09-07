@@ -1244,7 +1244,13 @@ class AlarmDetail extends Component {
                                         left: 0
                                     }}
                                 >
-                                    {editTasksBtn}
+                                    <EntypoIcon
+                                        name="add-to-list"
+                                        size={scaleByFactor(30, 0.2)}
+                                        // color="#7a7677"
+                                        color={Colors.brandLightOpp}
+                                    />
+                                    {/* {editTasksBtn} */}
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
@@ -1252,8 +1258,11 @@ class AlarmDetail extends Component {
                                         alignSelf: "center",
                                         paddingLeft: 25
                                     }}
-                                    onPress={this.onPressAddTask.bind(this)}
-                                    /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
+                                    onPress={() =>
+                                        alert(
+                                            "Hide disabled tasks! (Not implemented)"
+                                        )
+                                    }
                                     hitSlop={{
                                         top: 10,
                                         bottom: 10,
@@ -1262,8 +1271,8 @@ class AlarmDetail extends Component {
                                     }}
                                 >
                                     <EntypoIcon
-                                        name="add-to-list"
-                                        size={scaleByFactor(30, 0.2)}
+                                        name="eye"
+                                        size={scaleByFactor(26, 0.2)}
                                         // color="#7a7677"
                                         color={Colors.brandLightOpp}
                                     />

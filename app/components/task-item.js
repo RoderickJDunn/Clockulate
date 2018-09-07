@@ -206,7 +206,10 @@ class TaskItem extends React.Component {
     _onLongPress = initialVal => {
         // console.log("_onLongPress task");
 
-        if (this.props.isEditingTasks) {
+        /* NOTES: I reversed the logic for isEditingTasks since we can now re-order tasks at baseline.
+            There is no more edit mode (no task sliding for now)
+        */
+        if (!this.props.isEditingTasks) {
             this.props.shouldStartMove();
         } else {
             /* first inform parent views that we are going to show the slider, so that they disable dragging functionality
