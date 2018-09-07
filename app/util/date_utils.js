@@ -81,9 +81,9 @@ export function formatDuration(seconds, short) {
 export function date_to_nextTimeInstance(date) {
     /* This code finds the date that is next instance of the time passed in */
     let wakeUpDate = moment();
-    console.log("Date right now: " + wakeUpDate.toDate());
+    // console.log("Date right now: " + wakeUpDate.toDate());
     let wakeUpTime = moment(date);
-    console.log("Date passed in: " + wakeUpTime.toDate());
+    // console.log("Date passed in: " + wakeUpTime.toDate());
 
     wakeUpDate
         .set("hour", wakeUpTime.hour())
@@ -92,6 +92,6 @@ export function date_to_nextTimeInstance(date) {
     if (wakeUpDate.diff(moment()) < 0) {
         wakeUpDate.add(1, "days");
     }
-    console.log("Modded date: " + wakeUpDate.toDate());
+    // console.log("Modded date: " + wakeUpDate.toDate());
     return wakeUpDate.toDate();
 }

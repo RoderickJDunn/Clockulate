@@ -67,7 +67,7 @@ class TaskList extends React.Component {
     // }
 
     render() {
-        console.debug("Render TaskList");
+        // console.debug("Render TaskList");
         // console.debug("props: ", this.props);
         let tasksArr = [];
         for (let id in this.props.data) {
@@ -77,11 +77,11 @@ class TaskList extends React.Component {
         return (
             // <View style={[listStyle.container]}>
             <TouchableWithoutFeedback
-                style={listStyle.container}
+                /* No Styling since TouchableWithoutFeedback just ignores the style prop */
                 onPressIn={this.props.closeTaskRows}
             >
                 {/* This wrapper view is required for the TouchableWithoutFeedback to work within the TaskArea. */}
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: 1 /*  backgroundColor: "red" */ }}>
                     <DraggableFlatList
                         data={tasksArr}
                         renderItem={this._renderItem}
@@ -104,9 +104,6 @@ class TaskList extends React.Component {
                             );
                         }}
                         scrollEnabled={!this.props.isSlidingTask}
-                        onResponderRelease={() => {
-                            console.log("onResponderRelease (task-list)");
-                        }}
                     />
                 </View>
             </TouchableWithoutFeedback>

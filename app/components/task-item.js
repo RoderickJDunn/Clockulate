@@ -98,8 +98,8 @@ class TaskItem extends React.Component {
                 // console.log("onPanResponderGrant");
 
                 this._touchable.setOpacityTo(0.5, 100);
-                console.log("evt", evt.nativeEvent.locationX);
-                console.log("evt", evt.nativeEvent.pageX);
+                // console.log("evt", evt.nativeEvent.locationX);
+                // console.log("evt", evt.nativeEvent.pageX);
                 this._isSliding = true;
                 // let tempDuration =
                 //     (evt.nativeEvent.pageX /
@@ -365,7 +365,7 @@ class TaskItem extends React.Component {
 
         let movingStyle;
         if (this.props.isMoving) {
-            console.log("isMoving", "true");
+            // console.log("isMoving", "true");
             movingStyle = {
                 backgroundColor: Colors.brandSuperLightPurple,
                 shadowOpacity: 0.2,
@@ -374,7 +374,7 @@ class TaskItem extends React.Component {
                 // elevation: 10
             };
         } else {
-            console.log("isMoving", "false");
+            // console.log("isMoving", "false");
         }
 
         return (
