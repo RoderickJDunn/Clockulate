@@ -637,7 +637,7 @@ class AlarmDetail extends Component {
             }
         });
 
-        this.setState(this.state);
+        this.setState({ disableDrag: false });
     }
 
     _layoutAnimateToFullScreenTaskList() {
@@ -756,9 +756,9 @@ class AlarmDetail extends Component {
             });
         }
 
-        /* I hope this means: If either isEditingTasks or isSlidingTask is true, set
-            disableDrag to true. Otherwise, set disableDrag to false (if both are false)*/
-        let disableDrag = this.state.isEditingTasks || this.state.isSlidingTask;
+        // /* I hope this means: If either isEditingTasks or isSlidingTask is true, set
+        //     disableDrag to true. Otherwise, set disableDrag to false (if both are false)*/
+        // let disableDrag = this.state.isEditingTasks || this.state.isSlidingTask;
 
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
         let sortedTasks =
@@ -832,6 +832,7 @@ class AlarmDetail extends Component {
                     isEditingTasks={this.state.isEditingTasks}
                     isSlidingTask={this.state.isSlidingTask}
                     onReorderTasks={this._onReorderTasks.bind(this)}
+                    willStartMove={() => this.setState({ disableDrag: true })}
                 />
             );
         }
@@ -978,7 +979,7 @@ class AlarmDetail extends Component {
                     animatedValueY={this._clockTransform}
                     onSnap={this.onSnap.bind(this)}
                     // initialPosition={{ y: initInterPosition }}
-                    dragEnabled={!disableDrag}
+                    dragEnabled={!this.state.disableDrag}
                     boundaries={{
                         top: -SCREEN_HEIGHT * 0.5, // 0.7 before
                         bottom: this.snapNormal * 1.15,

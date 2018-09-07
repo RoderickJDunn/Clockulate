@@ -210,6 +210,7 @@ class TaskItem extends React.Component {
             There is no more edit mode (no task sliding for now)
         */
         if (!this.props.isEditingTasks) {
+            this.props.willStartMove();
             this.props.shouldStartMove();
         } else {
             /* first inform parent views that we are going to show the slider, so that they disable dragging functionality
@@ -444,18 +445,19 @@ class TaskItem extends React.Component {
                             //     touches: [] }  ********
 
                             /* The only different between the events is the 'touches' array. */
-                            if (
-                                e.nativeEvent.touches &&
-                                e.nativeEvent.touches.length == 0
-                            ) {
-                                console.log(
-                                    "Touches arr is empty. Released without sliding!"
-                                );
-                                this._tempDuration = null;
-                                this.setState({ isSlidingTask: false });
-                            } else {
-                                console.log("Touches arr NOT empty!");
-                            }
+                            // if (
+                            //     e.nativeEvent.touches &&
+                            //     e.nativeEvent.touches.length == 0
+                            // ) {
+                            //     console.log(
+                            //         "Touches arr is empty. Released without sliding!"
+                            //     );
+                            //     this._tempDuration = null;
+                            //     this.setState({ isSlidingTask: false });
+                            // } else {
+                            //     console.log("Touches arr NOT empty!");
+                            // }
+                            // this.props.shouldEndMove();
                         }}
                         // disabled={this.props.isEditingTasks}
                         {...sortHandlers}

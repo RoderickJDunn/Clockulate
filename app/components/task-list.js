@@ -40,7 +40,8 @@ class TaskList extends React.Component {
         // console.log("closed: ", closed);
         return (
             <TaskItem
-                {...other} // the props expanded here include 'onPressItem' callback, and the onPressItemCheckBox callback
+                // other includes 'willStartMove' cb, 'onPressItem' callback, onPressItemCheckBox callback
+                {...other}
                 isMoving={isMoving}
                 data={item}
                 id={item.id}
@@ -104,6 +105,9 @@ class TaskList extends React.Component {
                             );
                         }}
                         scrollEnabled={!this.props.isSlidingTask}
+                        onResponderRelease={() => {
+                            console.log("onResponderRelease (task-list)");
+                        }}
                     />
                 </View>
             </TouchableWithoutFeedback>
