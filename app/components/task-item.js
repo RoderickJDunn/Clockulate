@@ -445,19 +445,19 @@ class TaskItem extends React.Component {
                             //     touches: [] }  ********
 
                             /* The only different between the events is the 'touches' array. */
-                            // if (
-                            //     e.nativeEvent.touches &&
-                            //     e.nativeEvent.touches.length == 0
-                            // ) {
-                            //     console.log(
-                            //         "Touches arr is empty. Released without sliding!"
-                            //     );
-                            //     this._tempDuration = null;
-                            //     this.setState({ isSlidingTask: false });
-                            // } else {
-                            //     console.log("Touches arr NOT empty!");
-                            // }
-                            // this.props.shouldEndMove();
+                            if (
+                                e.nativeEvent.touches &&
+                                e.nativeEvent.touches.length == 0
+                            ) {
+                                console.log(
+                                    "Touches arr is empty. Released without sliding!"
+                                );
+                                this._tempDuration = null;
+                                this.setState({ isSlidingTask: false });
+                                this.props.shouldEndMove();
+                            } else {
+                                console.log("Touches arr NOT empty!");
+                            }
                         }}
                         // disabled={this.props.isEditingTasks}
                         {...sortHandlers}
