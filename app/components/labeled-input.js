@@ -96,47 +96,59 @@ class LabeledInput extends Component {
                 >
                     {this.props.labelText}
                 </Text>
-                <TextInput
-                    style={[
-                        styles.fieldText,
-                        TextStyle.editableText,
-                        this.props.textInputStyle,
-                        {
-                            // height: inputHeight + scaleByFactor(23, 0.5),
-                            paddingVertical: 3,
-                            margin: 0
-                            // backgroundColor: "#ededed"
-                            // borderRadius: 5
+                <View
+                    style={{
+                        flex: 1,
+                        flexDirection: "row",
+                        alignItems: "center"
+                    }}
+                >
+                    <TextInput
+                        style={[
+                            styles.fieldText,
+                            TextStyle.editableText,
+                            this.props.textInputStyle,
+                            {
+                                // height: inputHeight + scaleByFactor(23, 0.5),
+                                paddingVertical: 3,
+                                margin: 0,
+                                flex: 1
+                                // backgroundColor: "#ededed"
+                                // borderRadius: 5
+                            }
+                        ]}
+                        // underlineColorAndroid="transparent"
+                        placeholder={this.props.placeholder}
+                        defaultValue={this.props.fieldText}
+                        onChangeText={this._onChangeTextInput.bind(this)}
+                        onBlur={e => {
+                            // console.log("TextInput blurred: " + e.nativeEvent.text);
+                            this._onBlur(this);
+                            if (onBlur != null) onBlur(e);
+                        }}
+                        onFocus={() => {
+                            this._onFocus.bind(this);
+                            if (onFocus != null) onFocus();
+                        }}
+                        blurOnSubmit={true}
+                        onContentSizeChange={e =>
+                            this.updateSize(e.nativeEvent.contentSize.height)
                         }
-                    ]}
-                    // underlineColorAndroid="transparent"
-                    placeholder={this.props.placeholder}
-                    defaultValue={this.props.fieldText}
-                    onChangeText={this._onChangeTextInput.bind(this)}
-                    onBlur={e => {
-                        // console.log("TextInput blurred: " + e.nativeEvent.text);
-                        this._onBlur(this);
-                        if (onBlur != null) onBlur(e);
-                    }}
-                    onFocus={() => {
-                        this._onFocus.bind(this);
-                        if (onFocus != null) onFocus();
-                    }}
-                    blurOnSubmit={true}
-                    onContentSizeChange={e =>
-                        this.updateSize(e.nativeEvent.contentSize.height)
-                    }
-                    multiline={false}
-                    underlineColorAndroid="transparent"
-                    editable={
-                        this.props.editable == null ? true : this.props.editable
-                    }
-                    textAlign={
-                        this.props.textAlign == null
-                            ? "left"
-                            : this.props.textAlign
-                    }
-                />
+                        multiline={false}
+                        underlineColorAndroid="transparent"
+                        editable={
+                            this.props.editable == null
+                                ? true
+                                : this.props.editable
+                        }
+                        textAlign={
+                            this.props.textAlign == null
+                                ? "left"
+                                : this.props.textAlign
+                        }
+                    />
+                    {this.props.clearButton}
+                </View>
             </View>
         );
     }

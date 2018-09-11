@@ -15,7 +15,8 @@ import {
     Keyboard,
     Platform,
     KeyboardAvoidingView,
-    ScrollView
+    ScrollView,
+    Alert
 } from "react-native";
 import { Icon } from "react-native-elements";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -64,7 +65,7 @@ class TaskDetail extends Component {
             },
             headerRight: (
                 <TouchableOpacity
-                    style={{ marginRight: 15 }}
+                    style={{ paddingHorizontal: 15, paddingVertical: 10 }}
                     onPress={() => navigation.state.params.handleSave()}
                 >
                     <IonIcon
@@ -288,6 +289,8 @@ class TaskDetail extends Component {
                 "Creating new Task. 'isNewAlarmTask': " + isNewAlarmTask
             );
             prevAlarmTask.task = newTask;
+
+            prevAlarmTask.enabled = true; // since this AlarmTask has been edited and saved, it should be automatically enabled.
             // prevAlarmTask = this.state.alarmTask;
             realm.write(() => {
                 // NOTE: even though we need both a new Task and AlarmTask, we just need to create the AlarmTask,
@@ -358,6 +361,8 @@ class TaskDetail extends Component {
                             prevAlarmTask.duration;
                     }
 
+                    prevAlarmTask.enabled = true; // since this AlarmTask has been edited and saved, it should be automatically enabled.
+
                     // NOTE: Here we are updating the AlarmTask in the DB by passing 'true' as the 3rd param of create()
                     //        This param specifies that it should be an update operation, rather than a creation.
                     // console.log('alarmTask', this.state.alarmTask);
@@ -375,18 +380,38 @@ class TaskDetail extends Component {
     _onDeleteTask() {
         console.log("TaskDetail: _onDeleteTask");
         console.log("this.state.alarmTask", this.state.alarmTask);
-        let alarmTaskRlmObject = realm.objectForPrimaryKey(
-            "AlarmTask",
-            this.state.alarmTask.id
+
+        Alert.alert(
+            "Delete Task",
+            "Are you sure you want to delete this task?",
+            [
+                {
+                    text: "Delete",
+                    onPress: () => {
+                        let alarmTaskRlmObject = realm.objectForPrimaryKey(
+                            "AlarmTask",
+                            this.state.alarmTask.id
+                        );
+                        if (alarmTaskRlmObject) {
+                            realm.write(() => {
+                                realm.delete(alarmTaskRlmObject);
+                            });
+                        }
+                        this.state.onSaveState();
+                        this.state.willNavigateBack();
+                        this.props.navigation.dispatch(
+                            NavigationActions.back()
+                        );
+                    }
+                },
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                }
+                // { text: "OK", onPress: () => console.log("OK Pressed") }
+            ],
+            { cancelable: false }
         );
-        if (alarmTaskRlmObject) {
-            realm.write(() => {
-                realm.delete(alarmTaskRlmObject);
-            });
-        }
-        this.state.onSaveState();
-        this.state.willNavigateBack();
-        this.props.navigation.dispatch(NavigationActions.back());
     }
 
     _onTaskNameChange(text) {

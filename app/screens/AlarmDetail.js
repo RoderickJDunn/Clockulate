@@ -269,7 +269,7 @@ class AlarmDetail extends Component {
         this.removeKeyboardListeners();
     }
 
-    onPressAddTask() {
+    _onPressAddTask() {
         if (this.state.activeTask == null) {
             let nextTaskPosition = this.state.alarm.tasks.length;
             // console.log("passing position of new task: ", nextTaskPosition);
@@ -779,7 +779,7 @@ class AlarmDetail extends Component {
                     style={{
                         flex: 1
                     }}
-                    onPress={this.onPressAddTask.bind(this)}
+                    onPress={this._onPressAddTask.bind(this)}
                 >
                     <View
                         style={{
@@ -1131,6 +1131,30 @@ class AlarmDetail extends Component {
                                 autoResize={false}
                                 numberOfLines={1}
                                 multiline={false}
+                                clearButton={
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            this.alarmLabelCache = "";
+                                            // we are faking a 'blur' event here, so that the cache change is saved to DB and state is updated.
+                                            this.onLabelInputBlur();
+                                        }}
+                                        style={{
+                                            flex: 0.05,
+                                            // position: "absolute",
+                                            // right: 0,
+                                            // top: 0,
+                                            // bottom: 0,
+                                            justifyContent: "center",
+                                            alignItems: "center"
+                                        }}
+                                    >
+                                        <EntypoIcon
+                                            name="circle-with-cross"
+                                            size={15}
+                                            color="#929292"
+                                        />
+                                    </TouchableOpacity>
+                                }
                             />
                             {/* <View style={{ height: scale(3) }} /> */}
                             {/* <View
@@ -1199,13 +1223,17 @@ class AlarmDetail extends Component {
                             ]}
                         >
                             <View style={styles.taskListHeader}>
-                                <View
+                                <TouchableOpacity
+                                    // onPress={() => this.interactiveRef.snapTo({ index: 2 })}>
+                                    onPress={this._onPressTasksHeader.bind(
+                                        this
+                                    )}
                                     style={{
                                         position: "absolute",
                                         top: 0,
                                         bottom: 0,
-                                        left: 0,
-                                        right: 0,
+                                        left: SCREEN_WIDTH / 4,
+                                        right: SCREEN_WIDTH / 4,
                                         justifyContent: "center",
                                         alignItems: "center"
                                     }}
@@ -1236,7 +1264,7 @@ class AlarmDetail extends Component {
                                         alignSelf: "center",
                                         paddingRight: 25
                                     }}
-                                    onPress={this._onPressEditTasks.bind(this)}
+                                    onPress={this._onPressAddTask.bind(this)}
                                     /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
                                     hitSlop={{
                                         top: 10,

@@ -238,7 +238,7 @@ class AlarmItem extends React.PureComponent {
                                     ]
                                 })
                             },
-                            {perspective: 1000}
+                            { perspective: 1000 }
                         ],
                         opacity: this.props.hide ? 0 : 1
                     }
@@ -383,15 +383,17 @@ class AlarmItem extends React.PureComponent {
                                     {" " + amPmWakeUpTime}
                                 </Text>
                             </Text>
-                            <Text
-                                style={{
-                                    color: textColor,
-                                    fontSize: scaleByFactor(15, 0.4)
-                                }}
-                                numberOfLines={2}
-                            >
-                                {this.props.alarm.label}
-                            </Text>
+                            {this.props.alarm.label.length > 0 && (
+                                <Text
+                                    style={{
+                                        color: textColor,
+                                        fontSize: scaleByFactor(15, 0.4)
+                                    }}
+                                    numberOfLines={2}
+                                >
+                                    {this.props.alarm.label}
+                                </Text>
+                            )}
                             <View
                                 style={{
                                     position: "absolute",
@@ -482,7 +484,7 @@ class AlarmItem extends React.PureComponent {
                                             extrapolate: "clamp"
                                         })
                                     },
-                                    {perspective: 1000}
+                                    { perspective: 1000 }
                                 ]
                             }
                         ]}
@@ -545,7 +547,7 @@ class AlarmItem extends React.PureComponent {
                                             extrapolate: "clamp"
                                         })
                                     },
-                                    {perspective: 1000}
+                                    { perspective: 1000 }
                                 ]
                             }
                         ]}

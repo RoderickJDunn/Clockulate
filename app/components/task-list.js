@@ -108,6 +108,7 @@ class TaskList extends React.Component {
                         onResponderRelease={() => {
                             console.log("onResponderRelease (task-list)");
                         }}
+                        forceRemeasure={this.props.forceRemeasure}
                     />
                 </View>
             </TouchableWithoutFeedback>
