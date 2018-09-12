@@ -28,7 +28,7 @@ export const AlarmListStyle = StyleSheet.create({
     alarmRow: {
         flex: 1,
         flexDirection: "row",
-        width: SCREEN_WIDTH + 200,
+        width: SCREEN_WIDTH,
         opacity: 1,
         backgroundColor: "#ecebf4"
     },
@@ -55,23 +55,26 @@ export const AlarmListStyle = StyleSheet.create({
         width: 100,
         height: scaleByFactor(100, 0.2),
         justifyContent: "center",
-        zIndex: 10000,
+        // zIndex: 10000,
         padding: 5
     },
     duplicateBtn: {
         position: "absolute",
-        backgroundColor: "#68BBBB",
-        right: 100,
+        backgroundColor: "#32a3a3",
+        right: 0,
         width: 100,
         height: scaleByFactor(100, 0.2),
         justifyContent: "center",
-        zIndex: 10000,
+        // zIndex: 10000,
         padding: 5
     },
     deleteBtnText: {
         alignSelf: "stretch",
         textAlign: "center",
-        color: "white"
+        color: "white",
+        fontFamily: "Avenir-Black",
+        fontSize: scaleByFactor(15, 0.2),
+        fontWeight: "600"
     }
 });
 
@@ -87,7 +90,7 @@ export const TaskListStyle = StyleSheet.create({
         height: 55,
         alignContent: "stretch",
         alignItems: "center",
-        backgroundColor: "transparent",
+        backgroundColor: "transparent"
         // backgroundColor: "yellow"
     },
 
@@ -109,7 +112,7 @@ export const TaskItemStyle = StyleSheet.create({
         height: 55,
         alignContent: "stretch",
         borderBottomColor: "black",
-        borderBottomWidth: 0.8,
+        borderBottomWidth: 0.8
         // alignItems: "center",
         // backgroundColor: "green"
         // justifyContent: "space-between"
