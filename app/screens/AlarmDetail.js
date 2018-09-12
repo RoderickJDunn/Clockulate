@@ -59,7 +59,7 @@ class AlarmDetail extends Component {
     height = SCREEN_HEIGHT; //full height
     snapAuto = 0;
     snapNormal = SCREEN_HEIGHT;
-    snapTaskList = -280;
+    snapTaskList = -SCREEN_HEIGHT * 0.42;
 
     xtraKeyboardHeight = 0; // this is always 0, except on iPhone X it is 34
     _animKeyboardHeight = new Animated.Value(0);
@@ -1482,7 +1482,7 @@ class AlarmDetail extends Component {
                                             ],
                                             outputRange: [
                                                 SCREEN_HEIGHT * 1.1,
-                                                SCREEN_HEIGHT * 1.18,
+                                                SCREEN_HEIGHT * 1.185,
                                                 SCREEN_HEIGHT * 0.76
                                             ]
                                         }
