@@ -250,6 +250,125 @@ class AlarmItem extends React.PureComponent {
                         { backgroundColor: Colors.brandLightGrey }
                     ]}
                 />
+                <Animated.View
+                    style={[
+                        AlarmListStyle.deleteBtn,
+                        {
+                            flexWrap: "nowrap",
+                            overflow: "hidden",
+                            alignContent: "center",
+                            alignItems: "center",
+                            transform: [
+                                {
+                                    translateX: this._position.interpolate({
+                                        inputRange: [-300, -200, 0],
+                                        outputRange: [-100, 0, 35]
+                                        // extrapolate: "clamp"
+                                    })
+                                },
+                                // {
+                                //     scaleX: this._position.interpolate({
+                                //         inputRange: [-200, 0],
+                                //         outputRange: [1, 0.001],
+                                //         extrapolate: "clamp"
+                                //     })
+                                // },
+                                { perspective: 1000 }
+                            ]
+                        }
+                    ]}
+                >
+                    <TouchableOpacity
+                        style={{
+                            flex: 1,
+                            height: scaleByFactor(100, 0.2),
+                            justifyContent: "center"
+                        }}
+                        onPressOut={alarm => this.props.onDelete(alarm)}
+                    >
+                        <Text
+                            numberOfLines={1}
+                            overflow="hidden"
+                            ellipsizeMode={
+                                Platform.OS == "ios" ? "clip" : "tail"
+                            }
+                            style={[
+                                AlarmListStyle.deleteBtnText
+                                // {
+                                //     width: 75
+                                // }
+                            ]}
+                        >
+                            Delete
+                        </Text>
+                    </TouchableOpacity>
+                </Animated.View>
+                <Animated.View
+                    style={[
+                        AlarmListStyle.duplicateBtn,
+                        {
+                            flexWrap: "nowrap",
+                            overflow: "hidden",
+                            // width: this._position.interpolate({
+                            //     inputRange: [-200, 0],
+                            //     outputRange: [100, 0],
+                            //     extrapolate: "clamp"
+                            // }),
+                            // right: this._position.interpolate({
+                            //     inputRange: [-200, 0],
+                            //     outputRange: [100, 190],
+                            //     extrapolate: "clamp"
+                            // }),
+                            alignContent: "center",
+                            alignItems: "center",
+                            transform: [
+                                {
+                                    translateX: this._position.interpolate({
+                                        inputRange: [-300, -200, 0],
+                                        outputRange: [-200, -100, 0]
+                                        // extrapolate: "clamp"
+                                    })
+                                },
+                                // {
+                                //     scaleX: this._position.interpolate({
+                                //         inputRange: [-200, 0],
+                                //         outputRange: [1, 0.001],
+                                //         extrapolate: "clamp"
+                                //     })
+                                // },
+                                { perspective: 1000 }
+                            ]
+                        }
+                    ]}
+                >
+                    <TouchableOpacity
+                        style={{
+                            flex: 1,
+                            height: scaleByFactor(100, 0.2),
+                            justifyContent: "center"
+                        }}
+                        onPressOut={alarm => {
+                            console.log("pressed duplicate...");
+                            this.props.onDuplicate(alarm);
+                        }}
+                    >
+                        <Text
+                            numberOfLines={1}
+                            overflow="hidden"
+                            ellipsizeMode={
+                                Platform.OS == "ios" ? "clip" : "tail"
+                            }
+                            style={[
+                                AlarmListStyle.deleteBtnText
+                                // {
+                                //     width: 75
+                                // }
+                            ]}
+                        >
+                            Duplicate
+                        </Text>
+                    </TouchableOpacity>
+                </Animated.View>
                 <Interactable.View
                     ref={interactableRef}
                     style={[
@@ -461,125 +580,6 @@ class AlarmItem extends React.PureComponent {
                             </View>
                         </View>
                     </TouchableOpacity>
-                    <Animated.View
-                        style={[
-                            AlarmListStyle.deleteBtn,
-                            {
-                                flexWrap: "nowrap",
-                                overflow: "hidden",
-                                alignContent: "center",
-                                alignItems: "center",
-                                transform: [
-                                    {
-                                        translateX: this._position.interpolate({
-                                            inputRange: [-200, -150, -100, 0],
-                                            outputRange: [0, -35, -70, -150],
-                                            extrapolate: "clamp"
-                                        })
-                                    },
-                                    {
-                                        scaleX: this._position.interpolate({
-                                            inputRange: [-200, 0],
-                                            outputRange: [1, 0.001],
-                                            extrapolate: "clamp"
-                                        })
-                                    },
-                                    { perspective: 1000 }
-                                ]
-                            }
-                        ]}
-                    >
-                        <TouchableOpacity
-                            style={{
-                                flex: 1,
-                                height: scaleByFactor(100, 0.2),
-                                justifyContent: "center"
-                            }}
-                            onPressOut={alarm => this.props.onDelete(alarm)}
-                        >
-                            <Text
-                                numberOfLines={1}
-                                overflow="hidden"
-                                ellipsizeMode={
-                                    Platform.OS == "ios" ? "clip" : "tail"
-                                }
-                                style={[
-                                    AlarmListStyle.deleteBtnText,
-                                    {
-                                        width: 75
-                                    }
-                                ]}
-                            >
-                                DELETE
-                            </Text>
-                        </TouchableOpacity>
-                    </Animated.View>
-                    <Animated.View
-                        style={[
-                            AlarmListStyle.duplicateBtn,
-                            {
-                                flexWrap: "nowrap",
-                                overflow: "hidden",
-                                // width: this._position.interpolate({
-                                //     inputRange: [-200, 0],
-                                //     outputRange: [100, 0],
-                                //     extrapolate: "clamp"
-                                // }),
-                                // right: this._position.interpolate({
-                                //     inputRange: [-200, 0],
-                                //     outputRange: [100, 190],
-                                //     extrapolate: "clamp"
-                                // }),
-                                alignContent: "center",
-                                alignItems: "center",
-                                transform: [
-                                    {
-                                        translateX: this._position.interpolate({
-                                            inputRange: [-200, -150, -100, 0],
-                                            outputRange: [0, -10, -20, -50],
-                                            extrapolate: "clamp"
-                                        })
-                                    },
-                                    {
-                                        scaleX: this._position.interpolate({
-                                            inputRange: [-200, 0],
-                                            outputRange: [1, 0.001],
-                                            extrapolate: "clamp"
-                                        })
-                                    },
-                                    { perspective: 1000 }
-                                ]
-                            }
-                        ]}
-                    >
-                        <TouchableOpacity
-                            style={{
-                                flex: 1,
-                                height: scaleByFactor(100, 0.2),
-                                justifyContent: "center"
-                            }}
-                            onPressOut={alarm => {
-                                console.log("pressed duplicate...");
-                                this.props.onDuplicate(alarm);
-                            }}
-                        >
-                            <Text
-                                numberOfLines={1}
-                                overflow="hidden"
-                                ellipsizeMode={
-                                    Platform.OS == "ios" ? "clip" : "tail"
-                                }
-                                style={[
-                                    AlarmListStyle.deleteBtnText,
-                                    {
-                                        width: 75
-                                    }
-                                ]}
-                            >
-                                DUPLICATE
-                            </Text>
-                        </TouchableOpacity>
-                    </Animated.View>
                 </Interactable.View>
                 <View
                     style={{
