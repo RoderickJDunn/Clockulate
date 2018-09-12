@@ -71,20 +71,19 @@ class TaskList extends React.Component {
         // console.debug("props: ", this.props);
         let tasksArr = [];
 
-        /* PERFORMANCE BOTTLENECK 
-            I should try using Object.keys() and map() instead. See answer here https://stackoverflow.com/questions/38824349/convert-object-to-array-in-javascript/38824395
-        */
-        if (this.props.hideDisabledTasks) {
-            for (let id in this.props.data) {
-                if (this.props.data[id].enabled) {
-                    tasksArr.push(this.props.data[id]);
-                }
-            }
-        } else {
-            for (let id in this.props.data) {
-                tasksArr.push(this.props.data[id]);
-            }
+        let alarmTasks = this.props.data;
+        let filteredAlarmTasks = this.props.hideDisabledTasks
+            ? this.props.data.filtered("enabled == true")
+            : null;
+
+        let filterMap;
+        if (filteredAlarmTasks) {
+            filterMap = filteredAlarmTasks.map((aTask) => {
+                return aTask.order;
+            });
         }
+
+        console.log("taskList", this.props.data);
 
         // console.log("tasksArr in task-list", tasksArr);
         return (
@@ -96,7 +95,7 @@ class TaskList extends React.Component {
                 {/* This wrapper view is required for the TouchableWithoutFeedback to work within the TaskArea. */}
                 <View style={{ flex: 1 /* backgroundColor: "red" */ }}>
                     <DraggableFlatList
-                        data={tasksArr}
+                        data={filteredAlarmTasks || alarmTasks}
                         renderItem={this._renderItem}
                         keyExtractor={this._keyExtractor}
                         // scrollPercent={5}
@@ -110,7 +109,8 @@ class TaskList extends React.Component {
                             //     tasksArr
                             // );
                             this.props.onReorderTasks(
-                                tasksArr,
+                                alarmTasks,
+                                filterMap,
                                 moveInfo.data.id,
                                 moveInfo.from,
                                 moveInfo.to

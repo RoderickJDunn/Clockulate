@@ -647,7 +647,7 @@ class AlarmDetail extends Component {
         this.setState({ disableDrag: false });
     }
 
-    _onReorderTasks(aTasks, aTaskId, from, to) {
+    _onReorderTasks(allATasks, filterMap, aTaskId, from, to) {
         console.info("_onReorderTasks");
         // console.info("aTaskId", aTaskId);
         // console.info("from", from);
@@ -655,17 +655,51 @@ class AlarmDetail extends Component {
         // console.log("anotherArg", anotherArg);
 
         // console.log("aTasks", aTasks);
-        aTasks = aTasks.sort((t1, t2) => t1.order > t2.order);
-        realm.write(() => {
-            aTasks[from].order = to;
 
-            if (from < to) {
-                for (let i = from + 1; i <= to; i++) {
-                    aTasks[i].order--;
-                }
-            } else {
-                for (let i = from - 1; i >= to; i--) {
-                    aTasks[i].order++;
+        /* FilterMap is an array of the original orders of enabled aTasks. Each position in the array
+            corresponds to the order value of the enabled aTask excluding any disabled ones. Each value of the array
+            corresponds to the order value of the enabled aTask including any disabled ones. If hideDisabledTasks
+            was false during the move, then filterMap will be null.
+
+            First look up position 'from' in filterMap. This yields the original position of the moved
+            item with respect to all tasks (including disabled ones). [ie. the original 'order' property for this AT]
+
+            Then look up position 'to' in filterMap. This yields the final position of the moved item with 
+            respect to all tasks (including disabled ones). [ie. the final 'order' property of this AT after the move]
+        */
+        if (filterMap) {
+            from = filterMap[from];
+            to = filterMap[to];
+        }
+
+        let aTasksCopy = allATasks.snapshot();
+
+        realm.write(() => {
+            // aTasks[from].order = to;
+
+            for (const key in aTasksCopy) {
+                // console.log("key", key);
+                if (aTasksCopy.hasOwnProperty(key)) {
+                    const alarmTask = aTasksCopy[key];
+                    console.log("order: ", alarmTask.order);
+
+                    if (alarmTask.order == from) {
+                        alarmTask.order = to;
+                    } else {
+                        if (
+                            from < to &&
+                            alarmTask.order <= to &&
+                            alarmTask.order > from
+                        ) {
+                            alarmTask.order--;
+                        } else if (
+                            from > to &&
+                            alarmTask.order >= to &&
+                            alarmTask.order < from
+                        ) {
+                            alarmTask.order++;
+                        }
+                    }
                 }
             }
         });
