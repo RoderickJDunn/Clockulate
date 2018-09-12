@@ -35,7 +35,6 @@ class TaskList extends React.Component {
         if (this.props.activeTask == index) {
             closed = false;
         }
-        console.log("\n");
         // console.log("index: ", index);
         // console.log("closed: ", closed);
         return (
@@ -71,9 +70,22 @@ class TaskList extends React.Component {
         // console.debug("Render TaskList");
         // console.debug("props: ", this.props);
         let tasksArr = [];
-        for (let id in this.props.data) {
-            tasksArr.push(this.props.data[id]);
+
+        /* PERFORMANCE BOTTLENECK 
+            I should try using Object.keys() and map() instead. See answer here https://stackoverflow.com/questions/38824349/convert-object-to-array-in-javascript/38824395
+        */
+        if (this.props.hideDisabledTasks) {
+            for (let id in this.props.data) {
+                if (this.props.data[id].enabled) {
+                    tasksArr.push(this.props.data[id]);
+                }
+            }
+        } else {
+            for (let id in this.props.data) {
+                tasksArr.push(this.props.data[id]);
+            }
         }
+
         // console.log("tasksArr in task-list", tasksArr);
         return (
             // <View style={[listStyle.container]}>
@@ -82,7 +94,7 @@ class TaskList extends React.Component {
                 onPressIn={this.props.closeTaskRows}
             >
                 {/* This wrapper view is required for the TouchableWithoutFeedback to work within the TaskArea. */}
-                <View style={{ flex: 1 /*  backgroundColor: "red" */ }}>
+                <View style={{ flex: 1 /* backgroundColor: "red" */ }}>
                     <DraggableFlatList
                         data={tasksArr}
                         renderItem={this._renderItem}
@@ -109,6 +121,7 @@ class TaskList extends React.Component {
                             console.log("onResponderRelease (task-list)");
                         }}
                         forceRemeasure={this.props.forceRemeasure}
+                        containerDimensions={this.props.containerDimensions}
                     />
                 </View>
             </TouchableWithoutFeedback>

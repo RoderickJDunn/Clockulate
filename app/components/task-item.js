@@ -455,6 +455,7 @@ class TaskItem extends React.Component {
                                 this._tempDuration = null;
                                 this.setState({ isSlidingTask: false });
                                 this.props.shouldEndMove();
+                                this.props.didEndMove();
                             } else {
                                 console.log("Touches arr NOT empty!");
                             }

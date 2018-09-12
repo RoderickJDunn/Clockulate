@@ -68,6 +68,9 @@ class AlarmDetail extends Component {
     AnimatedHandle = Animated.createAnimatedComponent(MaterialIcon);
 
     _clockTransform = new Animated.Value(0);
+
+    _lastView = null;
+
     constructor(props) {
         super(props);
         console.log("AlarmDetail -- Constructor");
@@ -93,7 +96,8 @@ class AlarmDetail extends Component {
                     isEditingLabel: false, // indicates whether Label is being edited. Need to move Input when keyboard shows.
                     keyboardHeight: null,
                     isSlidingTask: false,
-                    taskListFullScreen: false
+                    taskListFullScreen: false,
+                    hideDisabledTasks: false
                 };
                 // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
@@ -108,7 +112,8 @@ class AlarmDetail extends Component {
                 isEditingLabel: false,
                 keyboardHeight: null,
                 isSlidingTask: false,
-                taskListFullScreen: false
+                taskListFullScreen: false,
+                hideDisabledTasks: false
             };
         }
 
@@ -159,7 +164,12 @@ class AlarmDetail extends Component {
             handleBackBtn: this.handleBackPress.bind(this)
         });
 
+        this._lastMeasuredView = "autocalc"; // set initial lastView to calcmode index
         if (this.state.alarm.mode == "normal") {
+            /* IMPORTANT: I'm purposefully not setting initial lastView to clasic-mode index. 
+                This flag doesn't care about normal mode. It is an indicator of which mode, FullTaskList or Autocalc
+                we were last in.
+             */
             setTimeout(() => {
                 this.interactiveRef.snapTo({ index: 1 });
             }, 0);
@@ -436,26 +446,44 @@ class AlarmDetail extends Component {
 
     onSnap = event => {
         console.info("onSnap");
-        let alarmState = this.state.alarm;
-        let snapId = event.nativeEvent.id;
-        // console.log("snapId", snapId);
-        // console.log("alarmState", alarmState);
-        if (snapId == "tasklist") {
-            this.setState({ taskListFullScreen: true });
-        } else if (snapId != alarmState.mode) {
-            realm.write(() => {
-                if (snapId == "normal") {
-                    alarmState.mode = "normal";
-                } else if (snapId == "autocalc") {
-                    alarmState.mode = "autocalc";
-                    // Re-calculate
-                    alarmState.wakeUpTime = this._calcWakeUpTime();
-                }
-                this.setState({ alarm: alarmState, taskListFullScreen: false });
-            });
-        } else {
-            this.setState({ taskListFullScreen: false });
-        }
+        // let alarmState = this.state.alarm;
+        // let { id, index: snapIdx } = event.nativeEvent;
+        // console.log("snapId", id);
+        // // console.log("alarmState", alarmState);
+
+        // console.log("this._lastMeasuredView", this._lastMeasuredView);
+        // console.log("snapIdx", snapIdx);
+        // // Set flag to remeasure list container if we've moved from fullListView to calcmode, or vice versa
+        // if (
+        //     (snapIdx == 0 && this._lastMeasuredView == 2) ||
+        //     (snapIdx == 2 && this._lastMeasuredView == 0)
+        // ) {
+        //     console.log("Setting this._taskListNeedsRemeasure");
+        //     this._taskListNeedsRemeasure = true;
+        // }
+        // if (snapIdx == 2) {
+        //     this._lastMeasuredView = 2; // set lastView as the snap-index of full-screen TaskList
+        //     this.setState({ taskListFullScreen: true });
+        // } else if (id != alarmState.mode) {
+        //     console.log("alarmState.mode", alarmState.mode);
+        //     realm.write(() => {
+        //         if (id == "normal") {
+        //             /* IMPORTANT: I'm purposefully not saving normal mode to this._lastMeasuredView, since the purpose of this flag
+        //                 is to check which of 'FullTaskList View' or 'Calcmode' has been measured last.
+        //             */
+        //             alarmState.mode = "normal";
+        //         } else if (id == "autocalc") {
+        //             alarmState.mode = "autocalc";
+        //             this._lastMeasuredView = snapIdx;
+        //             // Re-calculate
+        //             alarmState.wakeUpTime = this._calcWakeUpTime();
+        //         }
+        //         this.setState({ alarm: alarmState, taskListFullScreen: false });
+        //     });
+        // } else {
+        //     console.log("else... no change in view...");
+        //     this.setState({ taskListFullScreen: false });
+        // }
     };
 
     onPressClock = ref => {
@@ -614,7 +642,12 @@ class AlarmDetail extends Component {
         this.setState({ activeTask: null });
     }
 
-    _onReorderTasks(aTasks, aTaskId, from, to, anotherArg) {
+    /* Called when TaskItem longPress ends without TaskItem having been moved at all */
+    _didEndMove() {
+        this.setState({ disableDrag: false });
+    }
+
+    _onReorderTasks(aTasks, aTaskId, from, to) {
         console.info("_onReorderTasks");
         // console.info("aTaskId", aTaskId);
         // console.info("from", from);
@@ -640,11 +673,11 @@ class AlarmDetail extends Component {
         this.setState({ disableDrag: false });
     }
 
-    _layoutAnimateToFullScreenTaskList() {
+    _layoutAnimateToFullScreenTaskList(nextState = {}) {
         let config = {
-            duration: 300,
+            duration: 50,
             update: {
-                duration: 300,
+                duration: 50,
                 type: "easeInEaseOut"
                 // springDamping: 0.5,
                 // property: "scaleXY"
@@ -657,17 +690,23 @@ class AlarmDetail extends Component {
         console.log("Setting taskArea to LARGE");
         // first just set new height
         this.setState({
-            nonClockHeight: SCREEN_HEIGHT * 1.1,
             fieldAreaFlex: 0.17,
-            taskAreaFlex: 0.83
+            taskAreaFlex: 0.83,
+            taskListDimensions: {
+                width: SCREEN_WIDTH,
+                height: SCREEN_HEIGHT * 1.15 * 0.83 * 0.95, // TODO: Extract layout values into constants, the create variables for the value of these calculations
+                pageX: 0,
+                pageY: SCREEN_HEIGHT * 0.17 // TODO: Extract layout values into constants, the create variables for the value of these calculations
+            },
+            ...nextState
         });
     }
 
-    _layoutAnimateToCalcMode() {
+    _layoutAnimateToCalcMode(nextState) {
         let config = {
-            duration: 300,
+            duration: 50,
             update: {
-                duration: 300,
+                duration: 50,
                 type: "easeInEaseOut"
             }
         };
@@ -676,22 +715,34 @@ class AlarmDetail extends Component {
         console.log("Setting taskArea to small");
         // This should be in calc mode
         this.setState({
-            nonClockHeight: SCREEN_HEIGHT * 0.7,
             fieldAreaFlex: 0.17,
-            taskAreaFlex: 0.4
+            taskAreaFlex: 0.4,
+            taskListDimensions: {
+                width: SCREEN_WIDTH,
+                height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.95, // TODO: Extract layout values into constants, the create variables for the value of these calculations
+                pageX: 0,
+                pageY: SCREEN_HEIGHT * 0.58 // TODO: Extract layout values into constants, the create variables for the value of these calculations
+            },
+            ...nextState
         });
     }
 
     _onPressTasksHeader() {
         console.log("_onPressTasksHeader");
+        this._taskListNeedsRemeasure = true;
+
         if (this.state.taskListFullScreen == false) {
             console.log("1");
-            this._layoutAnimateToFullScreenTaskList();
             this.interactiveRef.snapTo({ index: 2 });
+            this._lastMeasuredView = "tasklist";
+            this._layoutAnimateToFullScreenTaskList({
+                taskListFullScreen: true
+            });
         } else {
             console.log("2");
-            this._layoutAnimateToCalcMode();
+            this._lastMeasuredView = "normal";
             this.interactiveRef.snapTo({ index: 0 });
+            this._layoutAnimateToCalcMode({ taskListFullScreen: false });
         }
     }
 
@@ -702,10 +753,59 @@ class AlarmDetail extends Component {
             console.log("y < 50");
             // animate height increase of TaskList.... lol
             this._layoutAnimateToFullScreenTaskList();
-        } else if (state == "end" && targetSnapPointId == "autocalc") {
-            console.log("y > 50");
-            // animate height increase of TaskList.... lol
-            this._layoutAnimateToCalcMode();
+        } else if (state == "end") {
+            console.log("END OF DRAG ******************* ");
+
+            let alarmState = this.state.alarm;
+            // console.log("alarmState", alarmState);
+            let nextState = {};
+            console.log("this._lastMeasuredView", this._lastMeasuredView);
+            console.log("targetSnapPointId", targetSnapPointId);
+
+            let measuredViewHasChanged =
+                targetSnapPointId != this._lastMeasuredView;
+
+            if (targetSnapPointId == "tasklist") {
+                this._lastMeasuredView = targetSnapPointId;
+                if (measuredViewHasChanged) {
+                    // since lastView will never be set to "normal", we know that the last view measured was "autocalc". Therefore we need to remeasure
+                    this._taskListNeedsRemeasure = true;
+
+                    // since view has changed, we need to set new state
+                    this.setState({ taskListFullScreen: true });
+                }
+            } else {
+                /* targetSnapPoint is either "normal" or "autocalc" */
+                nextState = { taskListFullScreen: false };
+
+                // first check if the last measured view was "tasklist".
+                if (this._lastMeasuredView == "tasklist") {
+                    this._taskListNeedsRemeasure = true;
+                }
+                this._lastMeasuredView = "autocalc";
+
+                let modeHasChanged = this.targetSnapPointId != alarmState.mode;
+
+                if (modeHasChanged) {
+                    // newMode = targetSnapPointId;
+                    let newWakeUpTime;
+                    if (targetSnapPointId == "autocalc") {
+                        newWakeUpTime = this._calcWakeUpTime();
+                        // alarmState.wakeUpTime = this._calcWakeUpTime();
+                    }
+                    realm.write(() => {
+                        let { alarm } = this.state;
+
+                        alarm.mode = targetSnapPointId;
+                        if (newWakeUpTime) {
+                            alarm.wakeUpTime = newWakeUpTime;
+                        }
+                        Object.assign({ alarm: alarm }, nextState);
+                    });
+                }
+
+                this._layoutAnimateToCalcMode(nextState);
+            }
         }
     }
 
@@ -816,6 +916,11 @@ class AlarmDetail extends Component {
             );
         } else {
             // console.log("Passing new list of tasks to TaskList");
+            let forceRemeasure = this._taskListNeedsRemeasure;
+            this._taskListNeedsRemeasure = false;
+
+            console.log("forceRemeasure?", forceRemeasure);
+
             taskArea = (
                 <TaskList
                     onPressItem={this._onPressTask.bind(this)}
@@ -831,8 +936,12 @@ class AlarmDetail extends Component {
                     closeTaskRows={this._closeTaskRows.bind(this)}
                     isEditingTasks={this.state.isEditingTasks}
                     isSlidingTask={this.state.isSlidingTask}
+                    didEndMove={this._didEndMove.bind(this)}
                     onReorderTasks={this._onReorderTasks.bind(this)}
                     willStartMove={() => this.setState({ disableDrag: true })}
+                    forceRemeasure={forceRemeasure}
+                    hideDisabledTasks={this.state.hideDisabledTasks}
+                    containerDimensions={this.state.taskListDimensions}
                 />
             );
         }
@@ -1238,27 +1347,17 @@ class AlarmDetail extends Component {
                                         alignItems: "center"
                                     }}
                                 >
-                                    <TouchableOpacity
-                                        // onPress={() => this.interactiveRef.snapTo({ index: 2 })}>
-                                        onPress={this._onPressTasksHeader.bind(
-                                            this
-                                        )}
+                                    <Text
+                                        style={[
+                                            TextStyle.labelText,
+                                            {
+                                                fontSize: scaleByFactor(17, 0.3)
+                                            }
+                                        ]}
                                     >
-                                        <Text
-                                            style={[
-                                                TextStyle.labelText,
-                                                {
-                                                    fontSize: scaleByFactor(
-                                                        17,
-                                                        0.3
-                                                    )
-                                                }
-                                            ]}
-                                        >
-                                            Tasks
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
+                                        Tasks
+                                    </Text>
+                                </TouchableOpacity>
                                 <TouchableOpacity
                                     style={{
                                         alignSelf: "center",
@@ -1287,11 +1386,15 @@ class AlarmDetail extends Component {
                                         alignSelf: "center",
                                         paddingLeft: 25
                                     }}
-                                    onPress={() =>
-                                        alert(
-                                            "Hide disabled tasks! (Not implemented)"
-                                        )
-                                    }
+                                    onPress={() => {
+                                        // alert(
+                                        //     "Hide disabled tasks! (Not implemented)"
+                                        // )
+                                        this.setState({
+                                            hideDisabledTasks: !this.state
+                                                .hideDisabledTasks
+                                        });
+                                    }}
                                     hitSlop={{
                                         top: 10,
                                         bottom: 10,
@@ -1299,12 +1402,21 @@ class AlarmDetail extends Component {
                                         right: 0
                                     }}
                                 >
-                                    <EntypoIcon
-                                        name="eye"
-                                        size={scaleByFactor(26, 0.2)}
-                                        // color="#7a7677"
-                                        color={Colors.brandLightOpp}
-                                    />
+                                    {this.state.hideDisabledTasks ? (
+                                        <EntypoIcon
+                                            name="eye-with-line"
+                                            size={scaleByFactor(26, 0.2)}
+                                            // color="#7a7677"
+                                            color={Colors.brandLightOpp}
+                                        />
+                                    ) : (
+                                        <EntypoIcon
+                                            name="eye"
+                                            size={scaleByFactor(26, 0.2)}
+                                            // color="#7a7677"
+                                            color={Colors.brandLightOpp}
+                                        />
+                                    )}
                                 </TouchableOpacity>
                             </View>
                             {touchableBackdrop}
@@ -1330,10 +1442,12 @@ class AlarmDetail extends Component {
                                     translateY: this._clockTransform.interpolate(
                                         {
                                             inputRange: [
+                                                this.snapTaskList,
                                                 this.snapAuto,
                                                 this.snapNormal
                                             ],
                                             outputRange: [
+                                                SCREEN_HEIGHT * 1.1,
                                                 SCREEN_HEIGHT * 1.18,
                                                 SCREEN_HEIGHT * 0.76
                                             ]
@@ -1341,13 +1455,20 @@ class AlarmDetail extends Component {
                                     )
                                 },
                                 { perspective: 1000 }
-                            ],
-                            ...handleForceHide
+                            ]
                         }}
                         onPress={() => {
                             // console.log("onPress AnimatedHandle");
                             let idx = this.state.alarm.mode == "normal" ? 0 : 1;
                             this.interactiveRef.snapTo({ index: idx });
+                            realm.write(() => {
+                                let { alarm } = this.state;
+                                alarm.mode =
+                                    alarm.mode == "autocalc"
+                                        ? "normal"
+                                        : "autocalc";
+                                this.setState({ alarm: alarm });
+                            });
                         }}
                         hitSlop={{ top: 70, bottom: 70, left: 70, right: 70 }}
                     />
