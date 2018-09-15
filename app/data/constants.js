@@ -4,10 +4,21 @@
 
 import * as DateUtils from "../util/date_utils";
 
-
-export const DefaultSound = {
-    
+export let SOUND_TYPES = {
+    SILENT: 0,
+    NORMAL: 1,
+    RANDOM: 2,
+    RANDOM_SUBSET: 3
 };
+
+export let ALARM_STATES = {
+    OFF: 0,
+    SET: 1,
+    RINGING: 2,
+    SNOOZED: 3
+};
+
+export const DefaultSound = {};
 
 export const DefaultAlarm = {
     wakeUpTime: getDateForHour(8), // 8:00 am
@@ -15,7 +26,7 @@ export const DefaultAlarm = {
     mode: "autocalc",
     tasks: [],
     label: "",
-    enabled: true,
+    status: ALARM_STATES.SET,
     visible: true,
     preset: false,
     order: null,
@@ -64,10 +75,3 @@ function getDateForHour(hour) {
     d = DateUtils.date_to_nextTimeInstance(d);
     return d;
 }
-
-export let SOUND_TYPES = {
-    SILENT: 0,
-    NORMAL: 1,
-    RANDOM: 2,
-    RANDOM_SUBSET: 3
-};

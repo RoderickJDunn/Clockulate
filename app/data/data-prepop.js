@@ -5,7 +5,7 @@
 import realm from "./DataSchemas";
 import uuid from "react-native-uuid";
 import moment from "moment";
-import { DefaultAlarm } from "./constants";
+import { DefaultAlarm, ALARM_STATES } from "./constants";
 import * as DateUtils from "../util/date_utils";
 import SOUND_DATA from "./sound-data";
 import { AlarmModel, AlarmSound } from "./models";
@@ -203,7 +203,7 @@ function insertPrepopData() {
             mode: "autocalc", // TODO: Change back to basic for testing
             tasks: [almTask1, almTask7, almTask3, almTask8],
             label: "Wake up on work-day",
-            enabled: false, // if true, it is active, and will Ring at wakeUpTime.
+            status: ALARM_STATES.OFF, // if true, it is active, and will Ring at wakeUpTime.
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
             preset: false, // if tr
             order: 0,
@@ -224,7 +224,7 @@ function insertPrepopData() {
             mode: "autocalc",
             tasks: [almTask6, almTask9, almTask1b, almTask3b],
             label: "Wake up for appointment",
-            enabled: false, // if true, it is active, and will Ring at wakeUpTime.
+            status: ALARM_STATES.OFF, // if true, it is active, and will Ring at wakeUpTime.
             visible: true, // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
             preset: false, // if tr
             order: 1,

@@ -6,7 +6,7 @@ import NotificationsIOS, {
 import { PushNotificationIOS } from "react-native";
 import moment from "moment";
 import Sound from "react-native-sound";
-import { SOUND_TYPES } from "../data/constants";
+import { SOUND_TYPES, ALARM_STATES } from "../data/constants";
 import realm from "../data/DataSchemas";
 
 let snoozeAction = new NotificationAction(
@@ -30,6 +30,8 @@ let snoozeAction = new NotificationAction(
                     } else {
                         currAlarm.snoozeCount += 1;
                     }
+
+                    currAlarm.status = ALARM_STATES.SNOOZED;
                 });
             }
         } catch (e) {
@@ -61,7 +63,7 @@ let disableAction = new NotificationAction(
             let currAlarm = realm.objectForPrimaryKey("Alarm", _data.alarmId);
             if (currAlarm) {
                 realm.write(() => {
-                    currAlarm.enabled = false;
+                    currAlarm.status = ALARM_STATES.OFF;
                     currAlarm.snoozeCount = 0;
                 });
             }
@@ -88,7 +90,7 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
     let wakeUpMoment = moment(alarm.wakeUpTime);
 
     /* Make sure there are no System or In-App notifications already set for this alarm 
-        Passing in 'false' as third param to 'clearAlarm' means this function will leave this Alarm set to 'enabled'
+        Passing in 'false' as third param to 'clearAlarm' means this function will leave this Alarm set to 'enabled' == SET
     */
     clearAlarm(alarm, null, false);
 
@@ -112,8 +114,7 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
         realm.write(() => {
             alarm.alarmSound.sound = randomSound;
         });
-    }
-    else if (alarm.alarmSound.type == SOUND_TYPES.NORMAL) {
+    } else if (alarm.alarmSound.type == SOUND_TYPES.NORMAL) {
         shortSoundFile = alarm.alarmSound.sound.files[0]; // this selects the first file in the file array which should be the short version
         longSoundFile = alarm.alarmSound.sound.files[filesLen - 1]; // this selects the last file in the file array which should be the long version (might be the same)
     } else if (alarm.alarmSound.type == SOUND_TYPES.SILENT) {
@@ -161,7 +162,7 @@ export let clearAlarm = (alarm, notificationId, disableAlarm = true) => {
     // if (alarm) {
     //     console.log("clearAlarm", alarm.wakeUpTime);
     //     console.log("snoozeCount", alarm.snoozeCount);
-    //     console.log("enabled", alarm.enabled);
+    //     console.log("status", alarm.status);
     // }
 
     PushNotificationIOS.cancelLocalNotifications({ alarmId: alarm.id });
@@ -172,7 +173,7 @@ export let clearAlarm = (alarm, notificationId, disableAlarm = true) => {
     if (alarm) {
         realm.write(() => {
             if (disableAlarm) {
-                alarm.enabled = false;
+                alarm.status = ALARM_STATES.OFF;
             }
             alarm.snoozeCount = 0;
         });
@@ -183,8 +184,10 @@ export let clearAlarm = (alarm, notificationId, disableAlarm = true) => {
 let onInAppSnoozePressed = (alarm, reloadAlarmsList, sound, soundFile) => {
     console.log("onInAppSnoozePressed");
 
-    sound.stop();
-    sound.release();
+    if (sound) {
+        sound.stop();
+        sound.release();
+    }
 
     realm.write(() => {
         if (alarm.snoozeCount == null) {
@@ -192,6 +195,8 @@ let onInAppSnoozePressed = (alarm, reloadAlarmsList, sound, soundFile) => {
         } else {
             alarm.snoozeCount += 1;
         }
+
+        alarm.status = ALARM_STATES.SNOOZED;
     });
 
     setInAppAlarm(alarm, reloadAlarmsList, soundFile);
@@ -202,8 +207,10 @@ let onInAppSnoozePressed = (alarm, reloadAlarmsList, sound, soundFile) => {
 let onInAppTurnOffPressed = (alarm, reloadAlarmsList, sound) => {
     console.log("onInAppTurnOffPressed");
 
-    sound.stop();
-    sound.release();
+    if (sound) {
+        sound.stop();
+        sound.release();
+    }
 
     clearAlarm(alarm);
 
@@ -217,12 +224,13 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
     if (alarm) {
         console.log("setInAppAlarm", alarm.wakeUpTime);
         console.log("snoozeCount", alarm.snoozeCount);
-        console.log("enabled", alarm.enabled);
+        console.log("status", alarm.status);
     }
     if (soundFile == null) {
         let filesLen = alarm.alarmSound.sound.files.length;
         soundFile = alarm.alarmSound.sound.files[filesLen - 1];
     }
+    console.log("soundFile", soundFile);
 
     // calculate time until alarm
     let now = new Date();
@@ -254,31 +262,41 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
     let timeoutId = setTimeout(() => {
         console.log("Alarm went off while app is open!");
 
-        /* Start sound playback */
-        var sound = new Sound(soundFile, Sound.MAIN_BUNDLE, error => {
-            if (error) {
-                console.log("failed to load the sound", error);
-                return;
-            }
-            // loaded successfully
-            console.log(
-                "duration in seconds: " +
-                    sound.getDuration() +
-                    "number of channels: " +
-                    sound.getNumberOfChannels()
-            );
-            sound.play(success => {
-                if (success) {
-                    console.log("successfully finished playing");
-                } else {
-                    console.log("playback failed due to audio decoding errors");
-                    // reset the player to its uninitialized state (android only)
-                    // this is the only option to recover after an error occured and use the player again
-                    sound.reset();
-                }
-                sound.release();
-            });
+        realm.write(() => {
+            alarm.status = ALARM_STATES.RINGING;
         });
+        reloadAlarmsList();
+        console.log("soundFile", soundFile);
+
+        /* Start sound playback */
+        var sound = null;
+
+        if (soundFile && soundFile.length > 0) {
+            sound = new Sound(soundFile, Sound.MAIN_BUNDLE, error => {
+                if (error) {
+                    console.log("failed to load the sound", error);
+                    return;
+                }
+                // loaded successfully
+                console.log(
+                    "duration in seconds: " +
+                        sound.getDuration() +
+                        "number of channels: " +
+                        sound.getNumberOfChannels()
+                );
+                sound.play(success => {
+                    if (success) {
+                        console.log("successfully finished playing");
+                    } else {
+                        console.log("playback failed due to audio decoding errors");
+                        // reset the player to its uninitialized state (android only)
+                        // this is the only option to recover after an error occured and use the player again
+                        sound.reset();
+                    }
+                    sound.release();
+                });
+            });
+        }
 
         Alert.alert(
             "!!!",
@@ -349,6 +367,7 @@ export let checkForImplicitSnooze = (alarm, mNow) => {
         // user did not explicitly snooze for x number of notifications.
         realm.write(() => {
             alarm.snoozeCount = expectedSnoozeCount;
+            alarm.status = ALARM_STATES.SNOOZED;
         });
     } else if (alarm.snoozeCount == expectedSnoozeCount) {
         console.log("Got expected value for snoozeCount", expectedSnoozeCount);

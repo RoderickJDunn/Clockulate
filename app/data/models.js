@@ -15,13 +15,13 @@ export class AlarmModel {
         this.mode = DefaultAlarm.mode;
         this.tasks = DefaultAlarm.tasks;
         this.label = DefaultAlarm.label;
-        this.enabled = DefaultAlarm.enabled;
+        this.status = DefaultAlarm.status;
         this.visible = DefaultAlarm.visible;
         this.preset = DefaultAlarm.preset;
         this.order = order;
 
         this.alarmSound = new AlarmSound();
-        console.log('this.sound', this.sound);
+        console.log("this.sound", this.sound);
         this.snoozeTime = DefaultAlarm.snoozeTime;
         this.noticiationId = null;
     }
@@ -35,7 +35,7 @@ export class AlarmModel {
             // alarm.mode === DefaultAlarm.mode &&
             alarm.tasks.length === DefaultAlarm.tasks.length &&
             alarm.label === DefaultAlarm.label &&
-            alarm.enabled === DefaultAlarm.enabled &&
+            alarm.status === DefaultAlarm.status &&
             alarm.visible === DefaultAlarm.visible &&
             alarm.preset === DefaultAlarm.preset
         ) {
@@ -48,6 +48,14 @@ export class AlarmModel {
 
 export class AlarmSound {
     constructor(sound) {
+        // if (!sound) {
+        //     sound = realm.objects("Sound").filtered("order = $0", 4)[0];
+        // }
+        // this.id = uuid.v1();
+        // this.sound = sound;
+        // this.type = SOUND_TYPES.NORMAL;
+
+        // FIXME: Leaving default sound silent for now. But for releases it should be Digital4 (uncomment the block above)
         if (!sound) {
             sound = realm.objects("Sound").filtered("order = $0", 0)[0];
         }

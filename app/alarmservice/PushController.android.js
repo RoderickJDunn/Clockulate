@@ -3,7 +3,7 @@
 import PushNotification from "react-native-push-notification";
 import Colors from "../styles/colors";
 import realm from "../data/DataSchemas";
-import { SOUND_TYPES } from "../data/constants";
+import { SOUND_TYPES, ALARM_STATES } from "../data/constants";
 
 let FAKE_CATEGORY = "MyFakeCategory";
 
@@ -79,7 +79,7 @@ export let clearAlarm = (alarm, notificationID, reloadAlarmsList) => {
         realm.write(() => {
             alarm.notificationId = null;
             alarm.snoozeCount = 0;
-            alarm.enabled = false;
+            alarm.status = ALARM_STATES.OFF;
         });
     }
 

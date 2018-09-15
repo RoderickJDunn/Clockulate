@@ -17,7 +17,7 @@ AlarmSchema.schema = {
         mode: "string", // "basic" or "autocalc"
         tasks: { type: "list", objectType: "AlarmTask" },
         label: "string",
-        enabled: "bool", // if true, it is active, and will Ring at wakeUpTime.
+        status: "int", // enum. [OFF, SET, RINGING, SNOOZED]
         visible: "bool", // if true, this Alarm will appear in 'Alarms list' page. If false it won't appear, and if preset also false, will be entirely deleted.
         preset: "bool", // if true, this Alarm is persistent (remains saved as preset, even if removed from 'Alarms' list page.
         order: "int", // used to re-arrange the Alarms list. When an alarm is added, it always gets the highest order (bottom of the list)

@@ -45,6 +45,7 @@ import TouchableBackdrop from "../components/touchable-backdrop";
 import { fontPreview } from "../styles/text.js";
 import { scale, scaleByFactor } from "../util/font-scale";
 import * as DateUtils from "../util/date_utils";
+import { ALARM_STATES } from "../data/constants";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 class AlarmDetail extends Component {
@@ -249,7 +250,7 @@ class AlarmDetail extends Component {
                 // } else
                 alarm[0].label = this.state.alarm.label;
                 alarm[0].arrivalTime = this.state.alarm.arrivalTime;
-                alarm[0].enabled = true;
+                alarm[0].status = ALARM_STATES.SET;
                 alarm[0].alarmSound = this.state.alarm.alarmSound;
                 if (
                     this.state.alarm.mode === "autocalc" &&

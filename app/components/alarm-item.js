@@ -25,6 +25,7 @@ import { TextStyle } from "../styles/text";
 import { ListStyle, AlarmListStyle } from "../styles/list";
 import { scaleByFactor } from "../util/font-scale";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { ALARM_STATES } from "../data/constants";
 
 let shakeAnimMap = new Map([
     [0, 0],
@@ -46,49 +47,6 @@ let shakeAnimMap = new Map([
     [0.95, -2],
     [1, 0]
 ]);
-// let shakeAnimMap = new Map([
-//     [0, 0],
-//     [0.025, 10],
-//     [0.05, 20],
-//     [0.075, 30],
-//     [0.1, 40],
-//     [0.125, 50],
-//     [0.15, 60],
-//     [0.175, 70],
-//     [0.2, 80],
-//     [0.225, 90],
-//     [0.25, 100],
-//     [0.275, 110],
-//     [0.3, 120],
-//     [0.325, 130],
-//     [0.35, 140],
-//     [0.375, 150],
-//     [0.4, 160],
-//     [0.425, 170],
-//     [0.45, 180],
-//     [0.475, 190],
-//     [0.5, 200],
-//     [0.525, 210],
-//     [0.55, 220],
-//     [0.575, 230],
-//     [0.6, 240],
-//     [0.625, 250],
-//     [0.65, 260],
-//     [0.675, 270],
-//     [0.7, 280],
-//     [0.725, 290],
-//     [0.75, 300],
-//     [0.775, 310],
-//     [0.8, 320],
-//     [0.825, 330],
-//     [0.85, 340],
-//     [0.875, 350],
-//     [0.9, 360],
-//     [0.925, 360],
-//     [0.95, 360],
-//     [0.975, 360],
-//     [1, 360]
-// ]);
 
 let anchorPoint = [];
 function getTransformXForRotation(rotationMap) {}
@@ -124,9 +82,9 @@ class AlarmItem extends React.PureComponent {
     constructor(props) {
         super(props);
         console.log("AlarmItem", "- constructor");
-        let initAnimProgress = props.alarm.enabled ? 0.9 : 0;
+        let initAnimProgress = props.alarm.status > ALARM_STATES.OFF ? 0.9 : 0;
         this.state = {
-            switchValue: props.alarm.enabled,
+            switchValue: props.alarm.status,
             animProgress: new Animated.Value(initAnimProgress),
             isMoving: false,
             isRinging: false
@@ -166,53 +124,36 @@ class AlarmItem extends React.PureComponent {
         } else {
             this._appearAnim.setValue(1);
         }
-
-        if (this.props.alarm.enabled) {
-            console.log("alarm is enabled");
-
-            // setTimeout(this._ringingAnimation.stopAnimation, 5000);
-        }
     }
 
     componentWillReceiveProps(props) {
         // console.log("componentWillReceiveProps");
-        if (this.state.switchValue != props.alarm.enabled) {
+        // console.log("props", props);
+        if (this.state.switchValue != props.alarm.status) {
             // console.log("Triggering animation");
-            this._triggerAnimation(props.alarm.enabled, false);
+            this._triggerAnimation(props.alarm.status, false);
         }
 
-        let shouldStopAnimation = false;
-        if (props.alarm.enabled == true) {
+        if (props.alarm.status == ALARM_STATES.RINGING) {
             // check if we are 0-60 past the alarm wakeUpTime. If so, start 'ringing animation'.
-
-            let secSinceAlarm =
-                (moment() - moment(props.alarm.wakeUpTime)) / 1000;
-
-            if (secSinceAlarm > 0 && secSinceAlarm < 60) {
-                // only play "ringing" animation, if it has been <60 sec since alarm fired.
-                this.playRingingAnimation();
-                this.setState({ isRinging: true });
-            } else {
-                shouldStopAnimation = true;
-            }
+            this.playRingingAnimation();
+            this.setState({ isRinging: true });
         } else {
-            shouldStopAnimation = true;
-        }
-
-        if (shouldStopAnimation) {
             this._ringingAnimation.stopAnimation();
+            this._ringingScaleAnim.stopAnimation();
+            this._ringingAnimation.setValue(0);
             Animated.parallel([
-                Animated.timing(this._ringingAnimation, {
-                    toValue: 0,
-                    duration: 100,
-                    useNativeDriver: true
-                }),
+                // Animated.timing(this._ringingAnimation, {
+                //     toValue: 0,
+                //     duration: 400,
+                //     useNativeDriver: true
+                // }),
                 Animated.timing(this._ringingScaleAnim, {
                     toValue: 1,
-                    duration: 900,
+                    duration: 400,
                     useNativeDriver: true
                 })
-            ]);
+            ]).start();
         }
     }
 
@@ -280,9 +221,9 @@ class AlarmItem extends React.PureComponent {
         //     duration = 1000;
         //     easing = Easing.log;
         // }
-        toValue = nextAlarmState ? 0.9 : 0;
+        toValue = nextAlarmState > ALARM_STATES.OFF ? 0.9 : 0;
         duration = 1000;
-        easing = nextAlarmState ? Easing.linear : Easing.log;
+        easing = nextAlarmState > ALARM_STATES.OFF ? Easing.linear : Easing.log;
 
         // console.log(
         //     "this.state.animProgress._value",
@@ -389,7 +330,7 @@ class AlarmItem extends React.PureComponent {
         // console.debug("alarm-item props", this.props);
         // console.debug(
         //     `wakeTime: ${this.props.alarm.wakeUpTime} | enabled: ${
-        //         this.props.alarm.enabled
+        //         this.props.alarm.status
         //     }  | order: ${this.props.alarm.order}         |         (id: ${
         //         this.props.alarm.id
         //     }`
@@ -413,7 +354,7 @@ class AlarmItem extends React.PureComponent {
 
         // Grab correct colors depending on whether alarm is enabled/disabled
         let textColor, buttonColor;
-        if (this.props.alarm.enabled) {
+        if (this.props.alarm.status > ALARM_STATES.OFF) {
             textColor = Colors.darkGreyText;
             buttonColor = "#6bf47b";
         } else {
@@ -632,7 +573,7 @@ class AlarmItem extends React.PureComponent {
                         this.props.onSnap(e.nativeEvent.id);
                     }}
                 >
-                    {this.props.alarm.snoozeCount > 0 && (
+                    {this.props.alarm.status == ALARM_STATES.SNOOZED && (
                         <Icon
                             name="sleep"
                             size={25}
@@ -922,8 +863,10 @@ class AlarmItem extends React.PureComponent {
                                     }}
                                     onPress={() => {
                                         /* Before launching SleepCycle, disable the current Alarm (if its enabled), so that we don't get conflicts */
-
-                                        if (this.props.alarm.enabled) {
+                                        if (
+                                            this.props.alarm.status >
+                                            ALARM_STATES.OFF
+                                        ) {
                                             // this will disable the alarm and clear notifications
                                             this.props.onToggle(
                                                 this.props.alarm

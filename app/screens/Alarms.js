@@ -43,6 +43,7 @@ const { UIManager } = NativeModules;
 
 /* Dev only */
 import { populateDummyAlarms } from "../data/data-prepop";
+import { ALARM_STATES } from "../data/constants";
 
 var loadedSound = null;
 
@@ -302,7 +303,9 @@ class Alarms extends Component {
                 // TODO: Remove platform check. We need similar function on Android (only transparent to user)
                 let mNow = moment();
 
-                let alarms = realm.objects("Alarm").filtered("enabled == true");
+                let alarms = realm
+                    .objects("Alarm")
+                    .filtered("status == $0 OR status == $1", ALARM_STATES.SET, ALARM_STATES.SNOOZED);
                 for (let i = 0; i < alarms.length; i++) {
                     if (moment(alarms[i].wakeUpTime) > mNow) {
                         // alarm is in the future. Set in app alarm. (On Android, the inAppAlarm is a transparent timer)
@@ -321,7 +324,9 @@ class Alarms extends Component {
             // cancel any set timers for in-app alarms (iOS only)
 
             if (Platform.OS == "ios") {
-                let alarms = realm.objects("Alarm").filtered("enabled == true");
+                let alarms = realm
+                    .objects("Alarm")
+                    .filtered("status == $0", ALARM_STATES.SET);
                 for (let i = 0; i < alarms.length; i++) {
                     cancelInAppAlarm(alarms[i]);
                 }
@@ -355,7 +360,7 @@ class Alarms extends Component {
 
             if (changedAlarm.length == 1) {
                 console.log("wakeUpTime", changedAlarm.wakeUpTime);
-                console.log("enabled", changedAlarm.enabled);
+                console.log("status", changedAlarm.status);
 
                 /* Now schedule notification(s) for the changes */
                 // passing in reloadAlarms function for iOS in-app alarm to be able to refresh AlarmsList screen
@@ -456,7 +461,7 @@ class Alarms extends Component {
         }
 
         newAlarm.label = item.label;
-        newAlarm.enabled = false;
+        newAlarm.status = ALARM_STATES.OFF;
         newAlarm.visible = item.visible;
         newAlarm.preset = item.preset;
         newAlarm.alarmSound = item.alarmSound;
@@ -479,13 +484,16 @@ class Alarms extends Component {
     _onAlarmToggled = alarm => {
         console.info("AlarmsList - alarm toggled: ");
         realm.write(() => {
-            alarm.enabled = !alarm.enabled;
+            alarm.status =
+                alarm.status > ALARM_STATES.OFF
+                    ? ALARM_STATES.OFF
+                    : ALARM_STATES.SET;
         });
         // console.log(alarm);
 
         // console.log(wakeUpTime);
         console.log("WakeUpTime: " + alarm.wakeUpTime);
-        if (alarm.enabled) {
+        if (alarm.status == ALARM_STATES.SET) {
             let wakeUpTime = DateUtils.date_to_nextTimeInstance(
                 alarm.wakeUpTime
             );
