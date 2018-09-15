@@ -932,7 +932,7 @@ class AlarmDetail extends Component {
                                 position: "absolute",
                                 // borderColor: "black",
                                 // borderWidth: 0.5,
-                                backgroundColor: "#603b91",
+                                backgroundColor: "#191966",
                                 padding: 12,
                                 borderRadius: 7,
                                 shadowOffset: {

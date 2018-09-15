@@ -16,6 +16,8 @@ import {
     // TouchableOpacity
 } from "react-native";
 import moment from "moment";
+import LinearGradient from "react-native-linear-gradient";
+// import RadialGradient from "react-native-radial-gradient";
 
 import PushNotificationAndroid from "react-native-push-notification";
 import {
@@ -305,7 +307,11 @@ class Alarms extends Component {
 
                 let alarms = realm
                     .objects("Alarm")
-                    .filtered("status == $0 OR status == $1", ALARM_STATES.SET, ALARM_STATES.SNOOZED);
+                    .filtered(
+                        "status == $0 OR status == $1",
+                        ALARM_STATES.SET,
+                        ALARM_STATES.SNOOZED
+                    );
                 for (let i = 0; i < alarms.length; i++) {
                     if (moment(alarms[i].wakeUpTime) > mNow) {
                         // alarm is in the future. Set in app alarm. (On Android, the inAppAlarm is a transparent timer)
@@ -601,7 +607,13 @@ class Alarms extends Component {
                 style={ListStyle.container}
                 onPressIn={this._onPressBackground}
             >
-                <View style={{ flex: 1 }}>
+                <LinearGradient
+                    style={{ flex: 1 }}
+                    start={{ x: 0.2, y: 0 }}
+                    end={{ x: 1.5, y: 1 }}
+                    // colors={["#ecebf4", "red"]}
+                    colors={["#ecebf4", "#c2ccd6"]}
+                >
                     {/* <PushController /> */}
                     <DraggableFlatList
                         data={this.state.alarms}
@@ -703,7 +715,7 @@ class Alarms extends Component {
                             this.setState(this.state);
                         }}
                     /> */}
-                </View>
+                </LinearGradient>
             </TouchableWithoutFeedback>
         );
     }

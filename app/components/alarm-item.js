@@ -429,12 +429,12 @@ class AlarmItem extends React.PureComponent {
                     }
                 ]}
             >
-                <View
+                {/* <View
                     style={[
                         StyleSheet.absoluteFill,
                         { backgroundColor: Colors.brandLightGrey }
                     ]}
-                />
+                /> */}
                 <Animated.View
                     style={[
                         AlarmListStyle.deleteBtn,
@@ -779,6 +779,7 @@ class AlarmItem extends React.PureComponent {
                             </Animated.View>
                         </TouchableOpacity>
                         <View style={AlarmListStyle.infoContainer}>
+                            {this.props.alarm.mode == "autocalc" && (
                             <Text
                                 style={[
                                     TextStyle.timeText,
@@ -803,6 +804,7 @@ class AlarmItem extends React.PureComponent {
                                     {" " + amPmArriveTime}
                                 </Text>
                             </Text>
+                            )}
                             <Text
                                 style={[
                                     AlarmListStyle.timeText,
