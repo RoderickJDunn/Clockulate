@@ -489,6 +489,7 @@ class AlarmDetail extends Component {
 
     onPressClock = ref => {
         console.info("onPressClock");
+        Keyboard.dismiss();
         if (this.state.activeTask == null) {
             if (this.state.alarm.mode == "autocalc") {
                 this.interactiveRef.snapTo({ index: 1 });
@@ -783,6 +784,7 @@ class AlarmDetail extends Component {
 
     _onDragInteractable(event) {
         console.log("drag:", event.nativeEvent);
+        Keyboard.dismiss();
         let { state, y, targetSnapPointId } = event.nativeEvent;
         if (state == "start" && y < 50 && y > -100) {
             console.log("y < 50");
@@ -1332,6 +1334,7 @@ class AlarmDetail extends Component {
                                     timePickerPrompt="What time do you need to arrive?"
                                     inputFontSize={scaleByFactor(33, 0.5)}
                                     separation={scaleByFactor(5, 0.3)}
+                                    onOpenModal={Keyboard.dismiss}
                                 />
                                 <LabeledTimeInput
                                     labelText="HRS OF SLEEP"

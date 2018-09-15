@@ -24,26 +24,29 @@ class LabeledTimeInput extends Component {
         // console.debug("Alarms  componentWillReceiveProps");
     }
 
-    _showDateTimePicker = () => this.setState({ isDTPickerVisible: true });
+    _showDateTimePicker = () => {
+        this.props.onOpenModal && this.props.onOpenModal();
+        this.setState({ isDTPickerVisible: true });
+    };
 
     _hideDateTimePicker = () => this.setState({ isDTPickerVisible: false });
 
     _handleDatePicked = time => {
-        console.log("A date has been picked: ", time);
+        // console.log("A date has been picked: ", time);
 
         // This 'time' is in fact a 'Date' object. We must make sure that this date
         // is the next instance of the specified time
 
         let arrivalDate = moment();
-        console.log("Date right now: " + arrivalDate.toDate());
+        // console.log("Date right now: " + arrivalDate.toDate());
         let arrivalTime = moment(time);
-        console.log("Selected date/time: " + arrivalTime.toDate());
+        // console.log("Selected date/time: " + arrivalTime.toDate());
 
         arrivalDate
             .set("hour", arrivalTime.hour())
             .set("minute", arrivalTime.minute())
             .set("second", 0);
-        console.log("Applied today's date: " + arrivalDate.toDate());
+        // console.log("Applied today's date: " + arrivalDate.toDate());
         // Check if this moment is in the past. If so add 1 day.
         if (arrivalDate.diff(moment()) < 0) {
             arrivalDate.add(1, "days");
