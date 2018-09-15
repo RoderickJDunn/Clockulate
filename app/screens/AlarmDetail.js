@@ -17,7 +17,8 @@ import {
     TextInput,
     ScrollView,
     Platform,
-    LayoutAnimation
+    LayoutAnimation,
+    Alert
 } from "react-native";
 import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -69,6 +70,8 @@ class AlarmDetail extends Component {
     AnimatedHandle = Animated.createAnimatedComponent(MaterialIcon);
 
     _clockTransform = new Animated.Value(0);
+    _modeTextOpacity;
+    _modeTextScale;
 
     _lastView = null;
 
@@ -122,6 +125,9 @@ class AlarmDetail extends Component {
 
         this.alarmLabelCache = this.state.alarm.label;
 
+        // TODO: Here we need to check whether user has global setting to "Never show mode indicator"
+        this._modeTextOpacity = new Animated.Value(1);
+        this._modeTextScale = new Animated.Value(0);
         // setTimeout(() => {
         //     this._animatedView.animate(this.state.animationDuration);
         // }, 0);
@@ -175,6 +181,28 @@ class AlarmDetail extends Component {
                 this.interactiveRef.snapTo({ index: 1 });
             }, 0);
         }
+
+        this._playModeIndicatorAnimation();
+    }
+
+    _playModeIndicatorAnimation() {
+        this._modeTextOpacity.setValue(1);
+        Animated.sequence([
+            Animated.spring(this._modeTextScale, { toValue: 1 }),
+            Animated.timing(this._modeTextOpacity, {
+                toValue: 0,
+                duration: 2000,
+                delay: 3000
+            })
+        ]).start(() => {
+            this._modeTextScale.setValue(0);
+            this._modeTextOpacity.setValue(0);
+        });
+    }
+
+    _hideModeText() {
+        this._modeTextScale.setValue(0);
+        this._modeTextOpacity.setValue(0);
     }
 
     _setAnimatedViewRef(ref) {
@@ -447,8 +475,13 @@ class AlarmDetail extends Component {
 
     onSnap = event => {
         console.info("onSnap");
+
         // let alarmState = this.state.alarm;
-        // let { id, index: snapIdx } = event.nativeEvent;
+        let { id, index: snapIdx } = event.nativeEvent;
+
+        if (snapIdx == 2) {
+            this._hideModeText();
+        }
         // console.log("snapId", id);
         // // console.log("alarmState", alarmState);
 
@@ -766,7 +799,7 @@ class AlarmDetail extends Component {
     _onPressTasksHeader() {
         console.log("_onPressTasksHeader");
         this._taskListNeedsRemeasure = true;
-
+        this._hideModeText();
         if (this.state.taskListFullScreen == false) {
             console.log("1");
             this.interactiveRef.snapTo({ index: 2 });
@@ -788,7 +821,7 @@ class AlarmDetail extends Component {
         let { state, y, targetSnapPointId } = event.nativeEvent;
         if (state == "start" && y < 50 && y > -100) {
             console.log("y < 50");
-            // animate height increase of TaskList.... lol
+            // animate height increase of TaskList
             this._layoutAnimateToFullScreenTaskList();
         } else if (state == "end") {
             console.log("END OF DRAG ******************* ");
@@ -821,7 +854,7 @@ class AlarmDetail extends Component {
                 }
                 this._lastMeasuredView = "autocalc";
 
-                let modeHasChanged = this.targetSnapPointId != alarmState.mode;
+                let modeHasChanged = targetSnapPointId != alarmState.mode;
 
                 if (modeHasChanged) {
                     // newMode = targetSnapPointId;
@@ -839,6 +872,8 @@ class AlarmDetail extends Component {
                         }
                         Object.assign({ alarm: alarm }, nextState);
                     });
+
+                    this._playModeIndicatorAnimation();
                 }
 
                 this._layoutAnimateToCalcMode(nextState);
@@ -1507,6 +1542,7 @@ class AlarmDetail extends Component {
                                         : "autocalc";
                                 this.setState({ alarm: alarm });
                             });
+                            this._playModeIndicatorAnimation();
                         }}
                         hitSlop={{ top: 70, bottom: 70, left: 70, right: 70 }}
                     />
@@ -1568,6 +1604,59 @@ class AlarmDetail extends Component {
                                 color: "blue"
                             }}
                         />
+                    </TouchableOpacity>
+                </Animated.View>
+                <Animated.View
+                    style={{
+                        position: "absolute",
+                        left: 8,
+                        top: 8,
+                        paddingHorizontal: 5,
+                        paddingVertical: 1,
+                        backgroundColor: "rgba(20, 20, 82, 0.6)",
+                        borderRadius: 15,
+                        opacity: this._modeTextOpacity,
+                        transform: [
+                            {
+                                scale: this._modeTextScale
+                            }
+                        ]
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress={() => {
+                            console.log("Pressed mode indicator text");
+                            Alert.alert(
+                                "Mode Indication",
+                                "Hide mode inidicator?",
+                                [
+                                    {
+                                        text: "Hide",
+                                        onPress: () => {
+                                            // TODO: Save to global settings
+                                            console.log(
+                                                "(MOCK) Saving 'hide mode inidicator' to global settings"
+                                            );
+                                        }
+                                    },
+                                    {
+                                        text: "Cancel",
+                                        style: "cancel"
+                                    }
+                                ]
+                            );
+                        }}
+                    >
+                        <Text
+                            style={{
+                                backgroundColor: "transparent",
+                                color: Colors.brandLightGrey
+                            }}
+                        >
+                            {this.state.alarm.mode == "normal"
+                                ? "Classic Mode"
+                                : "Calculate Mode"}
+                        </Text>
                     </TouchableOpacity>
                 </Animated.View>
                 {/* Measuring line -- dev view to check whether views are aligned properly */}
