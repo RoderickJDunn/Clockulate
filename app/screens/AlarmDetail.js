@@ -822,6 +822,7 @@ class AlarmDetail extends Component {
         if (state == "start" && y < 50 && y > -100) {
             console.log("y < 50");
             // animate height increase of TaskList
+            this._hideModeText();
             this._layoutAnimateToFullScreenTaskList();
         } else if (state == "end") {
             console.log("END OF DRAG ******************* ");
@@ -855,6 +856,7 @@ class AlarmDetail extends Component {
                 this._lastMeasuredView = "autocalc";
 
                 let modeHasChanged = targetSnapPointId != alarmState.mode;
+                console.log("alarmState.mode", alarmState.mode);
 
                 if (modeHasChanged) {
                     // newMode = targetSnapPointId;
@@ -1162,10 +1164,15 @@ class AlarmDetail extends Component {
                     // initialPosition={{ y: initInterPosition }}
                     dragEnabled={!this.state.disableDrag}
                     boundaries={{
-                        top: -SCREEN_HEIGHT * 0.5, // 0.7 before
+                        top: -SCREEN_HEIGHT * 0.45, // 0.7 before
                         bottom: this.snapNormal * 1.15,
                         bounce: 0.3
                     }}
+                    dragWithSpring={
+                        this.state.alarm.mode == "normal"
+                            ? { tension: 900, damping: 0.5 }
+                            : { tension: 1500, damping: 0.5 }
+                    }
                     // dragWithSpring={{ tension: 200, damping: 0.5 }}
                     // frictionAreas={[
                     //     { damping: 0.0, influenceArea: { right: 0 } }
