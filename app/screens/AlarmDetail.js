@@ -1513,7 +1513,6 @@ class AlarmDetail extends Component {
                         position: "absolute",
                         alignSelf: "flex-end",
                         backgroundColor: "transparent",
-                        padding: scaleByFactor(20, 0.6),
                         transform: [
                             {
                                 scale: this._clockTransform.interpolate({
@@ -1551,6 +1550,9 @@ class AlarmDetail extends Component {
                                 saveSound: this.saveSound.bind(this),
                                 currSound: this.state.alarm.alarmSound
                             });
+                        }}
+                        style={{
+                            padding: scaleByFactor(20, 0.6)
                         }}
                     >
                         <FontAwesome
