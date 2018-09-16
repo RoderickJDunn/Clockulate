@@ -127,7 +127,7 @@ class LabeledInput extends Component {
                             if (onBlur != null) onBlur(e);
                         }}
                         onFocus={() => {
-                            this._onFocus.bind(this);
+                            this._onFocus();
                             if (onFocus != null) onFocus();
                         }}
                         blurOnSubmit={true}
@@ -147,7 +147,9 @@ class LabeledInput extends Component {
                                 : this.props.textAlign
                         }
                     />
-                    {this.props.clearButton}
+                    {this.state.isEditing == true
+                        ? this.props.clearButton
+                        : null}
                 </View>
             </View>
         );
