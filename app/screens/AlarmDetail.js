@@ -188,11 +188,15 @@ class AlarmDetail extends Component {
     _playModeIndicatorAnimation() {
         this._modeTextOpacity.setValue(1);
         Animated.sequence([
-            Animated.spring(this._modeTextScale, { toValue: 1 }),
+            Animated.spring(this._modeTextScale, {
+                toValue: 1,
+                useNativeDriver: true
+            }),
             Animated.timing(this._modeTextOpacity, {
                 toValue: 0,
                 duration: 2000,
-                delay: 3000
+                delay: 3000,
+                useNativeDriver: true
             })
         ]).start(() => {
             this._modeTextScale.setValue(0);
@@ -1235,7 +1239,7 @@ class AlarmDetail extends Component {
                                 {fWakeUpTime}
                                 <Text
                                     style={[
-                                        { fontSize: scaleByFactor(55, 0.7) }
+                                        { fontSize: scaleByFactor(53, 0.7) }
                                     ]}
                                 >
                                     {" " + amPmWakeUpTime}
@@ -1306,7 +1310,7 @@ class AlarmDetail extends Component {
                             ]}
                         >
                             <LabeledInput
-                                labelText="LABEL"
+                                labelText="Label"
                                 placeholder="Enter a label"
                                 fieldText={this.alarmLabelCache}
                                 handleTextInput={this.onChangeLabel}
@@ -1360,8 +1364,8 @@ class AlarmDetail extends Component {
                                 }}
                             >
                                 <LabeledTimeInput
-                                    labelText="ARRIVAL"
-                                    flex={0.6}
+                                    labelText="Arrival"
+                                    flex={0.5}
                                     // fieldText={moment
                                     //     .utc(this.state.alarm.arrivalTime)
                                     //     .local()
@@ -1379,9 +1383,9 @@ class AlarmDetail extends Component {
                                     onOpenModal={Keyboard.dismiss}
                                 />
                                 <LabeledTimeInput
-                                    labelText="HRS OF SLEEP"
+                                    labelText="Hrs of Sleep"
                                     fieldText={hoursOfSleep}
-                                    flex={0.4}
+                                    flex={0.5}
                                     viewStyle={{
                                         flex: 0.3,
                                         height: "auto"
@@ -1626,6 +1630,16 @@ class AlarmDetail extends Component {
                         transform: [
                             {
                                 scale: this._modeTextScale
+                            },
+                            {
+                                translateY: this._clockTransform.interpolate({
+                                    inputRange: [
+                                        this.snapTaskList,
+                                        this.snapAuto
+                                    ],
+                                    outputRange: [-SCREEN_HEIGHT * 0.3, 0],
+                                    extrapolate: "clamp"
+                                })
                             }
                         ]
                     }}
@@ -1793,7 +1807,7 @@ const styles = StyleSheet.create({
     timeText: {
         // color: "#d5d5d5",
         color: Colors.brandOffWhiteBlue,
-        fontSize: scaleByFactor(115, 0.7),
+        fontSize: scaleByFactor(105, 0.7),
         backgroundColor: "transparent",
         alignSelf: "center",
         // fontFamily: "Baskerville-Bold"
