@@ -23,7 +23,11 @@ import {
 import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
+import MaterialComIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import FAIcon from "react-native-vector-icons/FontAwesome";
+import MenuItem from "../components/menu-item";
+import MenuHeader from "../components/menu-header";
+
 import Interactable from "react-native-interactable";
 import DateTimePicker from "react-native-modal-datetime-picker";
 // import KeyframesView from "react-native-facebook-keyframes";
@@ -49,10 +53,144 @@ import * as DateUtils from "../util/date_utils";
 import { ALARM_STATES } from "../data/constants";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+let _menuIconRotation = new Animated.Value(0);
+
 class AlarmDetail extends Component {
-    static navigationOptions = () => ({
-        title: "Edit Alarm"
-    });
+    static navigationOptions = ({ navigation }) => {
+        // const { test } = navigation.state.params;
+        // const { testId } = navigation.state.params;
+        // console.log("navigation.state", navigation.state);
+        // let wifiIcon = <FeatherIcon name="wifi-off" size={17} color="white" />;
+        // if ("params" in navigation.state) {
+        //     // if (
+        //     //     "connected" in navigation.state.params &&
+        //     //     navigation.state.params.connected
+        //     // ) {
+        //     //     wifiIcon = <FeatherIcon name="wifi" size={17} color="white" />;
+        //     // }
+        //     if (
+        //         "testFilter" in navigation.state.params &&
+        //         navigation.state.params.testFilter
+        //     ) {
+        //         filterIdx = navigation.state.params.testFilter;
+        //     }
+        // }
+
+        let filterIdx = 1;
+
+        let menuStyle = navigation.state.params.open
+            ? {
+                  top: 0,
+                  right: 0,
+                  height: 200,
+                  width: 375
+              }
+            : {
+                  top: 0,
+                  right: 0,
+                  height: 40,
+                  width: 375
+              };
+
+        let textHeight = !navigation.state.params.open
+            ? {
+                  height: 0
+              }
+            : {
+                  height: 30
+              };
+
+        return {
+            title: "Edit Alarm",
+            headerRight: (
+                <View
+                    style={{
+                        position: "absolute",
+                        paddingVertical: 10,
+                        paddingHorizontal: 5,
+                        // borderColor: "red",
+                        // borderWidth: 2,
+                        ...menuStyle
+                    }}
+                >
+                    {/* {navigation.state.params.open && ( */}
+                    <View
+                        style={{
+                            position: "absolute",
+                            top: 0,
+                            bottom: 0,
+                            left: 0,
+                            right: 0
+                            // backgroundColor: "blue"
+                        }}
+                        pointerEvents="box-none"
+                    >
+                        <MenuHeader
+                            title="Alarm Options"
+                            open={navigation.state.params.open}
+                        />
+                        <MenuItem
+                            // icon={<MaterialComIcon name="sleep" size={17} />}
+                            title="Snooze Time"
+                            value={<Text>10</Text>}
+                            open={navigation.state.params.open}
+                        />
+                        <MenuItem
+                            title="Menu Item 2!"
+                            open={navigation.state.params.open}
+                        />
+                    </View>
+                    {/* )} */}
+
+                    {/* Rotate this to horizontal when menu is open */}
+                    <TouchableOpacity
+                        onPress={() => {
+                            let config = {
+                                duration: 1500,
+                                update: {
+                                    duration: 1500,
+                                    type: "easeInEaseOut"
+                                    // springDamping: 0.5,
+                                    // property: "scaleXY"
+                                }
+                            };
+                            let nextMenuIsOpen = !navigation.state.params.open;
+                            Animated.timing(_menuIconRotation, {
+                                toValue: nextMenuIsOpen ? 1 : 0,
+                                duration: 200,
+                                delay: 200,
+                                useNativeDriver: true
+                            }).start();
+
+                            LayoutAnimation.configureNext(config);
+                            navigation.setParams({
+                                open: !navigation.state.params.open
+                            });
+                        }}
+                        style={{
+                            alignSelf: "flex-end",
+                            transform: [
+                                {
+                                    rotate: _menuIconRotation.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: ["0deg", "-90deg"]
+                                    })
+                                }
+                            ]
+                            // backgroundColor: "green"
+                        }}
+                    >
+                        <MaterialIcon
+                            color={Colors.brandLightGrey}
+                            name="more-vert"
+                            size={25}
+                        />
+                    </TouchableOpacity>
+                </View>
+            )
+        };
+    };
 
     _calculatedWakeUpTime;
     alarmLabelCache;
@@ -1843,6 +1981,21 @@ const styles = StyleSheet.create({
     dateText: {
         color: "#d5d5d5",
         fontSize: 40
+    },
+    menuHeader: {
+        fontWeight: "bold",
+        alignSelf: "stretch",
+        fontSize: 15,
+        padding: 10,
+        paddingBottom: 5
+    },
+    menuOption: {
+        // justifyContent: "center",
+        // height: scale(50, 0.5),
+        // padding: 10,
+        alignSelf: "stretch",
+        overflow: "hidden",
+        backgroundColor: "#FDFDFD"
     }
 });
 
