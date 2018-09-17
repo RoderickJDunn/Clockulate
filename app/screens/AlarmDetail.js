@@ -1370,6 +1370,7 @@ class AlarmDetail extends Component {
                                     //     .utc(this.state.alarm.arrivalTime)
                                     //     .local()
                                     //     .format("h:mm A")}
+                                    behavior={"picker"}
                                     time={moment
                                         .utc(this.state.alarm.arrivalTime)
                                         .local()
@@ -1382,6 +1383,20 @@ class AlarmDetail extends Component {
                                     separation={scaleByFactor(5, 0.3)}
                                     onOpenModal={Keyboard.dismiss}
                                 />
+                                {/* {
+                                    <View
+                                        style={{
+                                            alignSelf: "stretch",
+                                            backgroundColor: "transparent",
+                                            justifyContent: "center"
+                                        }}
+                                    >
+                                        <EntypoIcon
+                                            style={{ flex: 0.5 }}
+                                            name="moon"
+                                        />
+                                    </View>
+                                } */}
                                 <LabeledTimeInput
                                     labelText="Hrs of Sleep"
                                     fieldText={hoursOfSleep}
@@ -1393,8 +1408,19 @@ class AlarmDetail extends Component {
                                     }}
                                     inputFontSize={scaleByFactor(33, 0.5)}
                                     separation={scaleByFactor(5, 0.3)}
-                                    disabled={true}
+                                    behavior={"hider"}
                                     textAlign={"right"}
+                                    hiderView={
+                                        <EntypoIcon
+                                            style={{
+                                                textAlign: "right",
+                                                padding: 4
+                                                // backgroundColor: "red",
+                                            }}
+                                            size={25}
+                                            name="moon"
+                                        />
+                                    }
                                 />
                             </View>
                             {/* <View style={{ height: 5 }} /> */}
@@ -1605,7 +1631,7 @@ class AlarmDetail extends Component {
                             padding: scaleByFactor(20, 0.6)
                         }}
                     >
-                        <FontAwesome
+                        <FAIcon
                             name="music"
                             size={scaleByFactor(23, 0.4)}
                             // color="#ECECEC"
