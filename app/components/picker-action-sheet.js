@@ -6,7 +6,8 @@ import {
     TouchableOpacity,
     Text,
     Dimensions,
-    Picker
+    Picker,
+    Animated
 } from "react-native";
 import Colors from "../styles/colors";
 
@@ -15,6 +16,19 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15];
 
 class PickerActionSheet extends React.Component {
+    _pickerAnim = new Animated.Value(0);
+
+    _pickerTransform = {
+        transform: [
+            {
+                translateY: this._pickerAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [SCREEN_HEIGHT * 0.63, 0]
+                })
+            }
+        ]
+    };
+
     constructor(props) {
         super(props);
         this.state = {
@@ -22,78 +36,102 @@ class PickerActionSheet extends React.Component {
         };
     }
 
+    componentDidMount() {
+        Animated.timing(this._pickerAnim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true
+        }).start();
+    }
+
+    componentWillUnmount() {
+        console.log("SnoozePicker: componentWillUnmount");
+        Animated.timing(this._pickerAnim, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true
+        }).start();
+    }
+
     render() {
         return (
-            <View style={styles.container}>
-                <View style={styles.pickerUpperWrapper}>
-                    <View style={styles.pickerHeader}>
-                        <Text style={styles.headerText}>Snooze Time</Text>
-                    </View>
-                    <View style={styles.headerSeparator} />
-                    <View style={styles.pickerWrapper}>
-                        <Picker
-                            selectedValue={10}
-                            style={{
-                                // flex: 0.55,
-                                height: 200
-                                // backgroundColor: "blue"
-                                // alignContent: "center"
-                            }}
-                            onValueChange={(itemValue, itemIndex) =>
-                                this.setState({ value: itemValue })
-                            }
-                            itemStyle={{ height: 200 }}
-                        >
-                            {snoozeTimeOptions.map(time => {
-                                return (
-                                    <Picker.Item
-                                        key={time}
-                                        label={time.toString()}
-                                        value={time}
-                                    />
-                                );
-                            })}
-                        </Picker>
-                        <View
-                            style={{
-                                position: "absolute",
-                                left: "65%",
-                                top: 0,
-                                bottom: 0,
-                                width: "35%",
-                                alignContent: "center",
-                                justifyContent: "center"
-                                // backgroundColor: "red",
-                            }}
-                        >
-                            <Text>Minutes</Text>
+            <View style={{ flex: 1 }}>
+                {this.props.backdrop}
+                <Animated.View
+                    style={[styles.container, this._pickerTransform]}
+                >
+                    <View style={styles.pickerUpperWrapper}>
+                        <View style={styles.pickerHeader}>
+                            <Text style={styles.headerText}>Snooze Time</Text>
+                        </View>
+                        <View style={styles.headerSeparator} />
+                        <View style={styles.pickerWrapper}>
+                            <Picker
+                                selectedValue={this.state.value}
+                                style={{
+                                    // flex: 0.55,
+                                    height: 200
+                                    // backgroundColor: "blue"
+                                    // alignContent: "center"
+                                }}
+                                onValueChange={(itemValue, itemIndex) =>
+                                    this.setState({ value: itemValue })
+                                }
+                                itemStyle={{ height: 200 }}
+                            >
+                                {snoozeTimeOptions.map(time => {
+                                    return (
+                                        <Picker.Item
+                                            key={time}
+                                            label={time.toString()}
+                                            value={time}
+                                        />
+                                    );
+                                })}
+                            </Picker>
+                            <View
+                                style={{
+                                    position: "absolute",
+                                    left: "65%",
+                                    top: 0,
+                                    bottom: 0,
+                                    width: "35%",
+                                    alignContent: "center",
+                                    justifyContent: "center"
+                                    // backgroundColor: "red",
+                                }}
+                            >
+                                <Text>Minutes</Text>
+                            </View>
                         </View>
                     </View>
-                </View>
-                <View style={styles.actionSheetBtnRowWrap}>
-                    <View style={styles.actionSheetBtnWrap}>
-                        <TouchableOpacity
-                            style={styles.actionSheetBtn}
-                            onPress={() => {
-                                console.log("Pressed confirm");
-                                this.props.onValueSelected(this.state.value);
-                            }}
-                        >
-                            <Text style={styles.buttonText}>Confirm</Text>
-                        </TouchableOpacity>
+                    <View style={styles.actionSheetBtnRowWrap}>
+                        <View style={styles.actionSheetBtnWrap}>
+                            <TouchableOpacity
+                                style={styles.actionSheetBtn}
+                                onPress={() => {
+                                    console.log("Pressed confirm");
+                                    this.props.onValueSelected(
+                                        this.state.value
+                                    );
+                                }}
+                            >
+                                <Text style={styles.buttonText}>Confirm</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.actionSheetBtnWrap}>
+                            <TouchableOpacity
+                                style={styles.actionSheetBtn}
+                                onPress={() => {
+                                    console.log("Pressed cancel");
+                                    this.props.onPressedCancel();
+                                }}
+                            >
+                                <Text style={styles.buttonText}>Cancel</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                    <View style={styles.actionSheetBtnWrap}>
-                        <TouchableOpacity
-                            style={styles.actionSheetBtn}
-                            onPress={() => {
-                                console.log("Pressed cancel");
-                                this.props.onPressedCancel();
-                            }}
-                        >
-                            <Text style={styles.buttonText}>Cancel</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                </Animated.View>
             </View>
         );
     }

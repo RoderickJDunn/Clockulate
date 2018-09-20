@@ -11,17 +11,22 @@ import Colors from "../styles/colors";
 class StyledRadio extends React.Component {
     constructor(props) {
         super(props);
+        console.log("StyledRadio constructor ");
+        console.log("props", props);
         this.state = {
-            selectedIdx: null
+            selectedIdx: props.initialIdx
         };
     }
 
-    componentWillReceiveProps(props) {
-        console.log("componentWillReceiveProps");
-        this.setState({ selectedIdx: props.selectedIdx });
-    }
+    // componentWillReceiveProps(props) {
+    //     console.log("componentWillReceiveProps");
+    //     this.setState({ selectedIdx: props.selectedIdx });
+    // }
 
     render() {
+        console.log("Styled Radio");
+        console.log("this.props", this.props);
+        console.log("this.state", this.state);
         return (
             <View
                 style={{

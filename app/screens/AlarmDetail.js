@@ -60,57 +60,56 @@ import { ALARM_STATES } from "../data/constants";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-let _menuIconRotation = new Animated.Value(0);
+let _menuIconAnim = new Animated.Value(0);
 
 let AnimMaterialIcon = Animated.createAnimatedComponent(MaterialIcon);
 class AlarmDetail extends Component {
     static navigationOptions = ({ navigation }) => {
-        let isMenuOpen = navigation.state.params.menuOpen;
+        let menuIsOpen = navigation.state.params.menuIsOpen;
         let menuIsAnimating = navigation.state.params.menuIsAnimating;
         console.log("viewIdx", navigation.state.params.viewIdx);
-        let wrapperStyle, menuHeight;
 
-        if (menuIsAnimating == 0 || menuIsAnimating == 1) {
-            console.log("menuIsAnimating", menuIsAnimating);
-            wrapperStyle =
-                menuIsAnimating == 1
-                    ? {
-                          top: 0,
-                          right: 0,
-                          height: 180,
-                          width: SCREEN_WIDTH
-                      }
-                    : {
-                          top: 0,
-                          right: 0,
-                          height: 40,
-                          width: SCREEN_WIDTH
-                      };
-            menuHeight = menuIsAnimating == 1 ? 180 : 0;
-        } else {
-            console.log("menu is not animating. IsMenuOpen?", isMenuOpen);
-            wrapperStyle = isMenuOpen
-                ? {
-                      top: 0,
-                      right: 0,
-                      height: 180,
-                      width: SCREEN_WIDTH
-                  }
-                : {
-                      top: 0,
-                      right: 0,
-                      height: 40,
-                      width: SCREEN_WIDTH
-                  };
-            menuHeight = isMenuOpen ? 180 : 0;
-        }
+        // if (menuIsAnimating == 0 || menuIsAnimating == 1) {
+        //     console.log("menuIsAnimating", menuIsAnimating);
+        //     wrapperStyle =
+        //         menuIsAnimating == 1
+        //             ? {
+        //                   top: 0,
+        //                   right: 0,
+        //                   height: 180,
+        //                   width: SCREEN_WIDTH
+        //               }
+        //             : {
+        //                   top: 0,
+        //                   right: 0,
+        //                   height: 40,
+        //                   width: SCREEN_WIDTH
+        //               };
+        //     menuHeight = menuIsAnimating == 1 ? 180 : 0;
+        // } else {
+        //     console.log("menu is not animating. IsMenuOpen?", isMenuOpen);
+        //     wrapperStyle = isMenuOpen
+        //         ? {
+        //               top: 0,
+        //               right: 0,
+        //               height: 180,
+        //               width: SCREEN_WIDTH
+        //           }
+        //         : {
+        //               top: 0,
+        //               right: 0,
+        //               height: 40,
+        //               width: SCREEN_WIDTH
+        //           };
+        //     menuHeight = isMenuOpen ? 180 : 0;
+        // }
         // let headerLeft = isMenuOpen ? { headerBackImage: null } : {};
         return {
             title: "Edit Alarm",
             // This is how you define a custom back button. Apart from styling, this also seems like the best way to
             //  perform any additional tasks before executing navigation.goBack(), otherwise, goBack() is called
             //  automatically when the back button is pushed
-            headerLeft: isMenuOpen ? null : (
+            headerLeft: menuIsOpen ? null : (
                 <TouchableOpacity
                     onPress={() => {
                         navigation.state.params.handleBackBtn();
@@ -129,174 +128,27 @@ class AlarmDetail extends Component {
                 <View
                     style={{
                         position: "absolute",
-                        // paddingVertical: 10,
-                        // paddingHorizontal: 5,
-                        // borderColor: "red",
-                        // borderWidth: 2,
-                        ...wrapperStyle
+                        top: 0,
+                        right: 0,
+                        height: 180,
+                        width: SCREEN_WIDTH
+                        // backgroundColor: "red"
                     }}
                     pointerEvents="box-none"
                 >
-                    {isMenuOpen && (
-                        <TouchableBackdrop
-                            style={{
-                                position: "absolute",
-                                top: Header.HEIGHT, // - (isIphoneX() ? 15 : 0),
-                                width: SCREEN_WIDTH,
-                                height: SCREEN_HEIGHT,
-                                backgroundColor: "rgba(0, 0, 0, 0.4)"
-                            }}
-                            onPress={() => {
-                                // console.log(
-                                //     "Pressed touchable without feedback"
-                                // );
-                                // let nextMenuIsOpen = !isMenuOpen;
-
-                                AlarmDetail.closeMenu(isMenuOpen, navigation);
-                                // let config = {
-                                //     duration: 150,
-                                //     update: {
-                                //         duration: 150,
-                                //         type: "easeInEaseOut"
-                                //         // springDamping: 0.5,
-                                //         // property: "scaleXY"
-                                //     }
-                                // };
-                                // Animated.timing(_menuIconRotation, {
-                                //     toValue: nextMenuIsOpen ? 1 : 0,
-                                //     duration: 200,
-                                //     delay: nextMenuIsOpen ? 0 : 100,
-                                //     useNativeDriver: true
-                                // }).start();
-                                // //isMenuAnimating
-
-                                // LayoutAnimation.configureNext(config, () => {
-                                //     navigation.setParams({
-                                //         isMenuAnimating: false,
-                                //         menuOpen: nextMenuIsOpen
-                                //     });
-                                // });
-
-                                // navigation.setParams({
-                                //     menuIsAnimating:
-                                //         nextMenuIsOpen == true ? 1 : 0
-                                //     // menuOpen: nextMenuIsOpen
-                                // });
-                            }}
-                        />
-                    )}
-                    {/* {isMenuOpen && ( */}
-                    <View
-                        style={{
-                            position: "absolute",
-                            top: Header.HEIGHT - 20, // - (isIphoneX() ? 20 : 0),
-                            left: 0,
-                            right: 0,
-                            height: menuHeight,
-                            overflow: "hidden"
-                            // backgroundColor: "blue"
-                        }}
-                        pointerEvents="box-none"
-                    >
-                        {/* <MenuHeader title="Alarm Options" open={isMenuOpen} /> */}
-                        <MenuItem
-                            left={
-                                <MaterialComIcon
-                                    name="sleep"
-                                    size={25}
-                                    color={Colors.brandDarkPurple}
-                                />
-                            }
-                            center="Snooze Time"
-                            right={<Text>10 min</Text>}
-                            open={isMenuOpen}
-                            separatorPosition={SCREEN_WIDTH * 0.15}
-                            onPressItem={() => {
-                                AlarmDetail.closeMenu(isMenuOpen, navigation);
-                                navigation.state.params.openSnoozeTimePicker();
-                            }}
-                        />
-                        <MenuItem
-                            left={
-                                <EntypoIcon
-                                    size={25}
-                                    name="moon"
-                                    color={Colors.brandDarkPurple}
-                                />
-                            }
-                            center={"Show Hours of Sleep"}
-                            right={<EntypoIcon name="check" />}
-                            open={isMenuOpen}
-                            separatorPosition={SCREEN_WIDTH * 0.15}
-                            // onPressItem={}
-                        />
-                        <MenuItem
-                            open={isMenuOpen}
-                            // style={{ height: 80 }}
-                            left={
-                                <MaterialComIcon
-                                    name="view-dashboard-variant"
-                                    size={25}
-                                    color={Colors.brandDarkPurple}
-                                />
-                            }
-                            centerRight={
-                                <StyledRadio
-                                    title="Mode"
-                                    options={[
-                                        {
-                                            id: 0,
-                                            name: "Classic"
-                                        },
-                                        {
-                                            id: 1,
-                                            name: "Clockulator"
-                                        },
-                                        {
-                                            id: 2,
-                                            name: "Task List"
-                                        }
-                                    ]}
-                                    selectedIdx={
-                                        navigation.state.params.viewIdx
-                                    }
-                                    onSelect={idx => {
-                                        console.log("Pressed fancy radio");
-                                        navigation.state.params.snapToIdx(idx);
-                                    }}
-                                    // style={{ flex: 0.75 }}
-                                />
-                            }
-                            showSeparator={false}
-                        />
-                    </View>
-                    {/* )} */}
-
                     <TouchableOpacity
                         onPress={() => {
-                            let config = {
-                                duration: 250,
-                                update: {
-                                    duration: 250,
-                                    type: "easeInEaseOut"
-                                    // springDamping: 0.5,
-                                    // property: "scaleXY"
-                                }
-                            };
-                            let nextMenuIsOpen = !isMenuOpen;
-                            Animated.timing(_menuIconRotation, {
-                                toValue: nextMenuIsOpen ? 1 : 0,
-                                duration: 200,
-                                delay: nextMenuIsOpen ? 0 : 100,
-                                useNativeDriver: true
-                            }).start();
+                            // navigation.setParams({
+                            //     menuOpen: !menuIsOpen
+                            // });
+                            navigation.state.params.setMenuState(!menuIsOpen);
 
-                            LayoutAnimation.configureNext(config, () => {
-                                navigation.setParams({
-                                    isMenuAnimating: false,
-                                    menuOpen: nextMenuIsOpen
-                                });
-                            });
+                            // LayoutAnimation.configureNext(config, () => {
+                            //     navigation.setParams({
+                            //         isMenuAnimating: false,
+                            //         menuOpen: nextMenuIsOpen
+                            //     });
+                            // });
 
                             /* Order of Animations: 
                                 Menu Opening
@@ -308,10 +160,10 @@ class AlarmDetail extends Component {
                                     2. Once menu is gone, back button appears, and darkened background disappears (normal render)
                             */
 
-                            navigation.setParams({
-                                menuIsAnimating: nextMenuIsOpen == true ? 1 : 0,
-                                menuOpen: nextMenuIsOpen
-                            });
+                            // navigation.setParams({
+                            //     menuIsAnimating: nextMenuIsOpen == true ? 1 : 0,
+                            //     menuOpen: nextMenuIsOpen
+                            // });
                         }}
                         style={{
                             alignSelf: "flex-end",
@@ -329,13 +181,13 @@ class AlarmDetail extends Component {
                                 // paddingLeft: 20,
                                 transform: [
                                     {
-                                        rotate: _menuIconRotation.interpolate({
+                                        rotate: _menuIconAnim.interpolate({
                                             inputRange: [0, 1],
                                             outputRange: ["0deg", "-90deg"]
                                         })
                                     }
                                 ]
-                                // opacity: _menuIconRotation.interpolate({
+                                // opacity: _menuIconAnim.interpolate({
                                 //     inputRange: [0, 1],
                                 //     outputRange: [0.2, 0.8]
                                 // })
@@ -375,6 +227,7 @@ class AlarmDetail extends Component {
     _modeTextOpacity;
     _modeTextScale;
 
+    _viewIdx = null;
     _lastView = null;
 
     static closeMenu = (isMenuOpen, navigation) => {
@@ -388,7 +241,7 @@ class AlarmDetail extends Component {
             }
         };
         let nextMenuIsOpen = !isMenuOpen;
-        Animated.timing(_menuIconRotation, {
+        Animated.timing(_menuIconAnim, {
             toValue: nextMenuIsOpen ? 1 : 0,
             duration: 200,
             delay: nextMenuIsOpen ? 0 : 100,
@@ -436,6 +289,7 @@ class AlarmDetail extends Component {
                     isSlidingTask: false,
                     taskListFullScreen: false,
                     hideDisabledTasks: false,
+                    menuIsOpen: false,
                     showSnoozePicker: false
                 };
                 // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
@@ -453,6 +307,7 @@ class AlarmDetail extends Component {
                 isSlidingTask: false,
                 taskListFullScreen: false,
                 hideDisabledTasks: false,
+                menuIsOpen: false,
                 showSnoozePicker: false
             };
         }
@@ -467,6 +322,7 @@ class AlarmDetail extends Component {
         // setTimeout(() => {
         //     this._animatedView.animate(this.state.animationDuration);
         // }, 0);
+        this._viewIdx = this.state.alarm.mode == "autocalc" ? 1 : 0;
 
         // console.log(this.state);
         // console.log(params);
@@ -509,10 +365,12 @@ class AlarmDetail extends Component {
             snapToIdx: this._snapToIdx.bind(this),
             viewIdx: this.state.alarm.mode == "autocalc" ? 1 : 0,
             menuOpen: false,
+            setMenuState: this._setMenuState.bind(this),
             openSnoozeTimePicker: this._openSnoozeTimePicker.bind(this)
         });
 
         this._lastMeasuredView = "autocalc"; // set initial lastView to calcmode index
+
         if (this.state.alarm.mode == "normal") {
             /* IMPORTANT: I'm purposefully not setting initial lastMeasuredView to classic-mode index. 
                 This flag doesn't care about normal mode. It is an indicator of which mode, FullTaskList or Autocalc
@@ -528,14 +386,25 @@ class AlarmDetail extends Component {
         this.headerHeight = Header.HEIGHT;
     }
 
+    _setMenuState(nextMenuState) {
+        Animated.timing(_menuIconAnim, {
+            toValue: nextMenuState ? 1 : 0,
+            duration: 200,
+            delay: nextMenuState ? 0 : 100,
+            useNativeDriver: true
+        }).start();
+        this.setState({ menuIsOpen: nextMenuState });
+        this.props.navigation.setParams({ menuIsOpen: nextMenuState });
+    }
+
     _snapToIdx(idx) {
         console.log("_snapToIdx");
         // console.log("this.interactiveRef", this.interactiveRef);
         if (this.interactiveRef) {
             this.interactiveRef.snapTo({ index: idx });
-            this.props.navigation.setParams({
-                viewIdx: idx
-            });
+            // this.props.navigation.setParams({
+            //     viewIdx: idx
+            // });
         }
     }
 
@@ -844,6 +713,8 @@ class AlarmDetail extends Component {
         if (snapIdx == 2) {
             this._hideModeText();
         }
+
+        this._viewIdx = snapIdx;
         // console.log("snapId", id);
         // // console.log("alarmState", alarmState);
 
@@ -1265,7 +1136,14 @@ class AlarmDetail extends Component {
         }
     }
 
-    _saveSnoozeTime = () => {};
+    _saveSnoozeTime = value => {
+        realm.write(() => {
+            let { alarm } = this.state;
+
+            alarm.snoozeTime = value;
+        });
+        this.setState({ showSnoozePicker: false });
+    };
 
     _closeSnoozeTimePicker = () => {
         this.setState({ showSnoozePicker: false });
@@ -1333,6 +1211,8 @@ class AlarmDetail extends Component {
         // for (let id in sortedTasksRealm) {
         //     sortedTasks.push(sortedTasksRealm[id]);
         // }
+
+        console.log("AlarmDetail: this._viewIdx", this._viewIdx);
 
         let taskArea = null;
         if (sortedTasks.length == 0) {
@@ -1422,7 +1302,8 @@ class AlarmDetail extends Component {
 
         let interactableRef = el => (this.interactiveRef = el);
 
-        let touchableBackdrop = null;
+        let touchableBackdrop,
+            fullScreenTouchableBackdrop = null;
         // console.log("this.props.navigation", this.props.navigation);
 
         if (this.state.activeTask != null) {
@@ -1437,6 +1318,28 @@ class AlarmDetail extends Component {
                         //     "Pressed touchable without feedback"
                         // );
                         this._closeTaskRows();
+                    }}
+                />
+            );
+        } else if (this.state.menuIsOpen || this.state.showSnoozePicker) {
+            fullScreenTouchableBackdrop = (
+                <TouchableBackdrop
+                    style={{
+                        position: "absolute",
+                        top: 0, // - (isIphoneX() ? 15 : 0),
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        backgroundColor: "rgba(0, 0, 0, 0.4)"
+                    }}
+                    onPress={() => {
+                        // console.log(
+                        //     "Pressed touchable without feedback"
+                        // );
+                        // let nextMenuIsOpen = !isMenuOpen;
+
+                        this._setMenuState(false);
+                        this._closeSnoozeTimePicker();
                     }}
                 />
             );
@@ -2031,6 +1934,7 @@ class AlarmDetail extends Component {
                         />
                     </TouchableOpacity>
                 </Animated.View>
+                {!this.state.showSnoozePicker && fullScreenTouchableBackdrop}
                 <Animated.View
                     style={{
                         position: "absolute",
@@ -2094,6 +1998,96 @@ class AlarmDetail extends Component {
                         </Text>
                     </TouchableOpacity>
                 </Animated.View>
+                <Animated.View
+                    style={{
+                        position: "absolute",
+                        top: Header.HEIGHT - 20, // - (isIphoneX() ? 20 : 0),
+                        left: 0,
+                        right: 0,
+                        height: 180,
+                        overflow: "hidden",
+                        transform: [
+                            {
+                                translateY: _menuIconAnim.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [-230, -Header.HEIGHT + 20]
+                                })
+                            }
+                        ]
+                        // backgroundColor: "blue"
+                    }}
+                    pointerEvents="box-none"
+                >
+                    {/* <MenuHeader title="Alarm Options" open={isMenuOpen} /> */}
+                    <MenuItem
+                        left={
+                            <MaterialComIcon
+                                name="sleep"
+                                size={25}
+                                color={Colors.brandDarkPurple}
+                            />
+                        }
+                        center="Snooze Time"
+                        right={
+                            <Text>{`${this.state.alarm.snoozeTime} min`}</Text>
+                        }
+                        separatorPosition={SCREEN_WIDTH * 0.15}
+                        onPressItem={() => {
+                            // AlarmDetail.closeMenu(this.state.menuIsOpen, navigation);
+                            this._setMenuState(0);
+                            this._openSnoozeTimePicker();
+                        }}
+                    />
+                    <MenuItem
+                        left={
+                            <EntypoIcon
+                                size={25}
+                                name="moon"
+                                color={Colors.brandDarkPurple}
+                            />
+                        }
+                        center={"Show Hours of Sleep"}
+                        right={<EntypoIcon name="check" />}
+                        separatorPosition={SCREEN_WIDTH * 0.15}
+                        // onPressItem={}
+                    />
+                    <MenuItem
+                        // style={{ height: 80 }}
+                        left={
+                            <MaterialComIcon
+                                name="view-dashboard-variant"
+                                size={25}
+                                color={Colors.brandDarkPurple}
+                            />
+                        }
+                        centerRight={
+                            <StyledRadio
+                                title="Mode"
+                                options={[
+                                    {
+                                        id: 0,
+                                        name: "Classic"
+                                    },
+                                    {
+                                        id: 1,
+                                        name: "Clockulator"
+                                    },
+                                    {
+                                        id: 2,
+                                        name: "Task List"
+                                    }
+                                ]}
+                                initialIdx={this._viewIdx}
+                                onSelect={idx => {
+                                    console.log("Pressed fancy radio");
+                                    this._snapToIdx(idx);
+                                }}
+                                // style={{ flex: 0.75 }}
+                            />
+                        }
+                        showSeparator={false}
+                    />
+                </Animated.View>
                 {/* Measuring line -- dev view to check whether views are aligned properly */}
                 {/* <View
                     style={{
@@ -2121,6 +2115,7 @@ class AlarmDetail extends Component {
                         initialValue={this.state.alarm.snoozeTime}
                         onValueSelected={this._saveSnoozeTime.bind(this)}
                         onPressedCancel={this._closeSnoozeTimePicker.bind(this)}
+                        backdrop={fullScreenTouchableBackdrop}
                     />
                 )}
             </ScrollView>
