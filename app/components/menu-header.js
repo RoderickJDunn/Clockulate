@@ -27,7 +27,7 @@ class MenuHeader extends React.Component {
                 style={[
                     styles.menuHeader,
                     {
-                        height: this.props.open ? 30 : 0,
+                        height: 30,
                         alignSelf: "stretch",
                         overflow: "hidden"
                     }

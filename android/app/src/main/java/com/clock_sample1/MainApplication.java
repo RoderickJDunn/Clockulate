@@ -3,6 +3,7 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.surajit.rnrg.RNRadialGradientPackage;
 import com.apsl.versionnumber.RNVersionNumberPackage;
 import com.RNProximity.RNProximityPackage;
 import com.emekalites.react.alarm.notification.ANPackage;
@@ -38,7 +39,8 @@ public class MainApplication extends Application implements ReactApplication {
 
         @Override
         protected List<ReactPackage> getPackages() {
-            return Arrays.<ReactPackage>asList(new MainReactPackage(), new RNVersionNumberPackage(),
+            return Arrays.<ReactPackage>asList(new MainReactPackage(),
+            new RNRadialGradientPackage(), new RNVersionNumberPackage(),
                     new RNProximityPackage(), new ANPackage(), new LinearGradientPackage(), new LottiePackage(),
                     new RNNotificationsPackage(this.getApplication()), new RNSoundPackage(),
                     // new RNArrowsPackage(),

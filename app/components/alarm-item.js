@@ -780,30 +780,30 @@ class AlarmItem extends React.PureComponent {
                         </TouchableOpacity>
                         <View style={AlarmListStyle.infoContainer}>
                             {this.props.alarm.mode == "autocalc" && (
-                            <Text
-                                style={[
-                                    TextStyle.timeText,
-                                    {
-                                        alignSelf: "flex-end",
-                                        position: "absolute",
-                                        fontSize: scaleByFactor(23, 0.3),
-                                        top: 0,
-                                        right: 0,
-                                        color: textColor
-                                    }
-                                ]}
-                            >
-                                {fArriveTime}
                                 <Text
                                     style={[
+                                        TextStyle.timeText,
                                         {
-                                            fontSize: scaleByFactor(22, 0.3)
+                                            alignSelf: "flex-end",
+                                            position: "absolute",
+                                            fontSize: scaleByFactor(23, 0.3),
+                                            top: 0,
+                                            right: 0,
+                                            color: textColor
                                         }
                                     ]}
                                 >
-                                    {" " + amPmArriveTime}
+                                    {fArriveTime}
+                                    <Text
+                                        style={[
+                                            {
+                                                fontSize: scaleByFactor(22, 0.3)
+                                            }
+                                        ]}
+                                    >
+                                        {" " + amPmArriveTime}
+                                    </Text>
                                 </Text>
-                            </Text>
                             )}
                             <Text
                                 style={[
@@ -831,7 +831,7 @@ class AlarmItem extends React.PureComponent {
                                     {this.props.alarm.label}
                                 </Text>
                             )}
-                            <View
+                            {/* <View
                                 style={{
                                     position: "absolute",
                                     right: 0,
@@ -864,7 +864,7 @@ class AlarmItem extends React.PureComponent {
                                         right: 0
                                     }}
                                     onPress={() => {
-                                        /* Before launching SleepCycle, disable the current Alarm (if its enabled), so that we don't get conflicts */
+                                        // Before launching SleepCycle, disable the current Alarm (if its enabled), so that we don't get conflicts
                                         if (
                                             this.props.alarm.status >
                                             ALARM_STATES.OFF
@@ -897,7 +897,7 @@ class AlarmItem extends React.PureComponent {
                                         SC
                                     </Text>
                                 </TouchableOpacity>
-                            </View>
+                            </View> */}
                         </View>
                     </TouchableOpacity>
                 </Interactable.View>

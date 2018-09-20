@@ -5,7 +5,6 @@
 	};
 	objectVersion = 46;
 	objects = {
-
 /* Begin PBXBuildFile section */
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
@@ -42,12 +41,34 @@
 		495407502D4F414FB46284D6 /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 442591B775AC4E08AF1E7FD7 /* SimpleLineIcons.ttf */; };
 		536A97C2C67941F791CE7D32 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 47D610DB83674A19979F40D2 /* libc++.tbd */; };
 		5685819A8CCE4B0AB77D5192 /* MaterialCommunityIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D1C3862FFDE84DD4B36D0E6B /* MaterialCommunityIcons.ttf */; };
+		5A7C6D4BF5B34422AAB6558A /* libSRSRadialGradient.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C888C441C33D4F72BD47758C /* libSRSRadialGradient.a */; };
 		5CD09A41312F4D74ABD063CE /* libInteractable.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 632EC84740294E07AD09DD7E /* libInteractable.a */; };
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
 		602F7D06FEDE470D988557C2 /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EB3136758D754F0C8DBCA5C1 /* Zocial.ttf */; };
 		6127DE43CA824CA996F9A4EB /* MaterialIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C037E99A2E8745ABA4FC52EF /* MaterialIcons.ttf */; };
 		6576D022050B4AD39F6D6CB5 /* libRNCalendarEvents.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 248C0C1389684C9F8A6F2E4B /* libRNCalendarEvents.a */; };
 		707A2F89278648F7BEDA303E /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB975A8A36D64E1783582831 /* Zocial.ttf */; };
+		7708CE4E2140A13C0003AD4F /* tone9_lookalive_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE392140A1390003AD4F /* tone9_lookalive_30s.mp3 */; };
+		7708CE4F2140A13C0003AD4F /* tone2_walkwithme_full.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE3A2140A1390003AD4F /* tone2_walkwithme_full.mp3 */; };
+		7708CE502140A13C0003AD4F /* tone1_cloudwalk_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE3B2140A1390003AD4F /* tone1_cloudwalk_30s.mp3 */; };
+		7708CE512140A13C0003AD4F /* tone11_hauntedsunrise.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE3C2140A1390003AD4F /* tone11_hauntedsunrise.mp3 */; };
+		7708CE522140A13C0003AD4F /* tone5_brightandearly.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE3D2140A13A0003AD4F /* tone5_brightandearly.mp3 */; };
+		7708CE532140A13C0003AD4F /* tone2_walkwithme_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE3E2140A13A0003AD4F /* tone2_walkwithme_30s.mp3 */; };
+		7708CE542140A13C0003AD4F /* tone3_skyride_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE3F2140A13A0003AD4F /* tone3_skyride_30s.mp3 */; };
+		7708CE552140A13C0003AD4F /* tone04_digital4.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE402140A13A0003AD4F /* tone04_digital4.mp3 */; };
+		7708CE562140A13C0003AD4F /* tone6_childishbells_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE412140A13A0003AD4F /* tone6_childishbells_30s.mp3 */; };
+		7708CE572140A13C0003AD4F /* tone1_cloudwalk_full.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE422140A13A0003AD4F /* tone1_cloudwalk_full.mp3 */; };
+		7708CE582140A13C0003AD4F /* tone7_epicbliss_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE432140A13B0003AD4F /* tone7_epicbliss_30s.mp3 */; };
+		7708CE592140A13C0003AD4F /* tone3_skyride_full.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE442140A13B0003AD4F /* tone3_skyride_full.mp3 */; };
+		7708CE5A2140A13C0003AD4F /* tone7_epicbliss_full.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE452140A13B0003AD4F /* tone7_epicbliss_full.mp3 */; };
+		7708CE5B2140A13C0003AD4F /* tone8_theslinky_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE462140A13B0003AD4F /* tone8_theslinky_30s.mp3 */; };
+		7708CE5C2140A13C0003AD4F /* tone100_edmsiren.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE472140A13B0003AD4F /* tone100_edmsiren.mp3 */; };
+		7708CE5D2140A13C0003AD4F /* tone01_digital1.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE482140A13B0003AD4F /* tone01_digital1.mp3 */; };
+		7708CE5E2140A13C0003AD4F /* tone12_raysoflight.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE492140A13C0003AD4F /* tone12_raysoflight.mp3 */; };
+		7708CE5F2140A13C0003AD4F /* tone02_digital2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE4A2140A13C0003AD4F /* tone02_digital2.mp3 */; };
+		7708CE602140A13C0003AD4F /* tone10_bounceouttabed.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE4B2140A13C0003AD4F /* tone10_bounceouttabed.mp3 */; };
+		7708CE612140A13C0003AD4F /* tone95_lookalive_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE4C2140A13C0003AD4F /* tone95_lookalive_30s.mp3 */; };
+		7708CE622140A13C0003AD4F /* tone03_digital3.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7708CE4D2140A13C0003AD4F /* tone03_digital3.mp3 */; };
 		7742ACFB1F85198400C2DD4C /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77829B121F846B9D00705E6A /* libRCTPushNotification.a */; };
 		7749A4822068093000CBCE09 /* super_ringtone.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7749A4572068093000CBCE09 /* super_ringtone.mp3 */; };
 		776A54F820C4E015003F67E5 /* Lottie.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 776A54C520C4DF8E003F67E5 /* Lottie.framework */; };
@@ -57,27 +78,6 @@
 		77824157201BF0D50077CF2F /* ArrowViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 77824156201BF0D50077CF2F /* ArrowViewManager.m */; };
 		7783E73D20608433006F43AD /* sci-fi-alarm.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7783E71220608432006F43AD /* sci-fi-alarm.mp3 */; };
 		778B4A4D1F96D91000AB5DCA /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 778B4A4C1F96D91000AB5DCA /* LaunchScreen.xib */; };
-		77B8DE0B2134D4A700247AD9 /* Tone-6_ChildishBells_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DDF62134D49C00247AD9 /* Tone-6_ChildishBells_30s.mp3 */; };
-		77B8DE0C2134D4A700247AD9 /* Tone-8_TheSlinky_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DDF72134D49C00247AD9 /* Tone-8_TheSlinky_30s.mp3 */; };
-		77B8DE0D2134D4A700247AD9 /* Tone-0.2_Digital2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DDF82134D49D00247AD9 /* Tone-0.2_Digital2.mp3 */; };
-		77B8DE0E2134D4A700247AD9 /* Tone-100_EDMSiren.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DDF92134D49E00247AD9 /* Tone-100_EDMSiren.mp3 */; };
-		77B8DE0F2134D4A700247AD9 /* Tone-1_CloudWalk_Full.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DDFA2134D49F00247AD9 /* Tone-1_CloudWalk_Full.mp3 */; };
-		77B8DE102134D4A700247AD9 /* Tone-0.3_Digital3.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DDFB2134D49F00247AD9 /* Tone-0.3_Digital3.mp3 */; };
-		77B8DE112134D4A700247AD9 /* Tone-9_LookAlive_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DDFC2134D49F00247AD9 /* Tone-9_LookAlive_30s.mp3 */; };
-		77B8DE122134D4A700247AD9 /* Tone-7_EpicBliss_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DDFD2134D4A000247AD9 /* Tone-7_EpicBliss_30s.mp3 */; };
-		77B8DE132134D4A700247AD9 /* Tone-5_BrightandEarly.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DDFE2134D4A100247AD9 /* Tone-5_BrightandEarly.mp3 */; };
-		77B8DE142134D4A700247AD9 /* Tone-10_BounceOuttaBed.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DDFF2134D4A100247AD9 /* Tone-10_BounceOuttaBed.mp3 */; };
-		77B8DE152134D4A700247AD9 /* Tone-11_HauntedSunrise.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DE002134D4A200247AD9 /* Tone-11_HauntedSunrise.mp3 */; };
-		77B8DE162134D4A700247AD9 /* Tone-0.1_Digital1.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DE012134D4A200247AD9 /* Tone-0.1_Digital1.mp3 */; };
-		77B8DE172134D4A700247AD9 /* Tone-7_EpicBliss_Full.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DE022134D4A300247AD9 /* Tone-7_EpicBliss_Full.mp3 */; };
-		77B8DE182134D4A700247AD9 /* Tone-12_RaysofLight.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DE032134D4A300247AD9 /* Tone-12_RaysofLight.mp3 */; };
-		77B8DE192134D4A700247AD9 /* Tone-9.5_LookAlive_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DE042134D4A400247AD9 /* Tone-9.5_LookAlive_30s.mp3 */; };
-		77B8DE1A2134D4A700247AD9 /* Tone-1_CloudWalk_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DE052134D4A400247AD9 /* Tone-1_CloudWalk_30s.mp3 */; };
-		77B8DE1B2134D4A700247AD9 /* Tone-3_Skyride_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DE062134D4A500247AD9 /* Tone-3_Skyride_30s.mp3 */; };
-		77B8DE1C2134D4A700247AD9 /* Tone-3_Skyride_Full.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DE072134D4A500247AD9 /* Tone-3_Skyride_Full.mp3 */; };
-		77B8DE1D2134D4A700247AD9 /* Tone-0.4_Digital4.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DE082134D4A600247AD9 /* Tone-0.4_Digital4.mp3 */; };
-		77B8DE1E2134D4A700247AD9 /* Tone-2_Walkwithme_30s.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DE092134D4A600247AD9 /* Tone-2_Walkwithme_30s.mp3 */; };
-		77B8DE1F2134D4A700247AD9 /* Tone-2_Walkwithme_Full.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77B8DE0A2134D4A700247AD9 /* Tone-2_Walkwithme_Full.mp3 */; };
 		78B20419D2D34799AEABC874 /* MaterialCommunityIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 990EE60DD6AB4D0BA5CD0804 /* MaterialCommunityIcons.ttf */; };
 		7966E830EEED4BE7AD293BFE /* libRCTBEEPickerManager.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A525ACE79ED4D639237F06A /* libRCTBEEPickerManager.a */; };
 		7B779CCCB03C4BDFB24FA212 /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 239FBD4A90F1498AA1855A57 /* Entypo.ttf */; };
@@ -105,6 +105,7 @@
 		F85F25160D844C70A6771A45 /* Quesha.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1ECAD5541EB04D7B830CF61A /* Quesha.ttf */; };
 		FA3B9B11D48F4CAA86534730 /* libRealmReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E0283941A034496A2B01129 /* libRealmReact.a */; };
 		FF99069B65954427AFB5770E /* Feather.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DA7A2CAB0F3A42BC97B5BAA1 /* Feather.ttf */; };
+		2D9BCAFF4A9A4457B430EB40 /* Feather.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93BF611E8838445584944C66 /* Feather.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -402,6 +403,20 @@
 			remoteGlobalIDString = 62CA59B71E3C173B002D7188;
 			remoteInfo = Lottie_iOS;
 		};
+		777C5D14214DB07800D51AB5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AD4B9606FC904110A5CEF179 /* SRSRadialGradient.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = SRSRadialGradient;
+		};
+		777C5D16214DB07800D51AB5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AD4B9606FC904110A5CEF179 /* SRSRadialGradient.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 47413E2820DBB5D000CCDA85;
+			remoteInfo = "SRSRadialGradien-tvOS";
+		};
 		77829B111F846B9D00705E6A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 77829B011F846B9D00705E6A /* RCTPushNotification.xcodeproj */;
@@ -575,6 +590,27 @@
 		63F5829207604764B6EF79C3 /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = SimpleLineIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; };
 		6E69BB1BC77649E69A794456 /* EvilIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = EvilIcons.ttf; path = "../node_modules/native-base/Fonts/EvilIcons.ttf"; sourceTree = "<group>"; };
 		76E0C48BF8D543E39198C8B7 /* RNVectorIcons.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNVectorIcons.xcodeproj; path = "../node_modules/react-native-vector-icons/RNVectorIcons.xcodeproj"; sourceTree = "<group>"; };
+		7708CE392140A1390003AD4F /* tone9_lookalive_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone9_lookalive_30s.mp3; sourceTree = "<group>"; };
+		7708CE3A2140A1390003AD4F /* tone2_walkwithme_full.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone2_walkwithme_full.mp3; sourceTree = "<group>"; };
+		7708CE3B2140A1390003AD4F /* tone1_cloudwalk_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone1_cloudwalk_30s.mp3; sourceTree = "<group>"; };
+		7708CE3C2140A1390003AD4F /* tone11_hauntedsunrise.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone11_hauntedsunrise.mp3; sourceTree = "<group>"; };
+		7708CE3D2140A13A0003AD4F /* tone5_brightandearly.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone5_brightandearly.mp3; sourceTree = "<group>"; };
+		7708CE3E2140A13A0003AD4F /* tone2_walkwithme_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone2_walkwithme_30s.mp3; sourceTree = "<group>"; };
+		7708CE3F2140A13A0003AD4F /* tone3_skyride_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone3_skyride_30s.mp3; sourceTree = "<group>"; };
+		7708CE402140A13A0003AD4F /* tone04_digital4.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone04_digital4.mp3; sourceTree = "<group>"; };
+		7708CE412140A13A0003AD4F /* tone6_childishbells_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone6_childishbells_30s.mp3; sourceTree = "<group>"; };
+		7708CE422140A13A0003AD4F /* tone1_cloudwalk_full.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone1_cloudwalk_full.mp3; sourceTree = "<group>"; };
+		7708CE432140A13B0003AD4F /* tone7_epicbliss_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone7_epicbliss_30s.mp3; sourceTree = "<group>"; };
+		7708CE442140A13B0003AD4F /* tone3_skyride_full.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone3_skyride_full.mp3; sourceTree = "<group>"; };
+		7708CE452140A13B0003AD4F /* tone7_epicbliss_full.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone7_epicbliss_full.mp3; sourceTree = "<group>"; };
+		7708CE462140A13B0003AD4F /* tone8_theslinky_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone8_theslinky_30s.mp3; sourceTree = "<group>"; };
+		7708CE472140A13B0003AD4F /* tone100_edmsiren.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone100_edmsiren.mp3; sourceTree = "<group>"; };
+		7708CE482140A13B0003AD4F /* tone01_digital1.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone01_digital1.mp3; sourceTree = "<group>"; };
+		7708CE492140A13C0003AD4F /* tone12_raysoflight.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone12_raysoflight.mp3; sourceTree = "<group>"; };
+		7708CE4A2140A13C0003AD4F /* tone02_digital2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone02_digital2.mp3; sourceTree = "<group>"; };
+		7708CE4B2140A13C0003AD4F /* tone10_bounceouttabed.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone10_bounceouttabed.mp3; sourceTree = "<group>"; };
+		7708CE4C2140A13C0003AD4F /* tone95_lookalive_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone95_lookalive_30s.mp3; sourceTree = "<group>"; };
+		7708CE4D2140A13C0003AD4F /* tone03_digital3.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone03_digital3.mp3; sourceTree = "<group>"; };
 		7742ACFA1F85180900C2DD4C /* Alarm_AutoSet.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Alarm_AutoSet.entitlements; path = Alarm_AutoSet/Alarm_AutoSet.entitlements; sourceTree = "<group>"; };
 		7749A4572068093000CBCE09 /* super_ringtone.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = super_ringtone.mp3; sourceTree = "<group>"; };
 		77824129201BEE6D0077CF2F /* ArrowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrowView.swift; sourceTree = "<group>"; };
@@ -583,27 +619,6 @@
 		77829B011F846B9D00705E6A /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		7783E71220608432006F43AD /* sci-fi-alarm.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "sci-fi-alarm.mp3"; sourceTree = "<group>"; };
 		778B4A4C1F96D91000AB5DCA /* LaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = LaunchScreen.xib; path = Alarm_AutoSet/LaunchScreen.xib; sourceTree = "<group>"; };
-		77B8DDF62134D49C00247AD9 /* Tone-6_ChildishBells_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-6_ChildishBells_30s.mp3"; sourceTree = "<group>"; };
-		77B8DDF72134D49C00247AD9 /* Tone-8_TheSlinky_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-8_TheSlinky_30s.mp3"; sourceTree = "<group>"; };
-		77B8DDF82134D49D00247AD9 /* Tone-0.2_Digital2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-0.2_Digital2.mp3"; sourceTree = "<group>"; };
-		77B8DDF92134D49E00247AD9 /* Tone-100_EDMSiren.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-100_EDMSiren.mp3"; sourceTree = "<group>"; };
-		77B8DDFA2134D49F00247AD9 /* Tone-1_CloudWalk_Full.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-1_CloudWalk_Full.mp3"; sourceTree = "<group>"; };
-		77B8DDFB2134D49F00247AD9 /* Tone-0.3_Digital3.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-0.3_Digital3.mp3"; sourceTree = "<group>"; };
-		77B8DDFC2134D49F00247AD9 /* Tone-9_LookAlive_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-9_LookAlive_30s.mp3"; sourceTree = "<group>"; };
-		77B8DDFD2134D4A000247AD9 /* Tone-7_EpicBliss_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-7_EpicBliss_30s.mp3"; sourceTree = "<group>"; };
-		77B8DDFE2134D4A100247AD9 /* Tone-5_BrightandEarly.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-5_BrightandEarly.mp3"; sourceTree = "<group>"; };
-		77B8DDFF2134D4A100247AD9 /* Tone-10_BounceOuttaBed.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-10_BounceOuttaBed.mp3"; sourceTree = "<group>"; };
-		77B8DE002134D4A200247AD9 /* Tone-11_HauntedSunrise.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-11_HauntedSunrise.mp3"; sourceTree = "<group>"; };
-		77B8DE012134D4A200247AD9 /* Tone-0.1_Digital1.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-0.1_Digital1.mp3"; sourceTree = "<group>"; };
-		77B8DE022134D4A300247AD9 /* Tone-7_EpicBliss_Full.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-7_EpicBliss_Full.mp3"; sourceTree = "<group>"; };
-		77B8DE032134D4A300247AD9 /* Tone-12_RaysofLight.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-12_RaysofLight.mp3"; sourceTree = "<group>"; };
-		77B8DE042134D4A400247AD9 /* Tone-9.5_LookAlive_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-9.5_LookAlive_30s.mp3"; sourceTree = "<group>"; };
-		77B8DE052134D4A400247AD9 /* Tone-1_CloudWalk_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-1_CloudWalk_30s.mp3"; sourceTree = "<group>"; };
-		77B8DE062134D4A500247AD9 /* Tone-3_Skyride_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-3_Skyride_30s.mp3"; sourceTree = "<group>"; };
-		77B8DE072134D4A500247AD9 /* Tone-3_Skyride_Full.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-3_Skyride_Full.mp3"; sourceTree = "<group>"; };
-		77B8DE082134D4A600247AD9 /* Tone-0.4_Digital4.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-0.4_Digital4.mp3"; sourceTree = "<group>"; };
-		77B8DE092134D4A600247AD9 /* Tone-2_Walkwithme_30s.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-2_Walkwithme_30s.mp3"; sourceTree = "<group>"; };
-		77B8DE0A2134D4A700247AD9 /* Tone-2_Walkwithme_Full.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Tone-2_Walkwithme_Full.mp3"; sourceTree = "<group>"; };
 		77EC5CD8DB4B47FBAAA34706 /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		7CAC893A9BB048E3AA022AC5 /* RNNotifications.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNNotifications.xcodeproj; path = "../node_modules/react-native-notifications/RNNotifications/RNNotifications.xcodeproj"; sourceTree = "<group>"; };
@@ -618,12 +633,14 @@
 		A2E7BA83107F4723A76D4A36 /* rubicon-icon-font.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "rubicon-icon-font.ttf"; path = "../node_modules/native-base/Fonts/rubicon-icon-font.ttf"; sourceTree = "<group>"; };
 		AB27E86BC02A49978DB46EA2 /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
 		AB2ECF35F550404C9990407C /* libRNSound.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNSound.a; sourceTree = "<group>"; };
+		AD4B9606FC904110A5CEF179 /* SRSRadialGradient.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = SRSRadialGradient.xcodeproj; path = "../node_modules/react-native-radial-gradient/ios/SRSRadialGradient.xcodeproj"; sourceTree = "<group>"; };
 		B1B0273ACACE44F5AD5876F1 /* libRCTActionSheet.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTActionSheet.a; sourceTree = "<group>"; };
 		BB3CC8D7FD7D4F8EB044492F /* RealmReact.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RealmReact.xcodeproj; path = "../node_modules/realm/react-native/ios/RealmReact.xcodeproj"; sourceTree = "<group>"; };
 		BEA2E4549F5C45C296258AAE /* Ionicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Ionicons.ttf; path = "../node_modules/native-base/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
 		C037E99A2E8745ABA4FC52EF /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/native-base/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
 		C03BA5262BB54F7E883105AE /* LottieReactNative.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = LottieReactNative.xcodeproj; path = "../node_modules/lottie-react-native/src/ios/LottieReactNative.xcodeproj"; sourceTree = "<group>"; };
 		C183CA13F7B645ABADEF8335 /* Entypo.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Entypo.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
+		C888C441C33D4F72BD47758C /* libSRSRadialGradient.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libSRSRadialGradient.a; sourceTree = "<group>"; };
 		CB975A8A36D64E1783582831 /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/native-base/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
 		CCA2ADF618CB48A89CC8DD21 /* libz.tbd */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		D1C3862FFDE84DD4B36D0E6B /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialCommunityIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf"; sourceTree = "<group>"; };
@@ -639,6 +656,7 @@
 		F6657ACD8B544AB0B832C914 /* RCTBEEPickerManager.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTBEEPickerManager.xcodeproj; path = "../node_modules/react-native-picker/ios/RCTBEEPickerManager.xcodeproj"; sourceTree = "<group>"; };
 		F7908E24BEB34341883C6224 /* libRNProximityManager.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNProximityManager.a; sourceTree = "<group>"; };
 		F846D23EA98D443BA3EE91B0 /* libLottieReactNative.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libLottieReactNative.a; sourceTree = "<group>"; };
+		93BF611E8838445584944C66 /* Feather.ttf */ = {isa = PBXFileReference; name = "Feather.ttf"; path = "../node_modules/react-native-vector-icons/Fonts/Feather.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -683,6 +701,7 @@
 				060D8AEBA3C94E39AAFFA4BC /* libRNProximity.a in Frameworks */,
 				39EBBB3F1C9F4EBABBA060AA /* libRNProximityManager.a in Frameworks */,
 				A51E94D637DD47B19A5F1A6C /* libRNVersionNumber.a in Frameworks */,
+				5A7C6D4BF5B34422AAB6558A /* libSRSRadialGradient.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -838,27 +857,27 @@
 		3849B67EAA994E0CA44A32ED /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				77B8DE012134D4A200247AD9 /* Tone-0.1_Digital1.mp3 */,
-				77B8DDF82134D49D00247AD9 /* Tone-0.2_Digital2.mp3 */,
-				77B8DDFB2134D49F00247AD9 /* Tone-0.3_Digital3.mp3 */,
-				77B8DE082134D4A600247AD9 /* Tone-0.4_Digital4.mp3 */,
-				77B8DE052134D4A400247AD9 /* Tone-1_CloudWalk_30s.mp3 */,
-				77B8DDFA2134D49F00247AD9 /* Tone-1_CloudWalk_Full.mp3 */,
-				77B8DE092134D4A600247AD9 /* Tone-2_Walkwithme_30s.mp3 */,
-				77B8DE0A2134D4A700247AD9 /* Tone-2_Walkwithme_Full.mp3 */,
-				77B8DE062134D4A500247AD9 /* Tone-3_Skyride_30s.mp3 */,
-				77B8DE072134D4A500247AD9 /* Tone-3_Skyride_Full.mp3 */,
-				77B8DDFE2134D4A100247AD9 /* Tone-5_BrightandEarly.mp3 */,
-				77B8DDF62134D49C00247AD9 /* Tone-6_ChildishBells_30s.mp3 */,
-				77B8DDFD2134D4A000247AD9 /* Tone-7_EpicBliss_30s.mp3 */,
-				77B8DE022134D4A300247AD9 /* Tone-7_EpicBliss_Full.mp3 */,
-				77B8DDF72134D49C00247AD9 /* Tone-8_TheSlinky_30s.mp3 */,
-				77B8DDFC2134D49F00247AD9 /* Tone-9_LookAlive_30s.mp3 */,
-				77B8DE042134D4A400247AD9 /* Tone-9.5_LookAlive_30s.mp3 */,
-				77B8DDFF2134D4A100247AD9 /* Tone-10_BounceOuttaBed.mp3 */,
-				77B8DE002134D4A200247AD9 /* Tone-11_HauntedSunrise.mp3 */,
-				77B8DE032134D4A300247AD9 /* Tone-12_RaysofLight.mp3 */,
-				77B8DDF92134D49E00247AD9 /* Tone-100_EDMSiren.mp3 */,
+				7708CE3B2140A1390003AD4F /* tone1_cloudwalk_30s.mp3 */,
+				7708CE422140A13A0003AD4F /* tone1_cloudwalk_full.mp3 */,
+				7708CE482140A13B0003AD4F /* tone01_digital1.mp3 */,
+				7708CE4A2140A13C0003AD4F /* tone02_digital2.mp3 */,
+				7708CE3E2140A13A0003AD4F /* tone2_walkwithme_30s.mp3 */,
+				7708CE3A2140A1390003AD4F /* tone2_walkwithme_full.mp3 */,
+				7708CE4D2140A13C0003AD4F /* tone03_digital3.mp3 */,
+				7708CE3F2140A13A0003AD4F /* tone3_skyride_30s.mp3 */,
+				7708CE442140A13B0003AD4F /* tone3_skyride_full.mp3 */,
+				7708CE402140A13A0003AD4F /* tone04_digital4.mp3 */,
+				7708CE3D2140A13A0003AD4F /* tone5_brightandearly.mp3 */,
+				7708CE412140A13A0003AD4F /* tone6_childishbells_30s.mp3 */,
+				7708CE432140A13B0003AD4F /* tone7_epicbliss_30s.mp3 */,
+				7708CE452140A13B0003AD4F /* tone7_epicbliss_full.mp3 */,
+				7708CE462140A13B0003AD4F /* tone8_theslinky_30s.mp3 */,
+				7708CE392140A1390003AD4F /* tone9_lookalive_30s.mp3 */,
+				7708CE4B2140A13C0003AD4F /* tone10_bounceouttabed.mp3 */,
+				7708CE3C2140A1390003AD4F /* tone11_hauntedsunrise.mp3 */,
+				7708CE492140A13C0003AD4F /* tone12_raysoflight.mp3 */,
+				7708CE4C2140A13C0003AD4F /* tone95_lookalive_30s.mp3 */,
+				7708CE472140A13B0003AD4F /* tone100_edmsiren.mp3 */,
 				C183CA13F7B645ABADEF8335 /* Entypo.ttf */,
 				9C0225EDD5FE415A863A972C /* EvilIcons.ttf */,
 				77EC5CD8DB4B47FBAAA34706 /* FontAwesome.ttf */,
@@ -886,6 +905,7 @@
 				1ECAD5541EB04D7B830CF61A /* Quesha.ttf */,
 				DA7A2CAB0F3A42BC97B5BAA1 /* Feather.ttf */,
 				990EE60DD6AB4D0BA5CD0804 /* MaterialCommunityIcons.ttf */,
+				93BF611E8838445584944C66 /* Feather.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -968,6 +988,7 @@
 				5251F8E7127E45AAB3862C22 /* libRNProximity.a */,
 				F7908E24BEB34341883C6224 /* libRNProximityManager.a */,
 				4C94E5C2151F489780D1C787 /* libRNVersionNumber.a */,
+				C888C441C33D4F72BD47758C /* libSRSRadialGradient.a */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -979,6 +1000,15 @@
 				776A54C720C4DF8E003F67E5 /* Lottie.framework */,
 				776A54C920C4DF8E003F67E5 /* Lottie.framework */,
 				776A54CB20C4DF8E003F67E5 /* libLottie.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		777C5D10214DB07800D51AB5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				777C5D15214DB07800D51AB5 /* libSRSRadialGradient.a */,
+				777C5D17214DB07800D51AB5 /* libSRSRadialGradien-tvOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1097,6 +1127,7 @@
 				61BF1F28B4B14A68AE973EF5 /* RNProximity.xcodeproj */,
 				0B77CDD3C68E496DB9C545E2 /* RNProximityManager.xcodeproj */,
 				269A519E139F4ABFA8844A2B /* RNVersionNumber.xcodeproj */,
+				AD4B9606FC904110A5CEF179 /* SRSRadialGradient.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1368,6 +1399,10 @@
 				{
 					ProductGroup = 77B46478213E3727007CC69A /* Products */;
 					ProjectRef = 269A519E139F4ABFA8844A2B /* RNVersionNumber.xcodeproj */;
+				},
+				{
+					ProductGroup = 777C5D10214DB07800D51AB5 /* Products */;
+					ProjectRef = AD4B9606FC904110A5CEF179 /* SRSRadialGradient.xcodeproj */;
 				},
 				{
 					ProductGroup = 773B7E781F65C7960046B647 /* Products */;
@@ -1658,6 +1693,20 @@
 			remoteRef = 776A54CA20C4DF8E003F67E5 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		777C5D15214DB07800D51AB5 /* libSRSRadialGradient.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libSRSRadialGradient.a;
+			remoteRef = 777C5D14214DB07800D51AB5 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		777C5D17214DB07800D51AB5 /* libSRSRadialGradien-tvOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libSRSRadialGradien-tvOS.a";
+			remoteRef = 777C5D16214DB07800D51AB5 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		77829B121F846B9D00705E6A /* libRCTPushNotification.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1790,56 +1839,57 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7708CE5B2140A13C0003AD4F /* tone8_theslinky_30s.mp3 in Resources */,
+				7708CE602140A13C0003AD4F /* tone10_bounceouttabed.mp3 in Resources */,
+				7708CE592140A13C0003AD4F /* tone3_skyride_full.mp3 in Resources */,
 				7749A4822068093000CBCE09 /* super_ringtone.mp3 in Resources */,
+				7708CE552140A13C0003AD4F /* tone04_digital4.mp3 in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				7708CE5A2140A13C0003AD4F /* tone7_epicbliss_full.mp3 in Resources */,
 				29E41CB15E2742199EAB8C15 /* Entypo.ttf in Resources */,
+				7708CE582140A13C0003AD4F /* tone7_epicbliss_30s.mp3 in Resources */,
+				7708CE5D2140A13C0003AD4F /* tone01_digital1.mp3 in Resources */,
 				C0B98CD6E6B644F6BE540B6C /* EvilIcons.ttf in Resources */,
-				77B8DE112134D4A700247AD9 /* Tone-9_LookAlive_30s.mp3 in Resources */,
 				D970B2885B2C4D298587C188 /* FontAwesome.ttf in Resources */,
 				778B4A4D1F96D91000AB5DCA /* LaunchScreen.xib in Resources */,
+				7708CE5C2140A13C0003AD4F /* tone100_edmsiren.mp3 in Resources */,
+				7708CE522140A13C0003AD4F /* tone5_brightandearly.mp3 in Resources */,
+				7708CE4F2140A13C0003AD4F /* tone2_walkwithme_full.mp3 in Resources */,
 				962D592CB77D426F89C6FC59 /* Foundation.ttf in Resources */,
 				A027BE1AE4EE4E9DA4A02118 /* Ionicons.ttf in Resources */,
 				5685819A8CCE4B0AB77D5192 /* MaterialCommunityIcons.ttf in Resources */,
-				77B8DE162134D4A700247AD9 /* Tone-0.1_Digital1.mp3 in Resources */,
+				7708CE532140A13C0003AD4F /* tone2_walkwithme_30s.mp3 in Resources */,
 				86271B6F17BC46D099C28BC2 /* MaterialIcons.ttf in Resources */,
-				77B8DE0C2134D4A700247AD9 /* Tone-8_TheSlinky_30s.mp3 in Resources */,
+				7708CE5F2140A13C0003AD4F /* tone02_digital2.mp3 in Resources */,
 				A9349D3DF6AB4CBDB9A9315E /* Octicons.ttf in Resources */,
 				87C79272B8ED4293BAF06E7C /* SimpleLineIcons.ttf in Resources */,
+				7708CE542140A13C0003AD4F /* tone3_skyride_30s.mp3 in Resources */,
 				7783E73D20608433006F43AD /* sci-fi-alarm.mp3 in Resources */,
-				77B8DE0B2134D4A700247AD9 /* Tone-6_ChildishBells_30s.mp3 in Resources */,
 				602F7D06FEDE470D988557C2 /* Zocial.ttf in Resources */,
+				7708CE4E2140A13C0003AD4F /* tone9_lookalive_30s.mp3 in Resources */,
+				7708CE622140A13C0003AD4F /* tone03_digital3.mp3 in Resources */,
 				7B779CCCB03C4BDFB24FA212 /* Entypo.ttf in Resources */,
 				2C4D540675BC4411A8CD9EAE /* EvilIcons.ttf in Resources */,
+				7708CE512140A13C0003AD4F /* tone11_hauntedsunrise.mp3 in Resources */,
 				A18A1BE10D784641969E1EE4 /* FontAwesome.ttf in Resources */,
-				77B8DE1F2134D4A700247AD9 /* Tone-2_Walkwithme_Full.mp3 in Resources */,
-				77B8DE192134D4A700247AD9 /* Tone-9.5_LookAlive_30s.mp3 in Resources */,
 				BB98AD33D0C7409BAB0F480E /* Foundation.ttf in Resources */,
 				8D6AECC155D341189E8C07B5 /* Ionicons.ttf in Resources */,
-				77B8DE152134D4A700247AD9 /* Tone-11_HauntedSunrise.mp3 in Resources */,
-				77B8DE0E2134D4A700247AD9 /* Tone-100_EDMSiren.mp3 in Resources */,
-				77B8DE0F2134D4A700247AD9 /* Tone-1_CloudWalk_Full.mp3 in Resources */,
-				77B8DE0D2134D4A700247AD9 /* Tone-0.2_Digital2.mp3 in Resources */,
 				6127DE43CA824CA996F9A4EB /* MaterialIcons.ttf in Resources */,
-				77B8DE132134D4A700247AD9 /* Tone-5_BrightandEarly.mp3 in Resources */,
+				7708CE572140A13C0003AD4F /* tone1_cloudwalk_full.mp3 in Resources */,
+				7708CE5E2140A13C0003AD4F /* tone12_raysoflight.mp3 in Resources */,
+				7708CE502140A13C0003AD4F /* tone1_cloudwalk_30s.mp3 in Resources */,
 				EA42EDB424F24B39A445C98A /* Octicons.ttf in Resources */,
-				77B8DE182134D4A700247AD9 /* Tone-12_RaysofLight.mp3 in Resources */,
 				88384AE6D74B41EDB086C43F /* Roboto_medium.ttf in Resources */,
 				A9807F534B2A4C588A70209A /* Roboto.ttf in Resources */,
 				92481A22223746EF9B60E201 /* rubicon-icon-font.ttf in Resources */,
 				495407502D4F414FB46284D6 /* SimpleLineIcons.ttf in Resources */,
+				7708CE612140A13C0003AD4F /* tone95_lookalive_30s.mp3 in Resources */,
 				707A2F89278648F7BEDA303E /* Zocial.ttf in Resources */,
-				77B8DE102134D4A700247AD9 /* Tone-0.3_Digital3.mp3 in Resources */,
 				F85F25160D844C70A6771A45 /* Quesha.ttf in Resources */,
-				77B8DE122134D4A700247AD9 /* Tone-7_EpicBliss_30s.mp3 in Resources */,
-				77B8DE142134D4A700247AD9 /* Tone-10_BounceOuttaBed.mp3 in Resources */,
-				77B8DE1D2134D4A700247AD9 /* Tone-0.4_Digital4.mp3 in Resources */,
-				77B8DE1C2134D4A700247AD9 /* Tone-3_Skyride_Full.mp3 in Resources */,
-				77B8DE1E2134D4A700247AD9 /* Tone-2_Walkwithme_30s.mp3 in Resources */,
 				FF99069B65954427AFB5770E /* Feather.ttf in Resources */,
-				77B8DE172134D4A700247AD9 /* Tone-7_EpicBliss_Full.mp3 in Resources */,
-				77B8DE1B2134D4A700247AD9 /* Tone-3_Skyride_30s.mp3 in Resources */,
-				77B8DE1A2134D4A700247AD9 /* Tone-1_CloudWalk_30s.mp3 in Resources */,
 				78B20419D2D34799AEABC874 /* MaterialCommunityIcons.ttf in Resources */,
+				7708CE562140A13C0003AD4F /* tone6_childishbells_30s.mp3 in Resources */,
+				2D9BCAFF4A9A4457B430EB40 /* Feather.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1983,12 +2033,14 @@
 					"$(SRCROOT)/../node_modules/react-native-proximity/RNProximity/RNProximity",
 					"$(SRCROOT)/../node_modules/react-native-proximity-manager/ios",
 					"$(SRCROOT)/../node_modules/react-native-version-number/ios",
+					"$(SRCROOT)/../node_modules/react-native-radial-gradient/ios",
 				);
 				INFOPLIST_FILE = Alarm_AutoSetTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -2034,12 +2086,14 @@
 					"$(SRCROOT)/../node_modules/react-native-proximity/RNProximity/RNProximity",
 					"$(SRCROOT)/../node_modules/react-native-proximity-manager/ios",
 					"$(SRCROOT)/../node_modules/react-native-version-number/ios",
+					"$(SRCROOT)/../node_modules/react-native-radial-gradient/ios",
 				);
 				INFOPLIST_FILE = Alarm_AutoSetTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -2087,6 +2141,7 @@
 					"$(SRCROOT)/../node_modules/react-native-proximity/RNProximity/RNProximity",
 					"$(SRCROOT)/../node_modules/react-native-proximity-manager/ios",
 					"$(SRCROOT)/../node_modules/react-native-version-number/ios",
+					"$(SRCROOT)/../node_modules/react-native-radial-gradient/ios",
 				);
 				INFOPLIST_FILE = Alarm_AutoSet/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -2134,6 +2189,7 @@
 					"$(SRCROOT)/../node_modules/react-native-proximity/RNProximity/RNProximity",
 					"$(SRCROOT)/../node_modules/react-native-proximity-manager/ios",
 					"$(SRCROOT)/../node_modules/react-native-version-number/ios",
+					"$(SRCROOT)/../node_modules/react-native-radial-gradient/ios",
 				);
 				INFOPLIST_FILE = Alarm_AutoSet/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -2185,11 +2241,13 @@
 					"$(SRCROOT)/../node_modules/react-native-proximity/RNProximity/RNProximity",
 					"$(SRCROOT)/../node_modules/react-native-proximity-manager/ios",
 					"$(SRCROOT)/../node_modules/react-native-version-number/ios",
+					"$(SRCROOT)/../node_modules/react-native-radial-gradient/ios",
 				);
 				INFOPLIST_FILE = "Alarm_AutoSet-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -2244,11 +2302,13 @@
 					"$(SRCROOT)/../node_modules/react-native-proximity/RNProximity/RNProximity",
 					"$(SRCROOT)/../node_modules/react-native-proximity-manager/ios",
 					"$(SRCROOT)/../node_modules/react-native-version-number/ios",
+					"$(SRCROOT)/../node_modules/react-native-radial-gradient/ios",
 				);
 				INFOPLIST_FILE = "Alarm_AutoSet-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -2294,6 +2354,7 @@
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.REACT.Alarm_AutoSet-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2319,6 +2380,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",

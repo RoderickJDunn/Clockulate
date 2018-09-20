@@ -1,16 +1,13 @@
 import React from "react";
 import { DrawerRoot } from "./app/config/router";
-import {
-    AsyncStorage,
-    View,
-    StatusBar,
-    Dimensions,
-} from "react-native";
+import { AsyncStorage, View, StatusBar, Dimensions } from "react-native";
+
+import { MenuProvider } from "react-native-popup-menu";
+
 // import ArrowView from "./app/components/arrow-view-native";
 
 import realm from "./app/data/DataSchemas";
 import insertPrepopData from "./app/data/data-prepop";
-
 
 // configure();
 export default class App extends React.Component {
@@ -19,7 +16,7 @@ export default class App extends React.Component {
 
         console.info("App - constructor");
         this.state = {
-            firstLaunch: null,
+            firstLaunch: null
         };
     }
 
@@ -59,7 +56,9 @@ export default class App extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 <StatusBar animated={true} barStyle={"light-content"} />
-                <DrawerRoot />
+                <MenuProvider>
+                    <DrawerRoot />
+                </MenuProvider>
             </View>
         );
     }

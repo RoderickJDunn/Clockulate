@@ -125,30 +125,13 @@ const MainStack = StackNavigator(
                 drawerLockMode: "locked-closed", // this prevents the drawer from opening when user swipes from left of screen to go Back
                 headerStyle: {
                     backgroundColor: Colors.brandDarkGrey,
+                    // backgroundColor: "transparent",
                     borderBottomWidth: 0
                 },
                 headerTitleStyle: {
                     color: Colors.brandLightGrey
                 },
-                headerBackTitle: null,
-                // This is how you define a custom back button. Apart from styling, this also seems like the best way to
-                //  perform any additional tasks before executing navigation.goBack(), otherwise, goBack() is called
-                //  automatically when the back button is pushed
-                headerLeft: (
-                    <TouchableOpacity
-                        onPress={() => {
-                            navigation.state.params.handleBackBtn();
-                        }}
-                        hitSlop={{ top: 10, bottom: 10, left: 0, right: 20 }}
-                    >
-                        <Icon
-                            name={"chevron-left"}
-                            color={Colors.brandLightGrey}
-                            underlayColor={Colors.brandDarkGrey}
-                            size={33}
-                        />
-                    </TouchableOpacity>
-                )
+                headerBackTitle: null
             })
         },
         TaskDetail: {

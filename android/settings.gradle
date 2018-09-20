@@ -1,4 +1,6 @@
 rootProject.name = 'Clock_Sample1'
+include ':react-native-radial-gradient'
+project(':react-native-radial-gradient').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-radial-gradient/android')
 include ':react-native-version-number'
 project(':react-native-version-number').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-version-number/android')
 include ':react-native-proximity'

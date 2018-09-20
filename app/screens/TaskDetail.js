@@ -199,10 +199,6 @@ class TaskDetail extends Component {
         console.log(event.endCoordinates);
         console.log(SCREEN_HEIGHT);
         this.setState({ keyboardHeight: event.endCoordinates.screenY });
-        // setTimeout(() => {
-        //     this.interactiveRef.snapTo({ index: 2 }); // snap to "keyboard" snapPoint.
-        // }, 0);
-        // }
     };
 
     keyboardWillHide = event => {

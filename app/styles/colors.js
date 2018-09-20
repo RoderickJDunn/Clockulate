@@ -12,6 +12,7 @@ const Colors = {
     brandOffWhiteBlue: "#c8d6e5",
     brandLightGrey: "#C6C6C6",
     backgroundGrey: "#dbd6dd", // previously #e8e8e8
+    backgroundBright: "#fcfcfc",
     brandDarkGrey: "#1E1E1E",
     buttonOnGreen: "#0dff00",
     disabledGrey: "#999999",

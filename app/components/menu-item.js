@@ -21,40 +21,113 @@ class MenuItem extends React.Component {
         // console.debug("Render MenuItem");
         // console.debug("props: ", this.props);
 
+        let showSeperator = this.props.showSeperator == false ? false : true;
         // console.log("tasksArr in task-list", tasksArr);
         return (
             <View
                 style={[
                     styles.menuOption,
                     {
-                        height: this.props.open ? 60 : 0,
+                        height: 60,
                         alignSelf: "stretch",
                         overflow: "hidden"
-                    }
+                    },
+                    this.props.style
                 ]}
             >
-                <TouchableOpacity
-                    onPress={() => {
-                        alert("not implemented");
-                    }}
-                    style={styles.menuRowBtn}
-                >
-                    <View style={{ padding: 8, flexDirection: "row" }}>
-                        {this.props.icon && (
-                            <View style={{ flex: 0.2 }}>{this.props.icon}</View>
-                        )}
-                        <Text style={[styles.text, { flex: 0.8 }]}>
-                            {this.props.title}
-                        </Text>
-                    </View>
-                    {/* <View
+                {this.props.children || (
+                    <TouchableOpacity
+                        onPress={() => {
+                            this.props.onPressItem();
+                        }}
+                        style={styles.menuRowBtn}
+                    >
+                        <View
+                            style={{
+                                // padding: 8,
+                                flexDirection: "row",
+                                flex: 1,
+                                justifyContent: "center",
+                                alignContent: "center",
+                                alignItems: "center"
+                                // borderColor: "blue",
+                                // borderWidth: 1
+                            }}
+                        >
+                            {this.props.left && (
+                                <View
+                                    style={{
+                                        flex: 0.15,
+                                        alignContent: "center",
+                                        alignItems: "center",
+                                        justifyContent: "center"
+                                        // backgroundColor: "red"
+                                    }}
+                                >
+                                    {this.props.left}
+                                </View>
+                            )}
+                            {this.props.center &&
+                                !this.props.centerRight && (
+                                    <Text
+                                        style={[
+                                            styles.text,
+                                            {
+                                                flex: this.props.right
+                                                    ? 0.65
+                                                    : 0.75
+                                            }
+                                        ]}
+                                    >
+                                        {this.props.center}
+                                    </Text>
+                                )}
+                            {this.props.right &&
+                                !this.props.centerRight && (
+                                    <View
+                                        style={{
+                                            flex: 0.2,
+                                            alignContent: "flex-end",
+                                            alignItems: "flex-end"
+                                        }}
+                                    >
+                                        {this.props.right}
+                                    </View>
+                                )}
+                            {this.props.centerRight && (
+                                <View
+                                    style={{
+                                        flex: 0.85
+                                        // backgroundColor: "blue"
+                                        // alignContent: "flex-end",
+                                        // alignItems: "flex-end"
+                                    }}
+                                >
+                                    {this.props.centerRight}
+                                </View>
+                            )}
+                        </View>
+                        {/* <View
                     style={{
                         height: 10,
                         width: 10,
                         backgroundColor: "green"
                     }}
                 /> */}
-                </TouchableOpacity>
+                    </TouchableOpacity>
+                )}
+                {showSeperator && (
+                    <View
+                        style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: this.props.separatorPosition || 0,
+                            right: 0,
+                            height: 0.5,
+                            backgroundColor: "grey"
+                        }}
+                    />
+                )}
             </View>
         );
     }
@@ -71,7 +144,7 @@ const styles = StyleSheet.create({
     menuOption: {
         // justifyContent: "center",
         // height: scale(50, 0.5),
-        // padding: 10,
+        paddingRight: 10,
         alignSelf: "stretch",
         overflow: "hidden",
         backgroundColor: Colors.backgroundGrey
@@ -79,8 +152,11 @@ const styles = StyleSheet.create({
     },
     menuRowBtn: {
         height: 60,
-        paddingLeft: 10,
-        justifyContent: "center"
+        justifyContent: "center",
+        alignContent: "center",
+        alignItems: "center"
+        // borderWidth: 1,
+        // borderColor: "#487d"
     },
     text: {
         color: Colors.darkGreyText

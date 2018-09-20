@@ -78,12 +78,12 @@ class TaskList extends React.Component {
 
         let filterMap;
         if (filteredAlarmTasks) {
-            filterMap = filteredAlarmTasks.map((aTask) => {
+            filterMap = filteredAlarmTasks.map(aTask => {
                 return aTask.order;
             });
         }
 
-        console.log("taskList", this.props.data);
+        // console.log("taskList", this.props.data);
 
         // console.log("tasksArr in task-list", tasksArr);
         return (

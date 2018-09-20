@@ -11,7 +11,7 @@ export default class ArrowView extends Component {
         // let av = ArrowViewNative();
         // av.printHello();
         console.log("ArrowViewNative:");
-        console.log(ArrowViewNative);
+        // console.log(ArrowViewNative);
     }
     render() {
         return <ArrowViewNative {...this.props} />;

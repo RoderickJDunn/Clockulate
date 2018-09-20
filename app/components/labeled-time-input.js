@@ -16,7 +16,9 @@ class LabeledTimeInput extends Component {
             data: {
                 labelText: props.labelText,
                 fieldText: props.fieldText
-            }
+            },
+            /* Whether the time display should be hidden (for hrs of sleep setting) */
+            hideTime: true // TODO: Check setting in DB
         };
     }
 
@@ -56,6 +58,10 @@ class LabeledTimeInput extends Component {
         this._hideDateTimePicker();
     };
 
+    _toggleHiderView = () => {
+        this.setState({ hideTime: !this.state.hideTime });
+    };
+
     render() {
         let fieldText, amPmWakeUpTime;
         if (this.props.fieldText) {
@@ -77,6 +83,7 @@ class LabeledTimeInput extends Component {
                     {
                         flex: this.props.flex
                         // height: inputHeight + scaleByFactor(23, 0.5),
+                        // backgroundColor: "blue"
                     }
                 ]}
             >
@@ -95,29 +102,32 @@ class LabeledTimeInput extends Component {
                     {this.state.data.labelText}
                 </Text>
                 <TouchableOpacity
-                    onPress={this._showDateTimePicker}
-                    disabled={
-                        this.props.disabled == null
-                            ? false
-                            : this.props.disabled
+                    onPress={
+                        this.props.behavior == "picker"
+                            ? this._showDateTimePicker
+                            : this._toggleHiderView
                     }
                 >
-                    <Text
-                        style={[
-                            TextStyle.timeText,
-                            {
-                                fontSize: this.props.inputFontSize,
-                                textAlign:
-                                    this.props.textAlign == null
-                                        ? "left"
-                                        : this.props.textAlign
-                                // backgroundColor: "red"
-                            }
-                        ]}
-                    >
-                        {fieldText}
-                        {amPmWakeUpTime}
-                    </Text>
+                    {this.props.hiderView && this.state.hideTime ? (
+                        this.props.hiderView
+                    ) : (
+                        <Text
+                            style={[
+                                TextStyle.timeText,
+                                {
+                                    fontSize: this.props.inputFontSize,
+                                    textAlign:
+                                        this.props.textAlign == null
+                                            ? "left"
+                                            : this.props.textAlign
+                                    // backgroundColor: "red"
+                                }
+                            ]}
+                        >
+                            {fieldText}
+                            {amPmWakeUpTime}
+                        </Text>
+                    )}
                 </TouchableOpacity>
                 <DateTimePicker
                     date={this.props.time} // time has been converted into a Date() for this Component

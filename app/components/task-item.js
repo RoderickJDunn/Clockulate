@@ -314,7 +314,9 @@ class TaskItem extends React.Component {
         if (this.props.closed == true) {
             setTimeout(() => {
                 // console.log("Timeout closing task delete view...");
-                this.interactiveRef.snapTo({ index: 0 });
+                if (this.interactiveRef) {
+                    this.interactiveRef.snapTo({ index: 0 });
+                }
             }, 0);
         }
 
