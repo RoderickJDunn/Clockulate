@@ -215,7 +215,7 @@ class AlarmDetail extends Component {
     height = SCREEN_HEIGHT; //full height
     snapAuto = 0;
     snapNormal = SCREEN_HEIGHT;
-    snapTaskList = -SCREEN_HEIGHT * 0.42;
+    snapTaskList = -SCREEN_HEIGHT * 0.41;
 
     xtraKeyboardHeight = 0; // this is always 0, except on iPhone X it is 34
     _animKeyboardHeight = new Animated.Value(0);
@@ -1011,6 +1011,7 @@ class AlarmDetail extends Component {
         this.setState({
             fieldAreaFlex: 0.17,
             taskAreaFlex: 0.83,
+            taskHeaderFlex: 0.06,
             taskListDimensions: {
                 width: SCREEN_WIDTH,
                 height: SCREEN_HEIGHT * 1.15 * 0.83 * 0.95, // TODO: Extract layout values into constants, the create variables for the value of these calculations
@@ -1036,9 +1037,10 @@ class AlarmDetail extends Component {
         this.setState({
             fieldAreaFlex: 0.17,
             taskAreaFlex: 0.4,
+            taskHeaderFlex: 0.15,
             taskListDimensions: {
                 width: SCREEN_WIDTH,
-                height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.95, // TODO: Extract layout values into constants, the create variables for the value of these calculations
+                height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.95, // TODO: Extract layout values into constants, then create variables for the value of these calculations
                 pageX: 0,
                 pageY: SCREEN_HEIGHT * 0.58 // TODO: Extract layout values into constants, the create variables for the value of these calculations
             },
@@ -1741,7 +1743,14 @@ class AlarmDetail extends Component {
                                 { flex: this.state.taskAreaFlex || 0.4 }
                             ]}
                         >
-                            <View style={styles.taskListHeader}>
+                            <View
+                                style={[
+                                    styles.taskListHeader,
+                                    {
+                                        flex: this.state.taskHeaderFlex || 0.15
+                                    }
+                                ]}
+                            >
                                 <TouchableOpacity
                                     // onPress={() => this.interactiveRef.snapTo({ index: 2 })}>
                                     onPress={this._onPressTasksHeader.bind(
@@ -1755,6 +1764,7 @@ class AlarmDetail extends Component {
                                         right: SCREEN_WIDTH / 4,
                                         justifyContent: "center",
                                         alignItems: "center"
+                                        // backgroundColor: "green"
                                     }}
                                 >
                                     <Text
@@ -1770,8 +1780,12 @@ class AlarmDetail extends Component {
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     style={{
-                                        alignSelf: "center",
-                                        paddingRight: 25
+                                        alignSelf: "stretch",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        paddingRight: 25,
+                                        backgroundColor: "transparent"
+                                        // backgroundColor: "green"
                                     }}
                                     onPress={this._onPressAddTask.bind(this)}
                                     /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
@@ -1793,8 +1807,12 @@ class AlarmDetail extends Component {
 
                                 <TouchableOpacity
                                     style={{
-                                        alignSelf: "center",
-                                        paddingLeft: 25
+                                        alignSelf: "stretch",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        paddingLeft: 25,
+                                        backgroundColor: "transparent"
+                                        // backgroundColor: "green"
                                     }}
                                     onPress={() => {
                                         // alert(
@@ -2194,20 +2212,20 @@ const styles = StyleSheet.create({
         // borderBottomWidth: 1
     },
     taskListHeader: {
-        flex: 0.05,
         flexDirection: "row",
-        justifyContent: "space-between",
-        paddingVertical: 10
+        justifyContent: "space-between"
+        // paddingVertical: 10,
         // backgroundColor: "blue"
     },
     taskListContainer: {
         // flex: 0.22,
         flex: 0.72,
-        padding: scaleByFactor(10, 0.4),
+        paddingHorizontal: scaleByFactor(10, 0.4),
+        paddingBottom: scaleByFactor(10, 0.4),
         alignSelf: "stretch",
         backgroundColor: Colors.backgroundGrey
         // borderColor: "red",
-        // borderWidth: 5
+        // borderWidth: 1
     },
     // taskAreaFiller: {
     //     flex: 0.75,
