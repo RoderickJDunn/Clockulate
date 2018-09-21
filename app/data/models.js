@@ -8,7 +8,7 @@ import { isEmpty } from "../util/general_util";
 import realm from "../data/DataSchemas";
 
 export class AlarmModel {
-    constructor(order, wakeUpTime = null) {
+    constructor(order, wakeUpTime = null, defaultShowHrsOfSleep = null) {
         this.id = uuid.v1();
         this.wakeUpTime = wakeUpTime ? wakeUpTime : DefaultAlarm.wakeUpTime;
         this.arrivalTime = DefaultAlarm.arrivalTime;
@@ -19,6 +19,7 @@ export class AlarmModel {
         this.visible = DefaultAlarm.visible;
         this.preset = DefaultAlarm.preset;
         this.order = order;
+        this.showHrsOfSleep = DefaultAlarm.defaultShowHrsOfSleep;
 
         this.alarmSound = new AlarmSound();
         console.log("this.sound", this.sound);

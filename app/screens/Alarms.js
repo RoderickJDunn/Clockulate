@@ -454,6 +454,7 @@ class Alarms extends Component {
         newAlarm.wakeUpTime = item.wakeUpTime;
         newAlarm.arrivalTime = item.arrivalTime;
         newAlarm.mode = item.mode;
+        newAlarm.showHrsOfSleep = item.showHrsOfSleep;
         newAlarm.tasks = []; // needs careful attention for copying due to nested objects...
 
         for (let i = 0; i < item.tasks.length; i++) {

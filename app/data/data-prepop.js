@@ -35,6 +35,14 @@ let prePopTasks = [
     }
 ];
 
+let prePopSettings = [
+    {
+        name: "defaultShowHrsOfSleep",
+        enabled: true,
+        value: 0 // unused for this setting
+    }
+];
+
 // Create Realm objects and write to local storage
 function insertPrepopData() {
     realm.write(() => {
@@ -116,6 +124,16 @@ function insertPrepopData() {
                 id: uuid.v1(),
                 name: prePopTasks[index].name,
                 defaultDuration: prePopTasks[index].defaultDuration
+            });
+        }
+
+        /* Create Settings */
+        for (let index = 0; index < prePopSettings.length; index++) {
+            realm.create("Setting", {
+                id: uuid.v1(),
+                name: prePopSettings[index].name,
+                enabled: prePopSettings[index].enabled,
+                value: prePopSettings[index].value
             });
         }
 

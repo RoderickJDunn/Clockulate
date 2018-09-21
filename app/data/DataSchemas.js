@@ -26,6 +26,7 @@ AlarmSchema.schema = {
             type: "int", // TODO: not settable by user yet. For now it will default to 10 minutes
             default: 10
         },
+        showHrsOfSleep: { type: "bool", default: true },
         notificationId: {
             type: "string", // this is used for Android only since its the only way to cancel specific notifications.
             optional: true
@@ -89,6 +90,17 @@ AlarmSoundSchema.schema = {
         type: "int"
     }
 };
+class SettingsSchema extends Realm.Object {}
+SettingsSchema.schema = {
+    name: "Setting",
+    primaryKey: "id",
+    properties: {
+        id: "string",
+        name: "string",
+        enabled: { type: "bool", default: true },
+        value: { type: "int", default: 0 }
+    }
+};
 
 console.log("Realm path: ", Realm.defaultPath);
 
@@ -98,6 +110,7 @@ export default new Realm({
         TaskSchema,
         AlarmTaskSchema,
         SoundSchema,
-        AlarmSoundSchema
+        AlarmSoundSchema,
+        SettingsSchema
     ]
 });
