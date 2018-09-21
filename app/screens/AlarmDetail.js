@@ -316,9 +316,11 @@ class AlarmDetail extends Component {
 
         this.alarmLabelCache = this.state.alarm.label;
 
+        /* These may be used for Intro (Tutorial Mode), but removing for now */
         // TODO: Here we need to check whether user has global setting to "Never show mode indicator"
-        this._modeTextOpacity = new Animated.Value(1);
-        this._modeTextScale = new Animated.Value(0);
+        // this._modeTextOpacity = new Animated.Value(1);
+        // this._modeTextScale = new Animated.Value(0);
+
         // setTimeout(() => {
         //     this._animatedView.animate(this.state.animationDuration);
         // }, 0);
@@ -381,7 +383,7 @@ class AlarmDetail extends Component {
             }, 0);
         }
 
-        this._playModeIndicatorAnimation();
+        // this._playModeIndicatorAnimation();
 
         this.headerHeight = Header.HEIGHT;
     }
@@ -408,29 +410,30 @@ class AlarmDetail extends Component {
         }
     }
 
-    _playModeIndicatorAnimation() {
-        this._modeTextOpacity.setValue(1);
-        Animated.sequence([
-            Animated.spring(this._modeTextScale, {
-                toValue: 1,
-                useNativeDriver: true
-            }),
-            Animated.timing(this._modeTextOpacity, {
-                toValue: 0,
-                duration: 2000,
-                delay: 3000,
-                useNativeDriver: true
-            })
-        ]).start(() => {
-            this._modeTextScale.setValue(0);
-            this._modeTextOpacity.setValue(0);
-        });
-    }
+    /* This may be used for Intro (Tutorial Mode), but removing for now */
+    // _playModeIndicatorAnimation() {
+    //     this._modeTextOpacity.setValue(1);
+    //     Animated.sequence([
+    //         Animated.spring(this._modeTextScale, {
+    //             toValue: 1,
+    //             useNativeDriver: true
+    //         }),
+    //         Animated.timing(this._modeTextOpacity, {
+    //             toValue: 0,
+    //             duration: 2000,
+    //             delay: 3000,
+    //             useNativeDriver: true
+    //         })
+    //     ]).start(() => {
+    //         this._modeTextScale.setValue(0);
+    //         this._modeTextOpacity.setValue(0);
+    //     });
+    // }
 
-    _hideModeText() {
-        this._modeTextScale.setValue(0);
-        this._modeTextOpacity.setValue(0);
-    }
+    // _hideModeText() {
+    //     this._modeTextScale.setValue(0);
+    //     this._modeTextOpacity.setValue(0);
+    // }
 
     _openSnoozeTimePicker() {
         this.setState({ showSnoozePicker: true });
@@ -716,9 +719,9 @@ class AlarmDetail extends Component {
         // let alarmState = this.state.alarm;
         let { id, index: snapIdx } = event.nativeEvent;
 
-        if (snapIdx == 2) {
-            this._hideModeText();
-        }
+        // if (snapIdx == 2) {
+        //     this._hideModeText();
+        // }
 
         this._viewIdx = snapIdx;
         // console.log("snapId", id);
@@ -1051,7 +1054,7 @@ class AlarmDetail extends Component {
     _onPressTasksHeader() {
         console.log("_onPressTasksHeader");
         this._taskListNeedsRemeasure = true;
-        this._hideModeText();
+        // this._hideModeText();
         if (this.state.taskListFullScreen == false) {
             console.log("1");
             this._snapToIdx(2);
@@ -1074,7 +1077,7 @@ class AlarmDetail extends Component {
         if (state == "start" && y < 50 && y > -100) {
             console.log("y < 50");
             // animate height increase of TaskList
-            this._hideModeText();
+            // this._hideModeText();
             this._layoutAnimateToFullScreenTaskList();
             this.props.navigation.setParams({
                 viewIdx: 2
@@ -1140,7 +1143,7 @@ class AlarmDetail extends Component {
                         Object.assign({ alarm: alarm }, nextState);
                     });
 
-                    this._playModeIndicatorAnimation();
+                    // this._playModeIndicatorAnimation();
                 }
 
                 this._layoutAnimateToCalcMode(nextState);
@@ -1898,7 +1901,7 @@ class AlarmDetail extends Component {
                                         : "autocalc";
                                 this.setState({ alarm: alarm });
                             });
-                            this._playModeIndicatorAnimation();
+                            // this._playModeIndicatorAnimation();
                         }}
                         hitSlop={{ top: 70, bottom: 70, left: 70, right: 70 }}
                     />
@@ -1963,7 +1966,7 @@ class AlarmDetail extends Component {
                     </TouchableOpacity>
                 </Animated.View>
                 {!this.state.showSnoozePicker && fullScreenTouchableBackdrop}
-                <Animated.View
+                {/*  <Animated.View
                     style={{
                         position: "absolute",
                         left: 8,
@@ -2025,7 +2028,7 @@ class AlarmDetail extends Component {
                                 : "Calculate Mode"}
                         </Text>
                     </TouchableOpacity>
-                </Animated.View>
+                </Animated.View> */}
                 <Animated.View
                     style={{
                         position: "absolute",
