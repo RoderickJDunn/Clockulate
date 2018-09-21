@@ -875,21 +875,25 @@ class AlarmDetail extends Component {
 
                 // Update order of task list
                 let { tasks } = this.state.alarm;
+
+                let sortedTasks = tasks.sorted("order");
+                console.log("sortedTasks", sortedTasks);
                 // console.log("Deleted task. --> Now Tasks:", tasks);
                 let idx = 0;
-                for (var taskId in tasks) {
-                    if (tasks.hasOwnProperty(taskId)) {
-                        if (idx == tasks[taskId].order) {
+                for (var taskId in sortedTasks) {
+                    if (sortedTasks.hasOwnProperty(taskId)) {
+                        if (idx == sortedTasks[taskId].order) {
                             // console.log(tasks[taskId]);
                             // console.log("-----> Order OK");
                         } else {
-                            console.log(tasks[taskId]);
+                            console.log(sortedTasks[taskId]);
                             // console.log("-----> Order WRong. Decrementing...");
-                            tasks[taskId].order--;
+                            sortedTasks[taskId].order--;
                         }
                     }
                     idx++;
                 }
+                tasks = sortedTasks;
             });
         }
         this.onTaskListChanged();
