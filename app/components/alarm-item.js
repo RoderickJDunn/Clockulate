@@ -413,6 +413,7 @@ class AlarmItem extends React.PureComponent {
                 style={[
                     this.props.style,
                     {
+                        backgroundColor: Colors.brandLightGrey,
                         transform: [
                             {
                                 translateY: this._appearAnim.interpolate({
@@ -429,12 +430,6 @@ class AlarmItem extends React.PureComponent {
                     }
                 ]}
             >
-                {/* <View
-                    style={[
-                        StyleSheet.absoluteFill,
-                        { backgroundColor: Colors.brandLightGrey }
-                    ]}
-                /> */}
                 <Animated.View
                     style={[
                         AlarmListStyle.deleteBtn,
