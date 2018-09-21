@@ -508,16 +508,22 @@ class AlarmDetail extends Component {
                 //     realm.delete(alarm);
                 // } else
                 alarm[0].label = this.state.alarm.label;
-                alarm[0].arrivalTime = this.state.alarm.arrivalTime;
+                alarm[0].arrivalTime = DateUtils.date_to_nextTimeInstance(
+                    this.state.alarm.arrivalTime
+                );
                 alarm[0].status = ALARM_STATES.SET;
                 alarm[0].alarmSound = this.state.alarm.alarmSound;
                 if (
                     this.state.alarm.mode === "autocalc" &&
                     this._calculatedWakeUpTime
                 ) {
-                    alarm[0].wakeUpTime = this._calculatedWakeUpTime;
+                    alarm[0].wakeUpTime = DateUtils.date_to_nextTimeInstance(
+                        this._calculatedWakeUpTime
+                    );
                 } else {
-                    alarm[0].wakeUpTime = this.state.alarm.wakeUpTime;
+                    alarm[0].wakeUpTime = DateUtils.date_to_nextTimeInstance(
+                        this.state.alarm.wakeUpTime
+                    );
                 }
             }
             //////////////////////////////////
