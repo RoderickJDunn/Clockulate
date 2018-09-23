@@ -116,7 +116,7 @@ class PickerActionSheet extends React.Component {
                                     );
                                 }}
                             >
-                                <Text style={styles.buttonText}>Confirm</Text>
+                                <Text style={styles.buttonText}>Cancel</Text>
                             </TouchableOpacity>
                         </View>
                         <View style={styles.actionSheetBtnWrap}>
@@ -127,7 +127,7 @@ class PickerActionSheet extends React.Component {
                                     this.props.onPressedCancel();
                                 }}
                             >
-                                <Text style={styles.buttonText}>Cancel</Text>
+                                <Text style={styles.buttonText}>Confirm</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
