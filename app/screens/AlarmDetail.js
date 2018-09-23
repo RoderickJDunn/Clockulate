@@ -149,7 +149,7 @@ class AlarmDetail extends Component {
     height = SCREEN_HEIGHT; //full height
     snapAuto = 0;
     snapNormal = SCREEN_HEIGHT;
-    snapTaskList = -SCREEN_HEIGHT * 0.41;
+    snapTaskList = -SCREEN_HEIGHT * 0.415;
 
     xtraKeyboardHeight = 0; // this is always 0, except on iPhone X it is 34
     _animKeyboardHeight = new Animated.Value(0);
@@ -2176,7 +2176,8 @@ const styles = StyleSheet.create({
     },
     taskListHeader: {
         flexDirection: "row",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        minHeight: 20
         // paddingVertical: 10,
         // backgroundColor: "blue"
     },
