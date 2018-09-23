@@ -69,41 +69,6 @@ class AlarmDetail extends Component {
         let menuIsAnimating = navigation.state.params.menuIsAnimating;
         console.log("viewIdx", navigation.state.params.viewIdx);
 
-        // if (menuIsAnimating == 0 || menuIsAnimating == 1) {
-        //     console.log("menuIsAnimating", menuIsAnimating);
-        //     wrapperStyle =
-        //         menuIsAnimating == 1
-        //             ? {
-        //                   top: 0,
-        //                   right: 0,
-        //                   height: 180,
-        //                   width: SCREEN_WIDTH
-        //               }
-        //             : {
-        //                   top: 0,
-        //                   right: 0,
-        //                   height: 40,
-        //                   width: SCREEN_WIDTH
-        //               };
-        //     menuHeight = menuIsAnimating == 1 ? 180 : 0;
-        // } else {
-        //     console.log("menu is not animating. IsMenuOpen?", isMenuOpen);
-        //     wrapperStyle = isMenuOpen
-        //         ? {
-        //               top: 0,
-        //               right: 0,
-        //               height: 180,
-        //               width: SCREEN_WIDTH
-        //           }
-        //         : {
-        //               top: 0,
-        //               right: 0,
-        //               height: 40,
-        //               width: SCREEN_WIDTH
-        //           };
-        //     menuHeight = isMenuOpen ? 180 : 0;
-        // }
-        // let headerLeft = isMenuOpen ? { headerBackImage: null } : {};
         return {
             title: "Edit Alarm",
             // This is how you define a custom back button. Apart from styling, this also seems like the best way to
@@ -138,32 +103,7 @@ class AlarmDetail extends Component {
                 >
                     <TouchableOpacity
                         onPress={() => {
-                            // navigation.setParams({
-                            //     menuOpen: !menuIsOpen
-                            // });
                             navigation.state.params.setMenuState(!menuIsOpen);
-
-                            // LayoutAnimation.configureNext(config, () => {
-                            //     navigation.setParams({
-                            //         isMenuAnimating: false,
-                            //         menuOpen: nextMenuIsOpen
-                            //     });
-                            // });
-
-                            /* Order of Animations: 
-                                Menu Opening
-                                    1. Darkened backdrop appears, and back button disappears (normal render)
-                                    2. Menu folds into view (layout animation)
-
-                                Menu Closing
-                                    1. Menu folds out of view (layout animation)
-                                    2. Once menu is gone, back button appears, and darkened background disappears (normal render)
-                            */
-
-                            // navigation.setParams({
-                            //     menuIsAnimating: nextMenuIsOpen == true ? 1 : 0,
-                            //     menuOpen: nextMenuIsOpen
-                            // });
                         }}
                         style={{
                             alignSelf: "flex-end",
@@ -178,7 +118,6 @@ class AlarmDetail extends Component {
                                 alignItems: "center",
                                 justifyContent: "center",
                                 flex: 1,
-                                // paddingLeft: 20,
                                 transform: [
                                     {
                                         rotate: _menuIconAnim.interpolate({
@@ -187,11 +126,6 @@ class AlarmDetail extends Component {
                                         })
                                     }
                                 ]
-                                // opacity: _menuIconAnim.interpolate({
-                                //     inputRange: [0, 1],
-                                //     outputRange: [0.2, 0.8]
-                                // })
-                                // backgroundColor: "green"
                             }}
                         >
                             <MaterialIcon
@@ -277,9 +211,17 @@ class AlarmDetail extends Component {
             console.log("This is a new alarm");
             let alarmsCount = realm.objects("Alarm").length;
 
+            let defaultShowHrsOfSleep = realm
+                .objects("Setting")
+                .filtered("name = 'defaultShowHrsOfSleep'")[0];
+
+            // console.log("defaultShowHrsOfSleep", defaultShowHrsOfSleep);
+            // console.log("enabled: ", defaultShowHrsOfSleep.enabled);
+            let newAlarmModel = new AlarmModel(alarmsCount);
+            newAlarmModel.showHrsOfSleep = defaultShowHrsOfSleep.enabled;
             realm.write(() => {
                 this.state = {
-                    alarm: realm.create("Alarm", new AlarmModel(alarmsCount)),
+                    alarm: realm.create("Alarm", newAlarmModel),
                     isDatePickerVisible: false,
                     animationDuration: 3000,
                     activeTask: null, // holds the task ID of the task currently showing DELETE button. Otherwise null.
@@ -407,6 +349,8 @@ class AlarmDetail extends Component {
             // this.props.navigation.setParams({
             //     viewIdx: idx
             // });
+            this._viewIdx = idx;
+            // this.setState(this.state);
         }
     }
 
@@ -1715,7 +1659,9 @@ class AlarmDetail extends Component {
                                     separation={scaleByFactor(5, 0.3)}
                                     behavior={"hider"}
                                     textAlign={"right"}
+                                    disabled={this.state.alarm.showHrsOfSleep}
                                     hiderView={
+                                        !this.state.alarm.showHrsOfSleep && (
                                         <EntypoIcon
                                             style={{
                                                 textAlign: "right",
@@ -1725,6 +1671,7 @@ class AlarmDetail extends Component {
                                             size={25}
                                             name="moon"
                                         />
+                                        )
                                     }
                                 />
                             </View>
@@ -2077,10 +2024,22 @@ class AlarmDetail extends Component {
                                 color={Colors.brandDarkPurple}
                             />
                         }
-                        center={"Show Hours of Sleep"}
-                        right={<EntypoIcon name="check" />}
+                        center={"Hide Hours of Sleep"}
+                        right={
+                            !this.state.alarm.showHrsOfSleep ? (
+                                <EntypoIcon name="check" size={22} />
+                            ) : (
+                                <View />
+                            )
+                        }
                         separatorPosition={SCREEN_WIDTH * 0.15}
-                        // onPressItem={}
+                        onPressItem={() => {
+                            realm.write(() => {
+                                let { alarm } = this.state;
+                                alarm.showHrsOfSleep = !alarm.showHrsOfSleep;
+                            });
+                            this.setState(this.state);
+                        }}
                     />
                     <MenuItem
                         // style={{ height: 80 }}
@@ -2109,6 +2068,7 @@ class AlarmDetail extends Component {
                                     }
                                 ]}
                                 initialIdx={this._viewIdx}
+                                selectedIdx={this._viewIdx}
                                 onSelect={idx => {
                                     console.log("Pressed fancy radio");
                                     this._snapToIdx(idx);

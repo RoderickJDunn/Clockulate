@@ -22,8 +22,11 @@ class LabeledTimeInput extends Component {
         };
     }
 
-    componentWillReceiveProps() {
+    componentWillReceiveProps(props) {
         // console.debug("Alarms  componentWillReceiveProps");
+        if (props.hiderView && !this.props.hiderView) {
+            this.setState({ hideTime: true });
+        }
     }
 
     _showDateTimePicker = () => {
@@ -107,6 +110,7 @@ class LabeledTimeInput extends Component {
                             ? this._showDateTimePicker
                             : this._toggleHiderView
                     }
+                    disabled={this.props.disabled}
                 >
                     {this.props.hiderView && this.state.hideTime ? (
                         this.props.hiderView
