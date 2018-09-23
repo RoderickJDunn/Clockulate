@@ -72,7 +72,7 @@ const alarmListNavOptions = ({ navigation }) => ({
             underlayColor={Colors.brandDarkGrey}
             size={28}
             /* "DrawerOpen" is a built-in navigation function. I did not define it anywhere*/
-            onPress={() => navigation.navigate("DrawerOpen")}
+            onPress={navigation.openDrawer}
             navigate={navigation.navigate}
             hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
             style={{ marginLeft: scaleByFactor(8, 0.9) }}
@@ -100,7 +100,7 @@ const otherDrawerNavOptions = title => {
                 underlayColor={Colors.brandDarkGrey}
                 size={28}
                 /* "DrawerOpen" is a built-in navigation function. I did not define it anywhere*/
-                onPress={() => navigation.navigate("DrawerOpen")}
+                onPress={navigation.openDrawer}
                 navigate={navigation.navigate}
                 hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
                 style={{ marginLeft: scaleByFactor(8, 0.9) }}
