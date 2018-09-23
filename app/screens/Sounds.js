@@ -83,7 +83,7 @@ export default class Sounds extends Component {
     playSound(sound) {
         this.stopActiveSound();
 
-        if (!sound.files) return;
+        if (!sound.files || sound.files.length == 0) return;
 
         console.log("sound.files[last]", sound.files[sound.files.length - 1]);
         var s = new Sound(
