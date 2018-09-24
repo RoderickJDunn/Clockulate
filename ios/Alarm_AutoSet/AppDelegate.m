@@ -31,15 +31,23 @@
                                                initialProperties:nil
                                                    launchOptions:launchOptions];
   
-  NSLog(@"Testing my own log in AppDelegate -------- ******************** ---------------");
-  NSLog(@"%@", jsCodeLocation.absoluteString);
-  NSLog (@" host:%@", [jsCodeLocation host]);
-  NSLog (@" port:%@", [jsCodeLocation port]);
+//  NSLog(@"Testing my own log in AppDelegate -------- ******************** ---------------");
+//  NSLog(@"%@", jsCodeLocation.absoluteString);
+//  NSLog (@" host:%@", [jsCodeLocation host]);
+//  NSLog (@" port:%@", [jsCodeLocation port]);
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   UIViewController *rootViewController = [UIViewController new];
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
+  
+  /* @Roderick
+   IMPORTANT: The next 3 lines were added as a tip found in react-native docs (https://facebook.github.io/react-native/docs/running-on-device.html#troubleshooting). They prevent the screen from flashing white between the splash screen and mounting the root view!
+   */
+  UIView* launchScreenView = [[[NSBundle mainBundle] loadNibNamed:@"LaunchScreen" owner:self options:nil] objectAtIndex:0];
+  launchScreenView.frame = self.window.bounds;
+  rootView.loadingView = launchScreenView;
+  
   return YES;
 }
 
