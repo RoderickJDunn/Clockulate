@@ -2,8 +2,6 @@ import React from "react";
 import { DrawerRoot } from "./app/config/router";
 import { AsyncStorage, View, StatusBar, Dimensions } from "react-native";
 
-import { MenuProvider } from "react-native-popup-menu";
-
 // import ArrowView from "./app/components/arrow-view-native";
 
 import realm from "./app/data/DataSchemas";
@@ -56,9 +54,7 @@ export default class App extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 <StatusBar animated={true} barStyle={"light-content"} />
-                <MenuProvider>
-                    <DrawerRoot />
-                </MenuProvider>
+                <DrawerRoot />
             </View>
         );
     }
