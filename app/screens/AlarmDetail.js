@@ -1564,7 +1564,7 @@ class AlarmDetail extends Component {
                                 fieldText={this.alarmLabelCache}
                                 handleTextInput={this.onChangeLabel}
                                 onTextInputBlur={this.onLabelInputBlur}
-                                separation={4}
+                                separation={0}
                                 textInputStyle={{
                                     fontSize: scaleByFactor(32, 0.5)
                                 }}

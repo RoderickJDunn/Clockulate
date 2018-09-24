@@ -80,7 +80,7 @@ class LabeledTimeInput extends Component {
         }
 
         return (
-            <View
+            <TouchableOpacity
                 style={[
                     styles.container,
                     {
@@ -89,6 +89,12 @@ class LabeledTimeInput extends Component {
                         // backgroundColor: "blue"
                     }
                 ]}
+                onPress={
+                    this.props.behavior == "picker"
+                        ? this._showDateTimePicker
+                        : this._toggleHiderView
+                }
+                disabled={this.props.disabled}
             >
                 <Text
                     style={[
@@ -104,7 +110,7 @@ class LabeledTimeInput extends Component {
                 >
                     {this.state.data.labelText}
                 </Text>
-                <TouchableOpacity
+                <View
                     onPress={
                         this.props.behavior == "picker"
                             ? this._showDateTimePicker
@@ -132,7 +138,7 @@ class LabeledTimeInput extends Component {
                             {amPmWakeUpTime}
                         </Text>
                     )}
-                </TouchableOpacity>
+                </View>
                 <DateTimePicker
                     date={this.props.time} // time has been converted into a Date() for this Component
                     mode={"time"}
@@ -141,7 +147,7 @@ class LabeledTimeInput extends Component {
                     onConfirm={this._handleDatePicked}
                     onCancel={this._hideDateTimePicker}
                 />
-            </View>
+            </TouchableOpacity>
         );
     }
 }
