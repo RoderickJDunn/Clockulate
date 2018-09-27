@@ -62,10 +62,6 @@ class TaskList extends React.Component {
         this.props.onSnapTask(item, index, rowState);
     }
 
-    // shouldComponentUpdate(nState, nProps) {
-    //     return false;
-    // }
-
     render() {
         // console.debug("Render TaskList");
         // console.debug("props: ", this.props);
@@ -122,6 +118,8 @@ class TaskList extends React.Component {
                         }}
                         forceRemeasure={this.props.forceRemeasure}
                         containerDimensions={this.props.containerDimensions}
+                        // onScroll={this.props.onScroll}
+                        // onEndReached={this.props.onEndReachedTaskList}
                     />
                 </View>
             </TouchableWithoutFeedback>

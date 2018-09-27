@@ -110,10 +110,8 @@ class PickerActionSheet extends React.Component {
                             <TouchableOpacity
                                 style={styles.actionSheetBtn}
                                 onPress={() => {
-                                    console.log("Pressed confirm");
-                                    this.props.onValueSelected(
-                                        this.state.value
-                                    );
+                                    // console.log("Pressed cancel");
+                                    this.props.onPressedCancel();
                                 }}
                             >
                                 <Text style={styles.buttonText}>Cancel</Text>
@@ -123,8 +121,10 @@ class PickerActionSheet extends React.Component {
                             <TouchableOpacity
                                 style={styles.actionSheetBtn}
                                 onPress={() => {
-                                    console.log("Pressed cancel");
-                                    this.props.onPressedCancel();
+                                    // console.log("Pressed confirm");
+                                    this.props.onValueSelected(
+                                        this.state.value
+                                    );
                                 }}
                             >
                                 <Text style={styles.buttonText}>Confirm</Text>

@@ -23,9 +23,13 @@ class StyledRadio extends React.Component {
     }
 
     componentWillReceiveProps(props) {
-        console.log("componentWillReceiveProps");
-        if (props.selectedIdx != this.props.selectedIdx)
+        // console.log("componentWillReceiveProps");
+        // console.log("props.selectedIdx", props.selectedIdx);
+        // console.log("this.props.selectedIdx", this.props.selectedIdx);
+        if (props.selectedIdx != this.props.selectedIdx) {
+            this._underscorAnim.setValue(props.selectedIdx);
             this.setState({ selectedIdx: props.selectedIdx });
+        }
     }
 
     onLayout = event => {

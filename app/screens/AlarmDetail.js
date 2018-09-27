@@ -164,6 +164,8 @@ class AlarmDetail extends Component {
     _viewIdx = null;
     _lastView = null;
 
+    // _taskListScrollPos = 0;
+
     static closeMenu = (isMenuOpen, navigation) => {
         let config = {
             duration: 150,
@@ -668,6 +670,7 @@ class AlarmDetail extends Component {
         // }
 
         this._viewIdx = snapIdx;
+        this.setState(this.state);
         // console.log("snapId", id);
         // // console.log("alarmState", alarmState);
 
@@ -889,7 +892,7 @@ class AlarmDetail extends Component {
         // console.log("aTasks", aTasks);
 
         /* FilterMap is an array of the original orders of enabled aTasks. Each position in the array
-            corresponds to the order value of the enabled aTask excluding any disabled ones. Each value of the array
+            corresponds to the order value of the enabled aTask if disabled tasks are excluded. Each value of the array
             corresponds to the order value of the enabled aTask including any disabled ones. If hideDisabledTasks
             was false during the move, then filterMap will be null.
 
@@ -904,6 +907,11 @@ class AlarmDetail extends Component {
             to = filterMap[to];
         }
 
+        /* 'snapshot()' yields a copy that is not live-updated, which is necessary for the loop below
+            which updates alarm task order values as it loops through the list. Since the list is
+            sorted by order, changing order values on a live-updating list could cause the loop to skip 
+            skip some items, while hitting others more than once.
+        */
         let aTasksCopy = allATasks.snapshot();
 
         realm.write(() => {
@@ -992,6 +1000,20 @@ class AlarmDetail extends Component {
                 pageY: SCREEN_HEIGHT * 0.58 // TODO: Extract layout values into constants, the create variables for the value of these calculations
             },
             ...nextState
+        });
+    }
+
+    _onPressAnimHandle() {
+        let nextIdx =
+        this.state.alarm.mode == "normal" ? 1 : 0;
+        this._snapToIdx(nextIdx);
+        realm.write(() => {
+            let { alarm } = this.state;
+            alarm.mode =
+                alarm.mode == "autocalc"
+                    ? "normal"
+                    : "autocalc";
+            this.setState({ alarm: alarm });
         });
     }
 
@@ -1108,6 +1130,18 @@ class AlarmDetail extends Component {
         this.setState({ showSnoozePicker: false });
     };
 
+    // onScrollTaskList = nativeEvent => {
+    //     console.log("scroll event", nativeEvent);
+    //     console.log("this", this.constructor.name);
+    //     this._taskListScrollPos = nativeEvent.contentOffset.y;
+    //     console.log("this._taskListScrollPos ", this._taskListScrollPos);
+    // };
+
+    // onEndReachedTaskList = () => {
+    //     console.log("onEndReachedTaskList");
+    //     this._taskListAtEnd = true;
+    // };
+
     render() {
         console.info("AlarmDetail render ");
         // console.debug("AlarmDetail render - this.state: ", this.state);
@@ -1159,6 +1193,7 @@ class AlarmDetail extends Component {
         //     disableDrag to true. Otherwise, set disableDrag to false (if both are false)*/
         // let disableDrag = this.state.isEditingTasks || this.state.isSlidingTask;
 
+        // FIXME: TODO: This should not go here. We shouldn't have to re-sort the tasks on every render.
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
         let sortedTasks =
             this.state.alarm.tasks.length > 1
@@ -1243,6 +1278,8 @@ class AlarmDetail extends Component {
                     forceRemeasure={forceRemeasure}
                     hideDisabledTasks={this.state.hideDisabledTasks}
                     containerDimensions={this.state.taskListDimensions}
+                    // onScroll={this.onScrollTaskList.bind(this)}
+                    // onEndReached={this.onEndReachedTaskList.bind(this)}
                 />
             );
         }
@@ -1423,7 +1460,7 @@ class AlarmDetail extends Component {
                     }}
                     dragWithSpring={
                         this.state.alarm.mode == "normal"
-                            ? { tension: 900, damping: 0.5 }
+                            ? { tension: 1200, damping: 0.5 }
                             : { tension: 1500, damping: 0.5 }
                     }
                     // dragWithSpring={{ tension: 200, damping: 0.5 }}
@@ -1432,6 +1469,33 @@ class AlarmDetail extends Component {
                     // ]}
                     animatedNativeDriver={true}
                     onDrag={this._onDragInteractable.bind(this)}
+                    // onStartShouldSetResponderCapture={({ nativeEvent }) => {
+                    //     this._dragStartPos = nativeEvent.pageY;
+                    // }}
+                    // onMoveShouldSetResponderCapture={({ nativeEvent }) => {
+                    //     console.log(
+                    //         "Interactable.View: onMoveShouldSetResponderCapture"
+                    //     );
+                    //     console.log(
+                    //         "Scroll position is <= 0",
+                    //         this._taskListScrollPos
+                    //     );
+                    //     // if (this._taskListScrollPos <= 0) {
+
+                    //     // }
+                    //     console.log("latest", nativeEvent);
+                    //     console.log("previous", this._dragStartPos);
+
+                    //     // If drag from top to bottom (attempt to scroll up), and scrollPosition is 0, take control of responder
+                    //     if (
+                    //         this._dragStartPos < nativeEvent.pageY &&
+                    //         this._taskListScrollPos <= 0
+                    //     ) {
+                    //         return true;
+                    //     }
+
+                    //     // If drag is from bottom to top (attempt to scroll down), and scrollPosition is bottom, take control of responder
+                    // }}
                 >
                     {/* This is the animated wrapper for the CLOCK display, and the label shown in Normal */}
                     <Animated.View
@@ -1662,15 +1726,15 @@ class AlarmDetail extends Component {
                                     disabled={this.state.alarm.showHrsOfSleep}
                                     hiderView={
                                         !this.state.alarm.showHrsOfSleep && (
-                                        <EntypoIcon
-                                            style={{
-                                                textAlign: "right",
-                                                padding: 4
-                                                // backgroundColor: "red",
-                                            }}
-                                            size={25}
-                                            name="moon"
-                                        />
+                                            <EntypoIcon
+                                                style={{
+                                                    textAlign: "right",
+                                                    padding: 4
+                                                    // backgroundColor: "red",
+                                                }}
+                                                size={25}
+                                                name="moon"
+                                            />
                                         )
                                     }
                                 />
@@ -1835,21 +1899,7 @@ class AlarmDetail extends Component {
                                 { perspective: 1000 }
                             ]
                         }}
-                        onPress={() => {
-                            // console.log("onPress AnimatedHandle");
-                            let nextIdx =
-                                this.state.alarm.mode == "normal" ? 1 : 0;
-                            this._snapToIdx(nextIdx);
-                            realm.write(() => {
-                                let { alarm } = this.state;
-                                alarm.mode =
-                                    alarm.mode == "autocalc"
-                                        ? "normal"
-                                        : "autocalc";
-                                this.setState({ alarm: alarm });
-                            });
-                            // this._playModeIndicatorAnimation();
-                        }}
+                        onPress={this._onPressAnimHandle.bind(this)}
                         hitSlop={{ top: 70, bottom: 70, left: 70, right: 70 }}
                     />
                 </Interactable.View>
@@ -2071,7 +2121,13 @@ class AlarmDetail extends Component {
                                 selectedIdx={this._viewIdx}
                                 onSelect={idx => {
                                     console.log("Pressed fancy radio");
-                                    this._snapToIdx(idx);
+                                    if (idx == 2) {
+                                        this._onPressTasksHeader();
+                                    }
+                                    else {
+                                        this._onPressAnimHandle();
+                                    }
+                                    // this._snapToIdx(idx);1
                                 }}
                                 // style={{ flex: 0.75 }}
                             />
