@@ -412,6 +412,7 @@ class TaskDetail extends Component {
 
     _onTaskNameChange(text) {
         this.currName = text;
+        // console.log("Task name typing: this.currName", this.currName);
         // const updatedAlmTask = this.state.alarmTask;
         // updatedAlmTask.task.name = text;
         // this.setState({ alarmTask: updatedAlmTask });
@@ -420,7 +421,8 @@ class TaskDetail extends Component {
         }
 
         let filteredSuggestions = this.state.suggestions.filtered(
-            `name CONTAINS[c] "${this.currName}"`
+            "name CONTAINS[c] $0",
+            this.currName
         );
 
         this.setState({
