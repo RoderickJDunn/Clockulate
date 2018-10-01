@@ -161,6 +161,7 @@ class AlarmDetail extends Component {
     _clockTransform = new Animated.Value(0);
     _modeTextOpacity;
     _modeTextScale;
+    _startTimesHandleAnim = new Animated.Value(0);
 
     _viewIdx = null;
     _lastView = null;
@@ -1954,17 +1955,48 @@ class AlarmDetail extends Component {
                             ]}
                             horizontalOnly={true}
                             animatedNativeDriver={true}
-                            snapPoints={[{ x: 0 }, { x: -80 }]}
+                            snapPoints={[
+                                { id: "dur", x: 0 },
+                                { id: "st", x: -80 }
+                            ]}
                             boundaries={{ right: 20, left: -100 }}
                             ref={el => (this.startTimesRef = el)}
-                            // animatedValueY={this._clockTransform}
-                            // onSnap={this.onSnap.bind(this)}
+                            // animatedValueX={this._startTimesHandleAnim}
+                            onDrag={event => {
+                                let {
+                                    state,
+                                    y,
+                                    targetSnapPointId
+                                } = event.nativeEvent;
+
+                                if (state == "start") return;
+
+                                let toValue;
+                                if (targetSnapPointId == "dur") {
+                                    toValue = 0;
+                                } else {
+                                    toValue = 80;
+                                }
+                                Animated.spring(this._startTimesHandleAnim, {
+                                    toValue: toValue,
+                                    bounciness: 10,
+                                    useNativeDriver: true
+                                }).start();
+                            }}
                             // initialPosition={{ y: initInterPosition }}
                         >
                             <TouchableWithoutFeedback
                                 style={StyleSheet.absoluteFill}
                                 onPress={() => {
                                     this.startTimesRef.snapTo({ index: 0 });
+                                    Animated.timing(
+                                        this._startTimesHandleAnim,
+                                        {
+                                            toValue: 0,
+                                            duration: 250,
+                                            useNativeDriver: true
+                                        }
+                                    ).start();
                                 }}
                             >
                                 <View
@@ -2022,34 +2054,8 @@ class AlarmDetail extends Component {
                                         >
                                             <View
                                                 style={{
-                                                    width: 10
-                                                    // backgroundColor: "transparent"
-                                                }}
-                                            >
-                                                <View
-                                                    style={{
-                                                        position: "absolute",
-                                                        top: 80,
-                                                        left: 3,
-                                                        // backgroundColor:
-                                                        //     Colors.brandDarkPurple,
-                                                        // backgroundColor: "transparent",
-                                                        backgroundColor:
-                                                            Colors.labelText,
-                                                        // borderTopLeftRadius: 20,
-                                                        // borderBottomLeftRadius: 20,
-                                                        // borderBottomLeftRadius: 20,
-                                                        borderRadius: 20,
-                                                        height: 60,
-                                                        width: 30
-                                                        // borderColor: "black"
-                                                        // borderWidth: 0.5
-                                                    }}
-                                                />
-                                            </View>
-                                            <View
-                                                style={{
-                                                    flex: 0.9,
+                                                    flex: 1,
+                                                    paddingLeft: 10,
                                                     // flex: this.state.taskHeaderFlex || 0.15,
                                                     // backgroundColor: "blue",
                                                     backgroundColor:
@@ -2080,6 +2086,44 @@ class AlarmDetail extends Component {
                                                     }}
                                                 />
                                             </View>
+                                            <Animated.View
+                                                style={{
+                                                    width: 10,
+                                                    position: "absolute",
+                                                    top: 80,
+                                                    left: 3,
+                                                    overflow: "hidden",
+                                                    transform: [
+                                                        {
+                                                            translateX: this
+                                                                ._startTimesHandleAnim
+                                                        }
+                                                    ]
+                                                    // backgroundColor: "transparent"
+                                                }}
+                                            >
+                                                <View
+                                                    style={{
+                                                        // position: "absolute",
+                                                        // top: 80,
+                                                        // left: 3,
+                                                        // backgroundColor:
+                                                        //     Colors.brandDarkPurple,
+                                                        // backgroundColor: "transparent",
+                                                        backgroundColor:
+                                                            Colors.labelText,
+                                                        // borderTopLeftRadius: 20,
+                                                        // borderBottomLeftRadius: 20,
+                                                        // borderBottomLeftRadius: 20,
+                                                        borderRadius: 20,
+                                                        height: 60,
+                                                        width: 30
+
+                                                        // borderColor: "black"
+                                                        // borderWidth: 0.5
+                                                    }}
+                                                />
+                                            </Animated.View>
                                         </View>
                                     </View>
                                 </View>

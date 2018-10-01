@@ -60,7 +60,7 @@ class StartTimesList extends Component {
                             >
                                 <View
                                     style={{
-                                        paddingLeft: 16
+                                        paddingLeft: 10
                                     }}
                                 >
                                     <Text>{item.item.value}</Text>
