@@ -20,7 +20,7 @@ import {
     LayoutAnimation,
     Alert,
     Picker,
-    TouchableHighlight
+    TouchableWithoutFeedback
 } from "react-native";
 import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
 import { Header, Transitioner } from "react-navigation";
@@ -46,6 +46,7 @@ import TaskList from "../components/task-list";
 import LabeledInput from "../components/labeled-input";
 import LabeledTimeInput from "../components/labeled-time-input";
 import PickerActionSheet from "../components/picker-action-sheet";
+import StartTimesList from "../components/starttimes-list";
 import AnimatedView from "../components/animated-view";
 import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
@@ -164,6 +165,8 @@ class AlarmDetail extends Component {
     _viewIdx = null;
     _lastView = null;
 
+    _hoursOfSleep = 0;
+    _taskStartTimes = null;
     // _taskListScrollPos = 0;
 
     static closeMenu = (isMenuOpen, navigation) => {
@@ -259,6 +262,12 @@ class AlarmDetail extends Component {
         this._setAnimatedViewRef = this._setAnimatedViewRef.bind(this);
 
         this.alarmLabelCache = this.state.alarm.label;
+
+        this._hoursOfSleep = this._calculateHoursOfSleep(
+            this.state.alarm.wakeUpTime
+        );
+
+        this._taskStartTimes = this._calcStartTimes();
 
         /* These may be used for Intro (Tutorial Mode), but removing for now */
         // TODO: Here we need to check whether user has global setting to "Never show mode indicator"
@@ -788,6 +797,12 @@ class AlarmDetail extends Component {
 
         this._calculatedWakeUpTime = new Date(epochSec);
 
+        this._hoursOfSleep = this._calculateHoursOfSleep(
+            this._calculatedWakeUpTime
+        );
+
+        this._taskStartTimes = this._calcStartTimes();
+
         return this._calculatedWakeUpTime;
     };
 
@@ -808,6 +823,53 @@ class AlarmDetail extends Component {
         }
 
         return fmtTimeUntilAlarm;
+    };
+
+    _calcStartTimes = hideDisableTasks => {
+        let additiveMoment = moment(this.state.alarm.wakeUpTime);
+        if (hideDisableTasks == null || hideDisableTasks == undefined) {
+            hideDisableTasks = this.state.hideDisabledTasks;
+        }
+
+        let visibleTaskIdx = 0;
+        return this.state.alarm.tasks
+            .sorted("order")
+            .reduce(function(result, task, idx) {
+                console.log("result", result);
+                if (task.enabled == false && !hideDisableTasks) {
+                    result.push({
+                        key: visibleTaskIdx,
+                        value: null
+                    });
+                    visibleTaskIdx++;
+                } else if (task.enabled == true) {
+                    let startTime = {
+                        key: visibleTaskIdx,
+                        value: additiveMoment.format("h:mm A")
+                    };
+                    additiveMoment.add(task.duration, "seconds");
+                    result.push(startTime);
+                    visibleTaskIdx++;
+                }
+                return result;
+            }, []);
+
+        // return this.state.alarm.tasks.sorted("order").map((task, idx) => {
+        //     if (task.enabled == false) {
+
+        //         return {
+        //             key: idx,
+        //             value: null
+        //         };
+        //     } else {
+        //         let startTime = {
+        //             key: idx,
+        //             value: additiveMoment.format("h:mm A")
+        //         };
+        //         additiveMoment.add(task.duration, "seconds");
+        //         return startTime;
+        //     }
+        // });
     };
 
     _onDeleteTask(data) {
@@ -944,6 +1006,8 @@ class AlarmDetail extends Component {
             }
         });
 
+        this._taskStartTimes = this._calcStartTimes();
+
         this.setState({ disableDrag: false });
     }
 
@@ -1004,15 +1068,11 @@ class AlarmDetail extends Component {
     }
 
     _onPressAnimHandle() {
-        let nextIdx =
-        this.state.alarm.mode == "normal" ? 1 : 0;
+        let nextIdx = this.state.alarm.mode == "normal" ? 1 : 0;
         this._snapToIdx(nextIdx);
         realm.write(() => {
             let { alarm } = this.state;
-            alarm.mode =
-                alarm.mode == "autocalc"
-                    ? "normal"
-                    : "autocalc";
+            alarm.mode = alarm.mode == "autocalc" ? "normal" : "autocalc";
             this.setState({ alarm: alarm });
         });
     }
@@ -1188,10 +1248,6 @@ class AlarmDetail extends Component {
                 ]
             });
         }
-
-        // /* I hope this means: If either isEditingTasks or isSlidingTask is true, set
-        //     disableDrag to true. Otherwise, set disableDrag to false (if both are false)*/
-        // let disableDrag = this.state.isEditingTasks || this.state.isSlidingTask;
 
         // FIXME: TODO: This should not go here. We shouldn't have to re-sort the tasks on every render.
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
@@ -1399,8 +1455,6 @@ class AlarmDetail extends Component {
         // labelForceVisible = { opacity: 1 };
         // handleForceHide = { opacity: 0 };
         // }
-
-        let hoursOfSleep = this._calculateHoursOfSleep(wakeUpTime);
 
         return (
             <ScrollView
@@ -1618,7 +1672,10 @@ class AlarmDetail extends Component {
                         <View
                             style={[
                                 styles.fieldsContainer,
-                                { flex: this.state.fieldAreaFlex || 0.17 }
+                                {
+                                    flex: this.state.fieldAreaFlex || 0.17
+                                    // backgroundColor: "blue"
+                                }
                                 // { flex: 0 }
                             ]}
                         >
@@ -1712,7 +1769,7 @@ class AlarmDetail extends Component {
                                 } */}
                                 <LabeledTimeInput
                                     labelText="Hrs of Sleep"
-                                    fieldText={hoursOfSleep}
+                                    fieldText={this._hoursOfSleep}
                                     flex={0.5}
                                     viewStyle={{
                                         flex: 0.3,
@@ -1752,16 +1809,23 @@ class AlarmDetail extends Component {
                             start={{ x: 0.5, y: 0 }}
                             end={{ x: 0.5, y: 0.04 }}
                             colors={["#D2CED4", Colors.backgroundGrey]}
+                            // colors={["green", "green"]}
                             style={[
                                 styles.taskListContainer,
-                                { flex: this.state.taskAreaFlex || 0.4 }
+                                {
+                                    flex: this.state.taskAreaFlex || 0.4
+                                }
                             ]}
                         >
                             <View
                                 style={[
                                     styles.taskListHeader,
                                     {
-                                        flex: this.state.taskHeaderFlex || 0.15
+                                        flex: this.state.taskHeaderFlex || 0.15,
+                                        // backgroundColor: "green"
+                                        backgroundColor: "transparent"
+
+                                        // backgroundColor: "green"
                                     }
                                 ]}
                             >
@@ -1832,6 +1896,9 @@ class AlarmDetail extends Component {
                                         // alert(
                                         //     "Hide disabled tasks! (Not implemented)"
                                         // )
+                                        this._taskStartTimes = this._calcStartTimes(
+                                            !this.state.hideDisabledTasks
+                                        );
                                         this.setState({
                                             hideDisabledTasks: !this.state
                                                 .hideDisabledTasks
@@ -1864,6 +1931,160 @@ class AlarmDetail extends Component {
                             {touchableBackdrop}
                             {taskArea}
                         </LinearGradient>
+                        {/* Task Start-Times Interactable View*/}
+                        <Interactable.View
+                            style={[
+                                // StyleSheet.absoluteFill,
+                                {
+                                    position: "absolute",
+                                    // right: 0,
+                                    left: SCREEN_WIDTH - 10,
+                                    // top: 173,
+                                    top: 0,
+                                    bottom: 0,
+                                    width: 170,
+                                    // paddingBottom: scaleByFactor(10, 0.4),
+
+                                    // backgroundColor: "red"
+                                    // paddingVertical: scaleByFactor(10, 0.4)
+                                    backgroundColor: "transparent"
+                                    // borderRadius: 10
+                                    // backgroundColor: Colors.brandDarkGrey
+                                }
+                            ]}
+                            horizontalOnly={true}
+                            animatedNativeDriver={true}
+                            snapPoints={[{ x: 0 }, { x: -80 }]}
+                            boundaries={{ right: 20, left: -100 }}
+                            ref={el => (this.startTimesRef = el)}
+                            // animatedValueY={this._clockTransform}
+                            // onSnap={this.onSnap.bind(this)}
+                            // initialPosition={{ y: initInterPosition }}
+                        >
+                            <TouchableWithoutFeedback
+                                style={StyleSheet.absoluteFill}
+                                onPress={() => {
+                                    this.startTimesRef.snapTo({ index: 0 });
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        flex: 1
+                                        // backgroundColor: "green"
+                                    }}
+                                >
+                                    <View
+                                        style={{
+                                            flex:
+                                                this.state.fieldAreaFlex ||
+                                                0.17,
+                                            paddingVertical: scaleByFactor(
+                                                10,
+                                                0.4
+                                            ),
+                                            paddingBottom: 8,
+                                            backgroundColor: "transparent"
+                                        }}
+                                    />
+                                    <View
+                                        style={[
+                                            styles.taskListContainer,
+                                            {
+                                                flex:
+                                                    this.state.taskAreaFlex ||
+                                                    0.4,
+                                                paddingHorizontal: 0,
+                                                backgroundColor: "transparent"
+                                                // backgroundColor: "green"
+                                            }
+                                        ]}
+                                    >
+                                        <View
+                                            style={[
+                                                styles.taskListHeader,
+                                                {
+                                                    flex:
+                                                        this.state
+                                                            .taskHeaderFlex ||
+                                                        0.15,
+                                                    // backgroundColor: "green"
+                                                    backgroundColor:
+                                                        "transparent"
+                                                    // backgroundColor: "green"
+                                                }
+                                            ]}
+                                        />
+                                        <View
+                                            style={{
+                                                flex: 1,
+                                                flexDirection: "row"
+                                            }}
+                                        >
+                                            <View
+                                                style={{
+                                                    width: 10
+                                                    // backgroundColor: "transparent"
+                                                }}
+                                            >
+                                                <View
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: 80,
+                                                        left: 3,
+                                                        // backgroundColor:
+                                                        //     Colors.brandDarkPurple,
+                                                        // backgroundColor: "transparent",
+                                                        backgroundColor:
+                                                            Colors.labelText,
+                                                        // borderTopLeftRadius: 20,
+                                                        // borderBottomLeftRadius: 20,
+                                                        // borderBottomLeftRadius: 20,
+                                                        borderRadius: 20,
+                                                        height: 60,
+                                                        width: 30
+                                                        // borderColor: "black"
+                                                        // borderWidth: 0.5
+                                                    }}
+                                                />
+                                            </View>
+                                            <View
+                                                style={{
+                                                    flex: 0.9,
+                                                    // flex: this.state.taskHeaderFlex || 0.15,
+                                                    // backgroundColor: "blue",
+                                                    backgroundColor:
+                                                        "transparent",
+                                                    // backgroundColor:
+                                                    //     Colors.backgroundGrey,
+                                                    justifyContent: "center"
+                                                }}
+                                            >
+                                                {/* <View
+                                                style={{
+                                                    paddingLeft: 18,
+                                                    flex: 0.0245
+                                                    // backgroundColor: "#cac5cc",
+                                                    // borderTopLeftRadius: 20
+                                                }}
+                                            >
+                                                <Text style={{ fontSize: 10, paddingTop: 5 }}>
+                                                    Start Time
+                                                </Text>
+                                            </View> */}
+                                                <StartTimesList
+                                                    data={this._taskStartTimes} // this._taskStartTimes
+                                                    style={{
+                                                        borderRadius: 20,
+                                                        backgroundColor:
+                                                            Colors.backgroundGrey
+                                                    }}
+                                                />
+                                            </View>
+                                        </View>
+                                    </View>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </Interactable.View>
                     </View>
                     <this.AnimatedHandle
                         name="drag-handle"
@@ -2088,7 +2309,7 @@ class AlarmDetail extends Component {
                                 let { alarm } = this.state;
                                 alarm.showHrsOfSleep = !alarm.showHrsOfSleep;
                             });
-                            this.setState(this.state);
+                            this._setMenuState(0);
                         }}
                     />
                     <MenuItem
@@ -2123,8 +2344,7 @@ class AlarmDetail extends Component {
                                     console.log("Pressed fancy radio");
                                     if (idx == 2) {
                                         this._onPressTasksHeader();
-                                    }
-                                    else {
+                                    } else {
                                         this._onPressAnimHandle();
                                     }
                                     // this._snapToIdx(idx);1
@@ -2221,7 +2441,6 @@ const styles = StyleSheet.create({
         height: SCREEN_HEIGHT * 2.5
     },
     fieldsContainer: {
-        flex: 0.28,
         alignSelf: "stretch",
         justifyContent: "center",
         // backgroundColor: "yellow",
@@ -2239,7 +2458,6 @@ const styles = StyleSheet.create({
     },
     taskListContainer: {
         // flex: 0.22,
-        flex: 0.72,
         paddingHorizontal: scaleByFactor(10, 0.4),
         paddingBottom: scaleByFactor(10, 0.4),
         alignSelf: "stretch",
