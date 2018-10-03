@@ -470,6 +470,7 @@ class TaskItem extends React.Component {
                             style={[
                                 TaskListStyle.allChildren,
                                 TaskItemStyle.description
+                                // { backgroundColor: "blue" }
                             ]}
                             numberOfLines={2}
                             ellipsizeMode="tail"
@@ -477,18 +478,91 @@ class TaskItem extends React.Component {
                         >
                             {this.props.data.task.name}
                         </Text>
-                        <DurationText
-                            duration={duration}
-                            short={true}
+                        <View
                             style={[
-                                TaskListStyle.allChildren,
-                                TaskItemStyle.duration,
-                                TextStyle.timeText,
-                                { fontSize: 24 }
+                                {
+                                    flex: 0.25,
+                                    alignSelf: "stretch",
+                                    alignItems: "center"
+                                }
                             ]}
-                        />
+                        >
+                            <Animated.View
+                                style={[
+                                    styles.flipCard,
+                                    {
+                                        transform: [
+                                            {
+                                                rotateY: this.props.startTimesAnim.interpolate(
+                                                    {
+                                                        inputRange: [-230, 0],
+                                                        outputRange: [
+                                                            "180deg",
+                                                            "0deg"
+                                                        ]
+                                                    }
+                                                )
+                                            }
+                                        ]
+                                    }
+                                ]}
+                            >
+                                <DurationText
+                                    duration={duration}
+                                    short={true}
+                                    style={[
+                                        TaskItemStyle.duration,
+                                        TaskListStyle.allChildren,
+                                        TextStyle.timeText,
+                                        {
+                                            alignSelf: "stretch",
+                                            // textAlign: "right",
+                                            // backgroundColor: "red",
+                                            fontSize: 24
+                                        }
+                                    ]}
+                                />
+                            </Animated.View>
+                            <Animated.View
+                                style={[
+                                    styles.flipCard,
+                                    styles.flipCardBack,
+                                    {
+                                        transform: [
+                                            {
+                                                rotateY: this.props.startTimesAnim.interpolate(
+                                                    {
+                                                        inputRange: [-230, 0],
+                                                        outputRange: [
+                                                            "360deg",
+                                                            "180deg"
+                                                        ]
+                                                    }
+                                                )
+                                            }
+                                        ]
+                                    }
+                                ]}
+                            >
+                                <Text
+                                    style={[
+                                        TaskItemStyle.duration,
+                                        TaskListStyle.allChildren,
+                                        TextStyle.timeText,
+                                        {
+                                            // backgroundColor: "blue",
+                                            alignSelf: "stretch",
+                                            textAlign: "right",
+                                            fontSize: 24
+                                        }
+                                    ]}
+                                >
+                                    {this.props.data.startTime}
+                                </Text>
+                            </Animated.View>
+                        </View>
                     </TouchableOpacity>
-                    {this.state.isSlidingTask && (
+                    {/* this.state.isSlidingTask && (
                         <Slider
                             ref={component => (this._sliderRef = component)}
                             style={[styles.slider]}
@@ -515,7 +589,7 @@ class TaskItem extends React.Component {
                                 this.setState(this.state);
                             }}
                         />
-                    )}
+                    ) */}
                 </View>
                 {touchableBackdrop}
                 <TouchableOpacity
@@ -544,6 +618,27 @@ const styles = StyleSheet.create({
         right: 70,
         bottom: 0
         // flex: 1
+    },
+    flipCard: {
+        // height: "auto",
+        // width: "auto",
+        position: "absolute",
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        paddingRight: 12,
+        // width: 80,
+        // height: 80,
+        alignItems: "flex-end",
+        alignContent: "flex-end",
+        justifyContent: "center",
+        backfaceVisibility: "hidden"
+        // backgroundColor: "blue",
+    },
+    flipCardBack: {
+        // backgroundColor: "red",
+        position: "absolute"
     }
 });
 

@@ -146,10 +146,9 @@ export const TaskItemStyle = StyleSheet.create({
     duration: {
         // alignSelf: 'stretch',
         textAlign: "right",
-        flex: 0.2,
         fontSize: 16,
-        alignSelf: "center",
-        marginRight: 10
+        alignSelf: "center"
+        // marginRight: 10
         // position: "absolute",
         // right: 10
     },
