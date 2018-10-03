@@ -532,8 +532,11 @@ class AlarmDetail extends Component {
                 // only add task to list if new task was created
                 alarm.tasks.push(newTask);
             }
-            // re-calculated wake-up time either way, since existing task duration may have been changed
+            // re-calculate wake-up time either way, since existing task duration may have been changed
             alarm.wakeUpTime = this._calcWakeUpTime();
+
+            // calculate startTimes
+            this._calcStartTimes();
         });
         let tempState = this.state;
         tempState.activeTask = null;
@@ -638,6 +641,7 @@ class AlarmDetail extends Component {
         realm.write(() => {
             taskToChange.enabled = !enabled;
             alarm.wakeUpTime = this._calcWakeUpTime();
+            this._calcStartTimes();
         });
         this.setState({ tasks: tasks });
         // this.onTaskListChanged();
@@ -803,7 +807,7 @@ class AlarmDetail extends Component {
             this._calculatedWakeUpTime
         );
 
-        this._taskStartTimes = this._calcStartTimes();
+        this._calcStartTimes();
 
         return this._calculatedWakeUpTime;
     };
@@ -997,9 +1001,9 @@ class AlarmDetail extends Component {
             }
         });
 
-        this._taskStartTimes = this._calcStartTimes();
+        this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
 
-        // this._cachedSortedTasks = this.state.alarm.tasks.;
+        this._calcStartTimes();
 
         this.setState({ disableDrag: false });
     }
@@ -1892,9 +1896,9 @@ class AlarmDetail extends Component {
                                         // alert(
                                         //     "Hide disabled tasks! (Not implemented)"
                                         // )
-                                        this._taskStartTimes = this._calcStartTimes(
-                                            !this.state.hideDisabledTasks
-                                        );
+                                        // this._calcStartTimes(
+                                        //     !this.state.hideDisabledTasks
+                                        // );
                                         this.setState({
                                             hideDisabledTasks: !this.state
                                                 .hideDisabledTasks
@@ -1924,6 +1928,141 @@ class AlarmDetail extends Component {
                                     )}
                                 </TouchableOpacity>
                             </View>
+                            <Interactable.View
+                                style={[
+                                    // StyleSheet.absoluteFill,
+                                    {
+                                        position: "absolute",
+                                        // right: 0,
+                                        left: SCREEN_WIDTH - 15,
+                                        // top: 173,
+                                        top: 0,
+                                        bottom: 0,
+                                        width: 230,
+                                        // paddingBottom: scaleByFactor(10, 0.4),
+
+                                        // paddingVertical: scaleByFactor(10, 0.4)
+                                        backgroundColor: "transparent"
+                                        // backgroundColor: "red"
+                                        // borderRadius: 10
+                                        // backgroundColor: Colors.brandDarkGrey
+                                    }
+                                ]}
+                                horizontalOnly={true}
+                                animatedNativeDriver={true}
+                                snapPoints={[
+                                    { id: "dur", x: 0 },
+                                    { id: "st", x: -230 }
+                                    // { id: "hide", x: -160 }
+                                ]}
+                                boundaries={{ right: 20, left: -235 }}
+                                ref={el => (this.startTimesRef = el)}
+                                animatedValueX={this.startTimesHandleAnim}
+                                onDrag={event => {
+                                    let {
+                                        state,
+                                        y,
+                                        targetSnapPointId
+                                    } = event.nativeEvent;
+
+                                    if (state == "start") return;
+
+                                    console.log("onDrag - end");
+                                    console.log(
+                                        "targetSnapPointId",
+                                        targetSnapPointId
+                                    );
+                                    let toValue;
+                                    if (targetSnapPointId == "st") {
+                                        toValue = 0;
+                                        // this.startTimesRef.snapTo({ index: 0 });
+                                    } else {
+                                        toValue = -230;
+                                    }
+                                    // Animated.spring(
+                                    //     this.startTimesHandleAnim,
+                                    //     {
+                                    //         toValue: toValue,
+                                    //         bounciness: 10,
+                                    //         useNativeDriver: true
+                                    //     }
+                                    // ).start();
+                                }}
+                                // initialPosition={{ y: initInterPosition }}
+                            >
+                                <TouchableWithoutFeedback
+                                    style={StyleSheet.absoluteFill}
+                                    onPress={() => {
+                                        this.startTimesRef.snapTo({ index: 0 });
+                                        // Animated.timing(
+                                        //     this.startTimesHandleAnim,
+                                        //     {
+                                        //         toValue: 0,
+                                        //         duration: 250,
+                                        //         useNativeDriver: true
+                                        //     }
+                                        // ).start();
+                                    }}
+                                >
+                                    <View
+                                        style={{
+                                            flex: 1
+                                            // backgroundColor: "green"
+                                        }}
+                                    >
+                                        <View
+                                            style={{
+                                                flex:
+                                                    this.state.fieldAreaFlex ||
+                                                    0.17,
+                                                paddingVertical: scaleByFactor(
+                                                    10,
+                                                    0.4
+                                                ),
+                                                paddingBottom: 8,
+                                                backgroundColor: "transparent"
+                                            }}
+                                        />
+                                        <View
+                                            style={[
+                                                styles.taskListContainer,
+                                                {
+                                                    flex:
+                                                        this.state
+                                                            .taskAreaFlex ||
+                                                        0.4,
+                                                    paddingHorizontal: 0,
+                                                    backgroundColor:
+                                                        "transparent"
+                                                    // backgroundColor: "green"
+                                                }
+                                            ]}
+                                        >
+                                            <View
+                                                style={[
+                                                    styles.taskListHeader,
+                                                    {
+                                                        flex:
+                                                            this.state
+                                                                .taskHeaderFlex ||
+                                                            0.15,
+                                                        // backgroundColor: "green"
+                                                        backgroundColor:
+                                                            "transparent"
+                                                        // backgroundColor: "green"
+                                                    }
+                                                ]}
+                                            />
+                                            <View
+                                                style={{
+                                                    flex: 1,
+                                                    flexDirection: "row"
+                                                }}
+                                            />
+                                        </View>
+                                    </View>
+                                </TouchableWithoutFeedback>
+                            </Interactable.View>
                             {touchableBackdrop}
                             {taskArea}
                         </LinearGradient>
@@ -1945,196 +2084,7 @@ class AlarmDetail extends Component {
                             ]}
                             pointerEvents="box-none"
                         > */}
-                        <Interactable.View
-                            style={[
-                                // StyleSheet.absoluteFill,
-                                {
-                                    position: "absolute",
-                                    // right: 0,
-                                    left: SCREEN_WIDTH - 15,
-                                    // top: 173,
-                                    top: 0,
-                                    bottom: 0,
-                                    width: 230,
-                                    // paddingBottom: scaleByFactor(10, 0.4),
 
-                                    // paddingVertical: scaleByFactor(10, 0.4)
-                                    backgroundColor: "transparent"
-                                    // backgroundColor: "red"
-                                    // borderRadius: 10
-                                    // backgroundColor: Colors.brandDarkGrey
-                                }
-                            ]}
-                            horizontalOnly={true}
-                            animatedNativeDriver={true}
-                            snapPoints={[
-                                { id: "dur", x: 0 },
-                                { id: "st", x: -230 }
-                                // { id: "hide", x: -160 }
-                            ]}
-                            boundaries={{ right: 20, left: -235 }}
-                            ref={el => (this.startTimesRef = el)}
-                            animatedValueX={this.startTimesHandleAnim}
-                            onDrag={event => {
-                                let {
-                                    state,
-                                    y,
-                                    targetSnapPointId
-                                } = event.nativeEvent;
-
-                                if (state == "start") return;
-
-                                let toValue;
-                                if (targetSnapPointId == "dur") {
-                                    toValue = 0;
-                                } else {
-                                    toValue = 80;
-                                }
-                                // Animated.spring(
-                                //     this.startTimesHandleAnim,
-                                //     {
-                                //         toValue: toValue,
-                                //         bounciness: 10,
-                                //         useNativeDriver: true
-                                //     }
-                                // ).start();
-                            }}
-                            // initialPosition={{ y: initInterPosition }}
-                        >
-                            <TouchableWithoutFeedback
-                                style={StyleSheet.absoluteFill}
-                                onPress={() => {
-                                    this.startTimesRef.snapTo({ index: 0 });
-                                    // Animated.timing(
-                                    //     this.startTimesHandleAnim,
-                                    //     {
-                                    //         toValue: 0,
-                                    //         duration: 250,
-                                    //         useNativeDriver: true
-                                    //     }
-                                    // ).start();
-                                }}
-                            >
-                                <View
-                                    style={{
-                                        flex: 1
-                                        // backgroundColor: "green"
-                                    }}
-                                >
-                                    <View
-                                        style={{
-                                            flex:
-                                                this.state.fieldAreaFlex ||
-                                                0.17,
-                                            paddingVertical: scaleByFactor(
-                                                10,
-                                                0.4
-                                            ),
-                                            paddingBottom: 8,
-                                            backgroundColor: "transparent"
-                                        }}
-                                    />
-                                    <View
-                                        style={[
-                                            styles.taskListContainer,
-                                            {
-                                                flex:
-                                                    this.state.taskAreaFlex ||
-                                                    0.4,
-                                                paddingHorizontal: 0,
-                                                backgroundColor: "transparent"
-                                                // backgroundColor: "green"
-                                            }
-                                        ]}
-                                    >
-                                        <View
-                                            style={[
-                                                styles.taskListHeader,
-                                                {
-                                                    flex:
-                                                        this.state
-                                                            .taskHeaderFlex ||
-                                                        0.15,
-                                                    // backgroundColor: "green"
-                                                    backgroundColor:
-                                                        "transparent"
-                                                    // backgroundColor: "green"
-                                                }
-                                            ]}
-                                        />
-                                        <View
-                                            style={{
-                                                flex: 1,
-                                                flexDirection: "row"
-                                            }}
-                                        >
-                                            {/* <View
-                                                style={{
-                                                    flex: 1,
-                                                    paddingLeft: 10,
-                                                    // flex: this.state.taskHeaderFlex || 0.15,
-                                                    // backgroundColor: "blue",
-                                                    backgroundColor:
-                                                        "transparent",
-                                                    // backgroundColor:
-                                                    //     Colors.backgroundGrey,
-                                                    justifyContent: "center"
-                                                }}
-                                            >
-                                                <StartTimesList
-                                                        data={
-                                                            this._taskStartTimes
-                                                        } // this._taskStartTimes
-                                                    style={{
-                                                        borderRadius: 20,
-                                                        backgroundColor:
-                                                            Colors.backgroundGrey
-                                                    }}
-                                                />
-                                                </View> */}
-                                            {/* <Animated.View
-                                                    style={{
-                                                        width: 10,
-                                                        position: "absolute",
-                                                        top: 80,
-                                                        left: 0,
-                                                        overflow: "hidden"
-                                                        // transform: [
-                                                        //     {
-                                                        //         translateX: this
-                                                        //             .startTimesHandleAnim
-                                                        //     }
-                                                        // ]
-                                                        // backgroundColor: "transparent"
-                                                    }}
-                                                >
-                                                    <View
-                                                        style={{
-                                                            // position: "absolute",
-                                                            // top: 80,
-                                                            // left: 3,
-                                                            // backgroundColor:
-                                                            //     Colors.brandDarkPurple,
-                                                            // backgroundColor: "transparent",
-                                                            backgroundColor:
-                                                                Colors.labelText,
-                                                            // borderTopLeftRadius: 20,
-                                                            // borderBottomLeftRadius: 20,
-                                                            // borderBottomLeftRadius: 20,
-                                                            borderRadius: 20,
-                                                            height: 60,
-                                                            width: 30
-
-                                                            // borderColor: "black"
-                                                            // borderWidth: 0.5
-                                                        }}
-                                                    />
-                                                </Animated.View> */}
-                                        </View>
-                                    </View>
-                                </View>
-                            </TouchableWithoutFeedback>
-                        </Interactable.View>
                         {/* </View> */}
                     </View>
                     <this.AnimatedHandle
