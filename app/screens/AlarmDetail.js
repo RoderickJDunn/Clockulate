@@ -161,7 +161,7 @@ class AlarmDetail extends Component {
     _clockTransform = new Animated.Value(0);
     _modeTextOpacity;
     _modeTextScale;
-    _startTimesHandleAnim = new Animated.Value(0);
+    startTimesHandleAnim = new Animated.Value(0);
 
     _viewIdx = null;
     _lastView = null;
@@ -270,6 +270,7 @@ class AlarmDetail extends Component {
 
         this._taskStartTimes = this._calcStartTimes();
 
+        this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
         /* These may be used for Intro (Tutorial Mode), but removing for now */
         // TODO: Here we need to check whether user has global setting to "Never show mode indicator"
         // this._modeTextOpacity = new Animated.Value(1);
@@ -832,45 +833,34 @@ class AlarmDetail extends Component {
             hideDisableTasks = this.state.hideDisabledTasks;
         }
 
-        let visibleTaskIdx = 0;
-        return this.state.alarm.tasks
-            .sorted("order")
-            .reduce(function(result, task, idx) {
-                console.log("result", result);
-                if (task.enabled == false && !hideDisableTasks) {
-                    result.push({
-                        key: visibleTaskIdx,
-                        value: null
-                    });
-                    visibleTaskIdx++;
+        if (this._cachedSortedTasks == null) {
+            this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
+        }
+
+        if (realm.isInTransaction) {
+            this._cachedSortedTasks.forEach(task => {
+                if (task.enabled == false) {
+                    task.startTime = null;
                 } else if (task.enabled == true) {
-                    let startTime = {
-                        key: visibleTaskIdx,
-                        value: additiveMoment.format("h:mm A")
-                    };
+                    task.startTime = additiveMoment.format("h:mm A");
                     additiveMoment.add(task.duration, "seconds");
-                    result.push(startTime);
-                    visibleTaskIdx++;
                 }
-                return result;
-            }, []);
+            });
+        } else {
+            realm.write(() => {
+                this._cachedSortedTasks.forEach(task => {
+                    if (task.enabled == false) {
+                        task.startTime = null;
+                    } else if (task.enabled == true) {
+                        task.startTime = additiveMoment.format("h:mm A");
+                        additiveMoment.add(task.duration, "seconds");
+                    }
+                });
+            });
+        }
 
-        // return this.state.alarm.tasks.sorted("order").map((task, idx) => {
-        //     if (task.enabled == false) {
-
-        //         return {
-        //             key: idx,
-        //             value: null
-        //         };
-        //     } else {
-        //         let startTime = {
-        //             key: idx,
-        //             value: additiveMoment.format("h:mm A")
-        //         };
-        //         additiveMoment.add(task.duration, "seconds");
-        //         return startTime;
-        //     }
-        // });
+        console.log("this.state.alarm", this.state.alarm);
+        console.log("_cachedSortedTasks", this._cachedSortedTasks);
     };
 
     _onDeleteTask(data) {
@@ -889,24 +879,24 @@ class AlarmDetail extends Component {
                 // Update order of task list
                 let { tasks } = this.state.alarm;
 
-                let sortedTasks = tasks.sorted("order");
-                console.log("sortedTasks", sortedTasks);
+                this._cachedSortedTasks = tasks.sorted("order");
+                console.log("sortedTasks", this._cachedSortedTasks);
                 // console.log("Deleted task. --> Now Tasks:", tasks);
                 let idx = 0;
-                for (var taskId in sortedTasks) {
-                    if (sortedTasks.hasOwnProperty(taskId)) {
-                        if (idx == sortedTasks[taskId].order) {
+                for (var taskId in this._cachedSortedTasks) {
+                    if (this._cachedSortedTasks.hasOwnProperty(taskId)) {
+                        if (idx == this._cachedSortedTasks[taskId].order) {
                             // console.log(tasks[taskId]);
                             // console.log("-----> Order OK");
                         } else {
-                            console.log(sortedTasks[taskId]);
+                            console.log(this._cachedSortedTasks[taskId]);
                             // console.log("-----> Order WRong. Decrementing...");
-                            sortedTasks[taskId].order--;
+                            this._cachedSortedTasks[taskId].order--;
                         }
                     }
                     idx++;
                 }
-                tasks = sortedTasks;
+                tasks = this._cachedSortedTasks;
             });
         }
         this.onTaskListChanged();
@@ -1008,6 +998,8 @@ class AlarmDetail extends Component {
         });
 
         this._taskStartTimes = this._calcStartTimes();
+
+        // this._cachedSortedTasks = this.state.alarm.tasks.;
 
         this.setState({ disableDrag: false });
     }
@@ -1205,7 +1197,7 @@ class AlarmDetail extends Component {
 
     render() {
         console.info("AlarmDetail render ");
-        // console.debug("AlarmDetail render - this.state: ", this.state);
+        console.debug("AlarmDetail render - this.state: ", this.state);
         let imageHeight = SCREEN_HEIGHT + 30;
 
         /* clockAndLabelTranslation:
@@ -1252,10 +1244,12 @@ class AlarmDetail extends Component {
 
         // FIXME: TODO: This should not go here. We shouldn't have to re-sort the tasks on every render.
         // Assign tasks to 'sortedTasks', first ordering them if there are >1
-        let sortedTasks =
-            this.state.alarm.tasks.length > 1
-                ? this.state.alarm.tasks.sorted("order")
-                : this.state.alarm.tasks;
+        // let sortedTasks =
+        //     this.state.alarm.tasks.length > 1
+        //         ? this.state.alarm.tasks.sorted("order")
+        //         : this.state.alarm.tasks;
+
+        let sortedTasks = this._cachedSortedTasks;
 
         // console.log("sortedTasks", sortedTasks);
         // let sortedTasks = [];
@@ -1335,6 +1329,7 @@ class AlarmDetail extends Component {
                     forceRemeasure={forceRemeasure}
                     hideDisabledTasks={this.state.hideDisabledTasks}
                     containerDimensions={this.state.taskListDimensions}
+                    startTimesAnim={this.startTimesHandleAnim}
                     // onScroll={this.onScrollTaskList.bind(this)}
                     // onEndReached={this.onEndReachedTaskList.bind(this)}
                 />
@@ -1933,22 +1928,39 @@ class AlarmDetail extends Component {
                             {taskArea}
                         </LinearGradient>
                         {/* Task Start-Times Interactable View*/}
+                        {/* <View
+                            style={[
+                                // StyleSheet.absoluteFill,
+                                {
+                                    position: "absolute",
+                                    // right: 0,
+                                    left: SCREEN_WIDTH - 80,
+                                    // top: 173,
+                                    top: 0,
+                                    bottom: 0,
+                                    width: 230,
+                                    // backgroundColor: "green",
+                                    overflow: "hidden"
+                                }
+                            ]}
+                            pointerEvents="box-none"
+                        > */}
                         <Interactable.View
                             style={[
                                 // StyleSheet.absoluteFill,
                                 {
                                     position: "absolute",
                                     // right: 0,
-                                    left: SCREEN_WIDTH - 10,
+                                    left: SCREEN_WIDTH - 15,
                                     // top: 173,
                                     top: 0,
                                     bottom: 0,
-                                    width: 170,
+                                    width: 230,
                                     // paddingBottom: scaleByFactor(10, 0.4),
 
-                                    // backgroundColor: "red"
                                     // paddingVertical: scaleByFactor(10, 0.4)
                                     backgroundColor: "transparent"
+                                    // backgroundColor: "red"
                                     // borderRadius: 10
                                     // backgroundColor: Colors.brandDarkGrey
                                 }
@@ -1957,11 +1969,12 @@ class AlarmDetail extends Component {
                             animatedNativeDriver={true}
                             snapPoints={[
                                 { id: "dur", x: 0 },
-                                { id: "st", x: -80 }
+                                { id: "st", x: -230 }
+                                // { id: "hide", x: -160 }
                             ]}
-                            boundaries={{ right: 20, left: -100 }}
+                            boundaries={{ right: 20, left: -235 }}
                             ref={el => (this.startTimesRef = el)}
-                            // animatedValueX={this._startTimesHandleAnim}
+                            animatedValueX={this.startTimesHandleAnim}
                             onDrag={event => {
                                 let {
                                     state,
@@ -1977,11 +1990,14 @@ class AlarmDetail extends Component {
                                 } else {
                                     toValue = 80;
                                 }
-                                Animated.spring(this._startTimesHandleAnim, {
-                                    toValue: toValue,
-                                    bounciness: 10,
-                                    useNativeDriver: true
-                                }).start();
+                                // Animated.spring(
+                                //     this.startTimesHandleAnim,
+                                //     {
+                                //         toValue: toValue,
+                                //         bounciness: 10,
+                                //         useNativeDriver: true
+                                //     }
+                                // ).start();
                             }}
                             // initialPosition={{ y: initInterPosition }}
                         >
@@ -1989,14 +2005,14 @@ class AlarmDetail extends Component {
                                 style={StyleSheet.absoluteFill}
                                 onPress={() => {
                                     this.startTimesRef.snapTo({ index: 0 });
-                                    Animated.timing(
-                                        this._startTimesHandleAnim,
-                                        {
-                                            toValue: 0,
-                                            duration: 250,
-                                            useNativeDriver: true
-                                        }
-                                    ).start();
+                                    // Animated.timing(
+                                    //     this.startTimesHandleAnim,
+                                    //     {
+                                    //         toValue: 0,
+                                    //         duration: 250,
+                                    //         useNativeDriver: true
+                                    //     }
+                                    // ).start();
                                 }}
                             >
                                 <View
@@ -2052,7 +2068,7 @@ class AlarmDetail extends Component {
                                                 flexDirection: "row"
                                             }}
                                         >
-                                            <View
+                                            {/* <View
                                                 style={{
                                                     flex: 1,
                                                     paddingLeft: 10,
@@ -2065,70 +2081,61 @@ class AlarmDetail extends Component {
                                                     justifyContent: "center"
                                                 }}
                                             >
-                                                {/* <View
-                                                style={{
-                                                    paddingLeft: 18,
-                                                    flex: 0.0245
-                                                    // backgroundColor: "#cac5cc",
-                                                    // borderTopLeftRadius: 20
-                                                }}
-                                            >
-                                                <Text style={{ fontSize: 10, paddingTop: 5 }}>
-                                                    Start Time
-                                                </Text>
-                                            </View> */}
                                                 <StartTimesList
-                                                    data={this._taskStartTimes} // this._taskStartTimes
+                                                        data={
+                                                            this._taskStartTimes
+                                                        } // this._taskStartTimes
                                                     style={{
                                                         borderRadius: 20,
                                                         backgroundColor:
                                                             Colors.backgroundGrey
                                                     }}
                                                 />
-                                            </View>
-                                            <Animated.View
-                                                style={{
-                                                    width: 10,
-                                                    position: "absolute",
-                                                    top: 80,
-                                                    left: 3,
-                                                    overflow: "hidden",
-                                                    transform: [
-                                                        {
-                                                            translateX: this
-                                                                ._startTimesHandleAnim
-                                                        }
-                                                    ]
-                                                    // backgroundColor: "transparent"
-                                                }}
-                                            >
-                                                <View
+                                                </View> */}
+                                            {/* <Animated.View
                                                     style={{
-                                                        // position: "absolute",
-                                                        // top: 80,
-                                                        // left: 3,
-                                                        // backgroundColor:
-                                                        //     Colors.brandDarkPurple,
-                                                        // backgroundColor: "transparent",
-                                                        backgroundColor:
-                                                            Colors.labelText,
-                                                        // borderTopLeftRadius: 20,
-                                                        // borderBottomLeftRadius: 20,
-                                                        // borderBottomLeftRadius: 20,
-                                                        borderRadius: 20,
-                                                        height: 60,
-                                                        width: 30
-
-                                                        // borderColor: "black"
-                                                        // borderWidth: 0.5
+                                                        width: 10,
+                                                        position: "absolute",
+                                                        top: 80,
+                                                        left: 0,
+                                                        overflow: "hidden"
+                                                        // transform: [
+                                                        //     {
+                                                        //         translateX: this
+                                                        //             .startTimesHandleAnim
+                                                        //     }
+                                                        // ]
+                                                        // backgroundColor: "transparent"
                                                     }}
-                                                />
-                                            </Animated.View>
+                                                >
+                                                    <View
+                                                        style={{
+                                                            // position: "absolute",
+                                                            // top: 80,
+                                                            // left: 3,
+                                                            // backgroundColor:
+                                                            //     Colors.brandDarkPurple,
+                                                            // backgroundColor: "transparent",
+                                                            backgroundColor:
+                                                                Colors.labelText,
+                                                            // borderTopLeftRadius: 20,
+                                                            // borderBottomLeftRadius: 20,
+                                                            // borderBottomLeftRadius: 20,
+                                                            borderRadius: 20,
+                                                            height: 60,
+                                                            width: 30
+
+                                                            // borderColor: "black"
+                                                            // borderWidth: 0.5
+                                                        }}
+                                                    />
+                                                </Animated.View> */}
                                         </View>
                                     </View>
                                 </View>
                             </TouchableWithoutFeedback>
                         </Interactable.View>
+                        {/* </View> */}
                     </View>
                     <this.AnimatedHandle
                         name="drag-handle"
@@ -2168,6 +2175,7 @@ class AlarmDetail extends Component {
                         hitSlop={{ top: 70, bottom: 70, left: 70, right: 70 }}
                     />
                 </Interactable.View>
+
                 <Animated.View
                     style={{
                         position: "absolute",
