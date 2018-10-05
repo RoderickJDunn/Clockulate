@@ -2,6 +2,9 @@ package com.clock_sample1;
 
 import com.facebook.react.ReactActivity;
 import io.realm.react.RealmReactPackage;
+import com.facebook.react.ReactActivityDelegate;
+import com.facebook.react.ReactRootView;
+import com.swmansion.gesturehandler.react.RNGestureHandlerEnabledRootView;
 
 public class MainActivity extends ReactActivity {
 
@@ -13,4 +16,14 @@ public class MainActivity extends ReactActivity {
     protected String getMainComponentName() {
         return "Clockulate";
     }
+
+    @Override
+    protected ReactActivityDelegate createReactActivityDelegate() {
+        return new ReactActivityDelegate(this, getMainComponentName()) {
+            @Override
+            protected ReactRootView createRootView() {
+            return new RNGestureHandlerEnabledRootView(MainActivity.this);
+            }
+        };
+  }
 }

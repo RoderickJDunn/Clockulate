@@ -7,10 +7,8 @@ import {
     View,
     Text,
     StyleSheet,
-    StatusBar,
     TouchableOpacity,
     Dimensions,
-    ImageBackground,
     Image,
     Animated,
     Keyboard,
@@ -19,7 +17,7 @@ import {
     Platform,
     LayoutAnimation,
     Alert,
-    Picker,
+    Easing,
     TouchableWithoutFeedback
 } from "react-native";
 import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
@@ -38,6 +36,7 @@ import DateTimePicker from "react-native-modal-datetime-picker";
 // import KeyframesView from "react-native-facebook-keyframes";
 import { isIphoneX } from "react-native-iphone-x-helper";
 import LinearGradient from "react-native-linear-gradient";
+import { PanGestureHandler, State } from "react-native-gesture-handler";
 
 import moment from "moment";
 
@@ -238,7 +237,8 @@ class AlarmDetail extends Component {
                     taskListFullScreen: false,
                     hideDisabledTasks: false,
                     menuIsOpen: false,
-                    showSnoozePicker: false
+                    showSnoozePicker: false,
+                    durationsVisible: true
                 };
                 // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
@@ -256,7 +256,8 @@ class AlarmDetail extends Component {
                 taskListFullScreen: false,
                 hideDisabledTasks: false,
                 menuIsOpen: false,
-                showSnoozePicker: false
+                showSnoozePicker: false,
+                durationsVisible: true
             };
         }
 
@@ -337,6 +338,10 @@ class AlarmDetail extends Component {
                 this._snapToIdx(0);
             }, 0);
         }
+
+        // this.startTimesHandleAnim.addListener(({ value }) => {
+        //     console.log(value);
+        // });
 
         // this._playModeIndicatorAnimation();
 
@@ -629,8 +634,10 @@ class AlarmDetail extends Component {
     onChangeTaskEnabled = (taskToUpdate, enabled) => {
         // console.info("onChangeTaskEnabled");
         let { alarm } = this.state;
-        let tasks = alarm.tasks;
-        let taskToChange = tasks.find(task => task.id === taskToUpdate.id);
+        // let tasks = alarm.tasks;
+        let taskToChange = this._cachedSortedTasks.find(
+            task => task.id === taskToUpdate.id
+        );
         if (!taskToChange) {
             console.error(
                 "Could not find task to update with new 'enabled' value. Searching for AlarmTask id: ",
@@ -643,7 +650,7 @@ class AlarmDetail extends Component {
             alarm.wakeUpTime = this._calcWakeUpTime();
             this._calcStartTimes();
         });
-        this.setState({ tasks: tasks });
+        this.setState(this.state);
         // this.onTaskListChanged();
     };
 
@@ -1199,9 +1206,14 @@ class AlarmDetail extends Component {
     //     this._taskListAtEnd = true;
     // };
 
+    _onGestureStateChanged = event => {
+        console.log("_onGestureStateChanged");
+    };
+    startTimesPanRef;
+
     render() {
         console.info("AlarmDetail render ");
-        console.debug("AlarmDetail render - this.state: ", this.state);
+        // console.debug("AlarmDetail render - this.state: ", this.state);
         let imageHeight = SCREEN_HEIGHT + 30;
 
         /* clockAndLabelTranslation:
@@ -1334,6 +1346,7 @@ class AlarmDetail extends Component {
                     hideDisabledTasks={this.state.hideDisabledTasks}
                     containerDimensions={this.state.taskListDimensions}
                     startTimesAnim={this.startTimesHandleAnim}
+                    durationsVisible={this.state.durationsVisible}
                     // onScroll={this.onScrollTaskList.bind(this)}
                     // onEndReached={this.onEndReachedTaskList.bind(this)}
                 />
@@ -1928,7 +1941,7 @@ class AlarmDetail extends Component {
                                     )}
                                 </TouchableOpacity>
                             </View>
-                            <Interactable.View
+                            {/* <Interactable.View
                                 style={[
                                     // StyleSheet.absoluteFill,
                                     {
@@ -1958,6 +1971,7 @@ class AlarmDetail extends Component {
                                 boundaries={{ right: 20, left: -235 }}
                                 ref={el => (this.startTimesRef = el)}
                                 animatedValueX={this.startTimesHandleAnim}
+                                dragEnabled={false}
                                 onDrag={event => {
                                     let {
                                         state,
@@ -1989,80 +2003,170 @@ class AlarmDetail extends Component {
                                     // ).start();
                                 }}
                                 // initialPosition={{ y: initInterPosition }}
+                            > */}
+                            <PanGestureHandler
+                                ref={el => (this.startTimesPanRef = el)}
+                                onGestureEvent={Animated.event(
+                                    [
+                                        {
+                                            nativeEvent: {
+                                                // contentOffset: {
+                                                translationX: this
+                                                    .startTimesHandleAnim
+                                                // }
+                                            }
+                                        }
+                                    ],
+                                    { useNativeDriver: true }
+                                )}
+                                shouldCancelWhenOutside={false}
+                                onHandlerStateChange={({ nativeEvent }) => {
+                                    if (nativeEvent.state != State.END) {
+                                        return;
+                                    }
+                                    if (
+                                        nativeEvent.translationX > -70 &&
+                                        nativeEvent.velocityX > -1000
+                                    ) {
+                                        // console.log(
+                                        //     "Translation too small or velocity too slow. Snapping back"
+                                        // );
+                                        // Animated.spring back to 0
+                                        Animated.spring(
+                                            this.startTimesHandleAnim,
+                                            {
+                                                toValue: 0,
+                                                tension: 300,
+                                                friction: 11,
+                                                useNativeDriver: true
+                                            }
+                                        ).start();
+                                    } else {
+                                        // translationX is less than -70, finish the flip (Animated.spring to 1)
+                                        Animated.timing(
+                                            this.startTimesHandleAnim,
+                                            {
+                                                toValue: -230,
+                                                duration: 200,
+                                                easing: Easing.bounce,
+                                                useNativeDriver: true
+                                            }
+                                        ).start(() => {
+                                            this.setState({
+                                                durationsVisible: !this.state
+                                                    .durationsVisible
+                                            });
+                                            this.startTimesHandleAnim.setValue(
+                                                0
+                                            );
+                                        });
+                                    }
+                                }}
+                                minDist={1}
                             >
-                                <TouchableWithoutFeedback
-                                    style={StyleSheet.absoluteFill}
-                                    onPress={() => {
-                                        this.startTimesRef.snapTo({ index: 0 });
-                                        // Animated.timing(
-                                        //     this.startTimesHandleAnim,
-                                        //     {
-                                        //         toValue: 0,
-                                        //         duration: 250,
-                                        //         useNativeDriver: true
-                                        //     }
-                                        // ).start();
-                                    }}
+                                {/* <Animated.View style={animatedStyles} /> */}
+                                {/* <-- NEEDS TO BE Animated.View */}
+                                <Animated.View
+                                    style={[
+                                        // StyleSheet.absoluteFill,
+                                        {
+                                            position: "absolute",
+                                            // right: 0,
+                                            left: SCREEN_WIDTH - 15,
+                                            // left: 0,
+                                            // top: 173,
+                                            top: 0,
+                                            bottom: 0,
+                                            width: 230,
+                                            // paddingBottom: scaleByFactor(10, 0.4),
+
+                                            // paddingVertical: scaleByFactor(10, 0.4)
+                                            backgroundColor: "transparent"
+                                            // backgroundColor: "red"
+                                            // borderRadius: 10
+                                            // backgroundColor: Colors.brandDarkGrey
+                                        }
+                                    ]}
                                 >
-                                    <View
-                                        style={{
-                                            flex: 1
-                                            // backgroundColor: "green"
+                                    <TouchableWithoutFeedback
+                                        style={StyleSheet.absoluteFill}
+                                        onPress={() => {
+                                            this.startTimesRef.snapTo({
+                                                index: 0
+                                            });
+                                            // Animated.timing(
+                                            //     this.startTimesHandleAnim,
+                                            //     {
+                                            //         toValue: 0,
+                                            //         duration: 250,
+                                            //         useNativeDriver: true
+                                            //     }
+                                            // ).start();
                                         }}
                                     >
                                         <View
                                             style={{
-                                                flex:
-                                                    this.state.fieldAreaFlex ||
-                                                    0.17,
-                                                paddingVertical: scaleByFactor(
-                                                    10,
-                                                    0.4
-                                                ),
-                                                paddingBottom: 8,
-                                                backgroundColor: "transparent"
+                                                flex: 1
+                                                // backgroundColor: "green"
                                             }}
-                                        />
-                                        <View
-                                            style={[
-                                                styles.taskListContainer,
-                                                {
-                                                    flex:
-                                                        this.state
-                                                            .taskAreaFlex ||
-                                                        0.4,
-                                                    paddingHorizontal: 0,
-                                                    backgroundColor:
-                                                        "transparent"
-                                                    // backgroundColor: "green"
-                                                }
-                                            ]}
                                         >
                                             <View
+                                                style={{
+                                                    flex:
+                                                        this.state
+                                                            .fieldAreaFlex ||
+                                                        0.17,
+                                                    paddingVertical: scaleByFactor(
+                                                        10,
+                                                        0.4
+                                                    ),
+                                                    paddingBottom: 8,
+                                                    backgroundColor:
+                                                        "transparent"
+                                                }}
+                                            />
+                                            <View
                                                 style={[
-                                                    styles.taskListHeader,
+                                                    styles.taskListContainer,
                                                     {
                                                         flex:
                                                             this.state
-                                                                .taskHeaderFlex ||
-                                                            0.15,
-                                                        // backgroundColor: "green"
+                                                                .taskAreaFlex ||
+                                                            0.4,
+                                                        paddingHorizontal: 0,
                                                         backgroundColor:
                                                             "transparent"
                                                         // backgroundColor: "green"
                                                     }
                                                 ]}
-                                            />
-                                            <View
-                                                style={{
-                                                    flex: 1,
-                                                    flexDirection: "row"
-                                                }}
-                                            />
+                                            >
+                                                <View
+                                                    style={[
+                                                        styles.taskListHeader,
+                                                        {
+                                                            flex:
+                                                                this.state
+                                                                    .taskHeaderFlex ||
+                                                                0.15,
+                                                            // backgroundColor: "green"
+                                                            backgroundColor:
+                                                                "transparent"
+                                                            // backgroundColor: "green"
+                                                        }
+                                                    ]}
+                                                />
+                                                <View
+                                                    style={{
+                                                        flex: 1,
+                                                        flexDirection: "row"
+                                                    }}
+                                                />
+                                            </View>
                                         </View>
-                                    </View>
-                                </TouchableWithoutFeedback>
-                            </Interactable.View>
+                                    </TouchableWithoutFeedback>
+                                </Animated.View>
+                            </PanGestureHandler>
+                            {/* </Interactable.View> */}
                             {touchableBackdrop}
                             {taskArea}
                         </LinearGradient>

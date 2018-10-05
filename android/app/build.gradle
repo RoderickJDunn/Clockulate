@@ -156,6 +156,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-gesture-handler')
     compile project(':react-native-radial-gradient')
     compile project(':react-native-version-number')
     compile project(':react-native-proximity')

@@ -3,6 +3,7 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 import com.surajit.rnrg.RNRadialGradientPackage;
 import com.apsl.versionnumber.RNVersionNumberPackage;
 import com.RNProximity.RNProximityPackage;
@@ -40,6 +41,7 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(new MainReactPackage(),
+            new RNGestureHandlerPackage(),
             new RNRadialGradientPackage(), new RNVersionNumberPackage(),
                     new RNProximityPackage(), new ANPackage(), new LinearGradientPackage(), new LottiePackage(),
                     new RNNotificationsPackage(this.getApplication()), new RNSoundPackage(),

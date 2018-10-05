@@ -66,7 +66,8 @@ class TaskItem extends React.Component {
             },
             isSlidingTask: false,
             isEditingTasks: false,
-            closed: true
+            closed: true,
+            taskDurVisible: props.durationsVisible
         };
 
         // console.log("this.state", this.state);
@@ -173,6 +174,18 @@ class TaskItem extends React.Component {
                 this._isSliding = false;
             }
         });
+
+        this.flipFrontToBack = this.props.startTimesAnim.interpolate({
+            inputRange: [-230, 0],
+            outputRange: ["180deg", "0deg"],
+            extrapolate: "clamp"
+        });
+
+        this.flipBackToFront = this.props.startTimesAnim.interpolate({
+            inputRange: [-230, 0],
+            outputRange: ["360deg", "180deg"],
+            extrapolate: "clamp"
+        });
     }
 
     // componentWillUnmount() {
@@ -244,7 +257,8 @@ class TaskItem extends React.Component {
             isSlidingTask:
                 this._tempDuration != null && nextProps.isSlidingTask,
             isEditingTasks: nextProps.isEditingTasks,
-            closed: nextProps.closed
+            closed: nextProps.closed,
+            taskDurVisible: nextProps.durationsVisible
         });
     }
 
@@ -255,42 +269,69 @@ class TaskItem extends React.Component {
         // console.log("nextProps", nextProps);
 
         // if we are sliding, return true right away. We need to re-render
-        if (nextState.isSlidingTask) {
-            return true;
-        }
+        // if (nextState.isSlidingTask) {
+        //     return true;
+        // }
 
-        let { enabled, task, duration } = this.state.data;
-        let { isEditingTasks, isSlidingTask, closed } = this.state;
+        let { enabled, task, duration, startTime } = this.state.data;
+        let {
+            isEditingTasks,
+            isSlidingTask,
+            closed,
+            taskDurVisible
+        } = this.state;
 
         let {
             enabled: nEnabled,
             task: nTask,
-            duration: nDuration
+            duration: nDuration,
+            startTime: nStartTime
         } = nextProps.data;
-        let { isEditingTasks: nIsEditingTasks, closed: nClosed } = nextProps;
+        let {
+            isEditingTasks: nIsEditingTasks,
+            closed: nClosed,
+            durationsVisible
+        } = nextProps;
 
         let { isSlidingTask: nIsSlidingTask } = nextState;
 
+        console.log("enabled", enabled);
+        console.log("nEnabled", nEnabled);
         if (
             nEnabled == enabled &&
             nTask.name == task.name &&
+            nStartTime == startTime &&
             nDuration == duration &&
             nIsEditingTasks == isEditingTasks &&
             nIsSlidingTask == isSlidingTask &&
-            nClosed == closed
+            nClosed == closed &&
+            taskDurVisible == durationsVisible
         ) {
+            console.log("Not rendering task-item");
             return false;
         }
 
+        console.log("Will Render task-item");
         return true;
     }
 
     render() {
         console.debug("render task-item");
         // console.debug("render task-item props", this.props);
+        console.debug(
+            "render task-item durationsVisible",
+            this.props.durationsVisible
+        );
         // console.debug("render task-item state", this.state);
         // console.log("\n");
         // console.log("this.state.tempDuration", this.state.tempDuration);
+
+        const frontFlipAnimStyle = {
+            transform: [{ rotateY: this.flipFrontToBack }]
+        };
+        const backFlipAnimStyle = {
+            transform: [{ rotateY: this.flipBackToFront }]
+        };
 
         /* Statement Explanation: 
             - Use tempDuration if not null (this means the slider is showing)
@@ -490,21 +531,10 @@ class TaskItem extends React.Component {
                             <Animated.View
                                 style={[
                                     styles.flipCard,
-                                    {
-                                        transform: [
-                                            {
-                                                rotateY: this.props.startTimesAnim.interpolate(
-                                                    {
-                                                        inputRange: [-230, 0],
-                                                        outputRange: [
-                                                            "180deg",
-                                                            "0deg"
-                                                        ]
-                                                    }
-                                                )
-                                            }
-                                        ]
-                                    }
+                                    this.state.taskDurVisible
+                                        ? frontFlipAnimStyle
+                                        : backFlipAnimStyle
+                                    // frontFlipAnimStyle
                                 ]}
                             >
                                 <DurationText
@@ -527,21 +557,10 @@ class TaskItem extends React.Component {
                                 style={[
                                     styles.flipCard,
                                     styles.flipCardBack,
-                                    {
-                                        transform: [
-                                            {
-                                                rotateY: this.props.startTimesAnim.interpolate(
-                                                    {
-                                                        inputRange: [-230, 0],
-                                                        outputRange: [
-                                                            "360deg",
-                                                            "180deg"
-                                                        ]
-                                                    }
-                                                )
-                                            }
-                                        ]
-                                    }
+                                    this.state.taskDurVisible
+                                        ? backFlipAnimStyle
+                                        : frontFlipAnimStyle
+                                    // backFlipAnimStyle
                                 ]}
                             >
                                 <Text
