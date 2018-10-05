@@ -1012,6 +1012,8 @@ class AlarmDetail extends Component {
 
         this._calcStartTimes();
 
+        // this._cachedSortedTasks = this.state.alarm.tasks.;
+
         this.setState({ disableDrag: false });
     }
 
@@ -1213,7 +1215,7 @@ class AlarmDetail extends Component {
 
     render() {
         console.info("AlarmDetail render ");
-        // console.debug("AlarmDetail render - this.state: ", this.state);
+        console.debug("AlarmDetail render - this.state: ", this.state);
         let imageHeight = SCREEN_HEIGHT + 30;
 
         /* clockAndLabelTranslation:
@@ -2188,8 +2190,6 @@ class AlarmDetail extends Component {
                             ]}
                             pointerEvents="box-none"
                         > */}
-
-                        {/* </View> */}
                     </View>
                     <this.AnimatedHandle
                         name="drag-handle"

@@ -2,14 +2,14 @@
  * Created by rdunn on 2017-07-15.
  */
 
-import React, { Component } from "react";
+import React from "react";
 import {
     StyleSheet,
     Text,
     View,
     TouchableOpacity,
-    TouchableWithoutFeedback,
-    Slider,
+    // TouchableWithoutFeedback,
+    // Slider,
     PanResponder,
     Dimensions,
     Animated
@@ -535,6 +535,7 @@ class TaskItem extends React.Component {
                                         ? frontFlipAnimStyle
                                         : backFlipAnimStyle
                                     // frontFlipAnimStyle
+
                                 ]}
                             >
                                 <DurationText
@@ -561,6 +562,7 @@ class TaskItem extends React.Component {
                                         ? backFlipAnimStyle
                                         : frontFlipAnimStyle
                                     // backFlipAnimStyle
+
                                 ]}
                             >
                                 <Text
