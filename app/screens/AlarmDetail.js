@@ -66,8 +66,6 @@ let AnimMaterialIcon = Animated.createAnimatedComponent(MaterialIcon);
 class AlarmDetail extends Component {
     static navigationOptions = ({ navigation }) => {
         let menuIsOpen = navigation.state.params.menuIsOpen;
-        let menuIsAnimating = navigation.state.params.menuIsAnimating;
-        console.log("viewIdx", navigation.state.params.viewIdx);
 
         return {
             title: "Edit Alarm",
@@ -308,8 +306,6 @@ class AlarmDetail extends Component {
         console.log("this.state.alarm", this.state.alarm);
         this.props.navigation.setParams({
             handleBackBtn: this.handleBackPress.bind(this),
-            snapToIdx: this._snapToIdx.bind(this),
-            viewIdx: this.state.alarm.mode == "autocalc" ? 1 : 0,
             menuOpen: false,
             setMenuState: this._setMenuState.bind(this),
             openSnoozeTimePicker: this._openSnoozeTimePicker.bind(this)
@@ -357,10 +353,30 @@ class AlarmDetail extends Component {
         // console.log("this.interactiveRef", this.interactiveRef);
         if (this.interactiveRef) {
             this.interactiveRef.snapTo({ index: idx });
-            // this.props.navigation.setParams({
-            //     viewIdx: idx
-            // });
             this._viewIdx = idx;
+            realm.write(() => {
+                let { alarm } = this.state;
+                switch (idx) {
+                    case 0:
+                        alarm.mode = "normal";
+                        break;
+                    case 1:
+                        alarm.mode = "autocalc";
+                        this._layoutAnimateToCalcMode({
+                            taskListFullScreen: false,
+                            activeTask: null // closes any Row showing DELETE btn
+                        });
+                        break;
+                    case 2: 
+                        this._layoutAnimateToFullScreenTaskList({
+                            taskListFullScreen: true,
+                            activeTask: null // closes any Row showing DELETE btn
+                        });
+                        break;
+                }
+                // this.setState({ alarm: alarm });
+            });
+           
             // this.setState(this.state);
         }
     }
@@ -731,10 +747,6 @@ class AlarmDetail extends Component {
             if (this.state.alarm.mode == "autocalc") {
                 this._snapToIdx(0);
             }
-            this.props.navigation.setParams({
-                viewIdx: 0
-            });
-            this._viewIdx = 0;
             this._showDateTimePicker();
         } else {
             // simply snap the active task back to resting position
@@ -1071,13 +1083,11 @@ class AlarmDetail extends Component {
     }
 
     _onPressAnimHandle() {
+        // console.log("_onPressAnimHandle");
+        // console.log("this.state.alarm.mode ", this.state.alarm.mode);
         let nextIdx = this.state.alarm.mode == "normal" ? 1 : 0;
+        // console.log("nextIdx", nextIdx);
         this._snapToIdx(nextIdx);
-        realm.write(() => {
-            let { alarm } = this.state;
-            alarm.mode = alarm.mode == "autocalc" ? "normal" : "autocalc";
-            this.setState({ alarm: alarm });
-        });
     }
 
     _onPressTasksHeader() {
@@ -1086,20 +1096,12 @@ class AlarmDetail extends Component {
         // this._hideModeText();
         if (this.state.taskListFullScreen == false) {
             console.log("1");
-            this._snapToIdx(2);
             this._lastMeasuredView = "tasklist";
-            this._layoutAnimateToFullScreenTaskList({
-                taskListFullScreen: true,
-                activeTask: null // closes any Row showing DELETE btn
-            });
+            this._snapToIdx(2);
         } else {
             console.log("2");
             this._lastMeasuredView = "normal";
             this._snapToIdx(1);
-            this._layoutAnimateToCalcMode({
-                taskListFullScreen: false,
-                activeTask: null // closes any Row showing DELETE btn
-            });
         }
     }
 
@@ -1112,9 +1114,6 @@ class AlarmDetail extends Component {
             // animate height increase of TaskList
             // this._hideModeText();
             this._layoutAnimateToFullScreenTaskList({ activeTask: null });
-            this.props.navigation.setParams({
-                viewIdx: 2
-            });
         } else if (state == "end") {
             console.log("END OF DRAG ******************* ");
 
@@ -1129,13 +1128,11 @@ class AlarmDetail extends Component {
 
             if (targetSnapPointId == "tasklist") {
                 this._lastMeasuredView = targetSnapPointId;
+                this._viewIdx = 2;
                 if (measuredViewHasChanged) {
                     // since lastView will never be set to "normal", we know that the last view measured was "autocalc". Therefore we need to remeasure
                     this._taskListNeedsRemeasure = true;
 
-                    this.props.navigation.setParams({
-                        viewIdx: 2
-                    });
                     // since view has changed, we need to set new state
                     this.setState({
                         taskListFullScreen: true,
@@ -1151,7 +1148,7 @@ class AlarmDetail extends Component {
                     this._taskListNeedsRemeasure = true;
                 }
                 this._lastMeasuredView = "autocalc";
-
+                this._viewIdx = targetSnapPointId == "autocalc" ? 1 : 0;
                 let modeHasChanged = targetSnapPointId != alarmState.mode;
                 console.log("alarmState.mode", alarmState.mode);
 
@@ -1161,14 +1158,7 @@ class AlarmDetail extends Component {
                     if (targetSnapPointId == "autocalc") {
                         newWakeUpTime = this._calcWakeUpTime();
                         // alarmState.wakeUpTime = this._calcWakeUpTime();
-                        this.props.navigation.setParams({
-                            viewIdx: 1
-                        });
-                    } else {
-                        this.props.navigation.setParams({
-                            viewIdx: 0
-                        });
-                    }
+                    } 
                     realm.write(() => {
                         let { alarm } = this.state;
 
@@ -2417,12 +2407,8 @@ class AlarmDetail extends Component {
                                 initialIdx={this._viewIdx}
                                 selectedIdx={this._viewIdx}
                                 onSelect={idx => {
-                                    console.log("Pressed fancy radio");
-                                    if (idx == 2) {
-                                        this._onPressTasksHeader();
-                                    } else {
-                                        this._onPressAnimHandle();
-                                    }
+                                    // console.log("Pressed fancy radio: ", idx);
+                                    this._snapToIdx(idx);
                                     // this._snapToIdx(idx);1
                                 }}
                                 // style={{ flex: 0.75 }}
