@@ -3,13 +3,13 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.airbnb.android.react.lottie.LottiePackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 import com.surajit.rnrg.RNRadialGradientPackage;
 import com.apsl.versionnumber.RNVersionNumberPackage;
 import com.RNProximity.RNProximityPackage;
 import com.emekalites.react.alarm.notification.ANPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
-import com.airbnb.android.react.lottie.LottiePackage;
 import com.wix.reactnativenotifications.RNNotificationsPackage;
 import com.zmxv.RNSound.RNSoundPackage;
 import com.zmxv.RNSound.RNSoundPackage;
@@ -41,6 +41,7 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(new MainReactPackage(),
+            new LottiePackage(),
             new RNGestureHandlerPackage(),
             new RNRadialGradientPackage(), new RNVersionNumberPackage(),
                     new RNProximityPackage(), new ANPackage(), new LinearGradientPackage(), new LottiePackage(),

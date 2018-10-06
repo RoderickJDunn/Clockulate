@@ -111,9 +111,9 @@ android {
         targetSdkVersion 22
         versionCode 5
         versionName "0.5.1"
-        ndk {
-            abiFilters "armeabi-v7a", "x86"
-        }
+//        ndk {
+//            abiFilters "armeabi-v7a", "x86"
+//        }
         signingConfig signingConfigs.config
     }
     configurations.all {
@@ -156,13 +156,14 @@ android {
 }
 
 dependencies {
+    compile 'com.android.support:support-v4:27.1.0'
+    compile project(':lottie-react-native')
     compile project(':react-native-gesture-handler')
     compile project(':react-native-radial-gradient')
     compile project(':react-native-version-number')
     compile project(':react-native-proximity')
     compile project(':react-native-alarm-notification')
     compile project(':react-native-linear-gradient')
-    compile project(':lottie-react-native')
     compile project(':react-native-notifications')
     compile project(':react-native-sound')
     compile(project(':react-native-sound')) {
