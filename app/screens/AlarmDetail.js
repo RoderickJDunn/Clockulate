@@ -90,52 +90,40 @@ class AlarmDetail extends Component {
                 </TouchableOpacity>
             ),
             headerRight: (
-                <View
-                    style={{
-                        position: "absolute",
-                        top: 0,
-                        right: 0,
-                        height: 180,
-                        width: SCREEN_WIDTH
-                        // backgroundColor: "red"
+                <TouchableOpacity
+                    onPress={() => {
+                        navigation.state.params.setMenuState(!menuIsOpen);
                     }}
-                    pointerEvents="box-none"
+                    style={{
+                        alignSelf: "flex-end",
+                        paddingLeft: 20,
+                        paddingRight: 10
+                        // height: Header.HEIGHT - 20
+                    }}
                 >
-                    <TouchableOpacity
-                        onPress={() => {
-                            navigation.state.params.setMenuState(!menuIsOpen);
-                        }}
+                    <Animated.View
                         style={{
-                            alignSelf: "flex-end",
-                            paddingLeft: 20,
-                            paddingRight: 10,
-                            height: Header.HEIGHT - 20
+                            alignSelf: "center",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flex: 1,
+                            transform: [
+                                {
+                                    rotate: _menuIconAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: ["0deg", "-90deg"]
+                                    })
+                                }
+                            ]
                         }}
                     >
-                        <Animated.View
-                            style={{
-                                alignSelf: "center",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                flex: 1,
-                                transform: [
-                                    {
-                                        rotate: _menuIconAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: ["0deg", "-90deg"]
-                                        })
-                                    }
-                                ]
-                            }}
-                        >
-                            <MaterialIcon
-                                color={Colors.brandLightGrey}
-                                name="more-vert"
-                                size={25}
-                            />
-                        </Animated.View>
-                    </TouchableOpacity>
-                </View>
+                        <MaterialIcon
+                            color={Colors.brandLightGrey}
+                            name="more-vert"
+                            size={25}
+                        />
+                    </Animated.View>
+                </TouchableOpacity>
             )
         };
     };
@@ -743,6 +731,10 @@ class AlarmDetail extends Component {
             if (this.state.alarm.mode == "autocalc") {
                 this._snapToIdx(0);
             }
+            this.props.navigation.setParams({
+                viewIdx: 0
+            });
+            this._viewIdx = 0;
             this._showDateTimePicker();
         } else {
             // simply snap the active task back to resting position
