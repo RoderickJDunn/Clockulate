@@ -12,7 +12,8 @@ import {
     // Slider,
     PanResponder,
     Dimensions,
-    Animated
+    Animated,
+    Platform
 } from "react-native";
 import Interactable from "react-native-interactable";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -62,7 +63,8 @@ class TaskItem extends React.Component {
             data: {
                 enabled: props.data.enabled,
                 duration: props.data.duration,
-                task: props.data.task
+                task: props.data.task,
+                startTime: props.data.startTime
             },
             isSlidingTask: false,
             isEditingTasks: false,
@@ -252,7 +254,8 @@ class TaskItem extends React.Component {
             data: {
                 duration: nextProps.data.duration,
                 enabled: nextProps.data.enabled,
-                task: nextProps.data.task
+                task: nextProps.data.task,
+                startTime: nextProps.data.startTime
             },
             isSlidingTask:
                 this._tempDuration != null && nextProps.isSlidingTask,
@@ -305,13 +308,28 @@ class TaskItem extends React.Component {
             nIsEditingTasks == isEditingTasks &&
             nIsSlidingTask == isSlidingTask &&
             nClosed == closed &&
-            taskDurVisible == durationsVisible
+            durationsVisible == taskDurVisible
         ) {
-            console.log("Not rendering task-item");
+            // console.log("Not rendering task-item");
             return false;
         }
 
-        console.log("Will Render task-item");
+        // console.log("Will Render task-item");
+        // console.log("why?");
+        // console.log("nStartTime | startTime", nStartTime, startTime);
+        // console.log("nDuration | duration", nDuration, duration);
+        // console.log(
+        //     "nIsSlidingTask | isSlidingTask",
+        //     nIsSlidingTask,
+        //     isSlidingTask
+        // );
+        // console.log("nClosed | closed", nClosed, closed);
+        // console.log(
+        //     "durationsVisible | taskDurVisible",
+        //     durationsVisible,
+        //     taskDurVisible
+        // );
+
         return true;
     }
 
@@ -327,10 +345,36 @@ class TaskItem extends React.Component {
         // console.log("this.state.tempDuration", this.state.tempDuration);
 
         const frontFlipAnimStyle = {
-            transform: [{ rotateY: this.flipFrontToBack }]
+            transform: [
+                { rotateY: this.flipFrontToBack },
+                { perspective: 1000 }
+            ],
+            opacity:
+                Platform.OS == "android"
+                    ? this.props.startTimesAnim.interpolate({
+                          inputRange: [-230, -125, -90, 0],
+                          outputRange: [0, 0, 0.5, 1],
+                          extrapolate: "clamp"
+                      })
+                    : 1
         };
         const backFlipAnimStyle = {
-            transform: [{ rotateY: this.flipBackToFront }]
+            transform: [
+                { rotateY: this.flipBackToFront },
+                { perspective: 1000 }
+            ],
+            // opacity: this.props.startTimesAnim.interpolate({
+            //     inputRange: [-230, -115, 0],
+            //     outputRange: [1, 0, 1]
+            // }),
+            opacity:
+                Platform.OS == "android"
+                    ? this.props.startTimesAnim.interpolate({
+                          inputRange: [-230, -125, -90, 0],
+                          outputRange: [1, 0.5, 0, 0],
+                          extrapolate: "clamp"
+                      })
+                    : 1
         };
 
         /* Statement Explanation: 
@@ -437,9 +481,16 @@ class TaskItem extends React.Component {
                 snapPoints={[{ x: 0, id: "closed" }, { x: -90, id: "active" }]}
                 dragWithSpring={{ tension: 500, damping: 0.5 }}
                 animatedNativeDriver={true}
-                onSnap={e => {
+                // onSnap={e => {
+                //     // console.log("Snapping");
+                //     this.props.onSnapTask(e.nativeEvent.id);
+                // }}
+                onDrag={event => {
                     // console.log("Snapping");
-                    this.props.onSnapTask(e.nativeEvent.id);
+                    let { state, y, targetSnapPointId } = event.nativeEvent;
+                    if (state == "end") {
+                        this.props.onSnapTask(targetSnapPointId);
+                    }
                 }}
                 /* Disable "Swipe-to-show DELETE" if slider is showing. Otherwise we get
                     premature panResonder termination, especially on iOS */
@@ -535,7 +586,6 @@ class TaskItem extends React.Component {
                                         ? frontFlipAnimStyle
                                         : backFlipAnimStyle
                                     // frontFlipAnimStyle
-
                                 ]}
                             >
                                 <DurationText
@@ -562,7 +612,6 @@ class TaskItem extends React.Component {
                                         ? backFlipAnimStyle
                                         : frontFlipAnimStyle
                                     // backFlipAnimStyle
-
                                 ]}
                             >
                                 <Text
@@ -655,10 +704,10 @@ const styles = StyleSheet.create({
         alignContent: "flex-end",
         justifyContent: "center",
         backfaceVisibility: "hidden"
-        // backgroundColor: "blue",
     },
     flipCardBack: {
         // backgroundColor: "red",
+        // backgroundColor: Colors.backgroundGrey,
         position: "absolute"
     }
 });

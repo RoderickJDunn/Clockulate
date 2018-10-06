@@ -348,14 +348,19 @@ class AlarmDetail extends Component {
         this.headerHeight = Header.HEIGHT;
     }
 
-    _setMenuState(nextMenuState) {
+    _setMenuState(nextMenuState, nextState) {
         Animated.timing(_menuIconAnim, {
             toValue: nextMenuState ? 1 : 0,
             duration: 200,
             delay: nextMenuState ? 0 : 100,
             useNativeDriver: true
         }).start();
-        this.setState({ menuIsOpen: nextMenuState });
+
+        if (nextState) {
+            this.setState({ menuIsOpen: nextMenuState, ...nextState });
+        } else {
+            this.setState({ menuIsOpen: nextMenuState });
+        }
         this.props.navigation.setParams({ menuIsOpen: nextMenuState });
     }
 
@@ -1092,13 +1097,17 @@ class AlarmDetail extends Component {
             this._snapToIdx(2);
             this._lastMeasuredView = "tasklist";
             this._layoutAnimateToFullScreenTaskList({
-                taskListFullScreen: true
+                taskListFullScreen: true,
+                activeTask: null // closes any Row showing DELETE btn
             });
         } else {
             console.log("2");
             this._lastMeasuredView = "normal";
             this._snapToIdx(1);
-            this._layoutAnimateToCalcMode({ taskListFullScreen: false });
+            this._layoutAnimateToCalcMode({
+                taskListFullScreen: false,
+                activeTask: null // closes any Row showing DELETE btn
+            });
         }
     }
 
@@ -1110,7 +1119,7 @@ class AlarmDetail extends Component {
             console.log("y < 50");
             // animate height increase of TaskList
             // this._hideModeText();
-            this._layoutAnimateToFullScreenTaskList();
+            this._layoutAnimateToFullScreenTaskList({ activeTask: null });
             this.props.navigation.setParams({
                 viewIdx: 2
             });
@@ -1136,11 +1145,14 @@ class AlarmDetail extends Component {
                         viewIdx: 2
                     });
                     // since view has changed, we need to set new state
-                    this.setState({ taskListFullScreen: true });
+                    this.setState({
+                        taskListFullScreen: true,
+                        activeTask: null // closes any Row showing DELETE btn
+                    });
                 }
             } else {
                 /* targetSnapPoint is either "normal" or "autocalc" */
-                nextState = { taskListFullScreen: false };
+                nextState = { taskListFullScreen: false, activeTask: null };
 
                 // first check if the last measured view was "tasklist".
                 if (this._lastMeasuredView == "tasklist") {
@@ -2282,13 +2294,13 @@ class AlarmDetail extends Component {
                         top: Header.HEIGHT - 20, // - (isIphoneX() ? 20 : 0),
                         left: 0,
                         right: 0,
-                        height: 180,
+                        height: 240,
                         overflow: "hidden",
                         transform: [
                             {
                                 translateY: _menuIconAnim.interpolate({
                                     inputRange: [0, 1],
-                                    outputRange: [-230, -Header.HEIGHT + 20]
+                                    outputRange: [-290, -Header.HEIGHT + 20]
                                 })
                             }
                         ]
@@ -2339,6 +2351,49 @@ class AlarmDetail extends Component {
                                 alarm.showHrsOfSleep = !alarm.showHrsOfSleep;
                             });
                             this._setMenuState(0);
+                        }}
+                    />
+                    <MenuItem
+                        left={
+                            this.state.durationsVisible ? (
+                                <MaterialComIcon
+                                    size={25}
+                                    name="timetable"
+                                    color={Colors.brandDarkPurple}
+                                />
+                            ) : (
+                                <EntypoIcon
+                                    size={25}
+                                    name="time-slot"
+                                    color={Colors.brandDarkPurple}
+                                />
+                            )
+                        }
+                        centerRight={
+                            <Text>
+                                {this.state.durationsVisible
+                                    ? "Show Task Start Times"
+                                    : "Show Task Durations"}
+                            </Text>
+                        }
+                        // right={
+                        //     !this.state.durationsVisible ? (
+                        //         <EntypoIcon name="check" size={22} />
+                        //     ) : (
+                        //         <View />
+                        //     )
+                        // }
+                        separatorPosition={SCREEN_WIDTH * 0.15}
+                        onPressItem={() => {
+                            // realm.write(() => {
+                            //     let { alarm } = this.state;
+                            //     alarm.showHrsOfSleep = !alarm.showHrsOfSleep;
+                            // });
+                            // this._setMenuState(0);
+                            let nextState = {
+                                durationsVisible: !this.state.durationsVisible
+                            };
+                            this._setMenuState(0, nextState);
                         }}
                     />
                     <MenuItem
