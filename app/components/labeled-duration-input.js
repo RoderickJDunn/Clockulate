@@ -76,12 +76,12 @@ class LabeledDurationInput extends Component {
     render() {
         // console.log("this.state.data", this.state.data);
         return (
-            <View style={this.props.style}>
+            <TouchableOpacity onPress={this._showTimePicker} style={this.props.style}>
                 <Text style={[styles.fieldLabelText, TextStyle.labelText]}>
                     {this.state.data.labelText}
                 </Text>
                 <View style={{ height: 3 }} />
-                <TouchableOpacity onPress={this._showTimePicker}>
+                <View onPress={this._showTimePicker}>
                     <DurationText
                         duration={this.state.data.time}
                         overLongConfig={{
@@ -93,8 +93,8 @@ class LabeledDurationInput extends Component {
                             { fontSize: this.props.inputFontSize }
                         ]}
                     />
-                </TouchableOpacity>
-            </View>
+                </View>
+            </TouchableOpacity>
         );
     }
 }

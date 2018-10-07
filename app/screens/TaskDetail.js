@@ -65,7 +65,11 @@ class TaskDetail extends Component {
             },
             headerRight: (
                 <TouchableOpacity
-                    style={{ paddingHorizontal: 15, paddingVertical: 10 }}
+                    style={{
+                        paddingRight: 15,
+                        paddingVertical: 10,
+                        paddingLeft: 25
+                    }}
                     onPress={() => navigation.state.params.handleSave()}
                 >
                     <IonIcon

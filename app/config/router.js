@@ -62,7 +62,7 @@ const alarmListNavOptions = ({ navigation }) => ({
             size={28}
             onPress={() => navigation.state.params.handleAddAlarm()}
             hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
-            style={{ marginRight: scaleByFactor(8, 0.9) }}
+            style={{ paddingLeft: 20, marginRight: scaleByFactor(8, 0.9) }}
         />
     ),
     headerLeft: (
