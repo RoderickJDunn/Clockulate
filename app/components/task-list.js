@@ -2,13 +2,10 @@
  * Created by rdunn on 2017-07-15.
  */
 
-import React, { Component } from "react";
+import React from "react";
 import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
-import SortableListView from "react-native-sortable-listview";
 import DraggableFlatList from "react-native-draggable-flatlist";
-
 import TaskItem from "./task-item";
-import TouchableBackdrop from "../components/touchable-backdrop";
 
 class TaskList extends React.Component {
     // TODO: Comment the structure of Props passed in (we don't need a constructor since we are not keeping state in this component)
@@ -65,7 +62,6 @@ class TaskList extends React.Component {
     render() {
         // console.debug("Render TaskList");
         // console.debug("props: ", this.props);
-        let tasksArr = [];
 
         let alarmTasks = this.props.data;
         let filteredAlarmTasks = this.props.hideDisabledTasks
@@ -79,9 +75,10 @@ class TaskList extends React.Component {
             });
         }
 
+        // console.log('alarmTasks', alarmTasks);
         // console.log("taskList", this.props.data);
-
         // console.log("tasksArr in task-list", tasksArr);
+
         return (
             // <View style={[listStyle.container]}>
             <TouchableWithoutFeedback
