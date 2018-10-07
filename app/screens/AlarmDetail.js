@@ -62,7 +62,6 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 let _menuIconAnim = new Animated.Value(0);
 
-let AnimMaterialIcon = Animated.createAnimatedComponent(MaterialIcon);
 class AlarmDetail extends Component {
     static navigationOptions = ({ navigation }) => {
         let menuIsOpen = navigation.state.params.menuIsOpen;
@@ -141,7 +140,7 @@ class AlarmDetail extends Component {
     _animKeyboardHeight = new Animated.Value(0);
 
     AnimatedAlarmLabel = Animated.createAnimatedComponent(TextInput);
-    AnimatedHandle = Animated.createAnimatedComponent(MaterialIcon);
+    AnimatedHandle = Animated.createAnimatedComponent(TouchableOpacity);
 
     _clockTransform = new Animated.Value(0);
     _modeTextOpacity;
@@ -367,7 +366,7 @@ class AlarmDetail extends Component {
                             activeTask: null // closes any Row showing DELETE btn
                         });
                         break;
-                    case 2: 
+                    case 2:
                         this._layoutAnimateToFullScreenTaskList({
                             taskListFullScreen: true,
                             activeTask: null // closes any Row showing DELETE btn
@@ -376,7 +375,7 @@ class AlarmDetail extends Component {
                 }
                 // this.setState({ alarm: alarm });
             });
-           
+
             // this.setState(this.state);
         }
     }
@@ -1158,7 +1157,7 @@ class AlarmDetail extends Component {
                     if (targetSnapPointId == "autocalc") {
                         newWakeUpTime = this._calcWakeUpTime();
                         // alarmState.wakeUpTime = this._calcWakeUpTime();
-                    } 
+                    }
                     realm.write(() => {
                         let { alarm } = this.state;
 
@@ -2109,9 +2108,6 @@ class AlarmDetail extends Component {
                         > */}
                     </View>
                     <this.AnimatedHandle
-                        name="drag-handle"
-                        size={scaleByFactor(25, 0.5)}
-                        color={Colors.disabledGrey}
                         style={{
                             position: "absolute",
                             left:
@@ -2144,7 +2140,13 @@ class AlarmDetail extends Component {
                         }}
                         onPress={this._onPressAnimHandle.bind(this)}
                         hitSlop={{ top: 70, bottom: 70, left: 70, right: 70 }}
-                    />
+                    >
+                        <MaterialIcon
+                            name="drag-handle"
+                            size={scaleByFactor(25, 0.5)}
+                            color={Colors.disabledGrey}
+                        />
+                    </this.AnimatedHandle>
                 </Interactable.View>
 
                 <Animated.View
@@ -2207,69 +2209,6 @@ class AlarmDetail extends Component {
                     </TouchableOpacity>
                 </Animated.View>
                 {!this.state.showSnoozePicker && fullScreenTouchableBackdrop}
-                {/*  <Animated.View
-                    style={{
-                        position: "absolute",
-                        left: 8,
-                        top: 8,
-                        paddingHorizontal: 5,
-                        paddingVertical: 1,
-                        backgroundColor: "rgba(20, 20, 82, 0.6)",
-                        borderRadius: 15,
-                        opacity: this._modeTextOpacity,
-                        transform: [
-                            {
-                                scale: this._modeTextScale
-                            },
-                            {
-                                translateY: this._clockTransform.interpolate({
-                                    inputRange: [
-                                        this.snapTaskList,
-                                        this.snapAuto
-                                    ],
-                                    outputRange: [-SCREEN_HEIGHT * 0.3, 0],
-                                    extrapolate: "clamp"
-                                })
-                            }
-                        ]
-                    }}
-                >
-                    <TouchableOpacity
-                        onPress={() => {
-                            console.log("Pressed mode indicator text");
-                            Alert.alert(
-                                "Mode Indication",
-                                "Hide mode inidicator?",
-                                [
-                                    {
-                                        text: "Hide",
-                                        onPress: () => {
-                                            // TODO: Save to global settings
-                                            console.log(
-                                                "(MOCK) Saving 'hide mode inidicator' to global settings"
-                                            );
-                                        }
-                                    },
-                                    {
-                                        text: "Cancel",
-                                        style: "cancel"
-                                    }
-                                ]
-                            );
-                        }}
-                    >
-                        <Text
-                            style={{
-                                backgroundColor: "transparent",
-                                color: Colors.brandLightGrey
-                            }}
-                        >
-                            {this.state.alarm.mode == "normal"
-                                ? "Classic Mode"
-                                : "Calculate Mode"}
-                        </Text>
-                    </TouchableOpacity>
-                </Animated.View> */}
                 <Animated.View
                     style={{
                         position: "absolute",
@@ -2358,13 +2297,6 @@ class AlarmDetail extends Component {
                                     : "Show Task Durations"}
                             </Text>
                         }
-                        // right={
-                        //     !this.state.durationsVisible ? (
-                        //         <EntypoIcon name="check" size={22} />
-                        //     ) : (
-                        //         <View />
-                        //     )
-                        // }
                         separatorPosition={SCREEN_WIDTH * 0.15}
                         onPressItem={() => {
                             // realm.write(() => {
@@ -2379,7 +2311,6 @@ class AlarmDetail extends Component {
                         }}
                     />
                     <MenuItem
-                        // style={{ height: 80 }}
                         left={
                             <MaterialComIcon
                                 name="view-dashboard-variant"
