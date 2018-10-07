@@ -154,6 +154,9 @@ class AlarmDetail extends Component {
     _taskStartTimes = null;
     // _taskListScrollPos = 0;
 
+    _snapPoints;
+    _ALL_SNAP_POINTS;
+
     static closeMenu = (isMenuOpen, navigation) => {
         let config = {
             duration: 150,
@@ -267,6 +270,16 @@ class AlarmDetail extends Component {
         // }, 0);
         this._viewIdx = this.state.alarm.mode == "autocalc" ? 1 : 0;
 
+        this._ALL_SNAP_POINTS = [
+            { y: this.snapNormal, id: "normal" },
+            { y: this.snapAuto, id: "autocalc" },
+            { y: this.snapTaskList, id: "tasklist" }
+        ];
+
+        this._snapPoints =
+            this.state.alarm.mode == "autocalc"
+                ? this._ALL_SNAP_POINTS
+                : this._ALL_SNAP_POINTS.slice(0, 2); // this returns 0th and 1st elements in a new array
         // console.log(this.state);
         // console.log(params);
     }
@@ -302,7 +315,7 @@ class AlarmDetail extends Component {
 
     componentDidMount() {
         console.debug("AlarmDetail --- ComponentDidMount");
-        console.log("this.state.alarm", this.state.alarm);
+        // console.log("this.state.alarm", this.state.alarm);
         this.props.navigation.setParams({
             handleBackBtn: this.handleBackPress.bind(this),
             menuOpen: false,
@@ -347,26 +360,91 @@ class AlarmDetail extends Component {
         this.props.navigation.setParams({ menuIsOpen: nextMenuState });
     }
 
+    /**
+     * Imperitively snaps main Interactable View to provided snap index, and updates
+     * mode in DB as well as view tracking variables as required.
+     *
+     * Accepts a Snap Index within the range [0 - 2] inclusive, which includes all
+     * possible snap-points. Since all snappoints may not currently be accessible,
+     * depending on the current view, the provided idx will either be mapped to the current index
+     * of the view desired, or the function will return if it is not accessible after mapping.
+     * See large comment within the function for further explanation
+     */
     _snapToIdx(idx) {
-        console.log("_snapToIdx");
-        // console.log("this.interactiveRef", this.interactiveRef);
+        console.log("_snapToIdx: ", idx);
         if (this.interactiveRef) {
-            this.interactiveRef.snapTo({ index: idx });
+            // console.log("this.interactiveRef", this.interactiveRef);
+            /* Depending on what the current View is, we may need to map the passed-in snap index to currently accessible ones.
+               Note that mapping only needs to be done when this is called while in TaskList view, but we need error checking in both
+               NORMAL and TASKLIST views.
+
+                 Examples
+                    Current View   -     Accessible SnapPoints                 -    Passed in Idx    -    Mapped Index
+                    NORMAL            [0: 'normal', 1: 'autocalc']                        0                     0
+                    NORMAL            [0: 'normal', 1: 'autocalc']                        1                     1
+                    NORMAL            [0: 'normal', 1: 'autocalc']                        2                   error
+                    AUTOCALC     [0: 'normal', 1: 'autocalc', 2: 'tasklist']              0                     0
+                    AUTOCALC     [0: 'normal', 1: 'autocalc', 2: 'tasklist']              1                     1
+                    AUTOCALC     [0: 'normal', 1: 'autocalc', 2: 'tasklist']              2                     2
+                    TASKLIST          [0: 'autocalc', 1: 'TaskList']                      0                   error
+                    TASKLIST          [0: 'autocalc', 1: 'TaskList']                      1                     0
+                    TASKLIST          [0: 'autocalc', 1: 'TaskList']                      2                     1
+                 */
+            let accessibleSnapIdx = idx;
+            let currViewIdx = this._viewIdx;
             this._viewIdx = idx;
+
+            if (currViewIdx == 0 && idx == 2) {
+                console.info(
+                    `Invalid snap idx ${idx} for current mode (${currViewIdx})`
+                );
+                this._snapPoints = this._ALL_SNAP_POINTS;
+                this.forceUpdate();
+                setTimeout(() => this._snapToIdx(idx), 0);
+                // Temporarily set viewIdx to 1 (autocalc) so that when this fx is called again it won't end up
+                //  back in this if-else
+                this._viewIdx = 1;
+                return;
+            } else if (currViewIdx == 2) {
+                if (idx == 0) {
+                    console.info(
+                        `Invalid snap idx ${idx} for current mode (${currViewIdx})`
+                    );
+                    this._snapPoints = this._ALL_SNAP_POINTS;
+                    this.forceUpdate();
+                    setTimeout(() => this._snapToIdx(idx), 0);
+                    // Temporarily set viewIdx to 1 (autocalc) so that when this fx is called again it won't end up
+                    //  back in this if-else
+                    this._viewIdx = 1;
+                    return;
+                } else {
+                    accessibleSnapIdx = idx - 1; // map index to current position of desired view
+                }
+            }
+
+            console.log(
+                "Snapping to (of accessible indices): ",
+                accessibleSnapIdx
+            );
+            this.interactiveRef.snapTo({ index: accessibleSnapIdx });
             realm.write(() => {
                 let { alarm } = this.state;
                 switch (idx) {
                     case 0:
+                        this._snapPoints = this._ALL_SNAP_POINTS.slice(0, 2); // returns new array containing 0th and 2nd elements
                         alarm.mode = "normal";
+                        this.setState(this.state);
                         break;
                     case 1:
                         alarm.mode = "autocalc";
+                        this._snapPoints = this._ALL_SNAP_POINTS;
                         this._layoutAnimateToCalcMode({
                             taskListFullScreen: false,
                             activeTask: null // closes any Row showing DELETE btn
                         });
                         break;
                     case 2:
+                        this._snapPoints = this._ALL_SNAP_POINTS.slice(1); // returns new array containing 1st element to end (2nd element)
                         this._layoutAnimateToFullScreenTaskList({
                             taskListFullScreen: true,
                             activeTask: null // closes any Row showing DELETE btn
@@ -695,48 +773,9 @@ class AlarmDetail extends Component {
         // let alarmState = this.state.alarm;
         let { id, index: snapIdx } = event.nativeEvent;
 
-        // if (snapIdx == 2) {
-        //     this._hideModeText();
-        // }
-
-        this._viewIdx = snapIdx;
-        this.setState(this.state);
-        // console.log("snapId", id);
-        // // console.log("alarmState", alarmState);
-
-        // console.log("this._lastMeasuredView", this._lastMeasuredView);
-        // console.log("snapIdx", snapIdx);
-        // // Set flag to remeasure list container if we've moved from fullListView to calcmode, or vice versa
-        // if (
-        //     (snapIdx == 0 && this._lastMeasuredView == 2) ||
-        //     (snapIdx == 2 && this._lastMeasuredView == 0)
-        // ) {
-        //     console.log("Setting this._taskListNeedsRemeasure");
-        //     this._taskListNeedsRemeasure = true;
-        // }
-        // if (snapIdx == 2) {
-        //     this._lastMeasuredView = 2; // set lastView as the snap-index of full-screen TaskList
-        //     this.setState({ taskListFullScreen: true });
-        // } else if (id != alarmState.mode) {
-        //     console.log("alarmState.mode", alarmState.mode);
-        //     realm.write(() => {
-        //         if (id == "normal") {
-        //             /* IMPORTANT: I'm purposefully not saving normal mode to this._lastMeasuredView, since the purpose of this flag
-        //                 is to check which of 'FullTaskList View' or 'Calcmode' has been measured last.
-        //             */
-        //             alarmState.mode = "normal";
-        //         } else if (id == "autocalc") {
-        //             alarmState.mode = "autocalc";
-        //             this._lastMeasuredView = snapIdx;
-        //             // Re-calculate
-        //             alarmState.wakeUpTime = this._calcWakeUpTime();
-        //         }
-        //         this.setState({ alarm: alarmState, taskListFullScreen: false });
-        //     });
-        // } else {
-        //     console.log("else... no change in view...");
-        //     this.setState({ taskListFullScreen: false });
-        // }
+        // TODO: TEST WHETHER COMMENTING THIS OUT BREAKS ANYTHING WHEN SWITCHING VIEWS BY ANY MEANS (menu, dragging, tapping handles)
+        // this._viewIdx = snapIdx; // TODO: We probably just need to make sure viewIdx is updated in all of those cases (use fx _snapToIdx)
+        // this.setState(this.state);
     };
 
     onPressClock = () => {
@@ -878,8 +917,8 @@ class AlarmDetail extends Component {
             });
         }
 
-        console.log("this.state.alarm", this.state.alarm);
-        console.log("_cachedSortedTasks", this._cachedSortedTasks);
+        // console.log("this.state.alarm", this.state.alarm);
+        // console.log("_cachedSortedTasks", this._cachedSortedTasks);
     };
 
     _onDeleteTask(data) {
@@ -1131,7 +1170,7 @@ class AlarmDetail extends Component {
                 if (measuredViewHasChanged) {
                     // since lastView will never be set to "normal", we know that the last view measured was "autocalc". Therefore we need to remeasure
                     this._taskListNeedsRemeasure = true;
-
+                    this._snapPoints = this._ALL_SNAP_POINTS.slice(1); // returns new array containing 1st element to end (2nd element)
                     // since view has changed, we need to set new state
                     this.setState({
                         taskListFullScreen: true,
@@ -1171,6 +1210,11 @@ class AlarmDetail extends Component {
                     // this._playModeIndicatorAnimation();
                 }
 
+                this._snapPoints =
+                    this._viewIdx == 1
+                        ? this._ALL_SNAP_POINTS
+                        : this._ALL_SNAP_POINTS.slice(0, 2);
+
                 this._layoutAnimateToCalcMode(nextState);
             }
         }
@@ -1208,7 +1252,12 @@ class AlarmDetail extends Component {
 
     render() {
         console.info("AlarmDetail render ");
-        console.debug("AlarmDetail render - this.state: ", this.state);
+        // console.debug("AlarmDetail render - this.state: ", this.state);
+        console.log("this._snapPoints");
+        for (let index = 0; index < this._snapPoints.length; index++) {
+            console.log(index, this._snapPoints[index].id);
+        }
+
         let imageHeight = SCREEN_HEIGHT + 30;
 
         /* clockAndLabelTranslation:
@@ -1317,7 +1366,7 @@ class AlarmDetail extends Component {
             let forceRemeasure = this._taskListNeedsRemeasure;
             this._taskListNeedsRemeasure = false;
 
-            console.log("forceRemeasure?", forceRemeasure);
+            // console.log("forceRemeasure?", forceRemeasure);
 
             taskArea = (
                 <TaskList
@@ -1405,64 +1454,44 @@ class AlarmDetail extends Component {
             );
         }
 
-        let editTasksBtn;
-        if (!this.state.isEditingTasks) {
-            editTasksBtn = (
-                <EntypoIcon
-                    name="edit"
-                    size={scaleByFactor(20, 0.2)}
-                    // color="#7a7677"
-                    color={Colors.brandLightOpp}
-                />
-            );
-        } else {
-            editTasksBtn = (
-                <View
-                    style={{
-                        flex: 1,
-                        paddingHorizontal: 7,
-                        // paddingVertical: 3,
-                        borderRadius: 12,
-                        backgroundColor: Colors.brandLightPurple,
-                        alignItems: "center",
-                        alignContent: "center",
-                        justifyContent: "center"
-                    }}
-                >
-                    <Text
-                        style={{
-                            color: "white",
-                            fontSize: scaleByFactor(15, 0.1),
-                            textAlignVertical: "center"
-                        }}
-                    >
-                        DONE
-                    </Text>
-                </View>
-            );
-        }
-
-        let snapPoints = [
-            { y: this.snapNormal, id: "normal" },
-            { y: this.snapAuto, id: "autocalc" },
-            { y: this.snapTaskList, id: "tasklist" }
-        ];
+        // let editTasksBtn;
+        // if (!this.state.isEditingTasks) {
+        //     editTasksBtn = (
+        //         <EntypoIcon
+        //             name="edit"
+        //             size={scaleByFactor(20, 0.2)}
+        //             // color="#7a7677"
+        //             color={Colors.brandLightOpp}
+        //         />
+        //     );
+        // } else {
+        //     editTasksBtn = (
+        //         <View
+        //             style={{
+        //                 flex: 1,
+        //                 paddingHorizontal: 7,
+        //                 // paddingVertical: 3,
+        //                 borderRadius: 12,
+        //                 backgroundColor: Colors.brandLightPurple,
+        //                 alignItems: "center",
+        //                 alignContent: "center",
+        //                 justifyContent: "center"
+        //             }}
+        //         >
+        //             <Text
+        //                 style={{
+        //                     color: "white",
+        //                     fontSize: scaleByFactor(15, 0.1),
+        //                     textAlignVertical: "center"
+        //                 }}
+        //             >
+        //                 DONE
+        //             </Text>
+        //         </View>
+        //     );
+        // }
 
         let labelForceVisible = null;
-        let handleForceHide = null;
-
-        // if (this.state.isEditingLabel && this.state.keyboardHeight) {
-        // snapPoints.push({
-        //     y:
-        //         SCREEN_HEIGHT -
-        //         this.state.keyboardHeight -
-        //         50 -
-        //         this.xtraKeyboardHeight,
-        //     id: "keyboard"
-        // });
-        // labelForceVisible = { opacity: 1 };
-        // handleForceHide = { opacity: 0 };
-        // }
 
         return (
             <ScrollView
@@ -1510,7 +1539,7 @@ class AlarmDetail extends Component {
                         }
                     ]}
                     verticalOnly={true}
-                    snapPoints={snapPoints}
+                    snapPoints={this._snapPoints}
                     animatedValueY={this._clockTransform}
                     onSnap={this.onSnap.bind(this)}
                     // initialPosition={{ y: initInterPosition }}

@@ -10,6 +10,7 @@ import {
 import Colors from "../styles/colors";
 
 class StyledRadio extends React.Component {
+    _isAnimating = false;
     constructor(props) {
         super(props);
         // console.log("StyledRadio constructor ");
@@ -27,7 +28,9 @@ class StyledRadio extends React.Component {
         // console.log("props.selectedIdx", props.selectedIdx);
         // console.log("this.props.selectedIdx", this.props.selectedIdx);
         if (props.selectedIdx != this.props.selectedIdx) {
-            this._underscorAnim.setValue(props.selectedIdx);
+            if (!this._isAnimating) {
+                this._underscorAnim.setValue(props.selectedIdx);
+            }
             this.setState({ selectedIdx: props.selectedIdx });
         }
     }
@@ -39,12 +42,16 @@ class StyledRadio extends React.Component {
 
     _onSelectItem(idx) {
         this.setState({ selectedIdx: idx });
+        this._isAnimating = true;
         Animated.spring(this._underscorAnim, {
             toValue: idx,
             tension: 300,
             friction: 11,
             useNativeDriver: true
-        }).start();
+        }).start(() => {
+            this._isAnimating = false;
+            this._underscorAnim.setValue(this.state.selectedIdx);
+        });
         this.props.onSelect(idx);
     }
 
