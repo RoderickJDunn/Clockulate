@@ -208,7 +208,8 @@ class TaskDetail extends Component {
         let exactMatch = [];
         if (this.state.suggestions.length > 0) {
             exactMatch = this.state.suggestions.filtered(
-                `name = "${this.currName}"`
+                "name = $0",
+                this.currName
             );
         }
 
@@ -246,7 +247,7 @@ class TaskDetail extends Component {
         // Check if a Task exists in the DB with the current name (this.currName)
         let taskLookup = realm
             .objects("Task")
-            .filtered(`name = "${this.currName}"`);
+            .filtered("name = $0", this.currName);
 
         if (taskLookup.length == 1) {
             console.log("Found 1 task with name: " + this.currName);
