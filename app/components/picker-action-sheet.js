@@ -7,8 +7,13 @@ import {
     Text,
     Dimensions,
     Picker,
-    Animated
+    Animated,
+    Platform
 } from "react-native";
+import {
+    WheelPicker,
+} from "react-native-wheel-picker-android";
+
 import Colors from "../styles/colors";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -66,29 +71,42 @@ class PickerActionSheet extends React.Component {
                         </View>
                         <View style={styles.headerSeparator} />
                         <View style={styles.pickerWrapper}>
-                            <Picker
-                                selectedValue={this.state.value}
-                                style={{
-                                    // flex: 0.55,
-                                    height: 200
-                                    // backgroundColor: "blue"
-                                    // alignContent: "center"
-                                }}
-                                onValueChange={(itemValue, itemIndex) =>
-                                    this.setState({ value: itemValue })
-                                }
-                                itemStyle={{ height: 200 }}
-                            >
-                                {snoozeTimeOptions.map(time => {
-                                    return (
-                                        <Picker.Item
-                                            key={time}
-                                            label={time.toString()}
-                                            value={time}
-                                        />
-                                    );
-                                })}
-                            </Picker>
+                            {Platform.OS == "ios" ? (
+                                <Picker
+                                    selectedValue={this.state.value}
+                                    style={{
+                                        height: 200
+                                        // backgroundColor: "blue"
+                                    }}
+                                    onValueChange={(itemValue, itemIndex) =>
+                                        this.setState({ value: itemValue })
+                                    }
+                                    itemStyle={{ height: 200 }}
+                                >
+                                    {snoozeTimeOptions.map(time => {
+                                        return (
+                                            <Picker.Item
+                                                key={time}
+                                                label={time.toString()}
+                                                value={time}
+                                            />
+                                        );
+                                    })}
+                                </Picker>
+                            ) : (
+                                <WheelPicker
+                                    selectedItemPosition={snoozeTimeOptions.indexOf(this.state.value)}
+                                    onItemSelected={event =>
+                                        this.setState({ value: event.data })
+                                    }
+                                    isCurved
+                                    data={snoozeTimeOptions}
+                                    style={{
+                                        height: 200
+                                        // backgroundColor: "blue"
+                                    }}
+                                />
+                            )}
                             <View
                                 style={{
                                     position: "absolute",
