@@ -146,7 +146,7 @@ const MainStack = StackNavigator(
 
 export const DrawerRoot = DrawerNavigator(
     {
-        MainStack: {
+        Alarms: {
             screen: MainStack
         },
         Settings: {
@@ -176,7 +176,7 @@ export const DrawerRoot = DrawerNavigator(
     },
     {
         drawerWidth: 250,
-        initialRouteName: "MainStack",
+        initialRouteName: "Alarms",
         contentOptions: {
             activeTintColor: "#e91e63",
             itemsContainerStyle: {
@@ -187,6 +187,6 @@ export const DrawerRoot = DrawerNavigator(
             }
         },
         headerMode: "screen",
-        order: ["MainStack", "Settings", "About"]
+        order: ["Alarms", "Settings", "About"]
     }
 );
