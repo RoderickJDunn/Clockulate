@@ -1638,6 +1638,7 @@ class AlarmDetail extends Component {
                                 backgroundColor: "transparent",
                                 flex: 0.65
                             }}
+                            // hitSlop={{ top: 15, bottom: 15 }}
                         >
                             <Text style={[styles.timeText]}>
                                 {fWakeUpTime}
@@ -2146,7 +2147,7 @@ class AlarmDetail extends Component {
                             backgroundColor: "transparent",
                             // backgroundColor: "blue",
                             paddingHorizontal: 30,
-                            paddingVertical: 15,
+                            paddingVertical: 30,
                             transform: [
                                 {
                                     translateY: this._clockTransform.interpolate(
@@ -2158,7 +2159,7 @@ class AlarmDetail extends Component {
                                             ],
                                             outputRange: [
                                                 SCREEN_HEIGHT * 1.1,
-                                                SCREEN_HEIGHT * 1.185,
+                                                SCREEN_HEIGHT * 1.17,
                                                 SCREEN_HEIGHT * 0.76
                                             ]
                                         }
@@ -2168,7 +2169,6 @@ class AlarmDetail extends Component {
                             ]
                         }}
                         onPress={this._onPressAnimHandle.bind(this)}
-                        hitSlop={{ top: 70, bottom: 70, left: 70, right: 70 }}
                     >
                         <MaterialIcon
                             name="drag-handle"
