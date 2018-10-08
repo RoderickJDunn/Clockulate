@@ -68,9 +68,7 @@ export default class Sounds extends Component {
         });
         this.setState({ sounds: soundsTmp });
 
-        if (sound.type != SOUND_TYPES.RANDOM) {
-            this.playSound(sound);
-        }
+        this.playSound(sound);
     }
 
     stopActiveSound() {
@@ -82,6 +80,8 @@ export default class Sounds extends Component {
 
     playSound(sound) {
         this.stopActiveSound();
+
+        if (sound.type == SOUND_TYPES.RANDOM) return;
 
         if (!sound.files || sound.files.length == 0) return;
 
