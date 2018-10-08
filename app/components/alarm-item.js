@@ -327,7 +327,7 @@ class AlarmItem extends React.PureComponent {
 
     render() {
         console.log("AlarmItem", "- render");
-        // console.debug("alarm-item props", this.props);
+        // console.info("alarm-item props", this.props);
         // console.debug(
         //     `wakeTime: ${this.props.alarm.wakeUpTime} | enabled: ${
         //         this.props.alarm.status
@@ -423,8 +423,7 @@ class AlarmItem extends React.PureComponent {
                                         restingLocation
                                     ]
                                 })
-                            },
-                            { perspective: 1000 }
+                            }
                         ],
                         opacity: this.props.hide ? 0 : 1
                     }
@@ -446,6 +445,7 @@ class AlarmItem extends React.PureComponent {
                                         // extrapolate: "clamp"
                                     })
                                 },
+                                { perspective: 1000 }
                                 // {
                                 //     scaleX: this._position.interpolate({
                                 //         inputRange: [-200, 0],
@@ -453,7 +453,6 @@ class AlarmItem extends React.PureComponent {
                                 //         extrapolate: "clamp"
                                 //     })
                                 // },
-                                { perspective: 1000 }
                             ]
                         }
                     ]}
@@ -472,12 +471,7 @@ class AlarmItem extends React.PureComponent {
                             ellipsizeMode={
                                 Platform.OS == "ios" ? "clip" : "tail"
                             }
-                            style={[
-                                AlarmListStyle.deleteBtnText
-                                // {
-                                //     width: 75
-                                // }
-                            ]}
+                            style={[AlarmListStyle.deleteBtnText]}
                         >
                             Delete
                         </Text>
@@ -509,13 +503,6 @@ class AlarmItem extends React.PureComponent {
                                         // extrapolate: "clamp"
                                     })
                                 },
-                                // {
-                                //     scaleX: this._position.interpolate({
-                                //         inputRange: [-200, 0],
-                                //         outputRange: [1, 0.001],
-                                //         extrapolate: "clamp"
-                                //     })
-                                // },
                                 { perspective: 1000 }
                             ]
                         }
@@ -540,9 +527,6 @@ class AlarmItem extends React.PureComponent {
                             }
                             style={[
                                 AlarmListStyle.deleteBtnText
-                                // {
-                                //     width: 75
-                                // }
                             ]}
                         >
                             Duplicate
