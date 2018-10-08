@@ -4,6 +4,7 @@ import PushNotification from "react-native-push-notification";
 import Colors from "../styles/colors";
 import realm from "../data/DataSchemas";
 import { SOUND_TYPES, ALARM_STATES } from "../data/constants";
+import moment from "moment";
 
 let FAKE_CATEGORY = "MyFakeCategory";
 
@@ -44,6 +45,7 @@ function fetchAlarmByNotifId(notificationId) {
 }
 
 export let snoozeAlarm = (notificationInfo, reloadAlarmsList) => {
+    console.log("snoozeAlarm");
     let alarm = fetchAlarmByNotifId(notificationInfo.id);
 
     if (!alarm) {
@@ -55,9 +57,12 @@ export let snoozeAlarm = (notificationInfo, reloadAlarmsList) => {
             } else {
                 alarm.snoozeCount += 1;
             }
+            alarm.status = ALARM_STATES.SNOOZED;
         });
 
+        console.log("upped snooze count");
         if (reloadAlarmsList) {
+            console.log("reloading alarms list");
             reloadAlarmsList();
         }
     }
@@ -85,7 +90,7 @@ export let clearAlarm = (alarm, notificationID, reloadAlarmsList) => {
 
     console.log("alarm", alarm);
 
-    PushNotification.clearAllNotifications();
+    // PushNotification.cancelAllLocalNotifications();
 
     // Reload AlarmsList ... (in case we got the notification while app is open)
     if (reloadAlarmsList) {
@@ -93,7 +98,7 @@ export let clearAlarm = (alarm, notificationID, reloadAlarmsList) => {
     }
 };
 
-export let scheduleAlarm = alarm => {
+export let scheduleAlarm = (alarm, reloadAlarmsList) => {
     console.log(
         "scheduleAlarm for (rn-push-notification lib): " + alarm.wakeUpTime
     );
@@ -103,7 +108,7 @@ export let scheduleAlarm = alarm => {
 
     let notifId = alarmUUID_to_notificationID(alarm.id);
     console.log("alarmId", alarm.id);
-    console.log("notifId", notifId);
+    console.log("Setting notification ID", notifId);
 
     realm.write(() => {
         alarm.notificationId = notifId;
@@ -128,8 +133,12 @@ export let scheduleAlarm = alarm => {
 
     let snoozeTime = 600 * 1000;
     if (__DEV__) {
-        snoozeTime = 15 * 1000;
+        snoozeTime = 60 * 1000;
     }
+
+    setInAppAlarm(alarm, reloadAlarmsList);
+    // console.log("notifId", notifId);
+
     // let snoozeTime = 600 * 1000; // in milliseconds
     // for (let i = 1; i <= notiCount; i++) {
     PushNotification.localNotificationSchedule({
@@ -138,7 +147,7 @@ export let scheduleAlarm = alarm => {
         message: alarm.label, // Required
         ticker: alarm.label,
         autoCancel: false, // default: true
-        vibrate: true,
+        vibrate: true, // FIXME: change back to true
         vibration: 100, // default: 100, no vibration if vibrate: false
         smallIcon: "icon.png", // Required
         largeIcon: "icon.png",
@@ -154,5 +163,99 @@ export let scheduleAlarm = alarm => {
     });
 };
 
-export let cancelInAppAlarm = () => {};
-export let setInAppAlarm = () => {};
+export let setInAppAlarm = (alarm, reloadAlarmsList) => {
+    console.log("setInAppAlarm");
+
+    if (alarm) {
+        console.log("setInAppAlarm", alarm.wakeUpTime);
+        console.log("snoozeCount", alarm.snoozeCount);
+        console.log("status", alarm.status);
+    }
+
+    // calculate time until alarm
+    let now = new Date();
+
+    let msUntilAlarm = alarm.wakeUpTime - now;
+    console.log("msUntilAlarm", msUntilAlarm);
+
+    /* if alarm has been snoozed at least once, we need to adjust the in-app alarm time accordingly
+     (also taking into account snooze-time setting)
+     */
+    if (alarm.snoozeCount != null && alarm.snoozeCount > 0) {
+        console.log("This is a snooze...");
+        // For now use 0.25 minutes as the snooze time (15 sec) for dev/testing
+        let minutesToAdd = alarm.snoozeCount * 1; // FIXME: Make this '10' before alpha release. '10' is the hard-coded snooze time for now...
+        let inAppNotifTime = moment(alarm.wakeUpTime).add(
+            minutesToAdd,
+            "minute"
+        );
+        msUntilAlarm = inAppNotifTime.toDate() - now;
+    } else if (msUntilAlarm < 0) {
+        // This is the first time this alarm has triggered (not a snooze), but the alarmTime was calculated to be in the past.
+        // Add 1 day
+        let inAppNotifTime = moment(alarm.wakeUpTime).add(1, "day");
+        msUntilAlarm = inAppNotifTime.toDate() - now;
+    }
+
+    console.log("msUntilAlarm", msUntilAlarm);
+
+    let timeoutId = setTimeout(() => {
+        console.log("Alarm went off while app is open!");
+
+        realm.write(() => {
+            alarm.status = ALARM_STATES.RINGING;
+        });
+        reloadAlarmsList();
+    }, msUntilAlarm);
+
+    realm.write(() => {
+        alarm.timeoutId = timeoutId;
+    });
+};
+
+export let cancelInAppAlarm = alarm => {
+    if (alarm && alarm.timeoutId) {
+        clearTimeout(alarm.timeoutId);
+        realm.write(() => {
+            alarm.timeoutId = null;
+        });
+    }
+};
+
+export let checkForImplicitSnooze = (alarm, mNow) => {
+    let mWakeupTime = moment(alarm.wakeUpTime);
+
+    let secondsDiff = (mNow - mWakeupTime) / 1000;
+    console.log("secondsDiff", secondsDiff);
+
+    // sanity check. secondsDiff should always be positive.
+    if (secondsDiff < 0) {
+        console.error(
+            "checkForImplicitSnooze: ",
+            `secondsDiff should always be positive, but now=${mNow} and wakeUpTime=${mWakeupTime}`
+        );
+    }
+
+    // let almSnoozeTime = alarm.snoozeTime * 60; // convert snoozeTime to seconds
+    let almSnoozeTime = 1 * 60; // convert snoozeTime to seconds TODO: Change 1 to alarm.snoozeTime
+    console.log("almSnoozeTime", almSnoozeTime);
+
+    let expectedSnoozeCount = Math.ceil(secondsDiff / almSnoozeTime);
+    console.log("expectedSnoozeCount", expectedSnoozeCount);
+
+    if (alarm.snoozeCount == null || alarm.snoozeCount < expectedSnoozeCount) {
+        // user did not explicitly snooze for x number of notifications.
+        realm.write(() => {
+            alarm.snoozeCount = expectedSnoozeCount;
+            alarm.status = ALARM_STATES.SNOOZED;
+        });
+    } else if (alarm.snoozeCount == expectedSnoozeCount) {
+        console.log("Got expected value for snoozeCount", expectedSnoozeCount);
+    } else {
+        // sanity check. Should never happen.
+        console.error(
+            "Expected snoozeCount was LOWER than actual snoozecount",
+            `Expected: ${expectedSnoozeCount} | Actual: ${alarm.snoozeCount}`
+        );
+    }
+};

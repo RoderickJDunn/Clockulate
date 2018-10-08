@@ -300,28 +300,25 @@ class Alarms extends Component {
         ) {
             console.log("App has come to the foreground! (ALARMS LIST)");
 
-            // Implicit Snoozing and In-App Timers: Check if we need to manually switch any Alarms into 'snooze'. (ie: snooze Count)
-            if (Platform.OS == "ios") {
-                // TODO: Remove platform check. We need similar function on Android (only transparent to user)
-                let mNow = moment();
+            // Implicit Snoozing and In-App Timers: Check if we need to manually switch any Alarms into 'snooze'. (ie: snooze Count)arent to user)
+            let mNow = moment();
 
-                let alarms = realm
-                    .objects("Alarm")
-                    .filtered(
-                        "status == $0 OR status == $1",
-                        ALARM_STATES.SET,
-                        ALARM_STATES.SNOOZED
-                    );
-                for (let i = 0; i < alarms.length; i++) {
-                    if (moment(alarms[i].wakeUpTime) > mNow) {
-                        // alarm is in the future. Set in app alarm. (On Android, the inAppAlarm is a transparent timer)
-                        setInAppAlarm(alarms[i], this.reloadAlarms.bind(this));
-                    } else {
-                        // the alarm has already triggered.
-                        // If snoozeCount is null set it to 1. Otherwise, calculate what it should be, and set it accordingly.
-                        checkForImplicitSnooze(alarms[i], mNow);
-                        setInAppAlarm(alarms[i], this.reloadAlarms.bind(this));
-                    }
+            let alarms = realm
+                .objects("Alarm")
+                .filtered(
+                    "status == $0 OR status == $1",
+                    ALARM_STATES.SET,
+                    ALARM_STATES.SNOOZED
+                );
+            for (let i = 0; i < alarms.length; i++) {
+                if (moment(alarms[i].wakeUpTime) > mNow) {
+                    // alarm is in the future. Set in app alarm. (On Android, the inAppAlarm is a transparent timer)
+                    setInAppAlarm(alarms[i], this.reloadAlarms.bind(this));
+                } else {
+                    // the alarm has already triggered.
+                    // If snoozeCount is null set it to 1. Otherwise, calculate what it should be, and set it accordingly.
+                    checkForImplicitSnooze(alarms[i], mNow);
+                    setInAppAlarm(alarms[i], this.reloadAlarms.bind(this));
                 }
             }
             this.reloadAlarms();
@@ -504,6 +501,13 @@ class Alarms extends Component {
             let wakeUpTime = DateUtils.date_to_nextTimeInstance(
                 alarm.wakeUpTime
             );
+
+            /* *** DEBUGGING *** */
+            // set alarm to next full minute
+            let inOneMin = moment().add(1, "minutes");
+            wakeUpTime = inOneMin.second(0).toDate();
+
+            /* ***************** */
 
             realm.write(() => {
                 alarm.wakeUpTime = wakeUpTime;
