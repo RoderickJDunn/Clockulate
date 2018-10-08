@@ -5,14 +5,11 @@ import android.app.Application;
 import com.facebook.react.ReactApplication;
 import com.airbnb.android.react.lottie.LottiePackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
-import com.surajit.rnrg.RNRadialGradientPackage;
 import com.apsl.versionnumber.RNVersionNumberPackage;
-import com.RNProximity.RNProximityPackage;
-import com.emekalites.react.alarm.notification.ANPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.wix.reactnativenotifications.RNNotificationsPackage;
 import com.zmxv.RNSound.RNSoundPackage;
-import com.zmxv.RNSound.RNSoundPackage;
+//import com.zmxv.RNSound.RNSoundPackage;
 // import com.reactlibrary.RNArrowsPackage;
 import com.facebook.react.uimanager.ViewManager;
 import com.wix.interactable.Interactable;
@@ -43,9 +40,9 @@ public class MainApplication extends Application implements ReactApplication {
             return Arrays.<ReactPackage>asList(new MainReactPackage(),
             new LottiePackage(),
             new RNGestureHandlerPackage(),
-            new RNRadialGradientPackage(), new RNVersionNumberPackage(),
-                    new RNProximityPackage(), new ANPackage(), new LinearGradientPackage(), new LottiePackage(),
+            new RNVersionNumberPackage(),
                     new RNNotificationsPackage(this.getApplication()), new RNSoundPackage(),
+                    new LinearGradientPackage(),
                     // new RNArrowsPackage(),
                     new Interactable(), new ReactNativePushNotificationPackage(), new CalendarEventsPackage(),
                     new SvgPackage(), new VectorIconsPackage(), new PickerViewPackage(), new RealmReactPackage(),
