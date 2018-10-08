@@ -226,9 +226,19 @@ class Alarms extends Component {
         } else {
             // PushNotificationAndroid.cancelAllLocalNotifications();
 
+            // console.log(
+            //     "notificationActionReceived listeners.length",
+            //     DeviceEventEmitter.listeners("notificationActionReceived").length
+            // );
             // DeviceEventEmitter.addListener("remoteNotificationReceived", e => {
             //     console.log("Notification event: ", e);
             // });
+            DeviceEventEmitter.removeAllListeners("notificationActionReceived");
+            PushNotificationAndroid.unregister();
+            // console.log(
+            //     "notificationActionReceived listeners.length",
+            //     DeviceEventEmitter.listeners("notificationActionReceived").length
+            // );
             // Register all the valid actions for notifications here and add the action handler for each action
             PushNotificationAndroid.registerNotificationActions([
                 "Snooze",
@@ -256,6 +266,11 @@ class Alarms extends Component {
                 }
                 // Add all the required actions handlers
             });
+
+            // console.log(
+            //     "notificationActionReceived listeners.length",
+            //     DeviceEventEmitter.listeners("notificationActionReceived").length
+            // );
         }
 
         this._didBlurListener = this.props.navigation.addListener(
@@ -288,9 +303,14 @@ class Alarms extends Component {
                 "notificationOpened",
                 this.onNotificationOpened.bind(this)
             );
+        } else {
+            DeviceEventEmitter.removeAllListeners("notificationActionReceived");
         }
 
         AppState.removeEventListener("change", this._handleAppStateChange);
+
+        this.props.navigation.removeAllListeners("didFocus");
+        this.props.navigation.removeAllListeners("didBlur");
     }
 
     _handleAppStateChange = nextAppState => {
@@ -326,13 +346,11 @@ class Alarms extends Component {
             console.log("App is going into background");
             // cancel any set timers for in-app alarms (iOS only)
 
-            if (Platform.OS == "ios") {
-                let alarms = realm
-                    .objects("Alarm")
-                    .filtered("status == $0", ALARM_STATES.SET);
-                for (let i = 0; i < alarms.length; i++) {
-                    cancelInAppAlarm(alarms[i]);
-                }
+            let alarms = realm
+                .objects("Alarm")
+                .filtered("status == $0", ALARM_STATES.SET);
+            for (let i = 0; i < alarms.length; i++) {
+                cancelInAppAlarm(alarms[i]);
             }
         }
 
