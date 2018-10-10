@@ -128,7 +128,8 @@ export const TaskItemStyle = StyleSheet.create({
         justifyContent: "space-between"
     },
     checkbox: {
-        flex: 0.08
+        flex: 0.08,
+        paddingRight: 4
         // alignItems: "flex-start",
         // backgroundColor: "blue"
         // flexShrink: 0.1

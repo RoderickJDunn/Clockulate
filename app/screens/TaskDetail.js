@@ -76,7 +76,7 @@ class TaskDetail extends Component {
                         name="md-checkmark-circle-outline"
                         // name="md-checkmark"
                         // name="playlist-add-check" // MaterialIcons  -- looks like a list with a checkmark at bottom-right
-                        size={30}
+                        size={scaleByFactor(25, 0.3)}
                         color={Colors.brandOffWhiteBlue}
                     />
                 </TouchableOpacity>
@@ -763,41 +763,43 @@ class TaskDetail extends Component {
                     </View>
                 </View>
                 {/* <View style={{ position: "absolute", height: 1, backgroundColor: "black", left: 0, right:0, top: 140 }} /> */}
-                <AwesomeAlert
-                    alertContainerStyle={{
-                        top: 0,
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        width: "auto"
-                    }}
-                    // contentContainerStyle={{}}
-                    show={this.state.showDurationInfo}
-                    showProgress={false}
-                    title="About Default Durations"
-                    message={`Check this box if you want new tasks with this name to be created with this duration (${formatDuration(
-                        durationDisplayed
-                    )}) from now on.`}
-                    // message={`If checked, new tasks with this name will have this duration (${formatDuration(
-                    //     durationDisplayed
-                    // )}). \n\nIf unchecked, new tasks with this name will have the original duration (${formatDuration(
-                    //     this.state.alarmTask.task.defaultDuration
-                    // )})`}
-                    messageStyle={{ textAlign: "center" }}
-                    closeOnTouchOutside={true}
-                    closeOnHardwareBackPress={false}
-                    showConfirmButton={true}
-                    confirmText="Got it!"
-                    confirmButtonColor="#54c0ff"
-                    onConfirmPressed={() => {
-                        this.setState({ showDurationInfo: false });
-                    }}
-                    onDismiss={() => {
-                        if (this.state.showDurationInfo) {
+                {this.state.showDurationInfo && (
+                    <AwesomeAlert
+                        alertContainerStyle={{
+                            top: 0,
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            width: "auto"
+                        }}
+                        // contentContainerStyle={{}}
+                        show={true}
+                        showProgress={false}
+                        title="About Default Durations"
+                        message={`Check this box if you want new tasks with this name to be created with this duration (${formatDuration(
+                            durationDisplayed
+                        )}) from now on.`}
+                        // message={`If checked, new tasks with this name will have this duration (${formatDuration(
+                        //     durationDisplayed
+                        // )}). \n\nIf unchecked, new tasks with this name will have the original duration (${formatDuration(
+                        //     this.state.alarmTask.task.defaultDuration
+                        // )})`}
+                        messageStyle={{ textAlign: "center" }}
+                        closeOnTouchOutside={true}
+                        closeOnHardwareBackPress={false}
+                        showConfirmButton={true}
+                        confirmText="Got it!"
+                        confirmButtonColor="#54c0ff"
+                        onConfirmPressed={() => {
                             this.setState({ showDurationInfo: false });
-                        }
-                    }}
-                />
+                        }}
+                        onDismiss={() => {
+                            if (this.state.showDurationInfo) {
+                                this.setState({ showDurationInfo: false });
+                            }
+                        }}
+                    />
+                )}
             </ScrollView>
         );
     }
@@ -856,8 +858,8 @@ const Styles = StyleSheet.create({
         padding: 5,
         alignContent: "center",
         alignItems: "center",
-        borderBottomWidth: 1,
-        borderBottomColor: Colors.disabledGrey,
+        borderTopWidth: 1,
+        borderTopColor: Colors.disabledGrey,
         // backgroundColor: "#dfdee0"
         backgroundColor: Colors.backgroundGrey
     },

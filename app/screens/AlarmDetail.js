@@ -16,18 +16,15 @@ import {
     ScrollView,
     Platform,
     LayoutAnimation,
-    Alert,
     Easing,
-    TouchableWithoutFeedback
+    InteractionManager
 } from "react-native";
-import Svg, { Defs, Rect, RadialGradient, Stop } from "react-native-svg";
-import { Header, Transitioner } from "react-navigation";
+import { Header } from "react-navigation";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import MaterialComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import FAIcon from "react-native-vector-icons/FontAwesome";
 import MenuItem from "../components/menu-item";
-import MenuHeader from "../components/menu-header";
 import StyledRadio from "../components/styled-radio";
 import { Icon } from "react-native-elements";
 
@@ -142,7 +139,7 @@ class AlarmDetail extends Component {
     AnimatedAlarmLabel = Animated.createAnimatedComponent(TextInput);
     AnimatedHandle = Animated.createAnimatedComponent(TouchableOpacity);
 
-    _clockTransform = new Animated.Value(0);
+    _clockTransform;
     _modeTextOpacity;
     _modeTextScale;
     startTimesHandleAnim = new Animated.Value(0);
@@ -260,15 +257,11 @@ class AlarmDetail extends Component {
         this._taskStartTimes = this._calcStartTimes();
 
         this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
+
         /* These may be used for Intro (Tutorial Mode), but removing for now */
         // TODO: Here we need to check whether user has global setting to "Never show mode indicator"
         // this._modeTextOpacity = new Animated.Value(1);
         // this._modeTextScale = new Animated.Value(0);
-
-        // setTimeout(() => {
-        //     this._animatedView.animate(this.state.animationDuration);
-        // }, 0);
-        this._viewIdx = this.state.alarm.mode == "autocalc" ? 1 : 0;
 
         this._ALL_SNAP_POINTS = [
             { y: this.snapNormal, id: "normal" },
@@ -276,21 +269,33 @@ class AlarmDetail extends Component {
             { y: this.snapTaskList, id: "tasklist" }
         ];
 
-        this._snapPoints =
-            this.state.alarm.mode == "autocalc"
-                ? this._ALL_SNAP_POINTS
-                : this._ALL_SNAP_POINTS.slice(0, 2); // this returns 0th and 1st elements in a new array
+        let initModeIsNormal = this.state.alarm.mode == "normal";
+
+        if (initModeIsNormal) {
+            this._viewIdx = 0;
+            this._clockTransform = new Animated.Value(this.snapNormal);
+            this._snapPoints = this._ALL_SNAP_POINTS.slice(0, 2);
+        } else {
+            this._viewIdx = 1;
+            this._clockTransform = new Animated.Value(this.snapAuto);
+            this._snapPoints = this._ALL_SNAP_POINTS;
+        }
+
         // console.log(this.state);
         // console.log(params);
     }
 
-    // componentDidMount() {
+    // componentWillMount() {
+    // console.log("AlarmDetail: componentWillMount");
+    // this.addKeyboardListeners();
+    // InteractionManager.runAfterInteractions(() => {
+    // this.props.navigation.setParams({
+    //     handleBackBtn: this.handleBackPress.bind(this),
+    //     menuOpen: false,
+    //     setMenuState: this._setMenuState.bind(this),
+    //     openSnoozeTimePicker: this._openSnoozeTimePicker.bind(this)
+    // });
     // }
-
-    componentWillMount() {
-        // console.log("AlarmDetail: componentWillMount");
-        this.addKeyboardListeners();
-    }
 
     componentWillUnmount() {
         // console.debug("AlarmDetail: componentWillUnmount");
@@ -316,28 +321,18 @@ class AlarmDetail extends Component {
     componentDidMount() {
         console.debug("AlarmDetail --- ComponentDidMount");
         // console.log("this.state.alarm", this.state.alarm);
-        this.props.navigation.setParams({
-            handleBackBtn: this.handleBackPress.bind(this),
-            menuOpen: false,
-            setMenuState: this._setMenuState.bind(this),
-            openSnoozeTimePicker: this._openSnoozeTimePicker.bind(this)
+
+        this.addKeyboardListeners();
+        InteractionManager.runAfterInteractions(() => {
+            this.props.navigation.setParams({
+                handleBackBtn: this.handleBackPress.bind(this),
+                menuOpen: false,
+                setMenuState: this._setMenuState.bind(this),
+                openSnoozeTimePicker: this._openSnoozeTimePicker.bind(this)
+            });
         });
 
         this._lastMeasuredView = "autocalc"; // set initial lastView to calcmode index
-
-        if (this.state.alarm.mode == "normal") {
-            /* IMPORTANT: I'm purposefully not setting initial lastMeasuredView to classic-mode index. 
-                This flag doesn't care about normal mode. It is an indicator of which mode, FullTaskList or Autocalc
-                was last measured.
-             */
-            setTimeout(() => {
-                this._snapToIdx(0);
-            }, 0);
-        }
-
-        // this.startTimesHandleAnim.addListener(({ value }) => {
-        //     console.log(value);
-        // });
 
         // this._playModeIndicatorAnimation();
 
@@ -1055,7 +1050,7 @@ class AlarmDetail extends Component {
             }
         });
 
-        this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
+        // this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
 
         this._calcStartTimes();
 
@@ -1340,6 +1335,7 @@ class AlarmDetail extends Component {
                                 alignSelf: "center",
                                 justifyContent: "center",
                                 position: "absolute",
+                                top: SCREEN_HEIGHT * 0.12,
                                 // borderColor: "black",
                                 // borderWidth: 0.5,
                                 backgroundColor: "#191966",
@@ -1493,6 +1489,8 @@ class AlarmDetail extends Component {
 
         let labelForceVisible = null;
 
+        let mode = this.state.alarm.mode;
+
         return (
             <ScrollView
                 contentContainerStyle={styles.screenContainer}
@@ -1523,10 +1521,8 @@ class AlarmDetail extends Component {
                             ]
                         }
                     ]}
-                    // source={require("../img/ClockBgd_v5.png")}
-                    source={require("../img/ClockBgd_v8_iphoneSE-5-6-7-8.png")}
-                    // source={require("../img/ClockBgd_v9_iphoneSE-5-6-7-8.png")}
-                />
+                        source={{ uri: "ClockBgd_v8_iphoneSE-5-6-7-8" }}
+                    />
                 {touchableBackdrop}
                 <Interactable.View
                     ref={interactableRef}
@@ -1550,7 +1546,7 @@ class AlarmDetail extends Component {
                         bounce: 0.3
                     }}
                     dragWithSpring={
-                        this.state.alarm.mode == "normal"
+                        mode == "normal"
                             ? { tension: 1200, damping: 0.5 }
                             : { tension: 1500, damping: 0.5 }
                     }
@@ -1560,6 +1556,9 @@ class AlarmDetail extends Component {
                     // ]}
                     animatedNativeDriver={true}
                     onDrag={this._onDragInteractable.bind(this)}
+                    initialPosition={{
+                        y: mode == "normal" ? this.snapNormal : this.snapAuto
+                    }}
                     // onStartShouldSetResponderCapture={({ nativeEvent }) => {
                     //     this._dragStartPos = nativeEvent.pageY;
                     // }}
@@ -1704,7 +1703,8 @@ class AlarmDetail extends Component {
                                     resizeMode: "cover"
                                 }
                             ]}
-                            source={require("../img/NonClockBgV2.png")}
+                            // source={require("../img/NonClockBgV2.png")}
+                            source={{ uri: "NonClockBgV2" }}
                         />
 
                         <View
@@ -2029,6 +2029,9 @@ class AlarmDetail extends Component {
                                 }}
                                 // initialPosition={{ y: initInterPosition }}
                             > */}
+                            {/* </Interactable.View> */}
+                            {touchableBackdrop}
+                            {taskArea}
                             <PanGestureHandler
                                 ref={el => (this.startTimesPanRef = el)}
                                 onGestureEvent={Animated.event(
@@ -2050,8 +2053,8 @@ class AlarmDetail extends Component {
                                         return;
                                     }
                                     if (
-                                        nativeEvent.translationX > -70 &&
-                                        nativeEvent.velocityX > -1000
+                                        nativeEvent.translationX > -45 &&
+                                        nativeEvent.velocityX > -800
                                     ) {
                                         // console.log(
                                         //     "Translation too small or velocity too slow. Snapping back"
@@ -2097,7 +2100,7 @@ class AlarmDetail extends Component {
                                         {
                                             position: "absolute",
                                             // right: 0,
-                                            left: SCREEN_WIDTH - 15,
+                                            left: SCREEN_WIDTH - 30,
                                             // left: 0,
                                             // top: 173,
                                             top: 0,
@@ -2114,9 +2117,6 @@ class AlarmDetail extends Component {
                                     ]}
                                 />
                             </PanGestureHandler>
-                            {/* </Interactable.View> */}
-                            {touchableBackdrop}
-                            {taskArea}
                         </LinearGradient>
                         {/* Task Start-Times Interactable View*/}
                         {/* <View
@@ -2430,6 +2430,7 @@ const styles = StyleSheet.create({
         top: -100, // required for image parallax
         width: SCREEN_WIDTH * 1.2,
         backgroundColor: "transparent",
+        // backgroundColor: "purple",
         padding: 10
     },
     clockContainer: {
