@@ -296,6 +296,58 @@ class AlarmDetail extends Component {
 
         // console.log(this.state);
         // console.log(params);
+        InteractionManager.runAfterInteractions(() => {
+            console.log("InteractionManager");
+
+            this._onPressAnimHandle = this._onPressAnimHandle.bind(this);
+            this._onPressTasksHeader = this._onPressTasksHeader.bind(this);
+            this._onDragInteractable = this._onDragInteractable.bind(this);
+            this._getMeasurementsForTaskRow = this._getMeasurementsForTaskRow.bind(this);
+            this._onSelectViewFromMenu = this._onSelectViewFromMenu.bind(this);
+            this._toggleShowStartTimes = this._toggleShowStartTimes.bind(this);
+            this._toggleHideHrsOfSleep = this._toggleHideHrsOfSleep.bind(this);
+            this._navigateToSounds = this._navigateToSounds.bind(this);
+            this._toggleHideDisabledTasks = this._toggleHideDisabledTasks.bind(this);
+            this._clearLabeledInput = this._clearLabeledInput.bind(this);
+            this._onGestureStateChanged = this._onGestureStateChanged.bind(this);
+            this._willStartTaskMove = this._willStartTaskMove.bind(this);
+            this._closeSnoozeTimePicker = this._closeSnoozeTimePicker.bind(this);
+            this._saveSnoozeTime = this._saveSnoozeTime.bind(this);
+            this._onReorderTasks = this._onReorderTasks.bind(this);
+            this._didEndMove = this._didEndMove.bind(this);
+            this._closeTaskRows = this._closeTaskRows.bind(this);
+            this._onSnapTask = this._onSnapTask.bind(this);
+            this._onDeleteTask = this._onDeleteTask.bind(this);
+            this._calcStartTimes = this._calcStartTimes.bind(this);
+            this._calculateHoursOfSleep = this._calculateHoursOfSleep.bind(this);
+            this._calcWakeUpTime = this._calcWakeUpTime.bind(this);
+            this._hideDateTimePicker = this._hideDateTimePicker.bind(this);
+            this._showDateTimePicker = this._showDateTimePicker.bind(this);
+            this._onWakeTimePicked = this._onWakeTimePicked.bind(this);
+            this._onArrivalTimePicked = this._onArrivalTimePicked.bind(this);
+            this.saveSound = this.saveSound.bind(this);
+            this._onPressClock = this._onPressClock.bind(this);
+            this.onSnap = this.onSnap.bind(this);
+            this.onChangeTaskDuration = this.onChangeTaskDuration.bind(this);
+            this.onChangeTaskEnabled = this.onChangeTaskEnabled.bind(this);
+            this.onLabelInputFocus = this.onLabelInputFocus.bind(this);
+            this.onLabelInputBlur = this.onLabelInputBlur.bind(this);
+            this.onChangeLabel = this.onChangeLabel.bind(this);
+            this._onPressTask = this._onPressTask.bind(this);
+            this.onTaskListChanged = this.onTaskListChanged.bind(this);
+            this._onPressAddTask = this._onPressAddTask.bind(this);
+            this._willLeaveNavScreen = this._willLeaveNavScreen.bind(this);
+            this._willShowNavScreen = this._willShowNavScreen.bind(this);
+            this.handleBackPress = this.handleBackPress.bind(this);
+            this.keyboardWillHide = this.keyboardWillHide.bind(this);
+            this.keyboardWillShow = this.keyboardWillShow.bind(this);
+            this._openSnoozeTimePicker = this._openSnoozeTimePicker.bind(this);
+            this._snapToIdx = this._snapToIdx.bind(this);
+            this._realm_snap_idx = this._realm_snap_idx.bind(this);
+            this._setMenuState = this._setMenuState.bind(this);
+            this.removeKeyboardListeners = this.removeKeyboardListeners.bind(this);
+            this.addKeyboardListeners = this.addKeyboardListeners.bind(this);
+        });
     }
 
     // componentWillMount() {
@@ -315,7 +367,7 @@ class AlarmDetail extends Component {
         this.removeKeyboardListeners();
     }
 
-    addKeyboardListeners = () => {
+    addKeyboardListeners() {
         this.keyboardWillShowSub = Keyboard.addListener(
             Platform.OS == "ios" ? "keyboardWillShow" : "keyboardDidShow",
             this.keyboardWillShow.bind(this)
@@ -324,12 +376,12 @@ class AlarmDetail extends Component {
             Platform.OS == "ios" ? "keyboardWillHide" : "keyboardDidHide",
             this.keyboardWillHide.bind(this)
         );
-    };
+    }
 
-    removeKeyboardListeners = () => {
+    removeKeyboardListeners() {
         this.keyboardWillShowSub.remove();
         this.keyboardWillHideSub.remove();
-    };
+    }
 
     componentDidMount() {
         console.debug("AlarmDetail --- ComponentDidMount");
@@ -352,7 +404,7 @@ class AlarmDetail extends Component {
         this.headerHeight = Header.HEIGHT;
     }
 
-    _setMenuState = (nextMenuState, nextState) => {
+    _setMenuState(nextMenuState, nextState) {
         if (nextMenuState == this.state.menuIsOpen) return;
 
         Animated.timing(_menuIconAnim, {
@@ -368,9 +420,9 @@ class AlarmDetail extends Component {
             this.setState({ menuIsOpen: nextMenuState });
         }
         this.props.navigation.setParams({ menuIsOpen: nextMenuState });
-    };
+    }
 
-    _realm_snap_idx = () => {
+    _realm_snap_idx() {
         let { alarm } = this.state;
         switch (this._viewIdx) {
             case 0:
@@ -394,7 +446,7 @@ class AlarmDetail extends Component {
                 });
                 break;
         }
-    };
+    }
 
     /**
      * Imperitively snaps main Interactable View to provided snap index, and updates
@@ -493,10 +545,10 @@ class AlarmDetail extends Component {
     //     this._modeTextOpacity.setValue(0);
     // }
 
-    _openSnoozeTimePicker = () => {
+    _openSnoozeTimePicker() {
         this._setMenuState(0);
         this.setState({ showSnoozePicker: true });
-    };
+    }
 
     _setInteractiveRef = el => (this.interactiveRef = el);
 
@@ -524,7 +576,7 @@ class AlarmDetail extends Component {
         console.log("... done.");
     };
 
-    keyboardWillShow = event => {
+    keyboardWillShow(event) {
         // console.log("keyboardWillShow -------");
         // console.log(event.endCoordinates);
         // console.log(SCREEN_HEIGHT);
@@ -539,9 +591,9 @@ class AlarmDetail extends Component {
             toValue: event.endCoordinates.height,
             useNativeDriver: true
         }).start();
-    };
+    }
 
-    keyboardWillHide = event => {
+    keyboardWillHide(event) {
         // console.log("keyboardWillHide");
         // let { mode } = this.state.alarm;
         // let modeInt = mode == "autocalc" ? 0 : 1;
@@ -555,7 +607,7 @@ class AlarmDetail extends Component {
             toValue: 0,
             useNativeDriver: true
         }).start();
-    };
+    }
 
     /*
     NOTE: This method DOES get called when you push 'Back' do go back to parent screen. However, no lifecycle
@@ -570,7 +622,7 @@ class AlarmDetail extends Component {
     //     console.debug("AlarmDetail componentWillUnmount");
     // }
 
-    handleBackPress = () => {
+    handleBackPress() {
         // console.debug("Going back to Alarms List");
         // console.debug(this.state);
 
@@ -619,17 +671,17 @@ class AlarmDetail extends Component {
         // setTimeout(() => {
         //     this.props.navigation.goBack();
         // }, 500);
-    };
+    }
 
-    _willShowNavScreen = () => {
+    _willShowNavScreen() {
         this.addKeyboardListeners();
-    };
+    }
 
-    _willLeaveNavScreen = () => {
+    _willLeaveNavScreen() {
         this.removeKeyboardListeners();
-    };
+    }
 
-    _onPressAddTask = () => {
+    _onPressAddTask() {
         if (this.state.activeTask == null) {
             let nextTaskPosition = this.state.alarm.tasks.length;
             // console.log("passing position of new task: ", nextTaskPosition);
@@ -643,9 +695,9 @@ class AlarmDetail extends Component {
             // simply snap the active task back to resting position
             this.setState({ activeTask: null });
         }
-    };
+    }
 
-    onTaskListChanged = newTask => {
+    onTaskListChanged(newTask) {
         console.info("Task modified");
         // console.log("Task modified", newTask);
         // Check if Task is defined. This callback expects the newly created alarmTask,
@@ -665,7 +717,7 @@ class AlarmDetail extends Component {
         let tempState = this.state;
         tempState.activeTask = null;
         this.setState(tempState);
-    };
+    }
 
     /*
     Called by a 'bubble-up' type functionality, since a reference to this function was passed as a prop to 'TaskList',
@@ -673,7 +725,7 @@ class AlarmDetail extends Component {
     IMPORTANT: It is vital to either use an arrow function here (which uses the outer-scope 'this'), or if it is a
         regular function, bind the fx to 'this' in the outer scope (the screen) so that it has access to this.props.navigation.
      */
-    _onPressTask = task => {
+    _onPressTask(task) {
         // console.debug("AlarmDetail: onPressTask -- task: ", task);
 
         if (this.state.activeTask == null) {
@@ -691,7 +743,7 @@ class AlarmDetail extends Component {
             // simply snap the active task back to resting position
             this.setState({ activeTask: null });
         }
-    };
+    }
 
     /**** THIS IS A DEV FUNCTION THAT WILL BE DELETED BEFORE RELEASE ****/
     fontCount = 50;
@@ -709,7 +761,7 @@ class AlarmDetail extends Component {
     }
     /***************************************************/
 
-    onChangeLabel = text => {
+    onChangeLabel(text) {
         // console.log("Label text changed: ", text);
         // simply save to instance variable until the TextInput blurs.
         // This avoids excessive re-renders!!!!
@@ -725,9 +777,9 @@ class AlarmDetail extends Component {
         //     tempAlarm.label = text;
         // });
         // this.setState({ alarm: tempAlarm });
-    };
+    }
 
-    onLabelInputBlur = e => {
+    onLabelInputBlur(e) {
         console.log("Label textInput blurred: " + this.alarmLabelCache);
         // using manually cached alarmLabel Text, since Android doesn't send 'Text' to onBlur...
 
@@ -741,16 +793,16 @@ class AlarmDetail extends Component {
             });
         }
         this.setState({ alarm: tempAlarm });
-    };
+    }
 
-    onLabelInputFocus = () => {
+    onLabelInputFocus() {
         console.info("Focusing label input");
         if (this.state.alarm.mode == "normal") {
             this.setState({ isEditingLabel: true });
         }
-    };
+    }
 
-    onChangeTaskEnabled = (taskToUpdate, enabled) => {
+    onChangeTaskEnabled(taskToUpdate, enabled) {
         // console.info("onChangeTaskEnabled");
         let { alarm } = this.state;
         // let tasks = alarm.tasks;
@@ -771,7 +823,7 @@ class AlarmDetail extends Component {
         });
         this.setState(this.state);
         // this.onTaskListChanged();
-    };
+    }
 
     /* Callback from TaskItem for when duration-slider has been released.
         Two main responsibilites
@@ -779,7 +831,7 @@ class AlarmDetail extends Component {
         2. Re-enable dragging of the main Interactable-View, as well as the TaskList child
             - This is done by setting isSlidingTask==false
     */
-    onChangeTaskDuration = (taskToUpdate, newDuration) => {
+    onChangeTaskDuration(taskToUpdate, newDuration) {
         console.info("onChangeTaskDuration");
         let { alarm } = this.state;
         let tasks = alarm.tasks;
@@ -798,9 +850,9 @@ class AlarmDetail extends Component {
         });
         this.setState({ tasks: tasks, isSlidingTask: false });
         // this.onTaskListChanged();
-    };
+    }
 
-    onSnap = event => {
+    onSnap(event) {
         console.info("onSnap");
 
         // let alarmState = this.state.alarm;
@@ -809,9 +861,9 @@ class AlarmDetail extends Component {
         // TODO: TEST WHETHER COMMENTING THIS OUT BREAKS ANYTHING WHEN SWITCHING VIEWS BY ANY MEANS (menu, dragging, tapping handles)
         // this._viewIdx = snapIdx; // TODO: We probably just need to make sure viewIdx is updated in all of those cases (use fx _snapToIdx)
         // this.setState(this.state);
-    };
+    }
 
-    _onPressClock = () => {
+    _onPressClock() {
         console.info("_onPressClock");
         Keyboard.dismiss();
         if (this.state.activeTask == null) {
@@ -823,9 +875,9 @@ class AlarmDetail extends Component {
             // simply snap the active task back to resting position
             this.setState({ activeTask: null });
         }
-    };
+    }
 
-    saveSound = sound => {
+    saveSound(sound) {
         // console.info("Sound changed: ", sound);
         // console.log("Arrival Time textInput changed: ", moment(time).unix());
         let { alarm } = this.state;
@@ -833,9 +885,9 @@ class AlarmDetail extends Component {
             alarm.alarmSound.sound = sound;
             alarm.alarmSound.type = sound.type; // for random sounds
         });
-    };
+    }
 
-    _onArrivalTimePicked = time => {
+    _onArrivalTimePicked(time) {
         console.info("Arrival Time input changed: ", time);
         // console.log("Arrival Time textInput changed: ", moment(time).unix());
         let { alarm } = this.state;
@@ -849,9 +901,9 @@ class AlarmDetail extends Component {
             },
             () => this._calcStartTimes()
         );
-    };
+    }
 
-    _onWakeTimePicked = date => {
+    _onWakeTimePicked(date) {
         console.info("A date has been picked: ", date);
         let { alarm } = this.state;
 
@@ -861,13 +913,17 @@ class AlarmDetail extends Component {
             alarm.wakeUpTime = wakeUpDate;
         });
         this._hideDateTimePicker();
-    };
+    }
 
-    _showDateTimePicker = () => this.setState({ isDatePickerVisible: true });
+    _showDateTimePicker() {
+        this.setState({ isDatePickerVisible: true });
+    }
 
-    _hideDateTimePicker = () => this.setState({ isDatePickerVisible: false });
+    _hideDateTimePicker() {
+        this.setState({ isDatePickerVisible: false });
+    }
 
-    _calcWakeUpTime = () => {
+    _calcWakeUpTime() {
         // console.log(
         //     "Calculating wakeuptime with arrival time: " +
         //         this.state.alarm.arrivalTime
@@ -898,9 +954,9 @@ class AlarmDetail extends Component {
         );
 
         return this._calculatedWakeUpTime;
-    };
+    }
 
-    _calculateHoursOfSleep = wakeUpTime => {
+    _calculateHoursOfSleep(wakeUpTime) {
         console.log("Calculating hours of sleep");
 
         wakeUpTime = DateUtils.date_to_nextTimeInstance(wakeUpTime);
@@ -917,9 +973,9 @@ class AlarmDetail extends Component {
         }
 
         return fmtTimeUntilAlarm;
-    };
+    }
 
-    _calcStartTimes = hideDisableTasks => {
+    _calcStartTimes(hideDisableTasks) {
         console.log("_calcStartTimes");
         let additiveMoment = moment(this.state.alarm.wakeUpTime);
         if (hideDisableTasks == null || hideDisableTasks == undefined) {
@@ -971,9 +1027,9 @@ class AlarmDetail extends Component {
 
         // console.log("this.state.alarm", this.state.alarm);
         console.log("_cachedSortedTasks", this._cachedSortedTasks);
-    };
+    }
 
-    _onDeleteTask = data => {
+    _onDeleteTask(data) {
         console.log("Deleting task");
         // console.log("data", data);
         // console.log("data.id", data.id);
@@ -1016,9 +1072,9 @@ class AlarmDetail extends Component {
             });
         }
         this.onTaskListChanged();
-    };
+    }
 
-    _onSnapTask = (item, index, rowState) => {
+    _onSnapTask(item, index, rowState) {
         console.info("Snapping task");
         // console.log("1. ", item);
         // console.log("2. ", index);
@@ -1026,7 +1082,7 @@ class AlarmDetail extends Component {
         if (rowState == "active") {
             this.setState({ activeTask: index });
         }
-    };
+    }
 
     // _onPressEditTasks() {
     //     console.info("_onPressEditTasks");
@@ -1034,17 +1090,17 @@ class AlarmDetail extends Component {
     //     this.setState({ isEditingTasks: editingTasks });
     // }
 
-    _closeTaskRows = () => {
+    _closeTaskRows() {
         console.info("_closeTaskRows");
         this.setState({ activeTask: null });
-    };
+    }
 
     /* Called when TaskItem longPress ends without TaskItem having been moved at all */
-    _didEndMove = () => {
+    _didEndMove() {
         this.setState({ disableDrag: false });
-    };
+    }
 
-    _onReorderTasks = (allATasks, filterMap, aTaskId, from, to) => {
+    _onReorderTasks(allATasks, filterMap, aTaskId, from, to) {
         console.info("_onReorderTasks");
         // console.info("aTaskId", aTaskId);
         // console.info("from", from);
@@ -1120,7 +1176,7 @@ class AlarmDetail extends Component {
         // this._cachedSortedTasks = this.state.alarm.tasks.;
 
         this.setState({ disableDrag: false }, () => this._calcStartTimes());
-    };
+    }
 
     _layoutAnimateToFullScreenTaskList(nextState = {}) {
         let config = {
@@ -1178,15 +1234,15 @@ class AlarmDetail extends Component {
         });
     }
 
-    _onPressAnimHandle = () => {
+    _onPressAnimHandle() {
         // console.log("_onPressAnimHandle");
         // console.log("this.state.alarm.mode ", this.state.alarm.mode);
         let nextIdx = this.state.alarm.mode == "normal" ? 1 : 0;
         // console.log("nextIdx", nextIdx);
         this._snapToIdx(nextIdx);
-    };
+    }
 
-    _onPressTasksHeader = () => {
+    _onPressTasksHeader() {
         console.log("_onPressTasksHeader");
         this._taskListNeedsRemeasure = true;
         // this._hideModeText();
@@ -1199,9 +1255,9 @@ class AlarmDetail extends Component {
             this._lastMeasuredView = "normal";
             this._snapToIdx(1);
         }
-    };
+    }
 
-    _onDragInteractable = event => {
+    _onDragInteractable(event) {
         console.log("drag:", event.nativeEvent);
         Keyboard.dismiss();
         let { state, y, targetSnapPointId } = event.nativeEvent;
@@ -1276,22 +1332,24 @@ class AlarmDetail extends Component {
                 this._layoutAnimateToCalcMode(nextState);
             }
         }
-    };
+    }
 
-    _saveSnoozeTime = value => {
+    _saveSnoozeTime(value) {
         realm.write(() => {
             let { alarm } = this.state;
 
             alarm.snoozeTime = value;
         });
         this.setState({ showSnoozePicker: false });
-    };
+    }
 
-    _closeSnoozeTimePicker = () => {
+    _closeSnoozeTimePicker() {
         this.setState({ showSnoozePicker: false });
-    };
+    }
 
-    _willStartTaskMove = () => this.setState({ disableDrag: true });
+    _willStartTaskMove() {
+        this.setState({ disableDrag: true });
+    }
 
     // onScrollTaskList = nativeEvent => {
     //     console.log("scroll event", nativeEvent);
@@ -1300,12 +1358,12 @@ class AlarmDetail extends Component {
     //     console.log("this._taskListScrollPos ", this._taskListScrollPos);
     // };
 
-    // onEndReachedTaskList = () => {
+    // onEndReachedTaskList() {
     //     console.log("onEndReachedTaskList");
     //     this._taskListAtEnd = true;
     // };
 
-    _onGestureStateChanged = ({ nativeEvent }) => {
+    _onGestureStateChanged({ nativeEvent }) {
         console.log("_onGestureStateChanged");
         if (nativeEvent.state != State.END) {
             return;
@@ -1335,36 +1393,36 @@ class AlarmDetail extends Component {
                 this.startTimesHandleAnim.setValue(0);
             });
         }
-    };
+    }
 
-    _clearLabeledInput = () => {
+    _clearLabeledInput() {
         this.alarmLabelCache = "";
         // we are faking a 'blur' event here, so that the cache change is saved to DB and state is updated.
         this.onLabelInputBlur();
-    };
+    }
 
-    _toggleHideDisabledTasks = () => {
+    _toggleHideDisabledTasks() {
         this.setState({
             hideDisabledTasks: !this.state.hideDisabledTasks
         });
-    };
+    }
 
-    _navigateToSounds = () => {
+    _navigateToSounds() {
         this.props.navigation.navigate("Sounds", {
             saveSound: this.saveSound,
             currSound: this.state.alarm.alarmSound
         });
-    };
+    }
 
-    _toggleHideHrsOfSleep = () => {
+    _toggleHideHrsOfSleep() {
         realm.write(() => {
             let { alarm } = this.state;
             alarm.showHrsOfSleep = !alarm.showHrsOfSleep;
         });
         this._setMenuState(0);
-    };
+    }
 
-    _toggleShowStartTimes = () => {
+    _toggleShowStartTimes() {
         // realm.write(() => {
         //     let { alarm } = this.state;
         //     alarm.showHrsOfSleep = !alarm.showHrsOfSleep;
@@ -1374,18 +1432,18 @@ class AlarmDetail extends Component {
             durationsVisible: !this.state.durationsVisible
         };
         this._setMenuState(0, nextState);
-    };
+    }
 
-    _onSelectViewFromMenu = idx => {
+    _onSelectViewFromMenu(idx) {
         // console.log("Pressed fancy radio: ", idx);
         this._snapToIdx(idx);
         // this._snapToIdx(idx);1
-    };
+    }
 
     // taskRowsY = [];
     ROW_HEIGHT = 55;
     ROW_WIDTH = SCREEN_WIDTH + 90 - scaleByFactor(20, 0.4);
-    _getMeasurementsForTaskRow = idx => {
+    _getMeasurementsForTaskRow(idx) {
         // y measurement needs to add all of...:
         // 1. NAV HEADER HEIGHT
         // 2. TASKLIST HEADER HEIGHT --- (SCREEN_HEIGHT * 1.15) * this.state.taskAreaFlex * this.state.taskHeaderFlex
@@ -1408,7 +1466,7 @@ class AlarmDetail extends Component {
             idx * this.ROW_HEIGHT;
         console.log("y ", y);
         return { x: 0, y: y, width: this.ROW_WIDTH, height: this.ROW_HEIGHT };
-    };
+    }
 
     render() {
         console.info("AlarmDetail render ");
