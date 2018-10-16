@@ -33,7 +33,6 @@ import DateTimePicker from "react-native-modal-datetime-picker";
 // import KeyframesView from "react-native-facebook-keyframes";
 import { isIphoneX } from "react-native-iphone-x-helper";
 import LinearGradient from "react-native-linear-gradient";
-import { PanGestureHandler, State } from "react-native-gesture-handler";
 
 import moment from "moment";
 
@@ -42,6 +41,8 @@ import TaskList from "../components/task-list";
 import LabeledInput from "../components/labeled-input";
 import LabeledTimeInput from "../components/labeled-time-input";
 import PickerActionSheet from "../components/picker-action-sheet";
+import EdgeSwiper from "../components/edge-swiper";
+
 import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { AlarmModel } from "../data/models";
@@ -302,16 +303,21 @@ class AlarmDetail extends Component {
             this._onPressAnimHandle = this._onPressAnimHandle.bind(this);
             this._onPressTasksHeader = this._onPressTasksHeader.bind(this);
             this._onDragInteractable = this._onDragInteractable.bind(this);
-            this._getMeasurementsForTaskRow = this._getMeasurementsForTaskRow.bind(this);
+            this._getMeasurementsForTaskRow = this._getMeasurementsForTaskRow.bind(
+                this
+            );
             this._onSelectViewFromMenu = this._onSelectViewFromMenu.bind(this);
             this._toggleShowStartTimes = this._toggleShowStartTimes.bind(this);
             this._toggleHideHrsOfSleep = this._toggleHideHrsOfSleep.bind(this);
             this._navigateToSounds = this._navigateToSounds.bind(this);
-            this._toggleHideDisabledTasks = this._toggleHideDisabledTasks.bind(this);
+            this._toggleHideDisabledTasks = this._toggleHideDisabledTasks.bind(
+                this
+            );
             this._clearLabeledInput = this._clearLabeledInput.bind(this);
-            this._onGestureStateChanged = this._onGestureStateChanged.bind(this);
             this._willStartTaskMove = this._willStartTaskMove.bind(this);
-            this._closeSnoozeTimePicker = this._closeSnoozeTimePicker.bind(this);
+            this._closeSnoozeTimePicker = this._closeSnoozeTimePicker.bind(
+                this
+            );
             this._saveSnoozeTime = this._saveSnoozeTime.bind(this);
             this._onReorderTasks = this._onReorderTasks.bind(this);
             this._didEndMove = this._didEndMove.bind(this);
@@ -319,7 +325,9 @@ class AlarmDetail extends Component {
             this._onSnapTask = this._onSnapTask.bind(this);
             this._onDeleteTask = this._onDeleteTask.bind(this);
             this._calcStartTimes = this._calcStartTimes.bind(this);
-            this._calculateHoursOfSleep = this._calculateHoursOfSleep.bind(this);
+            this._calculateHoursOfSleep = this._calculateHoursOfSleep.bind(
+                this
+            );
             this._calcWakeUpTime = this._calcWakeUpTime.bind(this);
             this._hideDateTimePicker = this._hideDateTimePicker.bind(this);
             this._showDateTimePicker = this._showDateTimePicker.bind(this);
@@ -328,6 +336,9 @@ class AlarmDetail extends Component {
             this.saveSound = this.saveSound.bind(this);
             this._onPressClock = this._onPressClock.bind(this);
             this.onSnap = this.onSnap.bind(this);
+            this.onCompleteGestureAnimation = this.onCompleteGestureAnimation.bind(
+                this
+            );
             this.onChangeTaskDuration = this.onChangeTaskDuration.bind(this);
             this.onChangeTaskEnabled = this.onChangeTaskEnabled.bind(this);
             this.onLabelInputFocus = this.onLabelInputFocus.bind(this);
@@ -345,7 +356,9 @@ class AlarmDetail extends Component {
             this._snapToIdx = this._snapToIdx.bind(this);
             this._realm_snap_idx = this._realm_snap_idx.bind(this);
             this._setMenuState = this._setMenuState.bind(this);
-            this.removeKeyboardListeners = this.removeKeyboardListeners.bind(this);
+            this.removeKeyboardListeners = this.removeKeyboardListeners.bind(
+                this
+            );
             this.addKeyboardListeners = this.addKeyboardListeners.bind(this);
         });
     }
@@ -1363,36 +1376,10 @@ class AlarmDetail extends Component {
     //     this._taskListAtEnd = true;
     // };
 
-    _onGestureStateChanged({ nativeEvent }) {
-        console.log("_onGestureStateChanged");
-        if (nativeEvent.state != State.END) {
-            return;
-        }
-        if (nativeEvent.translationX > -45 && nativeEvent.velocityX > -800) {
-            // console.log(
-            //     "Translation too small or velocity too slow. Snapping back"
-            // );
-            // Animated.spring back to 0
-            Animated.spring(this.startTimesHandleAnim, {
-                toValue: 0,
-                tension: 300,
-                friction: 11,
-                useNativeDriver: true
-            }).start();
-        } else {
-            // translationX is less than -70, finish the flip (Animated.spring to 1)
-            Animated.timing(this.startTimesHandleAnim, {
-                toValue: -230,
-                duration: 200,
-                easing: Easing.bounce,
-                useNativeDriver: true
-            }).start(() => {
-                this.setState({
-                    durationsVisible: !this.state.durationsVisible
-                });
-                this.startTimesHandleAnim.setValue(0);
-            });
-        }
+    onCompleteGestureAnimation() {
+        this.setState({
+            durationsVisible: !this.state.durationsVisible
+        });
     }
 
     _clearLabeledInput() {
@@ -2182,54 +2169,7 @@ class AlarmDetail extends Component {
                                 // onScroll={this.onScrollTaskList.bind(this)}
                                 // onEndReached={this.onEndReachedTaskList.bind(this)}
                             />
-                            <PanGestureHandler
-                                ref={el => (this.startTimesPanRef = el)}
-                                onGestureEvent={Animated.event(
-                                    [
-                                        {
-                                            nativeEvent: {
-                                                // contentOffset: {
-                                                translationX: this
-                                                    .startTimesHandleAnim
-                                                // }
-                                            }
-                                        }
-                                    ],
-                                    { useNativeDriver: true }
-                                )}
-                                shouldCancelWhenOutside={false}
-                                onHandlerStateChange={
-                                    this._onGestureStateChanged
-                                }
-                                minDist={1}
-                            >
-                                {/* <Animated.View style={animatedStyles} /> */}
-                                {/* <-- NEEDS TO BE Animated.View */}
-                                <Animated.View
-                                    style={[
-                                        // StyleSheet.absoluteFill,
-                                        {
-                                            position: "absolute",
-                                            // right: 0,
-                                            left: SCREEN_WIDTH - 30,
-                                            // left: 0,
-                                            // top: 173,
-                                            top: 50,
-                                            bottom: 0,
-                                            width: 230,
-                                            // paddingBottom: scaleByFactor(10, 0.4),
-
-                                            // paddingVertical: scaleByFactor(10, 0.4)
-                                            backgroundColor: "transparent"
-                                            // backgroundColor: "red"
-                                            // borderRadius: 10
-                                            // backgroundColor: Colors.brandDarkGrey
-                                        }
-                                    ]}
-                                    shouldRasterizeIOS={true}
-                                    renderToHardwareTextureAndroid={true}
-                                />
-                            </PanGestureHandler>
+                            <EdgeSwiper animValue={this.startTimesHandleAnim} onAnimComplete={this.onCompleteGestureAnimation}/>
                         </LinearGradient>
                     </View>
                     <this.AnimatedHandle
