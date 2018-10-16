@@ -42,12 +42,10 @@ import TaskList from "../components/task-list";
 import LabeledInput from "../components/labeled-input";
 import LabeledTimeInput from "../components/labeled-time-input";
 import PickerActionSheet from "../components/picker-action-sheet";
-import StartTimesList from "../components/starttimes-list";
-import AnimatedView from "../components/animated-view";
 import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { AlarmModel } from "../data/models";
-import ArrowView from "../components/arrow-view-native";
+// import ArrowView from "../components/arrow-view-native";
 import TouchableBackdrop from "../components/touchable-backdrop";
 // TODO: Remove after we're done choosing fonts
 import { fontPreview } from "../styles/text.js";
@@ -154,6 +152,8 @@ class AlarmDetail extends Component {
     _snapPoints;
     _ALL_SNAP_POINTS;
 
+    startTimesPanRef;
+
     static closeMenu = (isMenuOpen, navigation) => {
         let config = {
             duration: 150,
@@ -213,7 +213,6 @@ class AlarmDetail extends Component {
                 this.state = {
                     alarm: realm.create("Alarm", newAlarmModel),
                     isDatePickerVisible: false,
-                    animationDuration: 3000,
                     activeTask: null, // holds the task ID of the task currently showing DELETE button. Otherwise null.
                     isEditingTasks: false, // indicates whether tasks are currently moveable.
                     isEditingLabel: false, // indicates whether Label is being edited. Need to move Input when keyboard shows.
@@ -223,7 +222,15 @@ class AlarmDetail extends Component {
                     hideDisabledTasks: false,
                     menuIsOpen: false,
                     showSnoozePicker: false,
-                    durationsVisible: true
+                    durationsVisible: true,
+                    taskAreaFlex: 0.4,
+                    taskHeaderFlex: 0.15,
+                    taskListDimensions: {
+                        width: SCREEN_WIDTH,
+                        height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.95, // TODO: Extract layout values into constants, then create variables for the value of these calculations
+                        pageX: 0,
+                        pageY: SCREEN_HEIGHT * 0.6 // TODO: Extract layout values into constants, the create variables for the value of these calculations
+                    }
                 };
                 // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
@@ -232,7 +239,6 @@ class AlarmDetail extends Component {
             this.state = {
                 alarm: params.alarm,
                 isDatePickerVisible: false,
-                animationDuration: 3000,
                 activeTask: null,
                 isEditingTasks: false,
                 isEditingLabel: false,
@@ -242,11 +248,17 @@ class AlarmDetail extends Component {
                 hideDisabledTasks: false,
                 menuIsOpen: false,
                 showSnoozePicker: false,
-                durationsVisible: true
+                durationsVisible: true,
+                taskAreaFlex: 0.4,
+                taskHeaderFlex: 0.15,
+                taskListDimensions: {
+                    width: SCREEN_WIDTH,
+                    height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.95, // TODO: Extract layout values into constants, then create variables for the value of these calculations
+                    pageX: 0,
+                    pageY: SCREEN_HEIGHT * 0.6 // TODO: Extract layout values into constants, the create variables for the value of these calculations
+                }
             };
         }
-
-        this._setAnimatedViewRef = this._setAnimatedViewRef.bind(this);
 
         this.alarmLabelCache = this.state.alarm.label;
 
@@ -258,6 +270,7 @@ class AlarmDetail extends Component {
 
         this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
 
+        this.renderRowsInclude = [];
         /* These may be used for Intro (Tutorial Mode), but removing for now */
         // TODO: Here we need to check whether user has global setting to "Never show mode indicator"
         // this._modeTextOpacity = new Animated.Value(1);
@@ -302,7 +315,7 @@ class AlarmDetail extends Component {
         this.removeKeyboardListeners();
     }
 
-    addKeyboardListeners() {
+    addKeyboardListeners = () => {
         this.keyboardWillShowSub = Keyboard.addListener(
             Platform.OS == "ios" ? "keyboardWillShow" : "keyboardDidShow",
             this.keyboardWillShow.bind(this)
@@ -311,12 +324,12 @@ class AlarmDetail extends Component {
             Platform.OS == "ios" ? "keyboardWillHide" : "keyboardDidHide",
             this.keyboardWillHide.bind(this)
         );
-    }
+    };
 
-    removeKeyboardListeners() {
+    removeKeyboardListeners = () => {
         this.keyboardWillShowSub.remove();
         this.keyboardWillHideSub.remove();
-    }
+    };
 
     componentDidMount() {
         console.debug("AlarmDetail --- ComponentDidMount");
@@ -325,10 +338,10 @@ class AlarmDetail extends Component {
         this.addKeyboardListeners();
         InteractionManager.runAfterInteractions(() => {
             this.props.navigation.setParams({
-                handleBackBtn: this.handleBackPress.bind(this),
+                handleBackBtn: this.handleBackPress,
                 menuOpen: false,
-                setMenuState: this._setMenuState.bind(this),
-                openSnoozeTimePicker: this._openSnoozeTimePicker.bind(this)
+                setMenuState: this._setMenuState,
+                openSnoozeTimePicker: this._openSnoozeTimePicker
             });
         });
 
@@ -339,7 +352,9 @@ class AlarmDetail extends Component {
         this.headerHeight = Header.HEIGHT;
     }
 
-    _setMenuState(nextMenuState, nextState) {
+    _setMenuState = (nextMenuState, nextState) => {
+        if (nextMenuState == this.state.menuIsOpen) return;
+
         Animated.timing(_menuIconAnim, {
             toValue: nextMenuState ? 1 : 0,
             duration: 200,
@@ -353,7 +368,33 @@ class AlarmDetail extends Component {
             this.setState({ menuIsOpen: nextMenuState });
         }
         this.props.navigation.setParams({ menuIsOpen: nextMenuState });
-    }
+    };
+
+    _realm_snap_idx = () => {
+        let { alarm } = this.state;
+        switch (this._viewIdx) {
+            case 0:
+                this._snapPoints = this._ALL_SNAP_POINTS.slice(0, 2); // returns new array containing 0th and 2nd elements
+                alarm.mode = "normal";
+                this.setState(this.state);
+                break;
+            case 1:
+                alarm.mode = "autocalc";
+                this._snapPoints = this._ALL_SNAP_POINTS;
+                this._layoutAnimateToCalcMode({
+                    taskListFullScreen: false,
+                    activeTask: null // closes any Row showing DELETE btn
+                });
+                break;
+            case 2:
+                this._snapPoints = this._ALL_SNAP_POINTS.slice(1); // returns new array containing 1st element to end (2nd element)
+                this._layoutAnimateToFullScreenTaskList({
+                    taskListFullScreen: true,
+                    activeTask: null // closes any Row showing DELETE btn
+                });
+                break;
+        }
+    };
 
     /**
      * Imperitively snaps main Interactable View to provided snap index, and updates
@@ -389,16 +430,17 @@ class AlarmDetail extends Component {
             let currViewIdx = this._viewIdx;
             this._viewIdx = idx;
 
+            /* These handle cases where menu is used to enter NORMAL view from FullTaskList or vice versa */
             if (currViewIdx == 0 && idx == 2) {
                 console.info(
                     `Invalid snap idx ${idx} for current mode (${currViewIdx})`
                 );
                 this._snapPoints = this._ALL_SNAP_POINTS;
-                this.forceUpdate();
-                setTimeout(() => this._snapToIdx(idx), 0);
+
                 // Temporarily set viewIdx to 1 (autocalc) so that when this fx is called again it won't end up
                 //  back in this if-else
                 this._viewIdx = 1;
+                this.forceUpdate(() => this._snapToIdx(idx)); // force update to activate new snappoints, then CB is executed after update.
                 return;
             } else if (currViewIdx == 2) {
                 if (idx == 0) {
@@ -406,11 +448,11 @@ class AlarmDetail extends Component {
                         `Invalid snap idx ${idx} for current mode (${currViewIdx})`
                     );
                     this._snapPoints = this._ALL_SNAP_POINTS;
-                    this.forceUpdate();
-                    setTimeout(() => this._snapToIdx(idx), 0);
+
                     // Temporarily set viewIdx to 1 (autocalc) so that when this fx is called again it won't end up
                     //  back in this if-else
                     this._viewIdx = 1;
+                    this.forceUpdate(() => this._snapToIdx(idx)); // force update to activate new snappoints, then CB is executed after update.
                     return;
                 } else {
                     accessibleSnapIdx = idx - 1; // map index to current position of desired view
@@ -422,34 +464,7 @@ class AlarmDetail extends Component {
                 accessibleSnapIdx
             );
             this.interactiveRef.snapTo({ index: accessibleSnapIdx });
-            realm.write(() => {
-                let { alarm } = this.state;
-                switch (idx) {
-                    case 0:
-                        this._snapPoints = this._ALL_SNAP_POINTS.slice(0, 2); // returns new array containing 0th and 2nd elements
-                        alarm.mode = "normal";
-                        this.setState(this.state);
-                        break;
-                    case 1:
-                        alarm.mode = "autocalc";
-                        this._snapPoints = this._ALL_SNAP_POINTS;
-                        this._layoutAnimateToCalcMode({
-                            taskListFullScreen: false,
-                            activeTask: null // closes any Row showing DELETE btn
-                        });
-                        break;
-                    case 2:
-                        this._snapPoints = this._ALL_SNAP_POINTS.slice(1); // returns new array containing 1st element to end (2nd element)
-                        this._layoutAnimateToFullScreenTaskList({
-                            taskListFullScreen: true,
-                            activeTask: null // closes any Row showing DELETE btn
-                        });
-                        break;
-                }
-                // this.setState({ alarm: alarm });
-            });
-
-            // this.setState(this.state);
+            realm.write(this._realm_snap_idx);
         }
     }
 
@@ -478,13 +493,36 @@ class AlarmDetail extends Component {
     //     this._modeTextOpacity.setValue(0);
     // }
 
-    _openSnoozeTimePicker() {
+    _openSnoozeTimePicker = () => {
+        this._setMenuState(0);
         this.setState({ showSnoozePicker: true });
-    }
+    };
 
-    _setAnimatedViewRef(ref) {
-        this._animatedView = ref;
-    }
+    _setInteractiveRef = el => (this.interactiveRef = el);
+
+    startTimesRefs = [];
+
+    setStartTimeRef = (el, index) => {
+        console.log("startTimesRef - index", index);
+        console.log("this.startTimesRefs.length", this.startTimesRefs.length);
+        // console.log("this.startTimesRefs[index]", this.startTimesRefs[index]);
+        if (this.startTimesRefs[index] !== undefined) {
+            console.log("updated startTimesRef for idx (order): ", index);
+            if (el != null) {
+                this.startTimesRefs[index] = el;
+            } /* else {
+                console.warn("Element is null. Not overwriting ref with null");
+            } */
+        } else {
+            this.startTimesRefs.push(el);
+            console.log("added new startTimesRef for idx (order): ", index);
+            // sanity check
+            if (this.startTimesRefs.length != index + 1) {
+                console.warn("SetStartTimeRef not working as expected");
+            }
+        }
+        console.log("... done.");
+    };
 
     keyboardWillShow = event => {
         // console.log("keyboardWillShow -------");
@@ -532,7 +570,7 @@ class AlarmDetail extends Component {
     //     console.debug("AlarmDetail componentWillUnmount");
     // }
 
-    handleBackPress() {
+    handleBackPress = () => {
         // console.debug("Going back to Alarms List");
         // console.debug(this.state);
 
@@ -581,33 +619,33 @@ class AlarmDetail extends Component {
         // setTimeout(() => {
         //     this.props.navigation.goBack();
         // }, 500);
-    }
+    };
 
-    _willShowNavScreen() {
+    _willShowNavScreen = () => {
         this.addKeyboardListeners();
-    }
+    };
 
-    _willLeaveNavScreen() {
+    _willLeaveNavScreen = () => {
         this.removeKeyboardListeners();
-    }
+    };
 
-    _onPressAddTask() {
+    _onPressAddTask = () => {
         if (this.state.activeTask == null) {
             let nextTaskPosition = this.state.alarm.tasks.length;
             // console.log("passing position of new task: ", nextTaskPosition);
             this._willLeaveNavScreen();
             this.props.navigation.navigate("TaskDetail", {
-                onSaveState: this.onTaskListChanged.bind(this),
-                willNavigateBack: this._willShowNavScreen.bind(this),
+                onSaveState: this.onTaskListChanged,
+                willNavigateBack: this._willShowNavScreen,
                 order: nextTaskPosition
             });
         } else {
             // simply snap the active task back to resting position
             this.setState({ activeTask: null });
         }
-    }
+    };
 
-    onTaskListChanged(newTask) {
+    onTaskListChanged = newTask => {
         console.info("Task modified");
         // console.log("Task modified", newTask);
         // Check if Task is defined. This callback expects the newly created alarmTask,
@@ -627,7 +665,7 @@ class AlarmDetail extends Component {
         let tempState = this.state;
         tempState.activeTask = null;
         this.setState(tempState);
-    }
+    };
 
     /*
     Called by a 'bubble-up' type functionality, since a reference to this function was passed as a prop to 'TaskList',
@@ -644,8 +682,8 @@ class AlarmDetail extends Component {
             this._willLeaveNavScreen();
             const params = {
                 alarmTaskId: task.id,
-                onSaveState: this.onTaskListChanged.bind(this),
-                willNavigateBack: this._willShowNavScreen.bind(this)
+                onSaveState: this.onTaskListChanged,
+                willNavigateBack: this._willShowNavScreen
             };
 
             this.props.navigation.navigate("TaskDetail", params);
@@ -773,8 +811,8 @@ class AlarmDetail extends Component {
         // this.setState(this.state);
     };
 
-    onPressClock = () => {
-        console.info("onPressClock");
+    _onPressClock = () => {
+        console.info("_onPressClock");
         Keyboard.dismiss();
         if (this.state.activeTask == null) {
             if (this.state.alarm.mode == "autocalc") {
@@ -805,9 +843,12 @@ class AlarmDetail extends Component {
             alarm.arrivalTime = time;
             alarm.wakeUpTime = this._calcWakeUpTime();
         });
-        this.setState({
-            alarm: alarm
-        });
+        this.setState(
+            {
+                alarm: alarm
+            },
+            () => this._calcStartTimes()
+        );
     };
 
     _onWakeTimePicked = date => {
@@ -856,8 +897,6 @@ class AlarmDetail extends Component {
             this._calculatedWakeUpTime
         );
 
-        this._calcStartTimes();
-
         return this._calculatedWakeUpTime;
     };
 
@@ -881,6 +920,7 @@ class AlarmDetail extends Component {
     };
 
     _calcStartTimes = hideDisableTasks => {
+        console.log("_calcStartTimes");
         let additiveMoment = moment(this.state.alarm.wakeUpTime);
         if (hideDisableTasks == null || hideDisableTasks == undefined) {
             hideDisableTasks = this.state.hideDisabledTasks;
@@ -891,32 +931,49 @@ class AlarmDetail extends Component {
         }
 
         if (realm.isInTransaction) {
-            this._cachedSortedTasks.forEach(task => {
+            this._cachedSortedTasks.forEach((task, idx) => {
+                console.log("idx", idx);
                 if (task.enabled == false) {
                     task.startTime = null;
                 } else if (task.enabled == true) {
                     task.startTime = additiveMoment.format("h:mm A");
                     additiveMoment.add(task.duration, "seconds");
                 }
+                if (this.startTimesRefs[idx]) {
+                    this.startTimesRefs[idx].setNativeProps({
+                        text: task.startTime
+                    });
+                } /* else {
+                    console.warn("StartTimesRef not found at index: ", idx);
+                } */
             });
         } else {
             realm.write(() => {
-                this._cachedSortedTasks.forEach(task => {
+                this._cachedSortedTasks.forEach((task, idx) => {
+                    console.log("idx", idx);
                     if (task.enabled == false) {
                         task.startTime = null;
                     } else if (task.enabled == true) {
                         task.startTime = additiveMoment.format("h:mm A");
                         additiveMoment.add(task.duration, "seconds");
                     }
+                    if (this.startTimesRefs[idx]) {
+                        this.startTimesRefs[idx].setNativeProps({
+                            text: task.startTime
+                        });
+                        // this.startTimesRefs[idx]._getText();
+                    } /* else {
+                        console.warn("StartTimesRef not found at index: ", idx);
+                    } */
                 });
             });
         }
 
         // console.log("this.state.alarm", this.state.alarm);
-        // console.log("_cachedSortedTasks", this._cachedSortedTasks);
+        console.log("_cachedSortedTasks", this._cachedSortedTasks);
     };
 
-    _onDeleteTask(data) {
+    _onDeleteTask = data => {
         console.log("Deleting task");
         // console.log("data", data);
         // console.log("data.id", data.id);
@@ -925,6 +982,10 @@ class AlarmDetail extends Component {
             "AlarmTask",
             data.id
         );
+
+        // first update our startTimesRef array
+        this.startTimesRefs.splice(alarmTaskRlmObject.order, 1);
+
         if (alarmTaskRlmObject) {
             realm.write(() => {
                 realm.delete(alarmTaskRlmObject);
@@ -932,7 +993,9 @@ class AlarmDetail extends Component {
                 // Update order of task list
                 let { tasks } = this.state.alarm;
 
-                this._cachedSortedTasks = tasks.sorted("order");
+                // TODO: This line should not be necessary. See if commenting out breaks anything.
+                // this._cachedSortedTasks = tasks.sorted("order");
+
                 console.log("sortedTasks", this._cachedSortedTasks);
                 // console.log("Deleted task. --> Now Tasks:", tasks);
                 let idx = 0;
@@ -953,9 +1016,9 @@ class AlarmDetail extends Component {
             });
         }
         this.onTaskListChanged();
-    }
+    };
 
-    _onSnapTask(item, index, rowState) {
+    _onSnapTask = (item, index, rowState) => {
         console.info("Snapping task");
         // console.log("1. ", item);
         // console.log("2. ", index);
@@ -963,32 +1026,25 @@ class AlarmDetail extends Component {
         if (rowState == "active") {
             this.setState({ activeTask: index });
         }
-    }
+    };
 
-    _onPressEditTasks() {
-        console.info("_onPressEditTasks");
-        let editingTasks = !this.state.isEditingTasks;
-        this.setState({ isEditingTasks: editingTasks });
-    }
+    // _onPressEditTasks() {
+    //     console.info("_onPressEditTasks");
+    //     let editingTasks = !this.state.isEditingTasks;
+    //     this.setState({ isEditingTasks: editingTasks });
+    // }
 
-    _closeTaskRows() {
+    _closeTaskRows = () => {
         console.info("_closeTaskRows");
         this.setState({ activeTask: null });
-    }
-
-    _closeMenu() {
-        console.info("_closeMenu");
-        this.props.navigation.setParams({
-            menuOpen: false
-        });
-    }
+    };
 
     /* Called when TaskItem longPress ends without TaskItem having been moved at all */
-    _didEndMove() {
+    _didEndMove = () => {
         this.setState({ disableDrag: false });
-    }
+    };
 
-    _onReorderTasks(allATasks, filterMap, aTaskId, from, to) {
+    _onReorderTasks = (allATasks, filterMap, aTaskId, from, to) => {
         console.info("_onReorderTasks");
         // console.info("aTaskId", aTaskId);
         // console.info("from", from);
@@ -1012,6 +1068,15 @@ class AlarmDetail extends Component {
             from = filterMap[from];
             to = filterMap[to];
         }
+
+        // TODO: I need to re-order startTimesRefs here, otherwise one will get overwritten in setStartTimeRef
+        let temp = this.startTimesRefs.splice(from, 1)[0];
+        this.startTimesRefs.splice(to, 0, temp);
+        // FIXME: not working for some reason. An index is not found when setting refs after this, and startTime for moved row is not updated.
+        //  I should make the startTimesRefs an array of objects instead so that I can figure out which ones are which easier.
+
+        console.log("Just updated startTimesRefs order");
+        // console.log("this.startTimesRefs", this.startTimesRefs);
 
         /* 'snapshot()' yields a copy that is not live-updated, which is necessary for the loop below
             which updates alarm task order values as it loops through the list. Since the list is
@@ -1052,12 +1117,10 @@ class AlarmDetail extends Component {
 
         // this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
 
-        this._calcStartTimes();
-
         // this._cachedSortedTasks = this.state.alarm.tasks.;
 
-        this.setState({ disableDrag: false });
-    }
+        this.setState({ disableDrag: false }, () => this._calcStartTimes());
+    };
 
     _layoutAnimateToFullScreenTaskList(nextState = {}) {
         let config = {
@@ -1081,7 +1144,7 @@ class AlarmDetail extends Component {
             taskHeaderFlex: 0.06,
             taskListDimensions: {
                 width: SCREEN_WIDTH,
-                height: SCREEN_HEIGHT * 1.15 * 0.83 * 0.95, // TODO: Extract layout values into constants, the create variables for the value of these calculations
+                height: SCREEN_HEIGHT * 1.15 * 0.83 * 0.94, // TODO: Extract layout values into constants, the create variables for the value of these calculations
                 pageX: 0,
                 pageY: SCREEN_HEIGHT * 0.17 // TODO: Extract layout values into constants, the create variables for the value of these calculations
             },
@@ -1107,23 +1170,23 @@ class AlarmDetail extends Component {
             taskHeaderFlex: 0.15,
             taskListDimensions: {
                 width: SCREEN_WIDTH,
-                height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.95, // TODO: Extract layout values into constants, then create variables for the value of these calculations
+                height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.94, // TODO: Extract layout values into constants, then create variables for the value of these calculations
                 pageX: 0,
-                pageY: SCREEN_HEIGHT * 0.58 // TODO: Extract layout values into constants, the create variables for the value of these calculations
+                pageY: SCREEN_HEIGHT * 0.6 // TODO: Extract layout values into constants, the create variables for the value of these calculations
             },
             ...nextState
         });
     }
 
-    _onPressAnimHandle() {
+    _onPressAnimHandle = () => {
         // console.log("_onPressAnimHandle");
         // console.log("this.state.alarm.mode ", this.state.alarm.mode);
         let nextIdx = this.state.alarm.mode == "normal" ? 1 : 0;
         // console.log("nextIdx", nextIdx);
         this._snapToIdx(nextIdx);
-    }
+    };
 
-    _onPressTasksHeader() {
+    _onPressTasksHeader = () => {
         console.log("_onPressTasksHeader");
         this._taskListNeedsRemeasure = true;
         // this._hideModeText();
@@ -1136,9 +1199,9 @@ class AlarmDetail extends Component {
             this._lastMeasuredView = "normal";
             this._snapToIdx(1);
         }
-    }
+    };
 
-    _onDragInteractable(event) {
+    _onDragInteractable = event => {
         console.log("drag:", event.nativeEvent);
         Keyboard.dismiss();
         let { state, y, targetSnapPointId } = event.nativeEvent;
@@ -1213,7 +1276,7 @@ class AlarmDetail extends Component {
                 this._layoutAnimateToCalcMode(nextState);
             }
         }
-    }
+    };
 
     _saveSnoozeTime = value => {
         realm.write(() => {
@@ -1228,6 +1291,8 @@ class AlarmDetail extends Component {
         this.setState({ showSnoozePicker: false });
     };
 
+    _willStartTaskMove = () => this.setState({ disableDrag: true });
+
     // onScrollTaskList = nativeEvent => {
     //     console.log("scroll event", nativeEvent);
     //     console.log("this", this.constructor.name);
@@ -1240,18 +1305,118 @@ class AlarmDetail extends Component {
     //     this._taskListAtEnd = true;
     // };
 
-    _onGestureStateChanged = event => {
+    _onGestureStateChanged = ({ nativeEvent }) => {
         console.log("_onGestureStateChanged");
+        if (nativeEvent.state != State.END) {
+            return;
+        }
+        if (nativeEvent.translationX > -45 && nativeEvent.velocityX > -800) {
+            // console.log(
+            //     "Translation too small or velocity too slow. Snapping back"
+            // );
+            // Animated.spring back to 0
+            Animated.spring(this.startTimesHandleAnim, {
+                toValue: 0,
+                tension: 300,
+                friction: 11,
+                useNativeDriver: true
+            }).start();
+        } else {
+            // translationX is less than -70, finish the flip (Animated.spring to 1)
+            Animated.timing(this.startTimesHandleAnim, {
+                toValue: -230,
+                duration: 200,
+                easing: Easing.bounce,
+                useNativeDriver: true
+            }).start(() => {
+                this.setState({
+                    durationsVisible: !this.state.durationsVisible
+                });
+                this.startTimesHandleAnim.setValue(0);
+            });
+        }
     };
-    startTimesPanRef;
+
+    _clearLabeledInput = () => {
+        this.alarmLabelCache = "";
+        // we are faking a 'blur' event here, so that the cache change is saved to DB and state is updated.
+        this.onLabelInputBlur();
+    };
+
+    _toggleHideDisabledTasks = () => {
+        this.setState({
+            hideDisabledTasks: !this.state.hideDisabledTasks
+        });
+    };
+
+    _navigateToSounds = () => {
+        this.props.navigation.navigate("Sounds", {
+            saveSound: this.saveSound,
+            currSound: this.state.alarm.alarmSound
+        });
+    };
+
+    _toggleHideHrsOfSleep = () => {
+        realm.write(() => {
+            let { alarm } = this.state;
+            alarm.showHrsOfSleep = !alarm.showHrsOfSleep;
+        });
+        this._setMenuState(0);
+    };
+
+    _toggleShowStartTimes = () => {
+        // realm.write(() => {
+        //     let { alarm } = this.state;
+        //     alarm.showHrsOfSleep = !alarm.showHrsOfSleep;
+        // });
+        // this._setMenuState(0);
+        let nextState = {
+            durationsVisible: !this.state.durationsVisible
+        };
+        this._setMenuState(0, nextState);
+    };
+
+    _onSelectViewFromMenu = idx => {
+        // console.log("Pressed fancy radio: ", idx);
+        this._snapToIdx(idx);
+        // this._snapToIdx(idx);1
+    };
+
+    // taskRowsY = [];
+    ROW_HEIGHT = 55;
+    ROW_WIDTH = SCREEN_WIDTH + 90 - scaleByFactor(20, 0.4);
+    _getMeasurementsForTaskRow = idx => {
+        // y measurement needs to add all of...:
+        // 1. NAV HEADER HEIGHT
+        // 2. TASKLIST HEADER HEIGHT --- (SCREEN_HEIGHT * 1.15) * this.state.taskAreaFlex * this.state.taskHeaderFlex
+        //                                NonClockArea Height   *     taskAreaFlex        *      taskHeaderFlex
+        // 3. FullTaskList (0px) OR AutoCalc (??) mode.
+        // 4. idx * TaskItem_height
+        let tasksHeaderHeight =
+            SCREEN_HEIGHT *
+            1.15 *
+            this.state.taskAreaFlex *
+            this.state.taskHeaderFlex;
+        let clockHeight = this._viewIdx == 2 ? 0 : SCREEN_HEIGHT * 0.4;
+        console.log("Header.HEIGHT", Header.HEIGHT);
+        console.log("tasksHeaderHeight", tasksHeaderHeight);
+        console.log("idx * this.ROW_HEIGHT", idx * this.ROW_HEIGHT);
+        let y =
+            Header.HEIGHT +
+            tasksHeaderHeight +
+            clockHeight +
+            idx * this.ROW_HEIGHT;
+        console.log("y ", y);
+        return { x: 0, y: y, width: this.ROW_WIDTH, height: this.ROW_HEIGHT };
+    };
 
     render() {
         console.info("AlarmDetail render ");
         // console.debug("AlarmDetail render - this.state: ", this.state);
-        console.log("this._snapPoints");
-        for (let index = 0; index < this._snapPoints.length; index++) {
-            console.log(index, this._snapPoints[index].id);
-        }
+        // console.log("this._snapPoints");
+        // for (let index = 0; index < this._snapPoints.length; index++) {
+        //     console.log(index, this._snapPoints[index].id);
+        // }
 
         let imageHeight = SCREEN_HEIGHT + 30;
 
@@ -1297,101 +1462,88 @@ class AlarmDetail extends Component {
             });
         }
 
-        // FIXME: TODO: This should not go here. We shouldn't have to re-sort the tasks on every render.
-        // Assign tasks to 'sortedTasks', first ordering them if there are >1
-        // let sortedTasks =
-        //     this.state.alarm.tasks.length > 1
-        //         ? this.state.alarm.tasks.sorted("order")
-        //         : this.state.alarm.tasks;
-
-        let sortedTasks = this._cachedSortedTasks;
-
-        // console.log("sortedTasks", sortedTasks);
-        // let sortedTasks = [];
-        // for (let id in sortedTasksRealm) {
-        //     sortedTasks.push(sortedTasksRealm[id]);
-        // }
+        let sortedTasks = this._cachedSortedTasks.snapshot();
 
         console.log("AlarmDetail: this._viewIdx", this._viewIdx);
 
-        let taskArea = null;
-        if (sortedTasks.length == 0) {
-            taskArea = (
-                <TouchableOpacity
-                    style={{
-                        flex: 1
-                    }}
-                    onPress={this._onPressAddTask.bind(this)}
-                >
-                    <View
-                        style={{
-                            flex: 1,
-                            flexDirection: "column",
-                            justifyContent: "center"
-                        }}
-                    >
-                        <View
-                            style={{
-                                alignSelf: "center",
-                                justifyContent: "center",
-                                position: "absolute",
-                                top: SCREEN_HEIGHT * 0.12,
-                                // borderColor: "black",
-                                // borderWidth: 0.5,
-                                backgroundColor: "#191966",
-                                padding: 12,
-                                borderRadius: 7,
-                                shadowOffset: {
-                                    height: 2,
-                                    width: 0
-                                },
-                                shadowOpacity: 0.5,
-                                shadowRadius: 2,
-                                elevation: 3,
-                                shadowColor: "black",
-                                zIndex: 999
-                            }}
-                        >
-                            <Text style={{ color: "#FFFFFF" }}>ADD TASKS</Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-            );
-        } else {
-            // console.log("Passing new list of tasks to TaskList");
-            let forceRemeasure = this._taskListNeedsRemeasure;
-            this._taskListNeedsRemeasure = false;
+        // let taskArea = null;
+        // if (sortedTasks.length == 0) {
+        //     taskArea = (
+        //         <TouchableOpacity
+        //             style={{
+        //                 flex: 1
+        //             }}
+        //             onPress={this._onPressAddTask}
+        //         >
+        //             <View
+        //                 style={{
+        //                     flex: 1,
+        //                     flexDirection: "column",
+        //                     justifyContent: "center"
+        //                 }}
+        //             >
+        //                 <View
+        //                     style={{
+        //                         alignSelf: "center",
+        //                         justifyContent: "center",
+        //                         position: "absolute",
+        //                         top: SCREEN_HEIGHT * 0.12,
+        //                         // borderColor: "black",
+        //                         // borderWidth: 0.5,
+        //                         backgroundColor: "#191966",
+        //                         padding: 12,
+        //                         borderRadius: 7,
+        //                         shadowOffset: {
+        //                             height: 2,
+        //                             width: 0
+        //                         },
+        //                         shadowOpacity: 0.5,
+        //                         shadowRadius: 2,
+        //                         elevation: 3,
+        //                         shadowColor: "black",
+        //                         zIndex: 999
+        //                     }}
+        //                 >
+        //                     <Text style={{ color: "#FFFFFF" }}>ADD TASKS</Text>
+        //                 </View>
+        //             </View>
+        //         </TouchableOpacity>
+        //     );
+        // } else {
+        // console.log("Passing new list of tasks to TaskList");
+        let forceRemeasure = this._taskListNeedsRemeasure;
+        this._taskListNeedsRemeasure = false;
 
-            // console.log("forceRemeasure?", forceRemeasure);
+        // console.log("forceRemeasure?", forceRemeasure);
 
-            taskArea = (
-                <TaskList
-                    onPressItem={this._onPressTask.bind(this)}
-                    onPressItemCheckBox={this.onChangeTaskEnabled}
-                    onChangeTaskDuration={this.onChangeTaskDuration}
-                    onPressDelete={this._onDeleteTask.bind(this)}
-                    onShowDurationSlider={() =>
-                        this.setState({ isSlidingTask: true })
-                    }
-                    onSnapTask={this._onSnapTask.bind(this)}
-                    data={sortedTasks}
-                    activeTask={this.state.activeTask}
-                    closeTaskRows={this._closeTaskRows.bind(this)}
-                    isEditingTasks={this.state.isEditingTasks}
-                    isSlidingTask={this.state.isSlidingTask}
-                    didEndMove={this._didEndMove.bind(this)}
-                    onReorderTasks={this._onReorderTasks.bind(this)}
-                    willStartMove={() => this.setState({ disableDrag: true })}
-                    forceRemeasure={forceRemeasure}
-                    hideDisabledTasks={this.state.hideDisabledTasks}
-                    containerDimensions={this.state.taskListDimensions}
-                    startTimesAnim={this.startTimesHandleAnim}
-                    durationsVisible={this.state.durationsVisible}
-                    // onScroll={this.onScrollTaskList.bind(this)}
-                    // onEndReached={this.onEndReachedTaskList.bind(this)}
-                />
-            );
-        }
+        // taskArea = (
+        //     <TaskList
+        //         onPressItem={this._onPressTask}
+        //         onPressItemCheckBox={this.onChangeTaskEnabled}
+        //         onChangeTaskDuration={this.onChangeTaskDuration}
+        //         onPressDelete={this._onDeleteTask}
+        //         // onShowDurationSlider={() =>
+        //         //     this.setState({ isSlidingTask: true })
+        //         // }
+        //         onSnapTask={this._onSnapTask}
+        //         data={sortedTasks}
+        //         activeTask={this.state.activeTask}
+        //         closeTaskRows={this._closeTaskRows}
+        //         isEditingTasks={this.state.isEditingTasks}
+        //         isSlidingTask={this.state.isSlidingTask}
+        //         didEndMove={this._didEndMove}
+        //         onReorderTasks={this._onReorderTasks}
+        //         willStartMove={this._willStartTaskMove}
+        //         forceRemeasure={forceRemeasure} // TODO: is this prop event required anymore?
+        //         hideDisabledTasks={this.state.hideDisabledTasks}
+        //         containerDimensions={this.state.taskListDimensions}
+        //         startTimesAnim={this.startTimesHandleAnim}
+        //         durationsVisible={this.state.durationsVisible}
+        //         // onScroll={this.onScrollTaskList.bind(this)}
+        //         // onEndReached={this.onEndReachedTaskList.bind(this)}
+        //     />
+        // );
+        // }
 
         let wakeUpTime = this.state.alarm.wakeUpTime;
         // console.log("this.state.alarm.mode", this.state.alarm.mode);
@@ -1405,7 +1557,7 @@ class AlarmDetail extends Component {
         let fWakeUpTime = wakeTimeMoment.format("h:mm");
         let amPmWakeUpTime = wakeTimeMoment.format("A");
 
-        let interactableRef = el => (this.interactiveRef = el);
+        // let interactableRef
 
         let touchableBackdrop,
             fullScreenTouchableBackdrop = null;
@@ -1418,12 +1570,7 @@ class AlarmDetail extends Component {
                         width: SCREEN_WIDTH,
                         height: SCREEN_HEIGHT
                     }}
-                    onPress={() => {
-                        // console.log(
-                        //     "Pressed touchable without feedback"
-                        // );
-                        this._closeTaskRows();
-                    }}
+                    onPress={this._closeTaskRows}
                 />
             );
         } else if (this.state.menuIsOpen || this.state.showSnoozePicker) {
@@ -1521,11 +1668,11 @@ class AlarmDetail extends Component {
                             ]
                         }
                     ]}
-                        source={{ uri: "ClockBgd_v8_iphoneSE-5-6-7-8" }}
-                    />
+                    source={{ uri: "ClockBgd_v8_iphoneSE-5-6-7-8" }}
+                />
                 {touchableBackdrop}
                 <Interactable.View
-                    ref={interactableRef}
+                    ref={this._setInteractiveRef}
                     style={[
                         styles.animatedView,
                         {
@@ -1537,7 +1684,7 @@ class AlarmDetail extends Component {
                     verticalOnly={true}
                     snapPoints={this._snapPoints}
                     animatedValueY={this._clockTransform}
-                    onSnap={this.onSnap.bind(this)}
+                    // onSnap={this.onSnap.bind(this)}
                     // initialPosition={{ y: initInterPosition }}
                     dragEnabled={!this.state.disableDrag}
                     boundaries={{
@@ -1555,7 +1702,7 @@ class AlarmDetail extends Component {
                     //     { damping: 0.0, influenceArea: { right: 0 } }
                     // ]}
                     animatedNativeDriver={true}
-                    onDrag={this._onDragInteractable.bind(this)}
+                    onDrag={this._onDragInteractable}
                     initialPosition={{
                         y: mode == "normal" ? this.snapNormal : this.snapAuto
                     }}
@@ -1626,10 +1773,7 @@ class AlarmDetail extends Component {
                         ]}
                     >
                         <TouchableOpacity
-                            onPress={this.onPressClock.bind(
-                                this
-                                // interactableRef
-                            )}
+                            onPress={this._onPressClock}
                             style={{
                                 alignSelf: "stretch",
                                 alignContent: "center",
@@ -1733,11 +1877,7 @@ class AlarmDetail extends Component {
                                 multiline={false}
                                 clearButton={
                                     <TouchableOpacity
-                                        onPress={() => {
-                                            this.alarmLabelCache = "";
-                                            // we are faking a 'blur' event here, so that the cache change is saved to DB and state is updated.
-                                            this.onLabelInputBlur();
-                                        }}
+                                        onPress={this._clearLabeledInput}
                                         style={{
                                             flex: 0.05,
                                             // position: "absolute",
@@ -1851,7 +1991,7 @@ class AlarmDetail extends Component {
                             style={[
                                 styles.taskListContainer,
                                 {
-                                    flex: this.state.taskAreaFlex || 0.4
+                                    flex: this.state.taskAreaFlex
                                 }
                             ]}
                         >
@@ -1859,19 +1999,15 @@ class AlarmDetail extends Component {
                                 style={[
                                     styles.taskListHeader,
                                     {
-                                        flex: this.state.taskHeaderFlex || 0.15,
-                                        // backgroundColor: "green"
+                                        flex: this.state.taskHeaderFlex, // == (SCREEN_HEIGHT * 1.15) * this.state.taskAreaFlex * this.state.taskHeaderFlex
                                         backgroundColor: "transparent"
-
                                         // backgroundColor: "green"
                                     }
                                 ]}
                             >
                                 <TouchableOpacity
                                     // onPress={() => this.interactiveRef.snapTo({ index: 2 })}>
-                                    onPress={this._onPressTasksHeader.bind(
-                                        this
-                                    )}
+                                    onPress={this._onPressTasksHeader}
                                     style={{
                                         position: "absolute",
                                         top: 0,
@@ -1903,7 +2039,7 @@ class AlarmDetail extends Component {
                                         backgroundColor: "transparent"
                                         // backgroundColor: "green"
                                     }}
-                                    onPress={this._onPressAddTask.bind(this)}
+                                    onPress={this._onPressAddTask}
                                     /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
                                     hitSlop={{
                                         top: 10,
@@ -1930,18 +2066,7 @@ class AlarmDetail extends Component {
                                         backgroundColor: "transparent"
                                         // backgroundColor: "green"
                                     }}
-                                    onPress={() => {
-                                        // alert(
-                                        //     "Hide disabled tasks! (Not implemented)"
-                                        // )
-                                        // this._calcStartTimes(
-                                        //     !this.state.hideDisabledTasks
-                                        // );
-                                        this.setState({
-                                            hideDisabledTasks: !this.state
-                                                .hideDisabledTasks
-                                        });
-                                    }}
+                                    onPress={this._toggleHideDisabledTasks}
                                     hitSlop={{
                                         top: 10,
                                         bottom: 10,
@@ -1966,72 +2091,39 @@ class AlarmDetail extends Component {
                                     )}
                                 </TouchableOpacity>
                             </View>
-                            {/* <Interactable.View
-                                style={[
-                                    // StyleSheet.absoluteFill,
-                                    {
-                                        position: "absolute",
-                                        // right: 0,
-                                        left: SCREEN_WIDTH - 15,
-                                        // top: 173,
-                                        top: 0,
-                                        bottom: 0,
-                                        width: 230,
-                                        // paddingBottom: scaleByFactor(10, 0.4),
-
-                                        // paddingVertical: scaleByFactor(10, 0.4)
-                                        backgroundColor: "transparent"
-                                        // backgroundColor: "red"
-                                        // borderRadius: 10
-                                        // backgroundColor: Colors.brandDarkGrey
-                                    }
-                                ]}
-                                horizontalOnly={true}
-                                animatedNativeDriver={true}
-                                snapPoints={[
-                                    { id: "dur", x: 0 },
-                                    { id: "st", x: -230 }
-                                    // { id: "hide", x: -160 }
-                                ]}
-                                boundaries={{ right: 20, left: -235 }}
-                                ref={el => (this.startTimesRef = el)}
-                                animatedValueX={this.startTimesHandleAnim}
-                                dragEnabled={false}
-                                onDrag={event => {
-                                    let {
-                                        state,
-                                        y,
-                                        targetSnapPointId
-                                    } = event.nativeEvent;
-
-                                    if (state == "start") return;
-
-                                    console.log("onDrag - end");
-                                    console.log(
-                                        "targetSnapPointId",
-                                        targetSnapPointId
-                                    );
-                                    let toValue;
-                                    if (targetSnapPointId == "st") {
-                                        toValue = 0;
-                                        // this.startTimesRef.snapTo({ index: 0 });
-                                    } else {
-                                        toValue = -230;
-                                    }
-                                    // Animated.spring(
-                                    //     this.startTimesHandleAnim,
-                                    //     {
-                                    //         toValue: toValue,
-                                    //         bounciness: 10,
-                                    //         useNativeDriver: true
-                                    //     }
-                                    // ).start();
-                                }}
-                                // initialPosition={{ y: initInterPosition }}
-                            > */}
-                            {/* </Interactable.View> */}
                             {touchableBackdrop}
-                            {taskArea}
+                            {/* {taskArea} */}
+                            <TaskList
+                                onPressItem={this._onPressTask}
+                                onPressItemCheckBox={this.onChangeTaskEnabled}
+                                onChangeTaskDuration={this.onChangeTaskDuration}
+                                onPressDelete={this._onDeleteTask}
+                                // onShowDurationSlider={() =>
+                                //     this.setState({ isSlidingTask: true })
+                                // }
+                                onSnapTask={this._onSnapTask}
+                                data={sortedTasks}
+                                activeTask={this.state.activeTask}
+                                closeTaskRows={this._closeTaskRows}
+                                isEditingTasks={this.state.isEditingTasks}
+                                isSlidingTask={this.state.isSlidingTask}
+                                didEndMove={this._didEndMove}
+                                onReorderTasks={this._onReorderTasks}
+                                willStartMove={this._willStartTaskMove}
+                                forceRemeasure={forceRemeasure} // TODO: is this prop event required anymore?
+                                hideDisabledTasks={this.state.hideDisabledTasks}
+                                containerDimensions={
+                                    this.state.taskListDimensions
+                                }
+                                taskRowDimensions={
+                                    this._getMeasurementsForTaskRow
+                                }
+                                startTimesAnim={this.startTimesHandleAnim}
+                                durationsVisible={this.state.durationsVisible}
+                                setStartTimeRef={this.setStartTimeRef}
+                                // onScroll={this.onScrollTaskList.bind(this)}
+                                // onEndReached={this.onEndReachedTaskList.bind(this)}
+                            />
                             <PanGestureHandler
                                 ref={el => (this.startTimesPanRef = el)}
                                 onGestureEvent={Animated.event(
@@ -2048,48 +2140,9 @@ class AlarmDetail extends Component {
                                     { useNativeDriver: true }
                                 )}
                                 shouldCancelWhenOutside={false}
-                                onHandlerStateChange={({ nativeEvent }) => {
-                                    if (nativeEvent.state != State.END) {
-                                        return;
-                                    }
-                                    if (
-                                        nativeEvent.translationX > -45 &&
-                                        nativeEvent.velocityX > -800
-                                    ) {
-                                        // console.log(
-                                        //     "Translation too small or velocity too slow. Snapping back"
-                                        // );
-                                        // Animated.spring back to 0
-                                        Animated.spring(
-                                            this.startTimesHandleAnim,
-                                            {
-                                                toValue: 0,
-                                                tension: 300,
-                                                friction: 11,
-                                                useNativeDriver: true
-                                            }
-                                        ).start();
-                                    } else {
-                                        // translationX is less than -70, finish the flip (Animated.spring to 1)
-                                        Animated.timing(
-                                            this.startTimesHandleAnim,
-                                            {
-                                                toValue: -230,
-                                                duration: 200,
-                                                easing: Easing.bounce,
-                                                useNativeDriver: true
-                                            }
-                                        ).start(() => {
-                                            this.setState({
-                                                durationsVisible: !this.state
-                                                    .durationsVisible
-                                            });
-                                            this.startTimesHandleAnim.setValue(
-                                                0
-                                            );
-                                        });
-                                    }
-                                }}
+                                onHandlerStateChange={
+                                    this._onGestureStateChanged
+                                }
                                 minDist={1}
                             >
                                 {/* <Animated.View style={animatedStyles} /> */}
@@ -2103,7 +2156,7 @@ class AlarmDetail extends Component {
                                             left: SCREEN_WIDTH - 30,
                                             // left: 0,
                                             // top: 173,
-                                            top: 0,
+                                            top: 50,
                                             bottom: 0,
                                             width: 230,
                                             // paddingBottom: scaleByFactor(10, 0.4),
@@ -2115,27 +2168,11 @@ class AlarmDetail extends Component {
                                             // backgroundColor: Colors.brandDarkGrey
                                         }
                                     ]}
+                                    shouldRasterizeIOS={true}
+                                    renderToHardwareTextureAndroid={true}
                                 />
                             </PanGestureHandler>
                         </LinearGradient>
-                        {/* Task Start-Times Interactable View*/}
-                        {/* <View
-                            style={[
-                                // StyleSheet.absoluteFill,
-                                {
-                                    position: "absolute",
-                                    // right: 0,
-                                    left: SCREEN_WIDTH - 80,
-                                    // top: 173,
-                                    top: 0,
-                                    bottom: 0,
-                                    width: 230,
-                                    // backgroundColor: "green",
-                                    overflow: "hidden"
-                                }
-                            ]}
-                            pointerEvents="box-none"
-                        > */}
                     </View>
                     <this.AnimatedHandle
                         style={{
@@ -2168,7 +2205,7 @@ class AlarmDetail extends Component {
                                 { perspective: 1000 }
                             ]
                         }}
-                        onPress={this._onPressAnimHandle.bind(this)}
+                        onPress={this._onPressAnimHandle}
                     >
                         <MaterialIcon
                             name="drag-handle"
@@ -2215,12 +2252,7 @@ class AlarmDetail extends Component {
                     }}
                 >
                     <TouchableOpacity
-                        onPress={() => {
-                            this.props.navigation.navigate("Sounds", {
-                                saveSound: this.saveSound.bind(this),
-                                currSound: this.state.alarm.alarmSound
-                            });
-                        }}
+                        onPress={this._navigateToSounds}
                         style={{
                             padding: scaleByFactor(20, 0.6)
                         }}
@@ -2272,11 +2304,7 @@ class AlarmDetail extends Component {
                             <Text>{`${this.state.alarm.snoozeTime} min`}</Text>
                         }
                         separatorPosition={SCREEN_WIDTH * 0.15}
-                        onPressItem={() => {
-                            // AlarmDetail.closeMenu(this.state.menuIsOpen, navigation);
-                            this._setMenuState(0);
-                            this._openSnoozeTimePicker();
-                        }}
+                        onPressItem={this._openSnoozeTimePicker}
                     />
                     <MenuItem
                         left={
@@ -2295,13 +2323,7 @@ class AlarmDetail extends Component {
                             )
                         }
                         separatorPosition={SCREEN_WIDTH * 0.15}
-                        onPressItem={() => {
-                            realm.write(() => {
-                                let { alarm } = this.state;
-                                alarm.showHrsOfSleep = !alarm.showHrsOfSleep;
-                            });
-                            this._setMenuState(0);
-                        }}
+                        onPressItem={this._toggleHideHrsOfSleep}
                     />
                     <MenuItem
                         left={
@@ -2327,17 +2349,7 @@ class AlarmDetail extends Component {
                             </Text>
                         }
                         separatorPosition={SCREEN_WIDTH * 0.15}
-                        onPressItem={() => {
-                            // realm.write(() => {
-                            //     let { alarm } = this.state;
-                            //     alarm.showHrsOfSleep = !alarm.showHrsOfSleep;
-                            // });
-                            // this._setMenuState(0);
-                            let nextState = {
-                                durationsVisible: !this.state.durationsVisible
-                            };
-                            this._setMenuState(0, nextState);
-                        }}
+                        onPressItem={this._toggleShowStartTimes}
                     />
                     <MenuItem
                         left={
@@ -2366,11 +2378,7 @@ class AlarmDetail extends Component {
                                 ]}
                                 initialIdx={this._viewIdx}
                                 selectedIdx={this._viewIdx}
-                                onSelect={idx => {
-                                    // console.log("Pressed fancy radio: ", idx);
-                                    this._snapToIdx(idx);
-                                    // this._snapToIdx(idx);1
-                                }}
+                                onSelect={this._onSelectViewFromMenu}
                                 // style={{ flex: 0.75 }}
                             />
                         }
@@ -2378,32 +2386,34 @@ class AlarmDetail extends Component {
                     />
                 </Animated.View>
                 {/* Measuring line -- dev view to check whether views are aligned properly */}
-                {/* <View
+                <View
                     style={{
                         position: "absolute",
                         left: 0,
                         right: 0,
-                        top: 260,
+                        top: 64,
                         height: 2,
-                        backgroundColor: "black"
+                        backgroundColor: "red"
                     }}
-                /> */}
-                <DateTimePicker
-                    date={moment
-                        .utc(this.state.alarm.wakeUpTime)
-                        .local()
-                        .toDate()} // time has been converted into a Date() for this Component
-                    mode={"time"}
-                    titleIOS={"Set Wake-Up Time"}
-                    isVisible={this.state.isDatePickerVisible}
-                    onConfirm={this._onWakeTimePicked}
-                    onCancel={this._hideDateTimePicker}
                 />
+                {this.state.isDatePickerVisible && (
+                    <DateTimePicker
+                        date={moment
+                            .utc(this.state.alarm.wakeUpTime)
+                            .local()
+                            .toDate()} // time has been converted into a Date() for this Component
+                        mode={"time"}
+                        titleIOS={"Set Wake-Up Time"}
+                        isVisible={true}
+                        onConfirm={this._onWakeTimePicked}
+                        onCancel={this._hideDateTimePicker}
+                    />
+                )}
                 {this.state.showSnoozePicker && (
                     <PickerActionSheet
                         initialValue={this.state.alarm.snoozeTime}
-                        onValueSelected={this._saveSnoozeTime.bind(this)}
-                        onPressedCancel={this._closeSnoozeTimePicker.bind(this)}
+                        onValueSelected={this._saveSnoozeTime}
+                        onPressedCancel={this._closeSnoozeTimePicker}
                         backdrop={fullScreenTouchableBackdrop}
                     />
                 )}
@@ -2411,8 +2421,6 @@ class AlarmDetail extends Component {
         );
     }
 }
-
-const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15];
 
 const styles = StyleSheet.create({
     screenContainer: {

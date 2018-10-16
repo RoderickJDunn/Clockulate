@@ -13,7 +13,8 @@ import {
     PanResponder,
     Dimensions,
     Animated,
-    Platform
+    Platform,
+    TextInput
 } from "react-native";
 import Interactable from "react-native-interactable";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -57,7 +58,7 @@ class TaskItem extends React.Component {
     _tempDuration = null;
 
     constructor(props) {
-        super();
+        super(props);
         this.state = {
             // tempDuration: null,
             data: {
@@ -73,6 +74,7 @@ class TaskItem extends React.Component {
         };
 
         // console.log("this.state", this.state);
+        console.log("task-item constructor");
     }
 
     componentWillMount() {
@@ -221,28 +223,8 @@ class TaskItem extends React.Component {
     _onLongPress = initialVal => {
         // console.log("_onLongPress task");
 
-        /* NOTES: I reversed the logic for isEditingTasks since we can now re-order tasks at baseline.
-            There is no more edit mode (no task sliding for now)
-        */
-        if (!this.props.isEditingTasks) {
-            this.props.willStartMove();
-            this.props.shouldStartMove();
-        } else {
-            /* first inform parent views that we are going to show the slider, so that they disable dragging functionality
-            1) AlarmDetail main Interactable-View dragging will be disabled
-            2) TaskList sortable-listview scrolling will be disabled
-            3) Disabling of TaskItem Interactable-View (show delete btn) is managed in render()
-        */
-
-            let initialDuration = this.props.data.duration
-                ? this.props.data.duration
-                : this.props.data.task.defaultDuration;
-
-            // this.setState({ tempDuration: initialDuration });
-            this._tempDuration = initialDuration;
-
-            this.props.onShowDurationSlider();
-        }
+        this.props.willStartMove();
+        this.props.shouldStartMove();
     };
 
     componentWillReceiveProps(nextProps) {
@@ -276,7 +258,7 @@ class TaskItem extends React.Component {
         //     return true;
         // }
 
-        let { enabled, task, duration, startTime } = this.state.data;
+        let { enabled, task, duration /* startTime */ } = this.state.data;
         let {
             isEditingTasks,
             isSlidingTask,
@@ -287,8 +269,8 @@ class TaskItem extends React.Component {
         let {
             enabled: nEnabled,
             task: nTask,
-            duration: nDuration,
-            startTime: nStartTime
+            duration: nDuration
+            // startTime: nStartTime
         } = nextProps.data;
         let {
             isEditingTasks: nIsEditingTasks,
@@ -298,12 +280,10 @@ class TaskItem extends React.Component {
 
         let { isSlidingTask: nIsSlidingTask } = nextState;
 
-        console.log("enabled", enabled);
-        console.log("nEnabled", nEnabled);
         if (
             nEnabled == enabled &&
             nTask.name == task.name &&
-            nStartTime == startTime &&
+            // nStartTime == startTime &&
             nDuration == duration &&
             nIsEditingTasks == isEditingTasks &&
             nIsSlidingTask == isSlidingTask &&
@@ -316,6 +296,8 @@ class TaskItem extends React.Component {
 
         // console.log("Will Render task-item");
         // console.log("why?");
+        // console.log("enabled", enabled);
+        // console.log("nEnabled", nEnabled);
         // console.log("nStartTime | startTime", nStartTime, startTime);
         // console.log("nDuration | duration", nDuration, duration);
         // console.log(
@@ -336,10 +318,10 @@ class TaskItem extends React.Component {
     render() {
         console.debug("render task-item");
         // console.debug("render task-item props", this.props);
-        console.debug(
-            "render task-item durationsVisible",
-            this.props.durationsVisible
-        );
+        // console.debug(
+        //     "render task-item durationsVisible",
+        //     this.props.durationsVisible
+        // );
         // console.debug("render task-item state", this.state);
         // console.log("\n");
         // console.log("this.state.tempDuration", this.state.tempDuration);
@@ -468,6 +450,7 @@ class TaskItem extends React.Component {
             // console.log("isMoving", "false");
         }
 
+        // console.debug("... actual render");
         return (
             <Interactable.View
                 style={[
@@ -543,16 +526,16 @@ class TaskItem extends React.Component {
                                 e.nativeEvent.touches &&
                                 e.nativeEvent.touches.length == 0
                             ) {
-                                console.log(
-                                    "Touches arr is empty. Released without sliding!"
-                                );
+                                // console.log(
+                                //     "Touches arr is empty. Released without sliding!"
+                                // );
                                 this._tempDuration = null;
                                 this.setState({ isSlidingTask: false });
                                 this.props.shouldEndMove();
                                 this.props.didEndMove();
-                            } else {
+                            } /* else {
                                 console.log("Touches arr NOT empty!");
-                            }
+                            } */
                         }}
                         // disabled={this.props.isEditingTasks}
                         {...sortHandlers}
@@ -614,7 +597,32 @@ class TaskItem extends React.Component {
                                     // backFlipAnimStyle
                                 ]}
                             >
-                                <Text
+                                <TextInput
+                                    editable={false}
+                                    defaultValue={this.props.data.startTime}
+                                    ref={elem => {
+                                        // console.log("Sending data for ref");
+                                        // console.log(
+                                        //     "this.props.data",
+                                        //     this.props.data
+                                        // );
+                                        if (
+                                            this.props.data &&
+                                            !this.props.isMoving
+                                        ) {
+                                            // console.log("ok sending ref");
+                                            try {
+                                                this.props.setStartTimeRef(
+                                                    elem,
+                                                    this.props.data.order
+                                                );
+                                            } catch (e) {
+                                                // console.warn(
+                                                //     "Failed to set ref for nonexistent realm object"
+                                                // );
+                                            }
+                                        }
+                                    }}
                                     style={[
                                         TaskItemStyle.duration,
                                         TaskListStyle.allChildren,
@@ -626,9 +634,7 @@ class TaskItem extends React.Component {
                                             fontSize: 24
                                         }
                                     ]}
-                                >
-                                    {this.props.data.startTime}
-                                </Text>
+                                />
                             </Animated.View>
                         </View>
                     </TouchableOpacity>
