@@ -25,6 +25,7 @@ import { NavigationActions, Header } from "react-navigation";
 import Autocomplete from "react-native-autocomplete-input";
 import { isIphoneX } from "react-native-iphone-x-helper";
 
+import { minuteRange, hourRange } from "../data/constants";
 import realm from "../data/DataSchemas";
 import LabeledInput from "../components/labeled-input";
 import LabeledDurationInput from "../components/labeled-duration-input";
@@ -38,7 +39,12 @@ import { CheckBox, Container, StyleProvider } from "native-base";
 import getTheme from "../../native-base-theme/components";
 import material from "../../native-base-theme/variables/material";
 import AwesomeAlert from "react-native-awesome-alerts";
-import { formatDuration } from "../util/date_utils";
+import {
+    formatDuration,
+    calcWholeHours,
+    calcMinutes
+} from "../util/date_utils";
+import PickerActionSheet from "../components/picker-action-sheet";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -119,7 +125,8 @@ class TaskDetail extends Component {
                 keyboardHeight: 0,
                 showDurationInfo: false,
                 setAsDefault: false,
-                currNameHasMatch: false
+                currNameHasMatch: false,
+                showDurationPicker: false
             };
             // console.log(this.state.alarmTask);
         } else {
@@ -152,7 +159,8 @@ class TaskDetail extends Component {
                 newTask: false,
                 showDurationInfo: false,
                 setAsDefault: false,
-                currNameHasMatch: true
+                currNameHasMatch: true,
+                showDurationPicker: false
             };
         }
 
@@ -181,6 +189,12 @@ class TaskDetail extends Component {
         console.debug("AlarmDetail: componentWillUnmount");
         this.removeKeyboardListeners();
     }
+
+    _createDurationData = () => {
+        return hourRange().map(function(hour) {
+            return { [hour]: minuteRange() };
+        });
+    };
 
     addKeyboardListeners() {
         this.keyboardWillShowSub = Keyboard.addListener(
@@ -440,7 +454,7 @@ class TaskDetail extends Component {
         console.debug("Task duration changed: ", duration);
         const updatedAlmTask = this.state.alarmTask;
         updatedAlmTask.duration = duration;
-        this.setState({ alarmTask: updatedAlmTask });
+        this.setState({ alarmTask: updatedAlmTask, showDurationPicker: false });
     }
 
     /* Updates the AlarmTask model on this screen using the Task selected from the selection dropdown, then updates the UI
@@ -567,9 +581,14 @@ class TaskDetail extends Component {
         this.setState({ setAsDefault: value });
     };
 
+    _onPickerConfirm = pickedValues => {
+        let durationSecs = pickedValues[0] * 3600 + pickedValues[1] * 60;
+        this._onTaskDurationChanged(durationSecs);
+    };
+
     render() {
         console.log("Render TaskDetail.");
-        console.log("this.state", this.state);
+        // console.log("this.state", this.state);
 
         let statusBarHeight =
             Platform.OS == "android" ? StatusBar.currentHeight : 20;
@@ -579,8 +598,10 @@ class TaskDetail extends Component {
             HEADER_HEIGHT -
             AUTOCP_INPUT_HEIGHT;
 
-        console.log("maxHeight", maxHeight_autocomplete);
+        // console.log("maxHeight", maxHeight_autocomplete);
 
+        let hours = calcWholeHours(this.state.alarmTask.duration);
+        let minutes = calcMinutes(this.state.alarmTask.duration, hours);
         // console.log("this.currName", this.currName);
 
         let durationDisplayed = this.state.alarmTask.duration
@@ -623,7 +644,7 @@ class TaskDetail extends Component {
                         </View>
                     </KeyboardAvoidingView>
                     <Text style={[TextStyle.labelText, Styles.fieldLabelText]}>
-                        TASK
+                        Task
                     </Text>
                     <Autocomplete
                         placeholder="Take a shower..."
@@ -651,15 +672,8 @@ class TaskDetail extends Component {
                             margin: 0,
                             borderLeftWidth: 0,
                             borderRightWidth: 0,
-                            // maxHeight:
-                            //     SCREEN_HEIGHT -
-                            //     HEADER_HEIGHT -
-                            //     AUTOCP_INPUT_HEIGHT -
-                            //     this.xtraKeyboardHeight -
-                            //     this.state.keyboardHeight
                             maxHeight: maxHeight_autocomplete
                         }}
-                        // listStyle={[Styles.suggestionsContainer]}
                     />
 
                     <View
@@ -679,7 +693,7 @@ class TaskDetail extends Component {
                         }}
                     >
                         <LabeledDurationInput
-                            labelText="DURATION"
+                            labelText="Duration"
                             time={durationDisplayed}
                             onChange={this._onTaskDurationChanged.bind(this)}
                             inputFontSize={scaleByFactor(36, 0.55)}
@@ -689,6 +703,9 @@ class TaskDetail extends Component {
                                 // backgroundColor: "red",
                                 flex: 2
                             }}
+                            showDurationPicker={() =>
+                                this.setState({ showDurationPicker: true })
+                            }
                         />
                         {this.state.currNameHasMatch &&
                             this.state.alarmTask.duration !=
@@ -762,6 +779,18 @@ class TaskDetail extends Component {
                             )}
                     </View>
                 </View>
+                {this.state.showDurationPicker && (
+                    <PickerActionSheet
+                        initialValues={[hours, minutes]}
+                        onValueSelected={this._onPickerConfirm}
+                        onPressedCancel={() =>
+                            this.setState({ showDurationPicker: false })
+                        }
+                        dataSets={[hourRange(), minuteRange()]}
+                        dataLabels={["hours", "min"]}
+                        title={"Duration"}
+                    />
+                )}
                 {/* <View style={{ position: "absolute", height: 1, backgroundColor: "black", left: 0, right:0, top: 140 }} /> */}
                 {this.state.showDurationInfo && (
                     <AwesomeAlert

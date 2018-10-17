@@ -55,6 +55,7 @@ import * as DateUtils from "../util/date_utils";
 import { ALARM_STATES } from "../data/constants";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15];
 
 let _menuIconAnim = new Animated.Value(0);
 
@@ -1350,8 +1351,7 @@ class AlarmDetail extends Component {
     _saveSnoozeTime(value) {
         realm.write(() => {
             let { alarm } = this.state;
-
-            alarm.snoozeTime = value;
+            alarm.snoozeTime = value[0];
         });
         this.setState({ showSnoozePicker: false });
     }
@@ -2169,7 +2169,10 @@ class AlarmDetail extends Component {
                                 // onScroll={this.onScrollTaskList.bind(this)}
                                 // onEndReached={this.onEndReachedTaskList.bind(this)}
                             />
-                            <EdgeSwiper animValue={this.startTimesHandleAnim} onAnimComplete={this.onCompleteGestureAnimation}/>
+                            <EdgeSwiper
+                                animValue={this.startTimesHandleAnim}
+                                onAnimComplete={this.onCompleteGestureAnimation}
+                            />
                         </LinearGradient>
                     </View>
                     <this.AnimatedHandle
@@ -2384,7 +2387,7 @@ class AlarmDetail extends Component {
                     />
                 </Animated.View>
                 {/* Measuring line -- dev view to check whether views are aligned properly */}
-                <View
+                {/* <View
                     style={{
                         position: "absolute",
                         left: 0,
@@ -2393,7 +2396,7 @@ class AlarmDetail extends Component {
                         height: 2,
                         backgroundColor: "red"
                     }}
-                />
+                /> */}
                 {this.state.isDatePickerVisible && (
                     <DateTimePicker
                         date={moment
@@ -2409,10 +2412,12 @@ class AlarmDetail extends Component {
                 )}
                 {this.state.showSnoozePicker && (
                     <PickerActionSheet
-                        initialValue={this.state.alarm.snoozeTime}
+                        initialValues={[this.state.alarm.snoozeTime]}
                         onValueSelected={this._saveSnoozeTime}
                         onPressedCancel={this._closeSnoozeTimePicker}
-                        backdrop={fullScreenTouchableBackdrop}
+                        dataSets={[snoozeTimeOptions]}
+                        dataLabels={["minutes"]}
+                        title={"Snooze Time"}
                     />
                 )}
             </ScrollView>

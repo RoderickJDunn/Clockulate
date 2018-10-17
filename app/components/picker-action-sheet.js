@@ -10,18 +10,16 @@ import {
     Animated,
     Platform
 } from "react-native";
-import {
-    WheelPicker,
-} from "react-native-wheel-picker-android";
+import { WheelPicker } from "react-native-wheel-picker-android";
+import TouchableBackdrop from "../components/touchable-backdrop";
 
 import Colors from "../styles/colors";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15];
-
 class PickerActionSheet extends React.Component {
     _pickerAnim = new Animated.Value(0);
+    actionSheetWidth = SCREEN_WIDTH - 34;
 
     _pickerTransform = {
         transform: [
@@ -37,7 +35,7 @@ class PickerActionSheet extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            value: this.props.initialValue
+            currValues: this.props.initialValues
         };
     }
 
@@ -47,6 +45,16 @@ class PickerActionSheet extends React.Component {
             duration: 200,
             useNativeDriver: true
         }).start();
+    }
+
+    animateExit(onAnimEnded, arg) {
+        Animated.timing(this._pickerAnim, {
+            toValue: 0,
+            duration: 150,
+            useNativeDriver: true
+        }).start(() => {
+            onAnimEnded(arg);
+        });
     }
 
     componentWillUnmount() {
@@ -59,77 +67,207 @@ class PickerActionSheet extends React.Component {
     }
 
     render() {
+        let hasMultipleDatasets = this.props.dataSets.length > 1;
+        let pickerWidth = hasMultipleDatasets
+            ? this.actionSheetWidth * 0.5
+            : this.actionSheetWidth;
         return (
-            <View style={{ flex: 1 }}>
-                {this.props.backdrop}
+            <View style={StyleSheet.absoluteFill}>
+                <TouchableBackdrop
+                    style={{
+                        position: "absolute",
+                        top: 0, // - (isIphoneX() ? 15 : 0),
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        backgroundColor: "rgba(0, 0, 0, 0.4)"
+                    }}
+                    onPress={() => {
+                        this.animateExit(this.props.onPressedCancel);
+                    }}
+                />
                 <Animated.View
                     style={[styles.container, this._pickerTransform]}
                 >
                     <View style={styles.pickerUpperWrapper}>
                         <View style={styles.pickerHeader}>
-                            <Text style={styles.headerText}>Snooze Time</Text>
+                            <Text style={styles.headerText}>
+                                {this.props.title}
+                            </Text>
                         </View>
                         <View style={styles.headerSeparator} />
-                        <View style={styles.pickerWrapper}>
-                            {Platform.OS == "ios" ? (
-                                <Picker
-                                    selectedValue={this.state.value}
-                                    style={{
-                                        height: 200
-                                        // backgroundColor: "blue"
-                                    }}
-                                    onValueChange={(itemValue, itemIndex) =>
-                                        this.setState({ value: itemValue })
-                                    }
-                                    itemStyle={{ height: 200 }}
-                                >
-                                    {snoozeTimeOptions.map(time => {
-                                        return (
-                                            <Picker.Item
-                                                key={time}
-                                                label={time.toString()}
-                                                value={time}
-                                            />
-                                        );
-                                    })}
-                                </Picker>
-                            ) : (
-                                <WheelPicker
-                                    selectedItemPosition={snoozeTimeOptions.indexOf(this.state.value)}
-                                    onItemSelected={event =>
-                                        this.setState({ value: event.data })
-                                    }
-                                    isCurved
-                                    data={snoozeTimeOptions}
-                                    style={{
-                                        height: 200
-                                        // backgroundColor: "blue"
-                                    }}
-                                />
-                            )}
+                        <View style={styles.pickerGroup}>
                             <View
-                                style={{
-                                    position: "absolute",
-                                    left: "65%",
-                                    top: 0,
-                                    bottom: 0,
-                                    width: "35%",
-                                    alignContent: "center",
-                                    justifyContent: "center"
-                                    // backgroundColor: "red",
-                                }}
+                                style={[
+                                    styles.pickerWrapper,
+                                    !hasMultipleDatasets
+                                        ? { flex: 1 }
+                                        : undefined
+                                ]}
                             >
-                                <Text>Minutes</Text>
+                                <View
+                                    style={{
+                                        position: "absolute",
+                                        left: "65%",
+                                        top: 0,
+                                        bottom: 0,
+                                        alignContent: "center",
+                                        justifyContent: "center"
+                                        // backgroundColor: "red"
+                                    }}
+                                >
+                                    <Text style={{ fontSize: 18 }}>
+                                        {this.props.dataLabels[0]}
+                                    </Text>
+                                </View>
+                                {Platform.OS == "ios" ? (
+                                    <Picker
+                                        selectedValue={this.state.currValues[0]}
+                                        style={{
+                                            height: 200,
+                                            width: pickerWidth
+                                            // backgroundColor: "blue"
+                                        }}
+                                        onValueChange={(itemValue, itemIndex) =>
+                                            this.setState({
+                                                currValues: [
+                                                    itemValue,
+                                                    this.state.currValues[1]
+                                                ]
+                                            })
+                                        }
+                                        itemStyle={{ height: 200 }}
+                                    >
+                                        {this.props.dataSets[0].map(time => {
+                                            return (
+                                                <Picker.Item
+                                                    key={time}
+                                                    label={time.toString()}
+                                                    value={time}
+                                                />
+                                            );
+                                        })}
+                                    </Picker>
+                                ) : (
+                                    <WheelPicker
+                                        selectedItemPosition={this.props.dataSets[0].indexOf(
+                                            this.state.currValues[0]
+                                        )}
+                                        onItemSelected={event =>
+                                            this.setState({
+                                                currValues: [
+                                                    event.data,
+                                                    this.state.currValues[1]
+                                                ]
+                                            })
+                                        }
+                                        isCurved
+                                        data={this.props.dataSets[0]}
+                                        style={{
+                                            height: 200,
+                                            width: pickerWidth
+                                            // backgroundColor: "blue"
+                                        }}
+                                    />
+                                )}
                             </View>
+
+                            {this.props.dataLabels.length > 1 && (
+                                <View
+                                    style={[
+                                        styles.pickerWrapper,
+                                        { marginRight: 30 }
+                                    ]}
+                                >
+                                    <View
+                                        style={{
+                                            position: "absolute",
+                                            left: "65%",
+                                            top: 0,
+                                            bottom: 0,
+                                            // width: "30%",
+                                            alignContent: "center",
+                                            justifyContent: "center"
+                                            // backgroundColor: "red",
+                                        }}
+                                    >
+                                        <Text style={{ fontSize: 18 }}>
+                                            {this.props.dataLabels[1]}
+                                        </Text>
+                                    </View>
+                                    {Platform.OS == "ios" ? (
+                                        <Picker
+                                            selectedValue={
+                                                this.state.currValues[1]
+                                            }
+                                            style={{
+                                                height: 200,
+                                                width: pickerWidth,
+                                                backgroundColor: "transparent"
+                                            }}
+                                            onValueChange={(
+                                                itemValue,
+                                                itemIndex
+                                            ) =>
+                                                this.setState({
+                                                    currValues: [
+                                                        this.state
+                                                            .currValues[0],
+                                                        itemValue
+                                                    ]
+                                                })
+                                            }
+                                            itemStyle={{ height: 200 }}
+                                        >
+                                            {this.props.dataSets[1].map(
+                                                time => {
+                                                    return (
+                                                        <Picker.Item
+                                                            key={time}
+                                                            label={time.toString()}
+                                                            value={time}
+                                                        />
+                                                    );
+                                                }
+                                            )}
+                                        </Picker>
+                                    ) : (
+                                        <WheelPicker
+                                            selectedItemPosition={this.props.dataSets[1].indexOf(
+                                                this.state.currValues[1]
+                                            )}
+                                            onItemSelected={event =>
+                                                this.setState({
+                                                    currValues: [
+                                                        this.state
+                                                            .currValues[0],
+                                                        event.data
+                                                    ]
+                                                })
+                                            }
+                                            isCurved
+                                            data={this.props.dataSets[1]}
+                                            style={{
+                                                height: 200,
+                                                width: pickerWidth
+                                                // backgroundColor: "blue"
+                                            }}
+                                        />
+                                    )}
+                                </View>
+                            )}
                         </View>
                     </View>
+
                     <View style={styles.actionSheetBtnRowWrap}>
                         <View style={styles.actionSheetBtnWrap}>
                             <TouchableOpacity
                                 style={styles.actionSheetBtn}
                                 onPress={() => {
                                     // console.log("Pressed cancel");
-                                    this.props.onPressedCancel();
+                                    this.animateExit(
+                                        this.props.onPressedCancel
+                                    );
                                 }}
                             >
                                 <Text style={styles.buttonText}>Cancel</Text>
@@ -140,8 +278,9 @@ class PickerActionSheet extends React.Component {
                                 style={styles.actionSheetBtn}
                                 onPress={() => {
                                     // console.log("Pressed confirm");
-                                    this.props.onValueSelected(
-                                        this.state.value
+                                    this.animateExit(
+                                        this.props.onValueSelected,
+                                        this.state.currValues
                                     );
                                 }}
                             >
@@ -160,6 +299,7 @@ const styles = StyleSheet.create({
         top: SCREEN_HEIGHT * 0.37,
         height: SCREEN_HEIGHT * 0.6,
         width: SCREEN_WIDTH,
+        minHeight: 250,
         padding: 17
     },
     pickerUpperWrapper: {
@@ -183,14 +323,21 @@ const styles = StyleSheet.create({
         height: 0.3,
         backgroundColor: "#AAA"
     },
-    pickerWrapper: {
+    pickerGroup: {
         flex: 0.8,
-        justifyContent: "center",
         borderRadius: 15,
         borderTopRightRadius: 0,
         borderTopLeftRadius: 0,
-        backgroundColor: Colors.backgroundBright
-        // backgroundColor: "blue",
+        backgroundColor: Colors.backgroundBright,
+        flexDirection: "row",
+        justifyContent: "space-between"
+    },
+    pickerWrapper: {
+        flex: 0.5,
+        justifyContent: "center",
+        alignContent: "center",
+        alignItems: "center",
+        flexDirection: "row"
     },
     actionSheetBtnRowWrap: {
         flex: 0.15,
