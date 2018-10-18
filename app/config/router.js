@@ -215,14 +215,16 @@ const CustomDrawerContentComponent = props => {
                 }}
             >
                 <LinearGradient
-                    start={{ x: 0.8, y: -4 }}
-                    end={{ x: 0.6, y: 1.0 }}
+                    start={{ x: 0.2, y: -2 }}
+                    end={{ x: 0.8, y: 2 }}
                     // colors={[
                     //     "rgba(255, 255, 150, 0.7)",
                     //     "rgba(255, 255, 50, 0.8)"
                     // ]}
-                    colors={[Colors.brandLightPurple, "#FFFFFF"]}
+                    // colors={[Colors.brandLightPurple, "#FFFFFF"]}
                     // colors={["rgba(255, 255, 25, 0.9)", "#FFFFFF"]}
+                    // colors={["#000", Colors.brandDarkPurple]}
+                    colors={["#9F9F9F", Colors.brandDarkPurple]}
                     style={[
                         {
                             padding: 15
@@ -254,8 +256,8 @@ const CustomDrawerContentComponent = props => {
                         <Text
                             style={{
                                 fontSize: 33,
-                                // color: "#D9D9D9",
-                                color: "#272727",
+                                color: Colors.brandSuperLightPurple,
+                                // color: "#272727",
                                 // color: "yellow",
                                 fontFamily: "Quesha",
                                 fontWeight: "bold",
@@ -289,7 +291,7 @@ const CustomDrawerContentComponent = props => {
                         let { index } = scene;
                         let shade = "transparent";
                         if (index % 2 != 0) {
-                            shade = "rgba(230, 0, 230, 0.03)";
+                            shade = "rgba(255, 255, 255, 0.05)";
                         }
                         console.log("created icon");
                         return (
