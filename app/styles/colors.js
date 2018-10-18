@@ -4,6 +4,7 @@
 
 const Colors = {
     brandSuperLightPurple: "#bcb4ca",
+    brandVeryLightPurple: "#a297b5",
     brandLightPurple: "#6D6088",
     brandDarkPurple: "#220957",
     // brandLightOpp: "#10ac84",

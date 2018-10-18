@@ -3,9 +3,16 @@
  */
 
 import React from "react";
-import { View, Text, Button, TouchableOpacity } from "react-native";
-import { StackNavigator, DrawerNavigator } from "react-navigation";
+import { View, Text, Button, ScrollView, Image } from "react-native";
+import {
+    createStackNavigator,
+    createDrawerNavigator,
+    SafeAreaView,
+    DrawerItems
+} from "react-navigation";
 import { Icon } from "react-native-elements";
+import MaterialIcon from "react-native-vector-icons/MaterialIcons";
+import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
 
 import Alarms from "../screens/Alarms";
 import AlarmDetail from "../screens/AlarmDetail";
@@ -14,6 +21,11 @@ import TaskDetail from "../screens/TaskDetail";
 import Settings from "../screens/Settings";
 import About from "../screens/About";
 import Sounds from "../screens/Sounds";
+import Upgrade from "../screens/Upgrade";
+import Help from "../screens/Help";
+import LinearGradient from "react-native-linear-gradient";
+import { isIphoneX } from "react-native-iphone-x-helper";
+import MenuItem from "../components/menu-item";
 
 import Colors from "../styles/colors";
 import { scale, scaleByFactor } from "../util/font-scale";
@@ -109,11 +121,31 @@ const otherDrawerNavOptions = title => {
     });
 };
 
-function fakePage() {
-    return View;
+function renderMenuIcon({ type, name, size }) {
+    if (type == "MaterialIcon") {
+        return (
+            <MaterialIcon
+                name={name}
+                color={Colors.brandVeryLightPurple}
+                underlayColor={Colors.brandDarkGrey}
+                size={size}
+                // style={{ flex: 0.1 }}
+            />
+        );
+    } else if (type == "FontAwesomeIcon") {
+        return (
+            <FontAwesomeIcon
+                name={name}
+                color={Colors.brandVeryLightPurple}
+                underlayColor={Colors.brandDarkGrey}
+                size={size}
+                // style={{ flex: 0.1 }}
+            />
+        );
+    }
 }
 
-const MainStack = StackNavigator(
+const MainStack = createStackNavigator(
     {
         AlarmsList: {
             screen: Alarms,
@@ -144,13 +176,192 @@ const MainStack = StackNavigator(
     navigationConfig
 );
 
-export const DrawerRoot = DrawerNavigator(
+let screenMenuIcons = [
+    { type: "MaterialIcon", name: "access-alarm", size: 24 },
+    { type: "FontAwesomeIcon", name: "magic", size: 22 },
+    { type: "MaterialIcon", name: "settings", size: 22 },
+    { type: "MaterialIcon", name: "help", size: 22 },
+    { type: "FontAwesomeIcon", name: "info-circle", size: 22 }
+];
+// NICE_COLOR: #234853
+
+const CustomDrawerContentComponent = props => {
+    // console.log("props", props);
+    const color = props.focused
+        ? props.activeTintColor
+        : props.inactiveTintColor;
+
+    let spacer = <View style={{ minWidth: 15 }} />;
+
+    return (
+        <LinearGradient
+            start={{ x: 0.8, y: 0 }}
+            end={{ x: 0.6, y: 1.96 }}
+            // colors={["rgba(255, 255, 0, 1)", "rgba(255, 255, 150, 1)"]}
+            // colors={[Colors.brandLightPurple, "#FFFFFF"]}
+            colors={[Colors.brandDarkPurple, "#000"]}
+            style={[
+                {
+                    flex: 1
+                }
+            ]}
+        >
+            <SafeAreaView
+                style={{ flex: 1 }}
+                forceInset={{
+                    top: "never",
+                    horizontal: "never",
+                    bottom: "always"
+                }}
+            >
+                <LinearGradient
+                    start={{ x: 0.8, y: -4 }}
+                    end={{ x: 0.6, y: 1.0 }}
+                    // colors={[
+                    //     "rgba(255, 255, 150, 0.7)",
+                    //     "rgba(255, 255, 50, 0.8)"
+                    // ]}
+                    colors={[Colors.brandLightPurple, "#FFFFFF"]}
+                    // colors={["rgba(255, 255, 25, 0.9)", "#FFFFFF"]}
+                    style={[
+                        {
+                            padding: 15
+                            // backgroundColor: "rgba(255, 255, 25, 0.9)",
+                            // backgroundColor: "rgba(255, 255, 255, 0.1)"
+                            // backgroundColor: Colors.brandDarkPurple
+                            // backgroundColor: Colors.brandDarkGrey
+                            // opacity: 0.5
+                            // paddingTop: 30,
+                            // height: 90
+                        }
+                    ]}
+                    // overflow="hidden"
+                >
+                    {isIphoneX() ? (
+                        <View
+                            style={{
+                                height: 30
+                            }}
+                        />
+                    ) : null}
+                    <View
+                        style={{
+                            height: 65,
+                            justifyContent: "flex-end"
+                            // alignItems: "center"
+                        }}
+                    >
+                        <Text
+                            style={{
+                                fontSize: 33,
+                                // color: "#D9D9D9",
+                                color: "#272727",
+                                // color: "yellow",
+                                fontFamily: "Quesha",
+                                fontWeight: "bold",
+                                letterSpacing: 3,
+                                opacity: 1,
+                                textShadowColor: "black",
+                                textShadowOffset: { width: 10, height: 5 }
+                            }}
+                        >
+                            {/*  cloc
+                            <Text style={{ fontSize: 55 }}>k</Text>
+                            ulate */}
+                            Clockulate
+                        </Text>
+                        {/* <Image
+                            style={{
+                                height: 65,
+                                width: 65,
+                                position: "absolute",
+                                right: 10,
+                                top: 30
+                                // transform: [{ rotate: "25deg" }]
+                            }}
+                            source={require("../img/AppIcon_NoBgd_Clockulate.png")}
+                        /> */}
+                    </View>
+                </LinearGradient>
+                <DrawerItems
+                    {...props}
+                    getLabel={scene => {
+                        let { index } = scene;
+                        let shade = "transparent";
+                        if (index % 2 != 0) {
+                            shade = "rgba(230, 0, 230, 0.03)";
+                        }
+                        console.log("created icon");
+                        return (
+                            <View
+                                style={{
+                                    flex: 1,
+                                    backgroundColor: shade,
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    height: 50,
+                                    paddingLeft: 10
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        flex: 0.15,
+                                        alignContent: "center",
+                                        alignItems: "center"
+                                    }}
+                                >
+                                    {renderMenuIcon(screenMenuIcons[index])}
+                                </View>
+                                {spacer}
+                                <Text
+                                    style={[
+                                        { color },
+                                        props.labelStyle,
+                                        props.extraLabelStyle,
+                                        { flex: 0.85 }
+                                    ]}
+                                >
+                                    {props.getLabel(scene)}
+                                </Text>
+                            </View>
+                        );
+                    }}
+                />
+            </SafeAreaView>
+
+            <Text
+                style={{
+                    position: "absolute",
+                    alignSelf: "center",
+                    bottom: isIphoneX() ? 25 : 15,
+                    color: Colors.brandVeryLightPurple
+                }}
+            >
+                Version 0.2
+            </Text>
+        </LinearGradient>
+    );
+};
+
+export const DrawerRoot = createDrawerNavigator(
     {
         Alarms: {
             screen: MainStack
         },
+        Upgrade: {
+            screen: createStackNavigator(
+                {
+                    SettingsScreen: {
+                        screen: Upgrade
+                    }
+                },
+                {
+                    navigationOptions: otherDrawerNavOptions("Upgrade")
+                }
+            )
+        },
         Settings: {
-            screen: StackNavigator(
+            screen: createStackNavigator(
                 {
                     SettingsScreen: {
                         screen: Settings
@@ -161,8 +372,20 @@ export const DrawerRoot = DrawerNavigator(
                 }
             )
         },
+        Help: {
+            screen: createStackNavigator(
+                {
+                    SettingsScreen: {
+                        screen: Help
+                    }
+                },
+                {
+                    navigationOptions: otherDrawerNavOptions("Help")
+                }
+            )
+        },
         About: {
-            screen: StackNavigator(
+            screen: createStackNavigator(
                 {
                     AboutScreen: {
                         screen: About
@@ -175,18 +398,27 @@ export const DrawerRoot = DrawerNavigator(
         }
     },
     {
-        drawerWidth: 250,
+        // drawerWidth: 250,
         initialRouteName: "Alarms",
         contentOptions: {
-            activeTintColor: "#e91e63",
+            activeBackgroundColor: "transparent",
+            activeTintColor: Colors.brandLightPurple,
             itemsContainerStyle: {
                 marginVertical: 0
             },
             iconContainerStyle: {
                 opacity: 1
+            },
+            labelStyle: {
+                fontFamily: "Quesha",
+                fontSize: 25,
+                letterSpacing: 2,
+                // color: "#D9D9D9",
+                color: Colors.brandVeryLightPurple
             }
         },
         headerMode: "screen",
-        order: ["Alarms", "Settings", "About"]
+        order: ["Alarms", "Upgrade", "Settings", "Help", "About"],
+        contentComponent: CustomDrawerContentComponent
     }
 );
