@@ -59,6 +59,17 @@ const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15];
 
 let _menuIconAnim = new Animated.Value(0);
 
+/* Layout factors */
+const NON_CLOCK_HEIGHT_FACTOR = 1.15; // multiply this by SCREEN_HEIGHT to get height of non-clock area
+const TASK_AREA_TL_VIEW_FLEX_FACTOR = 0.83; // flex value for TaskArea (within non-clock area) in TaskList view
+const TASK_AREA_AUTO_VIEW_FLEX_FACTOR = 0.4; // flex value for TaskArea (within non-clock area) in Auto view
+const TASK_HEAD_TL_VIEW_FLEX_FACTOR = 0.06; // flex value for TaskHeader (within TaskArea) in TaskList view
+const TASK_HEAD_AUTO_VIEW_FLEX_FACTOR = 0.15; // flex value for Taskheader (within TaskArea) in Auto view
+const TASK_LIST_TL_VIEW_FLEX_FACTOR = 1 - TASK_HEAD_TL_VIEW_FLEX_FACTOR; // flex value for TaskList (within TaskArea) in TaskList view
+const TASK_LIST_AUTO_VIEW_FLEX_FACTOR = 1 - TASK_HEAD_AUTO_VIEW_FLEX_FACTOR; // flex value for TaskList (within TaskArea) in Auto view
+
+const TASK_LIST_TL_VIEW_POS_FACTOR = 0.18; // multiple this by SCREEN_HEIGHT to get the position of TaskList from top of screen in TaskList View
+const TASK_LIST_AUTO_VIEW_POS_FACTOR = 0.6; // multiple this by SCREEN_HEIGHT to get the position of TaskList from top of screen in Auto view
 class AlarmDetail extends Component {
     static navigationOptions = ({ navigation }) => {
         let menuIsOpen = navigation.state.params.menuIsOpen;
@@ -135,6 +146,28 @@ class AlarmDetail extends Component {
 
     xtraKeyboardHeight = 0; // this is always 0, except on iPhone X it is 34
     _animKeyboardHeight = new Animated.Value(0);
+
+    tskListDimsTLView = {
+        width: SCREEN_WIDTH,
+        height:
+            SCREEN_HEIGHT *
+            NON_CLOCK_HEIGHT_FACTOR *
+            TASK_AREA_TL_VIEW_FLEX_FACTOR *
+            TASK_LIST_TL_VIEW_FLEX_FACTOR,
+        pageX: 0,
+        pageY: SCREEN_HEIGHT * TASK_LIST_TL_VIEW_POS_FACTOR
+    };
+
+    tskListDimsAutoView = {
+        width: SCREEN_WIDTH,
+        height:
+            SCREEN_HEIGHT *
+            NON_CLOCK_HEIGHT_FACTOR *
+            TASK_AREA_AUTO_VIEW_FLEX_FACTOR *
+            TASK_LIST_AUTO_VIEW_FLEX_FACTOR,
+        pageX: 0,
+        pageY: SCREEN_HEIGHT * TASK_LIST_AUTO_VIEW_POS_FACTOR
+    };
 
     AnimatedAlarmLabel = Animated.createAnimatedComponent(TextInput);
     AnimatedHandle = Animated.createAnimatedComponent(TouchableOpacity);
@@ -225,14 +258,9 @@ class AlarmDetail extends Component {
                     menuIsOpen: false,
                     showSnoozePicker: false,
                     durationsVisible: true,
-                    taskAreaFlex: 0.4,
-                    taskHeaderFlex: 0.15,
-                    taskListDimensions: {
-                        width: SCREEN_WIDTH,
-                        height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.85, // TODO: Extract layout values into constants, then create variables for the value of these calculations
-                        pageX: 0,
-                        pageY: SCREEN_HEIGHT * 0.6 // TODO: Extract layout values into constants, the create variables for the value of these calculations
-                    }
+                    taskAreaFlex: TASK_AREA_AUTO_VIEW_FLEX_FACTOR,
+                    taskHeaderFlex: TASK_HEAD_AUTO_VIEW_FLEX_FACTOR,
+                    taskListDimensions: this.tskListDimsAutoView
                 };
                 // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
@@ -251,14 +279,9 @@ class AlarmDetail extends Component {
                 menuIsOpen: false,
                 showSnoozePicker: false,
                 durationsVisible: true,
-                taskAreaFlex: 0.4,
-                taskHeaderFlex: 0.15,
-                taskListDimensions: {
-                    width: SCREEN_WIDTH,
-                    height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.85, // TODO: Extract layout values into constants, then create variables for the value of these calculations
-                    pageX: 0,
-                    pageY: SCREEN_HEIGHT * 0.6 // TODO: Extract layout values into constants, the create variables for the value of these calculations
-                }
+                taskAreaFlex: TASK_AREA_AUTO_VIEW_FLEX_FACTOR,
+                taskHeaderFlex: TASK_HEAD_AUTO_VIEW_FLEX_FACTOR,
+                taskListDimensions: this.tskListDimsAutoView
             };
         }
 
@@ -1209,15 +1232,9 @@ class AlarmDetail extends Component {
         console.log("Setting taskArea to LARGE");
         // first just set new height
         this.setState({
-            fieldAreaFlex: 0.17,
-            taskAreaFlex: 0.83,
-            taskHeaderFlex: 0.06,
-            taskListDimensions: {
-                width: SCREEN_WIDTH,
-                height: SCREEN_HEIGHT * 1.15 * 0.83 * 0.94, // TODO: Extract layout values into constants, the create variables for the value of these calculations
-                pageX: 0,
-                pageY: SCREEN_HEIGHT * 0.18 // TODO: Extract layout values into constants, the create variables for the value of these calculations
-            },
+            taskAreaFlex: TASK_AREA_TL_VIEW_FLEX_FACTOR,
+            taskHeaderFlex: TASK_HEAD_TL_VIEW_FLEX_FACTOR,
+            taskListDimensions: this.tskListDimsTLView,
             ...nextState
         });
     }
@@ -1235,15 +1252,9 @@ class AlarmDetail extends Component {
         console.log("Setting taskArea to small");
         // This should be in calc mode
         this.setState({
-            fieldAreaFlex: 0.17,
-            taskAreaFlex: 0.4,
-            taskHeaderFlex: 0.15,
-            taskListDimensions: {
-                width: SCREEN_WIDTH,
-                height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.85, // TODO: Extract layout values into constants, then create variables for the value of these calculations
-                pageX: 0,
-                pageY: SCREEN_HEIGHT * 0.6 // TODO: Extract layout values into constants, the create variables for the value of these calculations
-            },
+            taskAreaFlex: TASK_AREA_AUTO_VIEW_FLEX_FACTOR,
+            taskHeaderFlex: TASK_HEAD_AUTO_VIEW_FLEX_FACTOR,
+            taskListDimensions: this.tskListDimsAutoView,
             ...nextState
         });
     }
@@ -1439,7 +1450,7 @@ class AlarmDetail extends Component {
         // 4. idx * TaskItem_height
         let tasksHeaderHeight =
             SCREEN_HEIGHT *
-            1.15 *
+            NON_CLOCK_HEIGHT_FACTOR *
             this.state.taskAreaFlex *
             this.state.taskHeaderFlex;
         let clockHeight = this._viewIdx == 2 ? 0 : SCREEN_HEIGHT * 0.4;
@@ -1734,7 +1745,7 @@ class AlarmDetail extends Component {
                     dragEnabled={!this.state.disableDrag}
                     boundaries={{
                         top: -SCREEN_HEIGHT * 0.45, // 0.7 before
-                        bottom: this.snapNormal * 1.15,
+                        bottom: this.snapNormal * NON_CLOCK_HEIGHT_FACTOR,
                         bounce: 0.3
                     }}
                     dragWithSpring={
@@ -1898,12 +1909,8 @@ class AlarmDetail extends Component {
 
                         <View
                             style={[
-                                styles.fieldsContainer,
-                                {
-                                    flex: this.state.fieldAreaFlex || 0.17
-                                    // backgroundColor: "blue"
-                                }
-                                // { flex: 0 }
+                                styles.fieldsContainer
+                                // {backgroundColor: "blue"}
                             ]}
                         >
                             <LabeledInput
@@ -2044,7 +2051,7 @@ class AlarmDetail extends Component {
                                 style={[
                                     styles.taskListHeader,
                                     {
-                                        flex: this.state.taskHeaderFlex, // == (SCREEN_HEIGHT * 1.15) * this.state.taskAreaFlex * this.state.taskHeaderFlex
+                                        flex: this.state.taskHeaderFlex, // == (SCREEN_HEIGHT * NON_CLOCK_HEIGHT_FACTOR) * this.state.taskAreaFlex * this.state.taskHeaderFlex
                                         backgroundColor: "transparent"
                                         // backgroundColor: "green"
                                     }
@@ -2462,7 +2469,7 @@ const styles = StyleSheet.create({
     },
     nonClockWrapper: {
         alignItems: "stretch",
-        height: SCREEN_HEIGHT * 1.15,
+        height: SCREEN_HEIGHT * NON_CLOCK_HEIGHT_FACTOR,
         top: SCREEN_HEIGHT * 0.9
         // borderWidth: 3,
         // borderColor: "blue"
@@ -2480,6 +2487,7 @@ const styles = StyleSheet.create({
         // backgroundColor: "yellow",
         padding: scaleByFactor(10, 0.4),
         paddingBottom: 8,
+        flex: 0.17,
         borderBottomColor: "#e9e9e9"
         // borderBottomWidth: 1
     },
