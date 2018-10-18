@@ -229,7 +229,7 @@ class AlarmDetail extends Component {
                     taskHeaderFlex: 0.15,
                     taskListDimensions: {
                         width: SCREEN_WIDTH,
-                        height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.95, // TODO: Extract layout values into constants, then create variables for the value of these calculations
+                        height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.85, // TODO: Extract layout values into constants, then create variables for the value of these calculations
                         pageX: 0,
                         pageY: SCREEN_HEIGHT * 0.6 // TODO: Extract layout values into constants, the create variables for the value of these calculations
                     }
@@ -255,7 +255,7 @@ class AlarmDetail extends Component {
                 taskHeaderFlex: 0.15,
                 taskListDimensions: {
                     width: SCREEN_WIDTH,
-                    height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.95, // TODO: Extract layout values into constants, then create variables for the value of these calculations
+                    height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.85, // TODO: Extract layout values into constants, then create variables for the value of these calculations
                     pageX: 0,
                     pageY: SCREEN_HEIGHT * 0.6 // TODO: Extract layout values into constants, the create variables for the value of these calculations
                 }
@@ -1216,7 +1216,7 @@ class AlarmDetail extends Component {
                 width: SCREEN_WIDTH,
                 height: SCREEN_HEIGHT * 1.15 * 0.83 * 0.94, // TODO: Extract layout values into constants, the create variables for the value of these calculations
                 pageX: 0,
-                pageY: SCREEN_HEIGHT * 0.17 // TODO: Extract layout values into constants, the create variables for the value of these calculations
+                pageY: SCREEN_HEIGHT * 0.18 // TODO: Extract layout values into constants, the create variables for the value of these calculations
             },
             ...nextState
         });
@@ -1240,7 +1240,7 @@ class AlarmDetail extends Component {
             taskHeaderFlex: 0.15,
             taskListDimensions: {
                 width: SCREEN_WIDTH,
-                height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.94, // TODO: Extract layout values into constants, then create variables for the value of these calculations
+                height: SCREEN_HEIGHT * 1.15 * 0.4 * 0.85, // TODO: Extract layout values into constants, then create variables for the value of these calculations
                 pageX: 0,
                 pageY: SCREEN_HEIGHT * 0.6 // TODO: Extract layout values into constants, the create variables for the value of these calculations
             },
