@@ -3,7 +3,14 @@
  */
 
 import React from "react";
-import { View, Text, Button, ScrollView, Image } from "react-native";
+import {
+    View,
+    Text,
+    Button,
+    ScrollView,
+    Image,
+    StyleSheet
+} from "react-native";
 import {
     createStackNavigator,
     createDrawerNavigator,
@@ -29,6 +36,7 @@ import MenuItem from "../components/menu-item";
 
 import Colors from "../styles/colors";
 import { scale, scaleByFactor } from "../util/font-scale";
+import LottieView from "lottie-react-native";
 
 // export const AlarmTabs = TabNavigator({
 //     AlarmDetail: {
@@ -163,7 +171,6 @@ const MainStack = createStackNavigator(
                 headerTitleStyle: {
                     color: Colors.brandLightGrey
                 },
-                headerBackTitle: null
             })
         },
         TaskDetail: {
@@ -206,6 +213,32 @@ const CustomDrawerContentComponent = props => {
                 }
             ]}
         >
+            <View
+                style={{
+                    height: 115,
+                    alignSelf: "stretch",
+                    backgroundColor: "red"
+                }}
+            >
+                <LottieView
+                    source={require("../img/menu_header_v9_e20_g1_h3.json")}
+                    // progress={this.state.animProgress}
+                    resizeMode={"cover"}
+                    // resizeMode={"contain"}
+                    style={[StyleSheet.absoluteFill]}
+                    // style={[StyleSheet.absoluteFill]}
+                    // style={[
+                    //     // StyleSheet.absoluteFill,
+                    //     { height: 115, top: 0 }
+                    // ]}
+                />
+            </View>
+            {/* <View
+                style={[
+                    // StyleSheet.absoluteFill,
+                    { backgroundColor: "red", height: 115, top: 0 }
+                ]}
+            /> */}
             <SafeAreaView
                 style={{ flex: 1 }}
                 forceInset={{
@@ -214,7 +247,7 @@ const CustomDrawerContentComponent = props => {
                     bottom: "always"
                 }}
             >
-                <LinearGradient
+                {/* <LinearGradient
                     start={{ x: 0.2, y: -2 }}
                     end={{ x: 0.8, y: 2 }}
                     // colors={[
@@ -227,7 +260,7 @@ const CustomDrawerContentComponent = props => {
                     colors={["#9F9F9F", Colors.brandDarkPurple]}
                     style={[
                         {
-                            padding: 15
+                            // padding: 15
                             // backgroundColor: "rgba(255, 255, 25, 0.9)",
                             // backgroundColor: "rgba(255, 255, 255, 0.1)"
                             // backgroundColor: Colors.brandDarkPurple
@@ -267,24 +300,10 @@ const CustomDrawerContentComponent = props => {
                                 textShadowOffset: { width: 10, height: 5 }
                             }}
                         >
-                            {/*  cloc
-                            <Text style={{ fontSize: 55 }}>k</Text>
-                            ulate */}
                             Clockulate
                         </Text>
-                        {/* <Image
-                            style={{
-                                height: 65,
-                                width: 65,
-                                position: "absolute",
-                                right: 10,
-                                top: 30
-                                // transform: [{ rotate: "25deg" }]
-                            }}
-                            source={require("../img/AppIcon_NoBgd_Clockulate.png")}
-                        /> */}
                     </View>
-                </LinearGradient>
+                </LinearGradient> */}
                 <DrawerItems
                     {...props}
                     getLabel={scene => {
