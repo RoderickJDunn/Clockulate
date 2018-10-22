@@ -2084,12 +2084,25 @@ class AlarmDetail extends Component {
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     style={{
-                                        alignSelf: "stretch",
+                                        flex: 0.13,
+                                        // flexDirection: "row",
                                         alignItems: "center",
+                                        alignContent: "center",
                                         justifyContent: "center",
-                                        paddingRight: 25,
-                                        backgroundColor: "transparent"
-                                        // backgroundColor: "green"
+                                        borderRadius: 100,
+                                        paddingLeft: 4,
+                                        paddingTop: 3,
+                                        // borderLeftWidth: 2,
+                                        // borderRightWidth: 1,
+                                        // borderBottomWidth: 1,
+                                        // borderColor: "#79d2a6",
+                                        // backgroundColor: "transparent",
+                                        backgroundColor: "#e6e3e8",
+                                        // backgroundColor: "#79d2a6"
+                                        shadowColor: "#000",
+                                        shadowOpacity: 0.1,
+                                        shadowOffset: { height: 1 },
+                                        shadowRadius: 2
                                     }}
                                     onPress={this._onPressAddTask}
                                     /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
@@ -2105,18 +2118,45 @@ class AlarmDetail extends Component {
                                         size={scaleByFactor(30, 0.2)}
                                         // color="#7a7677"
                                         color={Colors.brandLightOpp}
+                                        // color={Colors.brandSuperLightPurple}
+                                        // color="#79d2a6"
+                                        // style={{
+                                        //     borderRadius: 5,
+                                        //     backgroundColor: "blue"
+                                        // }}
                                     />
+                                    {/* <View
+                                        // name="add-to-list"
+                                        // size={scaleByFactor(30, 0.2)}
+                                        // color="#7a7677"
+                                        style={{
+                                            flex: 1,
+                                            alignSelf: "stretch",
+                                            // alignItems: "center",
+                                            // justifyContent: "center",
+                                            backgroundColor: "blue"
+                                        }}
+                                    /> */}
                                     {/* {editTasksBtn} */}
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
                                     style={{
-                                        alignSelf: "stretch",
+                                        flex: 0.13,
+                                        // flexDirection: "row",
                                         alignItems: "center",
+                                        alignContent: "center",
                                         justifyContent: "center",
-                                        paddingLeft: 25,
-                                        backgroundColor: "transparent"
-                                        // backgroundColor: "green"
+                                        borderRadius: 100,
+                                        paddingLeft: 2,
+                                        paddingTop: 2,
+                                        backgroundColor: "transparent",
+                                        backgroundColor: "#e6e3e8",
+                                        shadowColor: "#000",
+                                        shadowOpacity: 0.1,
+                                        shadowOffset: { height: 1 },
+                                        shadowRadius: 2
+                                        // backgroundColor: "#00b3b3"
                                     }}
                                     onPress={this._toggleHideDisabledTasks}
                                     hitSlop={{
