@@ -163,7 +163,8 @@ export default class Sounds extends Component {
 
 const styles = StyleSheet.create({
     listContainer: {
-        paddingHorizontal: 10
+        paddingHorizontal: 10,
+        backgroundColor: Colors.backgroundGrey
     },
     soundListItem: {
         flex: 1,

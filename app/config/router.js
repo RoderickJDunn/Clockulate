@@ -3,19 +3,13 @@
  */
 
 import React from "react";
-import {
-    View,
-    Text,
-    Button,
-    ScrollView,
-    Image,
-    StyleSheet
-} from "react-native";
+import { View, Text, StyleSheet, Easing, Animated } from "react-native";
 import {
     createStackNavigator,
     createDrawerNavigator,
     SafeAreaView,
-    DrawerItems
+    DrawerItems,
+    StackViewTransitionConfigs
 } from "react-navigation";
 import { Icon } from "react-native-elements";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
@@ -23,7 +17,6 @@ import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
 
 import Alarms from "../screens/Alarms";
 import AlarmDetail from "../screens/AlarmDetail";
-import AlarmDetailBasic from "../screens/AlarmDetailBasic";
 import TaskDetail from "../screens/TaskDetail";
 import Settings from "../screens/Settings";
 import About from "../screens/About";
@@ -32,10 +25,9 @@ import Upgrade from "../screens/Upgrade";
 import Help from "../screens/Help";
 import LinearGradient from "react-native-linear-gradient";
 import { isIphoneX } from "react-native-iphone-x-helper";
-import MenuItem from "../components/menu-item";
 
 import Colors from "../styles/colors";
-import { scale, scaleByFactor } from "../util/font-scale";
+import { scaleByFactor } from "../util/font-scale";
 import LottieView from "lottie-react-native";
 
 // export const AlarmTabs = TabNavigator({
@@ -47,6 +39,67 @@ import LottieView from "lottie-react-native";
 //         },
 //     },
 // });
+
+let SlideFromBottom = (index, position, height) => {
+    const inputRange = [index - 1, index, index + 1];
+    const translateY = position.interpolate({
+        inputRange: [index - 1, index, index + 1],
+        outputRange: [height, 0, 0]
+    });
+
+    const SlideFromBottom = { transform: [{ translateY }] };
+    return SlideFromBottom;
+};
+
+let SlideFromRight = (index, position, width) => {
+    const inputRange = [index - 1, index, index + 1];
+    const translateX = position.interpolate({
+        inputRange: [index - 1, index, index + 1],
+        outputRange: [width, 0, 0]
+    });
+    const slideFromRight = { transform: [{ translateX }] };
+    return slideFromRight;
+};
+
+const TransitionConfiguration = () => {
+    return {
+        transitionSpec: {
+            duration: 500,
+            easing: Easing.out(Easing.poly(15)),
+            timing: Animated.timing,
+            useNativeDriver: true
+        },
+        screenInterpolator: sceneProps => {
+            const { layout, position, scene } = sceneProps;
+            const width = layout.initWidth;
+            const height = layout.initHeight;
+            const { index, route } = scene;
+            const params = route.params || {};
+            const transition = params.transition || "default";
+            console.log("params", params);
+            return {
+                collapseExpand: SlideFromBottom(index, position, height),
+                default: SlideFromRight(index, position, width)
+            }[transition];
+        }
+    };
+};
+
+/* Alternative way of doing custom transition. Not using for now */
+// const IOS_MODAL_ROUTES = ["TaskDetail"];
+// let dynamicModalTransition = (transitionProps, prevTransitionProps) => {
+//     const isModal = IOS_MODAL_ROUTES.some(
+//         screenName =>
+//             screenName === transitionProps.scene.route.routeName ||
+//             (prevTransitionProps &&
+//                 screenName === prevTransitionProps.scene.route.routeName)
+//     );
+//     return StackViewTransitionConfigs.defaultTransitionConfig(
+//         transitionProps,
+//         prevTransitionProps,
+//         isModal
+//     );
+// };
 
 /*
     This is an optional object to be passed into StackNavigator when it is created. It provides
@@ -68,7 +121,11 @@ const navigationConfig = {
             color: Colors.brandLightGrey
         },
         headerTintColor: Colors.brandLightGrey // this sets color for 'Back' icon and text
-    }
+    },
+    // this hides the white top-padding in place of header for child screens that are animating
+    // in from bottom
+    cardStyle: { backgroundColor: "transparent" },
+    transitionConfig: TransitionConfiguration
 };
 
 const alarmListNavOptions = ({ navigation }) => ({
@@ -170,11 +227,23 @@ const MainStack = createStackNavigator(
                 },
                 headerTitleStyle: {
                     color: Colors.brandLightGrey
-                },
+                }
             })
         },
         TaskDetail: {
-            screen: TaskDetail
+            screen: TaskDetail,
+            navigationOptions: ({ navigation }) => ({
+                drawerLockMode: "locked-closed", // this prevents the drawer from opening when user swipes from left of screen to go Back
+                headerStyle: {
+                    backgroundColor: Colors.brandDarkGrey
+                    // backgroundColor: "transparent",
+                    // borderBottomWidth: 0 // is this needed?
+                },
+                // headerTransparent: true,
+                headerTitleStyle: {
+                    color: Colors.brandLightGrey
+                }
+            })
         },
         Sounds: {
             screen: Sounds

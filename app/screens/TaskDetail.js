@@ -16,7 +16,7 @@ import {
     Platform,
     KeyboardAvoidingView,
     ScrollView,
-    Alert
+    Alert,
 } from "react-native";
 import { Icon } from "react-native-elements";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -64,27 +64,64 @@ class TaskDetail extends Component {
             title: screenTitle,
             drawerLockMode: "locked-closed",
             headerStyle: {
-                backgroundColor: Colors.brandDarkGrey
+                backgroundColor: "transparent"
+                // backgroundColor: Colors.brandDarkGrey,
             },
-            headerTitleStyle: {
-                color: Colors.brandLightGrey
-            },
+            headerLeft: (
+                <TouchableOpacity
+                    style={{
+                        paddingRight: 25,
+                        paddingVertical: 10,
+                        paddingLeft: 10
+                    }}
+                    onPress={() =>
+                        navigation.dispatch(NavigationActions.back())
+                    }
+                >
+                    {Platform.OS == "ios" ? (
+                        <Text
+                            style={{
+                                color: Colors.brandLightGrey,
+                                fontSize: scaleByFactor(13)
+                            }}
+                        >
+                            Cancel
+                        </Text>
+                    ) : (
+                        <IonIcon
+                            name="md-close"
+                            // name="md-checkmark"
+                            // name="playlist-add-check" // MaterialIcons  -- looks like a list with a checkmark at bottom-right
+                            size={scaleByFactor(25, 0.3)}
+                            color={Colors.brandLightGrey}
+                        />
+                    )}
+                </TouchableOpacity>
+            ),
             headerRight: (
                 <TouchableOpacity
                     style={{
-                        paddingRight: 15,
+                        paddingRight: 10,
                         paddingVertical: 10,
                         paddingLeft: 25
                     }}
                     onPress={() => navigation.state.params.handleSave()}
                 >
-                    <IonIcon
+                    {/* <IonIcon
                         name="md-checkmark-circle-outline"
                         // name="md-checkmark"
                         // name="playlist-add-check" // MaterialIcons  -- looks like a list with a checkmark at bottom-right
                         size={scaleByFactor(25, 0.3)}
                         color={Colors.brandOffWhiteBlue}
-                    />
+                    /> */}
+                    <Text
+                        style={{
+                            color: Colors.brandLightGrey,
+                            fontSize: scaleByFactor(13)
+                        }}
+                    >
+                        Save
+                    </Text>
                 </TouchableOpacity>
             )
         };
@@ -182,7 +219,7 @@ class TaskDetail extends Component {
     }
 
     componentDidMount() {
-        this._nameInputRef.focus();
+        if (this._nameInputRef) setTimeout(this._nameInputRef.focus, 100);
     }
 
     componentWillUnmount() {
@@ -611,7 +648,10 @@ class TaskDetail extends Component {
             <ScrollView
                 contentContainerStyle={[
                     ScreenStyles.TaskScreen,
-                    { flexGrow: 1 }
+                    {
+                        flexGrow: 1
+                        // backgroundColor: "red"
+                    }
                 ]}
                 keyboardShouldPersistTaps="handled"
                 scrollEnabled={false}
@@ -703,9 +743,10 @@ class TaskDetail extends Component {
                                 // backgroundColor: "red",
                                 flex: 2
                             }}
-                            showDurationPicker={() =>
-                                this.setState({ showDurationPicker: true })
-                            }
+                            showDurationPicker={() => {
+                                this._nameInputRef.blur();
+                                this.setState({ showDurationPicker: true });
+                            }}
                         />
                         {this.state.currNameHasMatch &&
                             this.state.alarmTask.duration !=
