@@ -101,7 +101,7 @@ export default {
     CheckboxIconMarginTop: 0,
     CheckboxFontSize: 10 * Math.exp(1.1 * (deviceWidth / deviceHeight)),
     checkboxBgColor: "#039BE5",
-    checkboxSize: 12 * Math.exp(1.1 * (deviceWidth / deviceHeight)),
+    checkboxSize: 13 * Math.exp(1.1 * (deviceWidth / deviceHeight)),
     checkboxTickColor: "#fff",
     CheckboxLineheight: 30,
 
