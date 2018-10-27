@@ -437,15 +437,19 @@ class TaskItem extends React.Component {
         }
 
         let movingStyle;
+        let borderBottomColor = "black";
         if (this.props.isMoving) {
             // console.log("isMoving", "true");
             movingStyle = {
+                flex: undefined,
                 backgroundColor: Colors.brandSuperLightPurple,
                 shadowOpacity: 0.2,
                 shadowRadius: 10,
-                shadowColor: "black"
+                shadowColor: "black",
+                width: SCREEN_WIDTH - scaleByFactor(20, 0.4)
                 // elevation: 10
             };
+            borderBottomColor = "transparent";
         } else {
             // console.log("isMoving", "false");
         }
@@ -480,7 +484,10 @@ class TaskItem extends React.Component {
                 dragEnabled={this._tempDuration == null}
             >
                 <View
-                    style={[TaskItemStyle.taskInfoWrap]}
+                    style={[
+                        TaskItemStyle.taskInfoWrap,
+                        { borderBottomColor: borderBottomColor }
+                    ]}
                     {...this._panResponder.panHandlers}
                 >
                     <TouchableOpacity
