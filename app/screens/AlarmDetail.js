@@ -726,7 +726,8 @@ class AlarmDetail extends Component {
             this.props.navigation.navigate("TaskDetail", {
                 onSaveState: this.onTaskListChanged,
                 willNavigateBack: this._willShowNavScreen,
-                order: nextTaskPosition
+                order: nextTaskPosition,
+                transition: "collapseExpand"
             });
         } else {
             // simply snap the active task back to resting position
@@ -772,7 +773,8 @@ class AlarmDetail extends Component {
             const params = {
                 alarmTaskId: task.id,
                 onSaveState: this.onTaskListChanged,
-                willNavigateBack: this._willShowNavScreen
+                willNavigateBack: this._willShowNavScreen,
+                transition: "collapseExpand"
             };
 
             this.props.navigation.navigate("TaskDetail", params);
@@ -1724,7 +1726,7 @@ class AlarmDetail extends Component {
                             ]
                         }
                     ]}
-                    source={{ uri: "ClockBgd_v8_iphoneSE-5-6-7-8" }}
+                    source={{ uri: "clockbgd_v8_iphone_se5678" }}
                 />
                 {touchableBackdrop}
                 <Interactable.View
