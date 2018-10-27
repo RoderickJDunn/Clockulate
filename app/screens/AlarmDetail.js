@@ -61,15 +61,15 @@ let _menuIconAnim = new Animated.Value(0);
 
 /* Layout factors */
 const NON_CLOCK_HEIGHT_FACTOR = 1.15; // multiply this by SCREEN_HEIGHT to get height of non-clock area
-const TASK_AREA_TL_VIEW_FLEX_FACTOR = 0.83; // flex value for TaskArea (within non-clock area) in TaskList view
-const TASK_AREA_AUTO_VIEW_FLEX_FACTOR = 0.4; // flex value for TaskArea (within non-clock area) in Auto view
+const TASK_AREA_TL_VIEW_FLEX_FACTOR = 0.91; // flex value for TaskArea (within non-clock area) in TaskList view
+const TASK_AREA_AUTO_VIEW_FLEX_FACTOR = 0.5; // flex value for TaskArea (within non-clock area) in Auto view
 const TASK_HEAD_TL_VIEW_FLEX_FACTOR = 0.06; // flex value for TaskHeader (within TaskArea) in TaskList view
 const TASK_HEAD_AUTO_VIEW_FLEX_FACTOR = 0.15; // flex value for Taskheader (within TaskArea) in Auto view
 const TASK_LIST_TL_VIEW_FLEX_FACTOR = 1 - TASK_HEAD_TL_VIEW_FLEX_FACTOR; // flex value for TaskList (within TaskArea) in TaskList view
 const TASK_LIST_AUTO_VIEW_FLEX_FACTOR = 1 - TASK_HEAD_AUTO_VIEW_FLEX_FACTOR; // flex value for TaskList (within TaskArea) in Auto view
 
-const TASK_LIST_TL_VIEW_POS_FACTOR = 0.18; // multiple this by SCREEN_HEIGHT to get the position of TaskList from top of screen in TaskList View
-const TASK_LIST_AUTO_VIEW_POS_FACTOR = 0.6; // multiple this by SCREEN_HEIGHT to get the position of TaskList from top of screen in Auto view
+const TASK_LIST_TL_VIEW_POS_FACTOR = 0.18; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in TaskList View
+const TASK_LIST_AUTO_VIEW_POS_FACTOR = 0.56; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in Auto view
 class AlarmDetail extends Component {
     static navigationOptions = ({ navigation }) => {
         let menuIsOpen = navigation.state.params.menuIsOpen;
@@ -142,7 +142,7 @@ class AlarmDetail extends Component {
     height = SCREEN_HEIGHT; //full height
     snapAuto = 0;
     snapNormal = SCREEN_HEIGHT;
-    snapTaskList = -SCREEN_HEIGHT * 0.415;
+    snapTaskList = -SCREEN_HEIGHT * 0.385;
 
     xtraKeyboardHeight = 0; // this is always 0, except on iPhone X it is 34
     _animKeyboardHeight = new Animated.Value(0);
@@ -895,11 +895,6 @@ class AlarmDetail extends Component {
         console.info("onSnap");
 
         // let alarmState = this.state.alarm;
-        let { id, index: snapIdx } = event.nativeEvent;
-
-        // TODO: TEST WHETHER COMMENTING THIS OUT BREAKS ANYTHING WHEN SWITCHING VIEWS BY ANY MEANS (menu, dragging, tapping handles)
-        // this._viewIdx = snapIdx; // TODO: We probably just need to make sure viewIdx is updated in all of those cases (use fx _snapToIdx)
-        // this.setState(this.state);
     }
 
     _onPressClock() {
@@ -1219,10 +1214,10 @@ class AlarmDetail extends Component {
 
     _layoutAnimateToFullScreenTaskList(nextState = {}) {
         let config = {
-            duration: 50,
+            duration: 100,
             update: {
-                duration: 50,
-                type: "easeInEaseOut"
+                duration: 100,
+                type: "easeOut"
                 // springDamping: 0.5,
                 // property: "scaleXY"
             }
@@ -1243,9 +1238,9 @@ class AlarmDetail extends Component {
 
     _layoutAnimateToCalcMode(nextState) {
         let config = {
-            duration: 50,
+            duration: 200,
             update: {
-                duration: 50,
+                duration: 200,
                 type: "easeInEaseOut"
             }
         };
@@ -1887,6 +1882,54 @@ class AlarmDetail extends Component {
                             multiline={false}
                         />
                     </Animated.View>
+                    <this.AnimatedHandle
+                        // ref={elem => (this._animHandle = elem)}
+                        style={{
+                            position: "absolute",
+                            left:
+                                SCREEN_WIDTH / 2 -
+                                scaleByFactor(25, 0.5) / 2 -
+                                30, // padding (30 left + 30 right / 2 == 30)
+                            top: 0,
+                            backgroundColor: "transparent",
+                            // backgroundColor: "blue",
+                            paddingHorizontal: 30,
+                            paddingVertical: 30,
+                            transform: [
+                                {
+                                    translateY: this._clockTransform.interpolate(
+                                        {
+                                            inputRange: [
+                                                this.snapTaskList,
+                                                this.snapAuto,
+                                                this.snapNormal
+                                            ],
+                                            outputRange: [
+                                                0,
+                                                this.snapNormal * 1.4,
+                                                this.snapNormal * 0.65
+                                            ]
+                                        }
+                                    )
+                                }
+                            ],
+                            opacity: this._clockTransform.interpolate({
+                                inputRange: [
+                                    this.snapTaskList,
+                                    this.snapAuto,
+                                    this.snapNormal
+                                ],
+                                outputRange: [0, 0, 1]
+                            })
+                        }}
+                        onPress={this._onPressAnimHandle}
+                    >
+                        <MaterialComIcon
+                            name="drag"
+                            size={scaleByFactor(28, 0.5)}
+                            color={Colors.disabledGrey}
+                        />
+                    </this.AnimatedHandle>
                     <View
                         style={[
                             styles.nonClockWrapper
@@ -1897,18 +1940,6 @@ class AlarmDetail extends Component {
                             // }
                         ]}
                     >
-                        <Image
-                            style={[
-                                styles.nonClockBgImage,
-                                {
-                                    height: SCREEN_HEIGHT * 1.2,
-                                    resizeMode: "cover"
-                                }
-                            ]}
-                            // source={require("../img/NonClockBgV2.png")}
-                            source={{ uri: "NonClockBgV2" }}
-                        />
-
                         <View
                             style={[
                                 styles.fieldsContainer
@@ -2037,232 +2068,213 @@ class AlarmDetail extends Component {
                             /> */}
                         </View>
                         {touchableBackdrop}
-                        <LinearGradient
-                            start={{ x: 0.5, y: 0 }}
-                            end={{ x: 0.5, y: 0.04 }}
-                            colors={["#D2CED4", Colors.backgroundGrey]}
-                            // colors={["green", "green"]}
+                        <Animated.View
                             style={[
                                 styles.taskListContainer,
                                 {
-                                    flex: this.state.taskAreaFlex
+                                    flex: 1,
+                                    transform: [
+                                        {
+                                            translateY: this._clockTransform.interpolate(
+                                                {
+                                                    inputRange: [
+                                                        this.snapTaskList,
+                                                        this.snapAuto,
+                                                        this.snapNormal
+                                                    ],
+                                                    outputRange: [
+                                                        0,
+                                                        0,
+                                                        -this.snapNormal * 0.3
+                                                    ]
+                                                }
+                                            )
+                                        }
+                                    ]
                                 }
                             ]}
                         >
-                            <View
-                                style={[
-                                    styles.taskListHeader,
-                                    {
-                                        flex: this.state.taskHeaderFlex, // == (SCREEN_HEIGHT * NON_CLOCK_HEIGHT_FACTOR) * this.state.taskAreaFlex * this.state.taskHeaderFlex
-                                        backgroundColor: "transparent"
-                                        // backgroundColor: "green"
-                                    }
-                                ]}
-                            >
-                                <TouchableOpacity
-                                    // onPress={() => this.interactiveRef.snapTo({ index: 2 })}>
-                                    onPress={this._onPressTasksHeader}
-                                    style={{
-                                        position: "absolute",
-                                        top: 0,
-                                        bottom: 0,
-                                        left: SCREEN_WIDTH / 4,
-                                        right: SCREEN_WIDTH / 4,
-                                        justifyContent: "center",
-                                        alignItems: "center"
-                                        // backgroundColor: "green"
-                                    }}
+                            <View style={{ flex: this.state.taskAreaFlex }}>
+                                <View
+                                    style={[
+                                        styles.taskListHeader,
+                                        {
+                                            // flex: this.state.taskHeaderFlex, // == (SCREEN_HEIGHT * NON_CLOCK_HEIGHT_FACTOR) * this.state.taskAreaFlex * this.state.taskHeaderFlex
+                                            height: scaleByFactor(50, 0.6), // needs to be scaled to screen height
+                                            backgroundColor: "transparent",
+                                            // backgroundColor: "green",
+                                            borderBottomColor: "#c8c8c8",
+                                            borderBottomWidth: 0.8
+                                        }
+                                    ]}
                                 >
-                                    <Text
-                                        style={[
-                                            TextStyle.labelText,
-                                            {
-                                                fontSize: scaleByFactor(17, 0.3)
-                                            }
-                                        ]}
-                                    >
-                                        Tasks
-                                    </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={{
-                                        flex: 0.13,
-                                        // flexDirection: "row",
-                                        alignItems: "center",
-                                        alignContent: "center",
-                                        justifyContent: "center",
-                                        borderRadius: 100,
-                                        paddingLeft: 4,
-                                        paddingTop: 3,
-                                        // borderLeftWidth: 2,
-                                        // borderRightWidth: 1,
-                                        // borderBottomWidth: 1,
-                                        // borderColor: "#79d2a6",
-                                        // backgroundColor: "transparent",
-                                        backgroundColor: "#e6e3e8",
-                                        // backgroundColor: "#79d2a6"
-                                        shadowColor: "#000",
-                                        shadowOpacity: 0.1,
-                                        shadowOffset: { height: 1 },
-                                        shadowRadius: 2
-                                    }}
-                                    onPress={this._onPressAddTask}
-                                    /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
-                                    hitSlop={{
-                                        top: 10,
-                                        bottom: 10,
-                                        right: 20,
-                                        left: 0
-                                    }}
-                                >
-                                    <EntypoIcon
-                                        name="add-to-list"
-                                        size={scaleByFactor(30, 0.2)}
-                                        // color="#7a7677"
-                                        color={Colors.brandLightOpp}
-                                        // color={Colors.brandSuperLightPurple}
-                                        // color="#79d2a6"
-                                        // style={{
-                                        //     borderRadius: 5,
-                                        //     backgroundColor: "blue"
-                                        // }}
-                                    />
-                                    {/* <View
-                                        // name="add-to-list"
-                                        // size={scaleByFactor(30, 0.2)}
-                                        // color="#7a7677"
+                                    <TouchableOpacity
+                                        // onPress={() => this.interactiveRef.snapTo({ index: 2 })}>
+                                        onPress={this._onPressTasksHeader}
                                         style={{
-                                            flex: 1,
-                                            alignSelf: "stretch",
-                                            // alignItems: "center",
-                                            // justifyContent: "center",
-                                            backgroundColor: "blue"
+                                            position: "absolute",
+                                            top: 0,
+                                            bottom: 0,
+                                            left: SCREEN_WIDTH / 4,
+                                            right: SCREEN_WIDTH / 4,
+                                            justifyContent: "center",
+                                            alignItems: "center"
+                                            // backgroundColor: "green"
                                         }}
-                                    /> */}
-                                    {/* {editTasksBtn} */}
-                                </TouchableOpacity>
+                                    >
+                                        <Text
+                                            style={[
+                                                TextStyle.labelText,
+                                                {
+                                                    fontSize: scaleByFactor(
+                                                        17,
+                                                        0.3
+                                                    )
+                                                }
+                                            ]}
+                                        >
+                                            Tasks
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={{
+                                            alignSelf: "stretch",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            paddingRight: 25,
+                                            paddingLeft: 10,
+                                            backgroundColor: "transparent"
+                                            // backgroundColor: "green"
+                                        }}
+                                        onPress={this._onPressAddTask}
+                                        /* onPress={this._CHANGE_CLOCK_FONT.bind(this)} */
+                                        hitSlop={{
+                                            top: 10,
+                                            bottom: 10,
+                                            right: 20,
+                                            left: 0
+                                        }}
+                                    >
+                                        <EntypoIcon
+                                            name="add-to-list"
+                                            size={scaleByFactor(30, 0.2)}
+                                            // color="#7a7677"
+                                            color={Colors.brandLightOpp}
+                                        />
+                                        {/* {editTasksBtn} */}
+                                    </TouchableOpacity>
 
-                                <TouchableOpacity
-                                    style={{
-                                        flex: 0.13,
-                                        // flexDirection: "row",
-                                        alignItems: "center",
-                                        alignContent: "center",
-                                        justifyContent: "center",
-                                        borderRadius: 100,
-                                        paddingLeft: 2,
-                                        paddingTop: 2,
-                                        backgroundColor: "transparent",
-                                        backgroundColor: "#e6e3e8",
-                                        shadowColor: "#000",
-                                        shadowOpacity: 0.1,
-                                        shadowOffset: { height: 1 },
-                                        shadowRadius: 2
-                                        // backgroundColor: "#00b3b3"
-                                    }}
-                                    onPress={this._toggleHideDisabledTasks}
-                                    hitSlop={{
-                                        top: 10,
-                                        bottom: 10,
-                                        left: 20,
-                                        right: 0
-                                    }}
-                                >
-                                    {this.state.hideDisabledTasks ? (
-                                        <EntypoIcon
-                                            name="eye-with-line"
-                                            size={scaleByFactor(26, 0.2)}
-                                            // color="#7a7677"
-                                            color={Colors.brandLightOpp}
-                                        />
-                                    ) : (
-                                        <EntypoIcon
-                                            name="eye"
-                                            size={scaleByFactor(26, 0.2)}
-                                            // color="#7a7677"
-                                            color={Colors.brandLightOpp}
-                                        />
-                                    )}
-                                </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={{
+                                            alignSelf: "stretch",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            paddingLeft: 25,
+                                            paddingRight: 10,
+                                            backgroundColor: "transparent"
+                                            // backgroundColor: "green"
+                                        }}
+                                        onPress={this._toggleHideDisabledTasks}
+                                        hitSlop={{
+                                            top: 10,
+                                            bottom: 10,
+                                            left: 20,
+                                            right: 0
+                                        }}
+                                    >
+                                        {this.state.hideDisabledTasks ? (
+                                            <EntypoIcon
+                                                name="eye-with-line"
+                                                size={scaleByFactor(26, 0.2)}
+                                                // color="#7a7677"
+                                                color={Colors.brandLightOpp}
+                                            />
+                                        ) : (
+                                            <EntypoIcon
+                                                name="eye"
+                                                size={scaleByFactor(26, 0.2)}
+                                                // color="#7a7677"
+                                                color={Colors.brandLightOpp}
+                                            />
+                                        )}
+                                    </TouchableOpacity>
+                                </View>
+                                {touchableBackdrop}
+                                {/* {taskArea} */}
+                                <TaskList
+                                    onPressItem={this._onPressTask}
+                                    onPressItemCheckBox={
+                                        this.onChangeTaskEnabled
+                                    }
+                                    onChangeTaskDuration={
+                                        this.onChangeTaskDuration
+                                    }
+                                    onPressDelete={this._onDeleteTask}
+                                    // onShowDurationSlider={() =>
+                                    //     this.setState({ isSlidingTask: true })
+                                    // }
+                                    onSnapTask={this._onSnapTask}
+                                    data={sortedTasks}
+                                    activeTask={this.state.activeTask}
+                                    closeTaskRows={this._closeTaskRows}
+                                    isEditingTasks={this.state.isEditingTasks}
+                                    isSlidingTask={this.state.isSlidingTask}
+                                    didEndMove={this._didEndMove}
+                                    onReorderTasks={this._onReorderTasks}
+                                    willStartMove={this._willStartTaskMove}
+                                    forceRemeasure={forceRemeasure} // TODO: is this prop event required anymore?
+                                    hideDisabledTasks={
+                                        this.state.hideDisabledTasks
+                                    }
+                                    containerDimensions={
+                                        this.state.taskListDimensions
+                                    }
+                                    taskRowDimensions={
+                                        this._getMeasurementsForTaskRow
+                                    }
+                                    startTimesAnim={this.startTimesHandleAnim}
+                                    durationsVisible={
+                                        this.state.durationsVisible
+                                    }
+                                    setStartTimeRef={this.setStartTimeRef}
+                                    // onScroll={this.onScrollTaskList.bind(this)}
+                                    // onEndReached={this.onEndReachedTaskList.bind(this)}
+                                    // tlContainerStyle={{
+                                    //     paddingHorizontal: scaleByFactor(10, 0.4)
+                                    // }}
+                                />
+                                <EdgeSwiper
+                                    animValue={this.startTimesHandleAnim}
+                                    onAnimComplete={
+                                        this.onCompleteGestureAnimation
+                                    }
+                                />
                             </View>
-                            {touchableBackdrop}
-                            {/* {taskArea} */}
-                            <TaskList
-                                onPressItem={this._onPressTask}
-                                onPressItemCheckBox={this.onChangeTaskEnabled}
-                                onChangeTaskDuration={this.onChangeTaskDuration}
-                                onPressDelete={this._onDeleteTask}
-                                // onShowDurationSlider={() =>
-                                //     this.setState({ isSlidingTask: true })
-                                // }
-                                onSnapTask={this._onSnapTask}
-                                data={sortedTasks}
-                                activeTask={this.state.activeTask}
-                                closeTaskRows={this._closeTaskRows}
-                                isEditingTasks={this.state.isEditingTasks}
-                                isSlidingTask={this.state.isSlidingTask}
-                                didEndMove={this._didEndMove}
-                                onReorderTasks={this._onReorderTasks}
-                                willStartMove={this._willStartTaskMove}
-                                forceRemeasure={forceRemeasure} // TODO: is this prop event required anymore?
-                                hideDisabledTasks={this.state.hideDisabledTasks}
-                                containerDimensions={
-                                    this.state.taskListDimensions
-                                }
-                                taskRowDimensions={
-                                    this._getMeasurementsForTaskRow
-                                }
-                                startTimesAnim={this.startTimesHandleAnim}
-                                durationsVisible={this.state.durationsVisible}
-                                setStartTimeRef={this.setStartTimeRef}
-                                // onScroll={this.onScrollTaskList.bind(this)}
-                                // onEndReached={this.onEndReachedTaskList.bind(this)}
-                            />
-                            <EdgeSwiper
-                                animValue={this.startTimesHandleAnim}
-                                onAnimComplete={this.onCompleteGestureAnimation}
-                            />
-                        </LinearGradient>
+                        </Animated.View>
+                        {/* </LinearGradient> */}
                     </View>
-                    <this.AnimatedHandle
+                    <TouchableOpacity
+                        // ref={elem => (this._animHandle = elem)}
                         style={{
                             position: "absolute",
                             left:
                                 SCREEN_WIDTH / 2 -
                                 scaleByFactor(25, 0.5) / 2 -
                                 30, // padding (30 left + 30 right / 2 == 30)
+                            top: SCREEN_HEIGHT * 1.159,
                             backgroundColor: "transparent",
                             // backgroundColor: "blue",
                             paddingHorizontal: 30,
-                            paddingVertical: 30,
-                            transform: [
-                                {
-                                    translateY: this._clockTransform.interpolate(
-                                        {
-                                            inputRange: [
-                                                this.snapTaskList,
-                                                this.snapAuto,
-                                                this.snapNormal
-                                            ],
-                                            outputRange: [
-                                                SCREEN_HEIGHT * 1.1,
-                                                SCREEN_HEIGHT * 1.17,
-                                                SCREEN_HEIGHT * 0.76
-                                            ]
-                                        }
-                                    )
-                                },
-                                { perspective: 1000 }
-                            ]
+                            paddingVertical: 30
                         }}
                         onPress={this._onPressAnimHandle}
                     >
-                        <MaterialIcon
-                            name="drag-handle"
+                        <FAIcon
+                            name="minus"
                             size={scaleByFactor(25, 0.5)}
                             color={Colors.disabledGrey}
                         />
-                    </this.AnimatedHandle>
+                    </TouchableOpacity>
                 </Interactable.View>
 
                 <Animated.View
@@ -2512,7 +2524,10 @@ const styles = StyleSheet.create({
     nonClockWrapper: {
         alignItems: "stretch",
         height: SCREEN_HEIGHT * NON_CLOCK_HEIGHT_FACTOR,
-        top: SCREEN_HEIGHT * 0.9
+        top: SCREEN_HEIGHT * 0.9,
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        backgroundColor: Colors.backgroundGrey
         // borderWidth: 3,
         // borderColor: "blue"
     },
@@ -2545,7 +2560,17 @@ const styles = StyleSheet.create({
         paddingHorizontal: scaleByFactor(10, 0.4),
         paddingBottom: scaleByFactor(10, 0.4),
         alignSelf: "stretch",
-        backgroundColor: Colors.backgroundGrey
+        backgroundColor: Colors.backgroundLightGrey,
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        shadowColor: "black",
+        shadowOffset: {
+            height: 0,
+            width: 0
+        },
+        elevation: 12
         // borderColor: "red",
         // borderWidth: 1
     },
