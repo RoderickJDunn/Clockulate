@@ -4,8 +4,6 @@
 
 import React, { Component } from "react";
 import {
-    View,
-    FlatList,
     TouchableWithoutFeedback,
     Dimensions,
     LayoutAnimation,
@@ -505,26 +503,29 @@ class Alarms extends Component {
 
     _onAlarmToggled = alarm => {
         console.info("AlarmsList - alarm toggled: ");
+        let nextAlarmStatus =
+            alarm.status > ALARM_STATES.OFF
+                ? ALARM_STATES.OFF
+                : ALARM_STATES.SET;
         realm.write(() => {
-            alarm.status =
-                alarm.status > ALARM_STATES.OFF
-                    ? ALARM_STATES.OFF
-                    : ALARM_STATES.SET;
+            alarm.status = nextAlarmStatus;
         });
+
         // console.log(alarm);
 
         // console.log(wakeUpTime);
         console.log("WakeUpTime: " + alarm.wakeUpTime);
-        if (alarm.status == ALARM_STATES.SET) {
+        if (nextAlarmStatus == ALARM_STATES.SET) {
             let wakeUpTime = DateUtils.date_to_nextTimeInstance(
                 alarm.wakeUpTime
             );
 
             /* *** DEBUGGING *** */
-            // set alarm to next full minute
-            let inOneMin = moment().add(1, "minutes");
-            wakeUpTime = inOneMin.second(0).toDate();
-
+            // set alarm to next whole minute
+            if (__DEV__) {
+                let inOneMin = moment().add(1, "minutes");
+                wakeUpTime = inOneMin.second(0).toDate();
+            }
             /* ***************** */
 
             realm.write(() => {
