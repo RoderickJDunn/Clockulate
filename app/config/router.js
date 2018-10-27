@@ -261,6 +261,10 @@ let screenMenuIcons = [
 ];
 // NICE_COLOR: #234853
 
+let menuImage = isIphoneX()
+    ? require("../img/menu_header_v9_e20_g1_h3.json")
+    : require("../img/menu_header_v10_e1_g1_1_notchless.json");
+
 const CustomDrawerContentComponent = props => {
     // console.log("props", props);
     const color = props.focused
@@ -284,13 +288,15 @@ const CustomDrawerContentComponent = props => {
         >
             <View
                 style={{
-                    height: 115,
+                    // height: 95,
+                    height: isIphoneX() ? 115 : 104,
                     alignSelf: "stretch",
                     backgroundColor: "red"
                 }}
             >
                 <LottieView
-                    source={require("../img/menu_header_v9_e20_g1_h3.json")}
+                    // source={}
+                    source={menuImage}
                     // progress={this.state.animProgress}
                     resizeMode={"cover"}
                     // resizeMode={"contain"}
@@ -427,7 +433,7 @@ const CustomDrawerContentComponent = props => {
                     color: Colors.brandVeryLightPurple
                 }}
             >
-                Version 0.2
+                v0.2
             </Text>
         </LinearGradient>
     );
