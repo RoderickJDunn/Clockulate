@@ -18,7 +18,7 @@ export function scale(size) {
         );
         return ret;
     } else {
-        let ret = Math.round(size * SCALE) - 2;
+        let ret = Math.round(size * SCALE); // - 2;
         return ret;
     }
 }
@@ -33,7 +33,7 @@ export function scaleByFactor(size, bluntFactor = 1) {
     } else {
         // scale * bluntfactor does not work, it seems.
         // I need to find a way to make the bluntFactor bring the (scale) term closer to 1
-        return Math.round(size + (scale(size) - size) * bluntFactor) - 2;
+        return Math.round(size + (scale(size) - size) * bluntFactor); // - 2;
     }
 }
 
