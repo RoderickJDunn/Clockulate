@@ -460,10 +460,11 @@ class AlarmDetail extends Component {
     }
 
     _realm_snap_idx() {
+        // console.log("_realm_snap_idx");
         let { alarm } = this.state;
         switch (this._viewIdx) {
             case 0:
-                this._snapPoints = this._ALL_SNAP_POINTS.slice(0, 2); // returns new array containing 0th and 2nd elements
+                this._snapPoints = this._ALL_SNAP_POINTS.slice(0, 2); // returns new array containing 0th and 1st elements
                 alarm.mode = "normal";
                 this.setState(this.state);
                 break;
@@ -484,6 +485,7 @@ class AlarmDetail extends Component {
                 break;
         }
     }
+    _tmpViewIdx = null;
 
     /**
      * Imperitively snaps main Interactable View to provided snap index, and updates
@@ -492,7 +494,7 @@ class AlarmDetail extends Component {
      * Accepts a Snap Index within the range [0 - 2] inclusive, which includes all
      * possible snap-points. Since all snappoints may not currently be accessible,
      * depending on the current view, the provided idx will either be mapped to the current index
-     * of the view desired, or the function will return if it is not accessible after mapping.
+     * of the desired view, or the function will return if it is not accessible after mapping.
      * See large comment within the function for further explanation
      */
     _snapToIdx(idx) {
@@ -516,7 +518,7 @@ class AlarmDetail extends Component {
                     TASKLIST          [0: 'autocalc', 1: 'TaskList']                      2                     1
                  */
             let accessibleSnapIdx = idx;
-            let currViewIdx = this._viewIdx;
+            let currViewIdx = this._tmpViewIdx || this._viewIdx;
             this._viewIdx = idx;
 
             /* These handle cases where menu is used to enter NORMAL view from FullTaskList or vice versa */
@@ -528,7 +530,7 @@ class AlarmDetail extends Component {
 
                 // Temporarily set viewIdx to 1 (autocalc) so that when this fx is called again it won't end up
                 //  back in this if-else
-                this._viewIdx = 1;
+                this._tmpViewIdx = 1;
                 this.forceUpdate(() => this._snapToIdx(idx)); // force update to activate new snappoints, then CB is executed after update.
                 return;
             } else if (currViewIdx == 2) {
@@ -540,13 +542,16 @@ class AlarmDetail extends Component {
 
                     // Temporarily set viewIdx to 1 (autocalc) so that when this fx is called again it won't end up
                     //  back in this if-else
-                    this._viewIdx = 1;
+                    this._tmpViewIdx = 1;
+
                     this.forceUpdate(() => this._snapToIdx(idx)); // force update to activate new snappoints, then CB is executed after update.
                     return;
                 } else {
                     accessibleSnapIdx = idx - 1; // map index to current position of desired view
                 }
             }
+
+            this._tmpViewIdx = null;
 
             console.log(
                 "Snapping to (of accessible indices): ",
@@ -1760,7 +1765,8 @@ class AlarmDetail extends Component {
                         y: mode == "normal" ? this.snapNormal : this.snapAuto
                     }}
                     // onStartShouldSetResponderCapture={({ nativeEvent }) => {
-                    //     this._dragStartPos = nativeEvent.pageY;
+                    //     // this._dragStartPos = nativeEvent.pageY;
+                    //     return true;
                     // }}
                     // onMoveShouldSetResponderCapture={({ nativeEvent }) => {
                     //     console.log(
@@ -1770,6 +1776,7 @@ class AlarmDetail extends Component {
                     //         "Scroll position is <= 0",
                     //         this._taskListScrollPos
                     //     );
+                    //     return true;
                     //     // if (this._taskListScrollPos <= 0) {
 
                     //     // }
