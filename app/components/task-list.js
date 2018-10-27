@@ -3,12 +3,18 @@
  */
 
 import React from "react";
-import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
+import {
+    StyleSheet,
+    TouchableWithoutFeedback,
+    View
+} from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import TaskItem from "./task-item";
 
 class TaskList extends React.Component {
-    // TODO: Comment the structure of Props passed in (we don't need a constructor since we are not keeping state in this component)
+    // _scrollEnabled = true;
+    // _scrollPos = 0;
+    // _scrolledToEnd = false;
 
     constructor() {
         super();
@@ -78,7 +84,6 @@ class TaskList extends React.Component {
         // console.log('alarmTasks', alarmTasks);
         // console.log("taskList", this.props.data);
         // console.log("tasksArr in task-list", tasksArr);
-
         return (
             // <View style={[listStyle.container]}>
             <TouchableWithoutFeedback
@@ -86,7 +91,15 @@ class TaskList extends React.Component {
                 onPressIn={this.props.closeTaskRows}
             >
                 {/* This wrapper view is required for the TouchableWithoutFeedback to work within the TaskArea. */}
-                <View style={{ flex: 1 /* backgroundColor: "red" */ }}>
+                <View
+                    style={[
+                        {
+                            flex: 1
+                            /* backgroundColor: "red" */
+                        },
+                        this.props.tlContainerStyle
+                    ]}
+                >
                     <DraggableFlatList
                         data={filteredAlarmTasks || alarmTasks}
                         renderItem={this._renderItem}
@@ -109,14 +122,47 @@ class TaskList extends React.Component {
                                 moveInfo.to
                             );
                         }}
-                        scrollEnabled={!this.props.isSlidingTask}
-                        onResponderRelease={() => {
-                            console.log("onResponderRelease (task-list)");
-                        }}
+                        // scrollEnabled={!this.props.isSlidingTask}
+                        // scrollEnabled={true}
                         forceRemeasure={this.props.forceRemeasure}
                         containerDimensions={this.props.containerDimensions}
+                        // rowDimensions={this.props.taskRowDimensions}
+                        // renderRowsInclude={this.props.renderRowsInclude}
                         // onScroll={this.props.onScroll}
-                        // onEndReached={this.props.onEndReachedTaskList}
+                        // onEndReached={() => {
+                        //     console.log("On end reached");
+                        //     // this._scrolledToEnd = true;
+                        //     if (this._flRef) {
+                        //         console.log("setting scroll to disabled");
+                        //         const { current: list } = this._flRef;
+                        //         this._flRef.setNativeProps({
+                        //             scrollEnabled: false
+                        //         });
+
+                        //         setTimeout(() => {
+                        //             this._flRef.setNativeProps({
+                        //                 scrollEnabled: true
+                        //             });
+                        //         }, 1000);
+                        //     }
+                        // }}
+                        // onScroll={nativeEvent => {
+                        //     console.log("Ended scroll drag");
+                        //     this._scrollPos = nativeEvent.contentOffset.y;
+                        //     if (this._scrollPos == 0) {
+                        //         this.setState({});
+                        //     }
+                        // }}
+                        // onScrollEndDrag={nativeEvent => {
+                        //     console.log("Ended scroll drag");
+                        //     this._scrollPos = nativeEvent.contentOffset.y;
+                        //     if (this._scrollPos == 0) {
+
+                        //     }
+                        // }}
+                        // onMomentumScrollEnd={() => {
+                        //     console.log("onMomentumScrollEnd");
+                        // }}
                     />
                 </View>
             </TouchableWithoutFeedback>

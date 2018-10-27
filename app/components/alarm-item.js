@@ -525,9 +525,7 @@ class AlarmItem extends React.PureComponent {
                             ellipsizeMode={
                                 Platform.OS == "ios" ? "clip" : "tail"
                             }
-                            style={[
-                                AlarmListStyle.deleteBtnText
-                            ]}
+                            style={[AlarmListStyle.deleteBtnText]}
                         >
                             Duplicate
                         </Text>
@@ -571,7 +569,6 @@ class AlarmItem extends React.PureComponent {
                         onLongPress={this.props.startMove}
                         // onPressOut={this.props.endMove}
                         onPressOut={() => {
-                            console.log("onPressOut");
                             if (this.props.isActive == true) {
                                 this.props.endMove();
                             }
@@ -639,116 +636,9 @@ class AlarmItem extends React.PureComponent {
                                         alignContent: "center",
                                         justifyContent: "center",
                                         transform: this._ringTransform
-                                        // transform: [
-                                        //     { translateX: 2.5 },
-                                        //     { translateY: -1.8 },
-                                        //     { rotate: "45deg" }
-                                        // ]
-                                        // transform: [
-                                        //     { translateX: 5.5 },
-                                        //     { translateY: -1.1 },
-                                        //     { rotate: "90deg" }
-                                        // ]
-                                        // transform: [
-                                        //     { translateX: 7 },
-                                        //     { translateY: 4 },
-                                        //     { rotate: "180deg" }
-                                        // ]
-                                        // transform: [
-                                        //     { translateX: 1.1 },
-                                        //     { translateY: 5.5 },
-                                        //     { rotate: "270deg" }
-                                        // ]
-
-                                        // [
-                                        //     this._rotate
-                                        // {
-                                        //     translateY: this._ringingAnimation.interpolate(
-                                        //         {
-                                        //             inputRange: Array.from(
-                                        //                 shakeAnimMap.keys()
-                                        //             ),
-                                        //             outputRange: [
-                                        //                 0,
-                                        //                 -1,
-                                        //                 1,
-                                        //                 0,
-                                        //                 0,
-                                        //                 0,
-                                        //                 0,
-                                        //                 0,
-                                        //                 0,
-                                        //                 0,
-                                        //                 0
-                                        //             ]
-                                        //         }
-                                        //     )
-                                        // },
-                                        // {
-                                        //     translateX: this._ringingAnimation.interpolate(
-                                        //         {
-                                        //             inputRange: Array.from(
-                                        //                 shakeAnimMap.keys()
-                                        //             ),
-                                        //             outputRange: [
-                                        //                 0,
-                                        //                 2,
-                                        //                 -2,
-                                        //                 1,
-                                        //                 -1,
-                                        //                 0,
-                                        //                 0,
-                                        //                 0,
-                                        //                 0,
-                                        //                 0,
-                                        //                 0
-                                        //             ]
-                                        //         }
-                                        //     )
-                                        // }
-                                        //     {
-                                        //         scale: this._ringingScaleAnim
-                                        //     }
-                                        // ]
                                     }
                                 ]}
                             >
-                                {/* <View
-                                    style={{
-                                        position: "absolute",
-                                        left: "50%", // 32.83
-                                        width: 1,
-                                        height: 80,
-                                        backgroundColor: "red"
-                                    }}
-                                />
-                                <View
-                                    style={{
-                                        position: "absolute",
-                                        left: 35.5,
-                                        width: 1,
-                                        height: 80,
-                                        backgroundColor: "red"
-                                    }}
-                                />
-                                <View
-                                    style={{
-                                        position: "absolute",
-                                        top: "50%", // 41.5
-                                        width: 60,
-                                        height: 1,
-                                        backgroundColor: "red"
-                                    }}
-                                />
-                                <View
-                                    style={{
-                                        position: "absolute",
-                                        top: 43,
-                                        width: 60,
-                                        height: 1,
-                                        backgroundColor: "red"
-                                    }}
-                                /> */}
                                 <LottieView
                                     source={require("../img/off-to-clock-lottie.json")}
                                     progress={this.state.animProgress}
