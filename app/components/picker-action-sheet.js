@@ -68,9 +68,12 @@ class PickerActionSheet extends React.Component {
 
     render() {
         let hasMultipleDatasets = this.props.dataSets.length > 1;
-        let pickerWidth = hasMultipleDatasets
-            ? this.actionSheetWidth * 0.5
+        let pickerWidthL = hasMultipleDatasets
+            ? this.actionSheetWidth * 0.4
             : this.actionSheetWidth;
+        let pickerWidthR = hasMultipleDatasets
+            ? this.actionSheetWidth * 0.6
+            : 0;
         return (
             <View style={StyleSheet.absoluteFill}>
                 <TouchableBackdrop
@@ -125,7 +128,7 @@ class PickerActionSheet extends React.Component {
                                         selectedValue={this.state.currValues[0]}
                                         style={{
                                             height: 200,
-                                            width: pickerWidth
+                                            width: pickerWidthL
                                             // backgroundColor: "blue"
                                         }}
                                         onValueChange={(itemValue, itemIndex) =>
@@ -165,7 +168,7 @@ class PickerActionSheet extends React.Component {
                                         data={this.props.dataSets[0]}
                                         style={{
                                             height: 200,
-                                            width: pickerWidth
+                                            width: pickerWidthL
                                             // backgroundColor: "blue"
                                         }}
                                     />
@@ -176,7 +179,7 @@ class PickerActionSheet extends React.Component {
                                 <View
                                     style={[
                                         styles.pickerWrapper,
-                                        { marginRight: 30 }
+                                        { flex: 0.6 }
                                     ]}
                                 >
                                     <View
@@ -202,7 +205,7 @@ class PickerActionSheet extends React.Component {
                                             }
                                             style={{
                                                 height: 200,
-                                                width: pickerWidth,
+                                                width: pickerWidthR,
                                                 backgroundColor: "transparent"
                                             }}
                                             onValueChange={(
@@ -249,7 +252,7 @@ class PickerActionSheet extends React.Component {
                                             data={this.props.dataSets[1]}
                                             style={{
                                                 height: 200,
-                                                width: pickerWidth
+                                                width: pickerWidthR
                                                 // backgroundColor: "blue"
                                             }}
                                         />
@@ -330,14 +333,17 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 0,
         backgroundColor: Colors.backgroundBright,
         flexDirection: "row",
-        justifyContent: "space-between"
+        // alignItems: "center"
+        justifyContent: "center"
     },
     pickerWrapper: {
-        flex: 0.5,
+        flex: 0.4,
+        alignSelf: "center",
         justifyContent: "center",
         alignContent: "center",
         alignItems: "center",
         flexDirection: "row"
+        // backgroundColor: "blue"
     },
     actionSheetBtnRowWrap: {
         flex: 0.15,
