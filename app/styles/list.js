@@ -14,7 +14,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 export const ListStyle = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.brandDarkPurple,
+        backgroundColor: "#ecebf4",
         flexDirection: "row",
         zIndex: 50
     },

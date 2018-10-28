@@ -62,7 +62,7 @@ let _menuIconAnim = new Animated.Value(0);
 /* Layout factors */
 const NON_CLOCK_HEIGHT_FACTOR = 1.15; // multiply this by SCREEN_HEIGHT to get height of non-clock area
 const TASK_AREA_TL_VIEW_FLEX_FACTOR = 0.91; // flex value for TaskArea (within non-clock area) in TaskList view
-const TASK_AREA_AUTO_VIEW_FLEX_FACTOR = 0.5; // flex value for TaskArea (within non-clock area) in Auto view
+const TASK_AREA_AUTO_VIEW_FLEX_FACTOR = 0.53; // flex value for TaskArea (within non-clock area) in Auto view
 const TASK_HEAD_TL_VIEW_FLEX_FACTOR = 0.06; // flex value for TaskHeader (within TaskArea) in TaskList view
 const TASK_HEAD_AUTO_VIEW_FLEX_FACTOR = 0.15; // flex value for Taskheader (within TaskArea) in Auto view
 const TASK_LIST_TL_VIEW_FLEX_FACTOR = 1 - TASK_HEAD_TL_VIEW_FLEX_FACTOR; // flex value for TaskList (within TaskArea) in TaskList view
@@ -1914,7 +1914,7 @@ class AlarmDetail extends Component {
                                             outputRange: [
                                                 0,
                                                 this.snapNormal * 1.4,
-                                                this.snapNormal * 0.65
+                                                this.snapNormal * 0.72
                                             ]
                                         }
                                     )
@@ -1932,7 +1932,7 @@ class AlarmDetail extends Component {
                         onPress={this._onPressAnimHandle}
                     >
                         <MaterialComIcon
-                            name="drag"
+                            name="arrow-up-drop-circle-outline" //upcircle ("AntDesign")
                             size={scaleByFactor(28, 0.5)}
                             color={Colors.disabledGrey}
                         />
@@ -1990,11 +1990,11 @@ class AlarmDetail extends Component {
                             />
                             {/* <View style={{ height: scale(3) }} /> */}
                             {/* <View
-                                style={{
-                                    height: 1,
-                                    backgroundColor: "#E0E0E0"
-                                }}
-                            /> */}
+                                    style={{
+                                        height: 1,
+                                        backgroundColor: "#E0E0E0"
+                                    }}
+                                /> */}
                             <View
                                 style={{
                                     flex: 0.5,
@@ -2023,20 +2023,7 @@ class AlarmDetail extends Component {
                                     separation={scaleByFactor(5, 0.3)}
                                     onOpenModal={Keyboard.dismiss}
                                 />
-                                {/* {
-                                    <View
-                                        style={{
-                                            alignSelf: "stretch",
-                                            backgroundColor: "transparent",
-                                            justifyContent: "center"
-                                        }}
-                                    >
-                                        <EntypoIcon
-                                            style={{ flex: 0.5 }}
-                                            name="moon"
-                                        />
-                                    </View>
-                                } */}
+
                                 <LabeledTimeInput
                                     labelText="Hrs of Sleep"
                                     fieldText={this._hoursOfSleep}
@@ -2068,11 +2055,11 @@ class AlarmDetail extends Component {
                             </View>
                             {/* <View style={{ height: 5 }} /> */}
                             {/* <View
-                                style={{
-                                    height: 1,
-                                    backgroundColor: "#E0E0E0"
-                                }}
-                            /> */}
+                                    style={{
+                                        height: 1,
+                                        backgroundColor: "#E0E0E0"
+                                    }}
+                                /> */}
                         </View>
                         {touchableBackdrop}
                         <Animated.View
@@ -2098,6 +2085,7 @@ class AlarmDetail extends Component {
                                             )
                                         }
                                     ]
+                                    // backgroundColor: "blue"
                                 }
                             ]}
                         >
@@ -2250,6 +2238,14 @@ class AlarmDetail extends Component {
                                     //     paddingHorizontal: scaleByFactor(10, 0.4)
                                     // }}
                                 />
+                                {isIphoneX() ? (
+                                    <View
+                                        style={{
+                                            height: 34 // height of bottom safe area in Portrait mode
+                                            // backgroundColor: "green"
+                                        }}
+                                    />
+                                ) : null}
                                 <EdgeSwiper
                                     animValue={this.startTimesHandleAnim}
                                     onAnimComplete={

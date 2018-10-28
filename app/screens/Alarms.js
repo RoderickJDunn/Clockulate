@@ -16,6 +16,7 @@ import {
 import moment from "moment";
 import LinearGradient from "react-native-linear-gradient";
 // import RadialGradient from "react-native-radial-gradient";
+import { SafeAreaView } from "react-navigation";
 
 import PushNotificationAndroid from "react-native-push-notification";
 import {
@@ -631,94 +632,99 @@ class Alarms extends Component {
                 style={ListStyle.container}
                 onPressIn={this._onPressBackground}
             >
-                <LinearGradient
-                    style={{ flex: 1 }}
-                    start={{ x: 0.2, y: 0 }}
-                    end={{ x: 1.5, y: 1 }}
-                    // colors={["#ecebf4", "red"]}
-                    colors={["#ecebf4", "#c2ccd6"]}
-                >
-                    {/* <PushController /> */}
-                    <DraggableFlatList
-                        data={this.state.alarms}
-                        renderItem={alarm => {
-                            let { move, moveEnd, isActive } = alarm;
-                            return (
-                                <AlarmItem
-                                    alarm={alarm.item}
-                                    onPress={this._onPressItem}
-                                    onDelete={this._onPressDelete.bind(
-                                        this,
-                                        alarm.item
-                                    )}
-                                    onDuplicate={this._onPressDuplicate.bind(
-                                        this,
-                                        alarm.item
-                                    )}
-                                    onToggle={this._onAlarmToggled}
-                                    onSnap={this._onSnap.bind(this, alarm)}
-                                    close={alarm.item.id !== this._activeRow}
-                                    hide={
-                                        duplicationInfo &&
-                                        duplicationInfo.alarm.id ==
-                                            alarm.item.id
-                                    }
-                                    startMove={move}
-                                    endMove={moveEnd}
-                                    isActive={isActive}
-                                />
-                            );
-                        }}
-                        keyExtractor={this._keyExtractor}
-                        // extraData={this.state} // TODO: FIXME: May be able to fix flickering issue by being more careful about what extraData we pass in. THis may prevent unessesary re-renders of AlarmItems when they haven't changed
-                        onMoveEnd={moveInfo => {
-                            // console.log("moveInfo", moveInfo);
-                            this._onReorderAlarms(
-                                moveInfo.row.id,
-                                moveInfo.from,
-                                moveInfo.to,
-                                moveInfo.data
-                            );
-                        }}
-                    />
-                    {duplicationInfo && (
-                        <AlarmItem
-                            style={{
-                                position: "absolute",
-                                left: 0,
-                                top: 0,
-                                shadowOpacity: 0.2,
-                                shadowRadius: 10,
-                                elevation: 3,
-                                shadowColor: "black"
-                                // borderWidth: 3,
-                                // borderColor: "blue"
+                <SafeAreaView style={ListStyle.container}>
+                    <LinearGradient
+                        style={{ flex: 1 }}
+                        start={{ x: 0.2, y: 0 }}
+                        end={{ x: 1.5, y: 1 }}
+                        colors={["#ecebf4", "#c2ccd6"]}
+                    >
+                        {/* <PushController /> */}
+                        <DraggableFlatList
+                            data={this.state.alarms}
+                            renderItem={alarm => {
+                                let { move, moveEnd, isActive } = alarm;
+                                return (
+                                    <AlarmItem
+                                        alarm={alarm.item}
+                                        onPress={this._onPressItem}
+                                        onDelete={this._onPressDelete.bind(
+                                            this,
+                                            alarm.item
+                                        )}
+                                        onDuplicate={this._onPressDuplicate.bind(
+                                            this,
+                                            alarm.item
+                                        )}
+                                        onToggle={this._onAlarmToggled}
+                                        onSnap={this._onSnap.bind(this, alarm)}
+                                        close={
+                                            alarm.item.id !== this._activeRow
+                                        }
+                                        hide={
+                                            duplicationInfo &&
+                                            duplicationInfo.alarm.id ==
+                                                alarm.item.id
+                                        }
+                                        startMove={move}
+                                        endMove={moveEnd}
+                                        isActive={isActive}
+                                    />
+                                );
                             }}
-                            alarm={duplicationInfo.alarm}
-                            onPress={this._onPressItem}
-                            onDelete={this._onPressDelete.bind(
-                                this,
-                                duplicationInfo.alarm
-                            )}
-                            onDuplicate={this._onPressDuplicate.bind(
-                                this,
-                                duplicationInfo.alarm
-                            )}
-                            onToggle={this._onAlarmToggled}
-                            onSnap={this._onSnap.bind(
-                                this,
-                                duplicationInfo.alarm
-                            )}
-                            close={true}
-                            animateConfig={{
-                                enabled: true,
-                                sourceRow: duplicationInfo.srcPosition,
-                                alarmCount: this.state.alarms.length,
-                                onComplete: this.setState.bind(this, this.state)
+                            keyExtractor={this._keyExtractor}
+                            // extraData={this.state} // TODO: FIXME: May be able to fix flickering issue by being more careful about what extraData we pass in. THis may prevent unessesary re-renders of AlarmItems when they haven't changed
+                            onMoveEnd={moveInfo => {
+                                // console.log("moveInfo", moveInfo);
+                                this._onReorderAlarms(
+                                    moveInfo.row.id,
+                                    moveInfo.from,
+                                    moveInfo.to,
+                                    moveInfo.data
+                                );
                             }}
                         />
-                    )}
-                    {/* <TouchableOpacity
+                        {duplicationInfo && (
+                            <AlarmItem
+                                style={{
+                                    position: "absolute",
+                                    left: 0,
+                                    top: 0,
+                                    shadowOpacity: 0.2,
+                                    shadowRadius: 10,
+                                    elevation: 3,
+                                    shadowColor: "black"
+                                    // borderWidth: 3,
+                                    // borderColor: "blue"
+                                }}
+                                alarm={duplicationInfo.alarm}
+                                onPress={this._onPressItem}
+                                onDelete={this._onPressDelete.bind(
+                                    this,
+                                    duplicationInfo.alarm
+                                )}
+                                onDuplicate={this._onPressDuplicate.bind(
+                                    this,
+                                    duplicationInfo.alarm
+                                )}
+                                onToggle={this._onAlarmToggled}
+                                onSnap={this._onSnap.bind(
+                                    this,
+                                    duplicationInfo.alarm
+                                )}
+                                close={true}
+                                animateConfig={{
+                                    enabled: true,
+                                    sourceRow: duplicationInfo.srcPosition,
+                                    alarmCount: this.state.alarms.length,
+                                    onComplete: this.setState.bind(
+                                        this,
+                                        this.state
+                                    )
+                                }}
+                            />
+                        )}
+                        {/* <TouchableOpacity
                         style={{
                             position: "absolute",
                             bottom: 0,
@@ -739,7 +745,8 @@ class Alarms extends Component {
                             this.setState(this.state);
                         }}
                     /> */}
-                </LinearGradient>
+                    </LinearGradient>
+                </SafeAreaView>
             </TouchableWithoutFeedback>
         );
     }
