@@ -12,6 +12,7 @@
 #import <React/RCTRootView.h>
 #import <React/RCTPushNotificationManager.h>
 #import "RNNotifications.h"
+@import GoogleMobileAds;
 
 @implementation AppDelegate
 
@@ -31,6 +32,7 @@
                                                initialProperties:nil
                                                    launchOptions:launchOptions];
   
+    [GADMobileAds configureWithApplicationID:@"ca-app-pub-5775007461562122~1333890178"];
 //  NSLog(@"Testing my own log in AppDelegate -------- ******************** ---------------");
 //  NSLog(@"%@", jsCodeLocation.absoluteString);
 //  NSLog (@" host:%@", [jsCodeLocation host]);
@@ -40,6 +42,8 @@
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
+  
+
   
   /* @Roderick
    IMPORTANT: The next 3 lines were added as a tip found in react-native docs (https://facebook.github.io/react-native/docs/running-on-device.html#troubleshooting). They prevent the screen from flashing white between the splash screen and mounting the root view!

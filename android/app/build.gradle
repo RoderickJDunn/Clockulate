@@ -156,6 +156,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-admob')
     compile project(':react-native-wheel-picker-android')
     compile 'com.android.support:support-v4:27.1.0'
     compile project(':lottie-react-native')

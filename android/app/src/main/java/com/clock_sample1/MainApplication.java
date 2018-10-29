@@ -3,6 +3,7 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.sbugert.rnadmob.RNAdMobPackage;
 import com.wheelpicker.WheelPickerPackage;
 import com.airbnb.android.react.lottie.LottiePackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
@@ -39,6 +40,7 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(new MainReactPackage(),
+            new RNAdMobPackage(),
             new WheelPickerPackage(),
             new LottiePackage(),
             new RNGestureHandlerPackage(),

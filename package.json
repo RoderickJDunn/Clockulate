@@ -4,6 +4,7 @@
     "private": true,
     "devDependencies": {
         "babel-jest": "23.6.0",
+        "babel-plugin-transform-remove-console": "^6.9.4",
         "babel-preset-react-native": "^5.0.2",
         "buffer": "^5.0.7",
         "jest": "23.6.0",
@@ -34,6 +35,7 @@
         "native-base": "^2.7.2",
         "react": "^16.5.2",
         "react-native": "^0.57.0",
+        "react-native-admob": "^2.0.0-beta.5",
         "react-native-alarm-notification": "^1.1.0",
         "react-native-animatable": "^1.2.4",
         "react-native-autocomplete-input": "^3.6.0",
