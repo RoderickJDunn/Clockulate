@@ -31,7 +31,7 @@ import { Icon } from "react-native-elements";
 import Interactable from "react-native-interactable";
 import DateTimePicker from "react-native-modal-datetime-picker";
 // import KeyframesView from "react-native-facebook-keyframes";
-import { isIphoneX } from "react-native-iphone-x-helper";
+import { isIphoneX, ifIphoneX } from "react-native-iphone-x-helper";
 import LinearGradient from "react-native-linear-gradient";
 
 import moment from "moment";
@@ -59,17 +59,25 @@ const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15];
 
 let _menuIconAnim = new Animated.Value(0);
 
+let isSmallScreen = SCREEN_HEIGHT < 650;
+
 /* Layout factors */
 const NON_CLOCK_HEIGHT_FACTOR = 1.15; // multiply this by SCREEN_HEIGHT to get height of non-clock area
 const TASK_AREA_TL_VIEW_FLEX_FACTOR = 0.91; // flex value for TaskArea (within non-clock area) in TaskList view
-const TASK_AREA_AUTO_VIEW_FLEX_FACTOR = 0.53; // flex value for TaskArea (within non-clock area) in Auto view
+const TASK_AREA_AUTO_VIEW_FLEX_FACTOR = isSmallScreen ? 0.49 : 0.53; // flex value for TaskArea (within non-clock area) in Auto view
 const TASK_HEAD_TL_VIEW_FLEX_FACTOR = 0.06; // flex value for TaskHeader (within TaskArea) in TaskList view
 const TASK_HEAD_AUTO_VIEW_FLEX_FACTOR = 0.15; // flex value for Taskheader (within TaskArea) in Auto view
 const TASK_LIST_TL_VIEW_FLEX_FACTOR = 1 - TASK_HEAD_TL_VIEW_FLEX_FACTOR; // flex value for TaskList (within TaskArea) in TaskList view
 const TASK_LIST_AUTO_VIEW_FLEX_FACTOR = 1 - TASK_HEAD_AUTO_VIEW_FLEX_FACTOR; // flex value for TaskList (within TaskArea) in Auto view
+const FIELDS_AREA_FLEX_FACTOR = isSmallScreen ? 0.24 : 0.17; // flex value for TaskArea (within non-clock area) in Auto view
 
-const TASK_LIST_TL_VIEW_POS_FACTOR = 0.18; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in TaskList View
-const TASK_LIST_AUTO_VIEW_POS_FACTOR = 0.56; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in Auto view
+const TASK_LIST_TL_VIEW_POS_FACTOR = 0.21; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in TaskList View
+const TASK_LIST_AUTO_VIEW_POS_FACTOR = isSmallScreen ? 0.65 : 0.595; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in Auto view
+
+const SNAP_FACTOR_TL_VIEW = isSmallScreen ? 0.44 : 0.385;
+// for safe keeping
+//const TASK_LIST_TL_VIEW_POS_FACTOR = 0.21; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in TaskList View
+//const TASK_LIST_AUTO_VIEW_POS_FACTOR = 0.595; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in Auto view
 class AlarmDetail extends Component {
     static navigationOptions = ({ navigation }) => {
         let menuIsOpen = navigation.state.params.menuIsOpen;
@@ -142,7 +150,7 @@ class AlarmDetail extends Component {
     height = SCREEN_HEIGHT; //full height
     snapAuto = 0;
     snapNormal = SCREEN_HEIGHT;
-    snapTaskList = -SCREEN_HEIGHT * 0.385;
+    snapTaskList = -SCREEN_HEIGHT * SNAP_FACTOR_TL_VIEW;
 
     xtraKeyboardHeight = 0; // this is always 0, except on iPhone X it is 34
     _animKeyboardHeight = new Animated.Value(0);
@@ -155,7 +163,7 @@ class AlarmDetail extends Component {
             TASK_AREA_TL_VIEW_FLEX_FACTOR *
             TASK_LIST_TL_VIEW_FLEX_FACTOR,
         pageX: 0,
-        pageY: SCREEN_HEIGHT * TASK_LIST_TL_VIEW_POS_FACTOR
+        pageY: SCREEN_HEIGHT * TASK_LIST_TL_VIEW_POS_FACTOR - ifIphoneX(29, 0)
     };
 
     tskListDimsAutoView = {
@@ -166,7 +174,7 @@ class AlarmDetail extends Component {
             TASK_AREA_AUTO_VIEW_FLEX_FACTOR *
             TASK_LIST_AUTO_VIEW_FLEX_FACTOR,
         pageX: 0,
-        pageY: SCREEN_HEIGHT * TASK_LIST_AUTO_VIEW_POS_FACTOR
+        pageY: SCREEN_HEIGHT * TASK_LIST_AUTO_VIEW_POS_FACTOR - ifIphoneX(29, 0)
     };
 
     AnimatedAlarmLabel = Animated.createAnimatedComponent(TextInput);
@@ -405,6 +413,7 @@ class AlarmDetail extends Component {
     }
 
     addKeyboardListeners() {
+        // console.log("AlarmDetail: addKeyboardListeners");
         this.keyboardWillShowSub = Keyboard.addListener(
             Platform.OS == "ios" ? "keyboardWillShow" : "keyboardDidShow",
             this.keyboardWillShow.bind(this)
@@ -416,8 +425,9 @@ class AlarmDetail extends Component {
     }
 
     removeKeyboardListeners() {
-        this.keyboardWillShowSub.remove();
-        this.keyboardWillHideSub.remove();
+        console.log("AlarmDetail  -- removeKeyboardListeners");
+        if (this.keyboardWillShowSub) this.keyboardWillShowSub.remove();
+        if (this.keyboardWillHideSub) this.keyboardWillHideSub.remove();
     }
 
     componentDidMount() {
@@ -716,6 +726,7 @@ class AlarmDetail extends Component {
     }
 
     _willShowNavScreen() {
+        console.log("AlarmDetail: _willShowNavScreen");
         this.addKeyboardListeners();
     }
 
@@ -2547,7 +2558,8 @@ const styles = StyleSheet.create({
         // backgroundColor: "yellow",
         padding: scaleByFactor(10, 0.4),
         paddingBottom: 8,
-        flex: 0.17,
+        flex: FIELDS_AREA_FLEX_FACTOR,
+        // minHeight: 55,
         borderBottomColor: "#e9e9e9"
         // borderBottomWidth: 1
     },

@@ -10,7 +10,6 @@ import {
     TouchableOpacity,
     Text,
     StyleSheet,
-    Button,
     Dimensions,
     Keyboard,
     Platform,
@@ -74,9 +73,10 @@ class TaskDetail extends Component {
                         paddingVertical: 10,
                         paddingLeft: 10
                     }}
-                    onPress={() =>
-                        navigation.dispatch(NavigationActions.back())
-                    }
+                    onPress={() => {
+                        params.willNavigateBack();
+                        navigation.dispatch(NavigationActions.back());
+                    }}
                 >
                     {Platform.OS == "ios" ? (
                         <Text
@@ -139,7 +139,7 @@ class TaskDetail extends Component {
         super(props);
         // console.log("TaskDetail -- Props: ", props);
         const { params } = props.navigation.state; // same as: " const params = props.navigation.state.params "
-        console.log("nav params", params);
+        // console.log("nav params", params);
 
         let taskSuggestions = realm.objects("Task");
 
@@ -219,11 +219,16 @@ class TaskDetail extends Component {
     }
 
     componentDidMount() {
+        console.log("TaskDetail -- componentDidMount");
+        this.addKeyboardListeners();
+        this.props.navigation.setParams({
+            handleSave: this.handleSave.bind(this)
+        });
         if (this._nameInputRef) setTimeout(this._nameInputRef.focus, 100);
     }
 
     componentWillUnmount() {
-        console.debug("AlarmDetail: componentWillUnmount");
+        console.debug("TaskDetail: componentWillUnmount");
         this.removeKeyboardListeners();
     }
 
@@ -245,8 +250,8 @@ class TaskDetail extends Component {
     }
 
     removeKeyboardListeners() {
-        this.keyboardWillShowSub.remove();
-        this.keyboardWillHideSub.remove();
+        if (this.keyboardWillShowSub) this.keyboardWillShowSub.remove();
+        if (this.keyboardWillHideSub) this.keyboardWillHideSub.remove();
     }
 
     keyboardWillShow = event => {
@@ -257,8 +262,8 @@ class TaskDetail extends Component {
     };
 
     keyboardWillHide = event => {
-        console.log("keyboardDidHide");
-        console.log("this.currName", this.currName);
+        // console.log("keyboardDidHide");
+        // console.log("this.currName", this.currName);
 
         let exactMatch = [];
         if (this.state.suggestions.length > 0) {
@@ -268,7 +273,7 @@ class TaskDetail extends Component {
             );
         }
 
-        console.log("exactMatch", exactMatch);
+        // console.log("exactMatch", exactMatch);
         let hasMatch = exactMatch.length > 0;
         this.setState({
             keyboardHeight: 0,
@@ -283,7 +288,7 @@ class TaskDetail extends Component {
         // 1. Does the current task-name already exist in the DB as a 'Task'?
         // 2. Is this a new AlarmTask (user pushed 'Add New Task' button)?, or is it an existing AlarmTask that is being edited?
 
-        console.log("TaskDetail:handleSave: this.state", this.state);
+        // console.log("TaskDetail:handleSave: this.state", this.state);
 
         /* isNewAlarmTask:
             Simple flag indicating whether user entered TaskDetail by tapping the add button (isNewAlarmTask == true)
@@ -305,8 +310,8 @@ class TaskDetail extends Component {
             .filtered("name = $0", this.currName);
 
         if (taskLookup.length == 1) {
-            console.log("Found 1 task with name: " + this.currName);
-            console.log("taskLookup[0]", taskLookup[0]);
+            // console.log("Found 1 task with name: " + this.currName);
+            // console.log("taskLookup[0]", taskLookup[0]);
 
             prevAlarmTask.task = taskLookup[0];
 
@@ -317,7 +322,7 @@ class TaskDetail extends Component {
             */
             prevAlarmTask.duration = duration;
         } else if (taskLookup.length == 0) {
-            console.log("No tasks found with name: " + this.currName);
+            // console.log("No tasks found with name: " + this.currName);
             newTask = new TaskModel();
 
             newTask.name = this.currName; // apply current name to new Task
@@ -337,9 +342,9 @@ class TaskDetail extends Component {
             //  - true: create a new AlarmTask and Task
 
             // console.log(this.state);
-            console.log(
-                "Creating new Task. 'isNewAlarmTask': " + isNewAlarmTask
-            );
+            // console.log(
+            //     "Creating new Task. 'isNewAlarmTask': " + isNewAlarmTask
+            // );
             prevAlarmTask.task = newTask;
 
             prevAlarmTask.enabled = true; // since this AlarmTask has been edited and saved, it should be automatically enabled.
@@ -362,7 +367,7 @@ class TaskDetail extends Component {
                     We only get here if user has tapped "Add new AlarmTask" AND we have found an existing Task
                     in the DB with the name provided by the user
                 */
-                console.log("Creating a new AlarmTask");
+                // console.log("Creating a new AlarmTask");
                 realm.write(() => {
                     // let idToDelete = prevAlarmTask.id; // get Id of AlarmTask to delete
                     // console.log("idToDelete", idToDelete);
@@ -672,15 +677,15 @@ class TaskDetail extends Component {
                                 flex: 1
                             }}
                         >
-                            <TouchableOpacity
+                                <TouchableOpacity
                                 // style={Styles.DeleteButton}
-                                style={Styles.DeleteButton}
-                                onPress={this._onDeleteTask.bind(this)}
-                            >
+                                    style={Styles.DeleteButton}
+                                    onPress={this._onDeleteTask.bind(this)}
+                                >
                                 <Text style={{ color: "white", fontSize: 18 }}>
-                                    Delete
-                                </Text>
-                            </TouchableOpacity>
+                                        Delete
+                                    </Text>
+                                </TouchableOpacity>
                         </View>
                     </KeyboardAvoidingView>
                     <Text style={[TextStyle.labelText, Styles.fieldLabelText]}>
@@ -722,7 +727,8 @@ class TaskDetail extends Component {
                             alignContent: "center",
                             alignItems: "center",
                             position: "absolute",
-                            top: scaleByFactor(35, 0.6) + 35
+                            top: scaleByFactor(35, 0.6) + 35,
+                            backgroundColor: Colors.backgroundGrey
 
                             // borderRadius: 7,
                             // backgroundColor: "#c8d6e5",
@@ -885,11 +891,7 @@ const Styles = StyleSheet.create({
         height: 50,
         borderRadius: 7,
         alignItems: "center",
-        justifyContent: "center",
-        position: "absolute",
-        bottom: isIphoneX() ? 30 : 0,
-        right: 0,
-        left: 0
+        justifyContent: "center"
     },
     fieldLabelText: {
         // paddingBottom: 0,
@@ -908,7 +910,8 @@ const Styles = StyleSheet.create({
         paddingHorizontal: 0,
         zIndex: 1,
         borderWidth: 0,
-        borderColor: "transparent"
+        borderColor: "transparent",
+        backgroundColor: Colors.backgroundGrey
     },
     suggestionsContainer: {
         shadowOffset: {

@@ -34,7 +34,13 @@ import * as CONST_DIMENSIONS from "../styles/const_dimensions";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-const MAX_SLIDER_VALUE = 7200; // this is 2 hours, in seconds
+const isSmallScreen = SCREEN_HEIGHT < 650;
+
+const DURATION_AREA_FLEX_FACTOR = isSmallScreen ? 0.3 : 0.25;
+const NAME_AREA_FLEX_FACTOR = isSmallScreen ? 0.3 : 0.25;
+
+// const MAX_SLIDER_VALUE = 7200; // this is 2 hours, in seconds
+
 class TaskItem extends React.Component {
     /*
     Props: Receives an AlarmTask in the 'data' property:
@@ -563,7 +569,7 @@ class TaskItem extends React.Component {
                         <View
                             style={[
                                 {
-                                    flex: 0.25,
+                                    flex: DURATION_AREA_FLEX_FACTOR,
                                     alignSelf: "stretch",
                                     alignItems: "center"
                                 }
