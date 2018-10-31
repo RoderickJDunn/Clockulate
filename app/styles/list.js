@@ -15,7 +15,6 @@ export const ListStyle = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#ecebf4",
-        flexDirection: "row",
         zIndex: 50
     },
     item: {

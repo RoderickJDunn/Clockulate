@@ -5,7 +5,7 @@
 import realm from "./DataSchemas";
 import uuid from "react-native-uuid";
 import moment from "moment";
-import { DefaultAlarm, ALARM_STATES } from "./constants";
+import { DefaultAlarm, ALARM_STATES, ADV_STAT_TYPES } from "./constants";
 import * as DateUtils from "../util/date_utils";
 import SOUND_DATA from "./sound-data";
 import { AlarmModel, AlarmSound } from "./models";
@@ -43,10 +43,59 @@ let prePopSettings = [
     }
 ];
 
+let prePopAdvStats = [
+    {
+        name: "dateAppLastOpened"
+    },
+    {
+        name: "appOpenedCountTotal"
+    },
+    {
+        name: "appOpenedCountSinceNUP", // NUP == Non-Use-Period
+        statType: ADV_STAT_TYPES.NUP_COUNT
+    },
+    {
+        name: "AlarmsListVCTotal" // VC == View Count
+    },
+    {
+        name: "AlarmsListVCSinceNUP",
+        statType: ADV_STAT_TYPES.NUP_COUNT
+    },
+    {
+        name: "MainMenuVCTotal" // VC == View Count
+    },
+    {
+        name: "MainMenuVCSinceNUP",
+        statType: ADV_STAT_TYPES.NUP_COUNT
+    },
+    {
+        name: "AlarmDetailVCTotal" // VC == View Count
+    },
+    {
+        name: "AlarmDetailVCSinceNUP",
+        statType: ADV_STAT_TYPES.NUP_COUNT
+    },
+    {
+        name: "TaskDetailVCTotal" // VC == View Count
+    },
+    {
+        name: "TaskDetailVCSinceNUP",
+        statType: ADV_STAT_TYPES.NUP_COUNT
+    },
+    {
+        name: "SoundsVCTotal" // VC == View Count
+    },
+    {
+        name: "SoundsVCSinceNUP",
+        statType: ADV_STAT_TYPES.NUP_COUNT
+    }
+];
+
 // Create Realm objects and write to local storage
-function insertPrepopData() {
+function insertPrepopData(onFinished) {
     realm.write(() => {
         /* Insert Sounds data */
+        console.log("Insert Sounds");
         let defaultSound = realm.create("Sound", {
             id: uuid.v1(),
             files: SOUND_DATA[0].files,
@@ -69,8 +118,7 @@ function insertPrepopData() {
         }
 
         /**** Create Tasks *****/
-
-        console.log("Adding dummy tasks");
+        console.log("Create Tasks");
 
         const task1 = realm.create("Task", {
             id: uuid.v1(),
@@ -134,6 +182,16 @@ function insertPrepopData() {
                 name: prePopSettings[index].name,
                 enabled: prePopSettings[index].enabled,
                 value: prePopSettings[index].value
+            });
+        }
+
+        /* Create Advertising Stats */
+        for (let index = 0; index < prePopAdvStats.length; index++) {
+            realm.create("AdvStat", {
+                id: uuid.v1(),
+                name: prePopAdvStats[index].name,
+                statType:
+                    prePopAdvStats[index].statType || ADV_STAT_TYPES.TOTAL_COUNT
             });
         }
 
@@ -249,7 +307,10 @@ function insertPrepopData() {
             alarmSound: alarmSound2,
             snoozeTime: DefaultAlarm.snoozeTime
         });
-        console.log(alarm2, alarm1, task2, task4, task5);
+        // console.log(alarm2, alarm1, task2, task4, task5);
+        console.log("Inserted pre-pop data");
+
+        onFinished();
     });
 
     // const longTasks = realm.objects("Task").filtered("defaultDuration > 1000");

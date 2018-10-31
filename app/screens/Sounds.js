@@ -5,16 +5,25 @@ import {
     Dimensions,
     Text,
     TouchableOpacity,
-    StyleSheet
+    StyleSheet,
+    InteractionManager
 } from "react-native";
 import EntypoIcon from "react-native-vector-icons/Entypo";
+import { SafeAreaView } from "react-navigation";
+import {
+    AdMobBanner,
+    // AdMobInterstitial,
+    PublisherBanner
+    // AdMobRewarded
+} from "react-native-admob";
+
 import Sound from "react-native-sound";
 import { ListStyle } from "../styles/list";
 import { scale, scaleByFactor } from "../util/font-scale";
 import Colors from "../styles/colors";
 import realm from "../data/DataSchemas";
 import { SOUND_TYPES } from "../data/constants";
-
+import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
 export default class Sounds extends Component {
     static navigationOptions = () => ({
         title: "Sounds",
@@ -47,6 +56,9 @@ export default class Sounds extends Component {
             }),
             activeSound: null
         };
+        InteractionManager.runAfterInteractions(() => {
+            AdvSvcOnScreenConstructed("Sounds");
+        });
     }
 
     componentWillUnmount() {
@@ -123,46 +135,88 @@ export default class Sounds extends Component {
     render() {
         // console.log(this.state);
         return (
-            <View style={[styles.listContainer, { flex: 1 }]}>
-                <FlatList
-                    data={this.state.sounds}
-                    keyExtractor={sound => sound.displayName}
-                    renderItem={item => {
-                        // console.log("Rendering sound row: ", item);
-                        let sound = item.item;
-                        let checkArea;
+            <SafeAreaView
+                forceInset={{ bottom: "always" }}
+                style={{ flex: 1, backgroundColor: Colors.backgroundGrey }}
+            >
+                <View style={[styles.listContainer]}>
+                    <FlatList
+                        data={this.state.sounds}
+                        keyExtractor={sound => sound.displayName}
+                        renderItem={item => {
+                            // console.log("Rendering sound row: ", item);
+                            let sound = item.item;
+                            let checkArea;
 
-                        if (sound.enabled) {
-                            checkArea = (
-                                <EntypoIcon
-                                    style={styles.soundRowContent}
-                                    name="check"
-                                    size={22}
-                                    color="#098eee"
-                                />
+                            if (sound.enabled) {
+                                checkArea = (
+                                    <EntypoIcon
+                                        style={styles.soundRowContent}
+                                        name="check"
+                                        size={22}
+                                        color="#098eee"
+                                    />
+                                );
+                            }
+                            return (
+                                <TouchableOpacity
+                                    style={styles.soundListItem}
+                                    onPress={this._onPressItem.bind(
+                                        this,
+                                        sound
+                                    )}
+                                >
+                                    <Text style={styles.soundRowContent}>
+                                        {sound.displayName}
+                                    </Text>
+                                    {checkArea}
+                                </TouchableOpacity>
                             );
-                        }
-                        return (
-                            <TouchableOpacity
-                                style={styles.soundListItem}
-                                onPress={this._onPressItem.bind(this, sound)}
-                            >
-                                <Text style={styles.soundRowContent}>
-                                    {sound.displayName}
-                                </Text>
-                                {checkArea}
-                            </TouchableOpacity>
-                        );
-                    }}
-                    extraData={this.state}
-                />
-            </View>
+                        }}
+                        extraData={this.state}
+                    />
+                </View>
+                {true && (
+                    <AdWrapper
+                        borderPosition="top"
+                        // borderColor={Colors.brandDarkGrey}
+                    >
+                        <PublisherBanner
+                            adSize="smartBannerPortrait"
+                            // validAdSizes={[
+                            //     "banner",
+                            //     "smartBannerPortrait",
+                            //     "largeBanner",
+                            //     "mediumRectangle"
+                            //     // "smart"
+                            // ]}
+                            // adUnitID="ca-app-pub-3940256099942544/6300978111"
+                            adUnitID="ca-app-pub-5775007461562122/7208145331"
+                            testDevices={[AdMobBanner.simulatorId]}
+                            onAdFailedToLoad={this._bannerError}
+                            onAdLoaded={() => {
+                                console.log("adViewDidReceiveAd");
+                            }}
+                            style={{
+                                // flex: 1,
+                                alignSelf: "center",
+                                // bottom: 100,
+                                // height: 400,
+                                // width: 400,
+                                height: 80,
+                                width: 320
+                            }}
+                        />
+                    </AdWrapper>
+                )}
+            </SafeAreaView>
         );
     }
 }
 
 const styles = StyleSheet.create({
     listContainer: {
+        flex: 1,
         paddingHorizontal: 10,
         backgroundColor: Colors.backgroundGrey
     },

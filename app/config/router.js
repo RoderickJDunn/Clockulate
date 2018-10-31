@@ -3,17 +3,33 @@
  */
 
 import React from "react";
-import { View, Text, StyleSheet, Easing, Animated } from "react-native";
+import {
+    View,
+    Text,
+    StyleSheet,
+    Easing,
+    Animated,
+    Dimensions,
+    InteractionManager
+} from "react-native";
 import {
     createStackNavigator,
     createDrawerNavigator,
     SafeAreaView,
     DrawerItems,
+    Header,
     StackViewTransitionConfigs
 } from "react-navigation";
 import { Icon } from "react-native-elements";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
+import {
+    AdMobBanner,
+    // AdMobInterstitial,
+    PublisherBanner
+    // AdMobRewarded
+} from "react-native-admob";
+import LottieView from "lottie-react-native";
 
 import Alarms from "../screens/Alarms";
 import AlarmDetail from "../screens/AlarmDetail";
@@ -25,11 +41,13 @@ import Upgrade from "../screens/Upgrade";
 import Help from "../screens/Help";
 import LinearGradient from "react-native-linear-gradient";
 import { isIphoneX } from "react-native-iphone-x-helper";
+import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
 
 import Colors from "../styles/colors";
 import { scaleByFactor } from "../util/font-scale";
-import LottieView from "lottie-react-native";
 
+const SCREEN_WIDTH = Dimensions.get("window").width;
+const SCREEN_HEIGHT = Dimensions.get("window").height;
 // export const AlarmTabs = TabNavigator({
 //     AlarmDetail: {
 //         screen: AlarmDetail,
@@ -149,7 +167,12 @@ const alarmListNavOptions = ({ navigation }) => ({
             underlayColor={Colors.brandDarkGrey}
             size={28}
             /* "DrawerOpen" is a built-in navigation function. I did not define it anywhere*/
-            onPress={navigation.openDrawer}
+            onPress={() => {
+                InteractionManager.runAfterInteractions(() => {
+                    AdvSvcOnScreenConstructed("MainMenu");
+                });
+                navigation.openDrawer();
+            }}
             navigate={navigation.navigate}
             hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
             style={{ marginLeft: scaleByFactor(8, 0.9) }}
@@ -177,7 +200,12 @@ const otherDrawerNavOptions = title => {
                 underlayColor={Colors.brandDarkGrey}
                 size={28}
                 /* "DrawerOpen" is a built-in navigation function. I did not define it anywhere*/
-                onPress={navigation.openDrawer}
+                onPress={() => {
+                    InteractionManager.runAfterInteractions(() => {
+                        AdvSvcOnScreenConstructed("MainMenu");
+                    });
+                    navigation.openDrawer();
+                }}
                 navigate={navigation.navigate}
                 hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
                 style={{ marginLeft: scaleByFactor(8, 0.9) }}
@@ -322,63 +350,6 @@ const CustomDrawerContentComponent = props => {
                     bottom: "always"
                 }}
             >
-                {/* <LinearGradient
-                    start={{ x: 0.2, y: -2 }}
-                    end={{ x: 0.8, y: 2 }}
-                    // colors={[
-                    //     "rgba(255, 255, 150, 0.7)",
-                    //     "rgba(255, 255, 50, 0.8)"
-                    // ]}
-                    // colors={[Colors.brandLightPurple, "#FFFFFF"]}
-                    // colors={["rgba(255, 255, 25, 0.9)", "#FFFFFF"]}
-                    // colors={["#000", Colors.brandDarkPurple]}
-                    colors={["#9F9F9F", Colors.brandDarkPurple]}
-                    style={[
-                        {
-                            // padding: 15
-                            // backgroundColor: "rgba(255, 255, 25, 0.9)",
-                            // backgroundColor: "rgba(255, 255, 255, 0.1)"
-                            // backgroundColor: Colors.brandDarkPurple
-                            // backgroundColor: Colors.brandDarkGrey
-                            // opacity: 0.5
-                            // paddingTop: 30,
-                            // height: 90
-                        }
-                    ]}
-                    // overflow="hidden"
-                >
-                    {isIphoneX() ? (
-                        <View
-                            style={{
-                                height: 30
-                            }}
-                        />
-                    ) : null}
-                    <View
-                        style={{
-                            height: 65,
-                            justifyContent: "flex-end"
-                            // alignItems: "center"
-                        }}
-                    >
-                        <Text
-                            style={{
-                                fontSize: 33,
-                                color: Colors.brandSuperLightPurple,
-                                // color: "#272727",
-                                // color: "yellow",
-                                fontFamily: "Quesha",
-                                fontWeight: "bold",
-                                letterSpacing: 3,
-                                opacity: 1,
-                                textShadowColor: "black",
-                                textShadowOffset: { width: 10, height: 5 }
-                            }}
-                        >
-                            Clockulate
-                        </Text>
-                    </View>
-                </LinearGradient> */}
                 <DrawerItems
                     {...props}
                     getLabel={scene => {
@@ -423,13 +394,68 @@ const CustomDrawerContentComponent = props => {
                         );
                     }}
                 />
+                {true && (
+                    <AdWrapper
+                        borderPosition="top"
+                        // borderColor={Colors.brandDarkGrey}
+                        style={{
+                            // overflow: "hidden",
+                            alignSelf: "center",
+                            // bottom: 100,
+                            height: 300,
+                            width: 280,
+
+                            transform: [
+                                {
+                                    scale: SCREEN_HEIGHT < 660 ? 0.83 : 0.9
+                                }
+                            ]
+                        }}
+                    >
+                        {SCREEN_HEIGHT < 660 ? (
+                            <PublisherBanner
+                                adSize="banner"
+                                validAdSizes={["banner"]}
+                                // adUnitID="ca-app-pub-3940256099942544/6300978111"
+                                adUnitID="ca-app-pub-5775007461562122/1503272954"
+                                testDevices={[AdMobBanner.simulatorId]}
+                                onAdFailedToLoad={this._bannerError}
+                                onAdLoaded={() => {
+                                    console.log("adViewDidReceiveAd");
+                                }}
+                                style={{
+                                    // flex: 1,
+                                    alignSelf: "center"
+                                    // bottom: 100,
+                                }}
+                            />
+                        ) : (
+                            <PublisherBanner
+                                adSize="mediumRectangle"
+                                validAdSizes={["mediumRectangle"]}
+                                // adUnitID="ca-app-pub-3940256099942544/6300978111"
+                                adUnitID="ca-app-pub-5775007461562122/1503272954"
+                                testDevices={[AdMobBanner.simulatorId]}
+                                onAdFailedToLoad={this._bannerError}
+                                onAdLoaded={() => {
+                                    console.log("adViewDidReceiveAd");
+                                }}
+                                style={{
+                                    // flex: 1,
+                                    alignSelf: "center"
+                                    // bottom: 100,
+                                }}
+                            />
+                        )}
+                    </AdWrapper>
+                )}
             </SafeAreaView>
 
             <Text
                 style={{
                     position: "absolute",
                     alignSelf: "center",
-                    bottom: isIphoneX() ? 25 : 15,
+                    bottom: isIphoneX() ? 34 : 15,
                     color: Colors.brandVeryLightPurple
                 }}
             >

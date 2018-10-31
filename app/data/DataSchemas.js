@@ -5,7 +5,6 @@
 "use strict";
 
 import Realm from "realm";
-
 class AlarmSchema extends Realm.Object {}
 AlarmSchema.schema = {
     name: "Alarm",
@@ -103,6 +102,18 @@ SettingsSchema.schema = {
     }
 };
 
+class AdvStatSchema extends Realm.Object {}
+AdvStatSchema.schema = {
+    name: "AdvStat",
+    primaryKey: "id",
+    properties: {
+        id: "string",
+        name: "string",
+        value: { type: "int", default: 0 },
+        statType: { type: "int", default: 0}
+    }
+};
+
 console.log("Realm path: ", Realm.defaultPath);
 
 export default new Realm({
@@ -112,6 +123,7 @@ export default new Realm({
         AlarmTaskSchema,
         SoundSchema,
         AlarmSoundSchema,
-        SettingsSchema
+        SettingsSchema,
+        AdvStatSchema
     ]
 });

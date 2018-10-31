@@ -18,6 +18,11 @@ export let ALARM_STATES = {
     SNOOZED: 3
 };
 
+export let ADV_STAT_TYPES = {
+    TOTAL_COUNT: 0,
+    NUP_COUNT: 1
+};
+
 export const DefaultSound = {};
 
 export const DefaultAlarm = {

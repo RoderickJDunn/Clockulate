@@ -16,6 +16,7 @@ import {
     KeyboardAvoidingView,
     ScrollView,
     Alert,
+    InteractionManager
 } from "react-native";
 import { Icon } from "react-native-elements";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -23,6 +24,12 @@ import IonIcon from "react-native-vector-icons/Ionicons";
 import { NavigationActions, Header } from "react-navigation";
 import Autocomplete from "react-native-autocomplete-input";
 import { isIphoneX } from "react-native-iphone-x-helper";
+import {
+    AdMobBanner,
+    // AdMobInterstitial,
+    PublisherBanner
+    // AdMobRewarded
+} from "react-native-admob";
 
 import { minuteRange, hourRange } from "../data/constants";
 import realm from "../data/DataSchemas";
@@ -44,6 +51,7 @@ import {
     calcMinutes
 } from "../util/date_utils";
 import PickerActionSheet from "../components/picker-action-sheet";
+import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -203,19 +211,10 @@ class TaskDetail extends Component {
 
         this.initialName = this.state.alarmTask.task.name;
         this.currName = this.state.alarmTask.task.name;
-    }
 
-    componentWillMount() {
-        console.debug("TaskDetail --- ComponentDidMount");
-        // setParams updates the object 'navigation.state.params'
-        // When this Screen is going to be rendered, any code in navigationOptions is run (ie: the code within
-        // the onPress property of a Button (in headerRight)). This code in navigationOptions can have access to
-        // the navigation object that we are updating here - so long as you pass in navigation to navigationOptions
-        console.log("Binding handleSave task");
-        this.props.navigation.setParams({
-            handleSave: this.handleSave.bind(this)
+        InteractionManager.runAfterInteractions(() => {
+            AdvSvcOnScreenConstructed("TaskDetail");
         });
-        this.addKeyboardListeners();
     }
 
     componentDidMount() {
@@ -628,6 +627,11 @@ class TaskDetail extends Component {
         this._onTaskDurationChanged(durationSecs);
     };
 
+    _bannerError = e => {
+        console.log("_bannerError");
+        console.log(e);
+    };
+
     render() {
         console.log("Render TaskDetail.");
         // console.log("this.state", this.state);
@@ -677,15 +681,55 @@ class TaskDetail extends Component {
                                 flex: 1
                             }}
                         >
+                            <View style={[Styles.AdvDeleteWrapper]}>
                                 <TouchableOpacity
-                                // style={Styles.DeleteButton}
                                     style={Styles.DeleteButton}
                                     onPress={this._onDeleteTask.bind(this)}
                                 >
-                                <Text style={{ color: "white", fontSize: 18 }}>
+                                    <Text
+                                        style={{ color: "white", fontSize: 18 }}
+                                    >
                                         Delete
                                     </Text>
                                 </TouchableOpacity>
+                                {true && (
+                                    <AdWrapper
+                                        borderPosition="top"
+                                        // borderColor={Colors.brandDarkGrey}
+                                    >
+                                        <PublisherBanner
+                                            adSize="smartBannerPortrait"
+                                            // validAdSizes={[
+                                            //     // "banner",
+                                            //     "smartBannerPortrait"
+                                            //     // "largeBanner",
+                                            //     // "mediumRectangle"
+                                            //     // "smart"
+                                            // ]}
+                                            //adUnitID="ca-app-pub-3940256099942544/6300978111"
+                                            adUnitID="ca-app-pub-5775007461562122/9954191195"
+                                            testDevices={[
+                                                AdMobBanner.simulatorId
+                                            ]}
+                                            onAdFailedToLoad={this._bannerError}
+                                            onAdLoaded={() => {
+                                                console.log(
+                                                    "adViewDidReceiveAd"
+                                                );
+                                            }}
+                                            style={{
+                                                // flex: 1,
+                                                alignSelf: "center",
+                                                // bottom: 100,
+                                                // height: 400,
+                                                // width: 400,
+                                                height: 80,
+                                                width: 320
+                                            }}
+                                        />
+                                    </AdWrapper>
+                                )}
+                            </View>
                         </View>
                     </KeyboardAvoidingView>
                     <Text style={[TextStyle.labelText, Styles.fieldLabelText]}>
@@ -884,6 +928,13 @@ class TaskDetail extends Component {
 export default TaskDetail;
 
 const Styles = StyleSheet.create({
+    AdvDeleteWrapper: {
+        alignSelf: "stretch",
+        position: "absolute",
+        bottom: isIphoneX() ? 34 : 0,
+        right: 0,
+        left: 0
+    },
     DeleteButton: {
         padding: 10,
         backgroundColor: Colors.deleteBtnRed,

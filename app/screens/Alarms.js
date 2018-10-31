@@ -10,7 +10,8 @@ import {
     Platform,
     DeviceEventEmitter,
     AppState,
-    NativeModules
+    NativeModules,
+    InteractionManager
     // TouchableOpacity
 } from "react-native";
 import moment from "moment";
@@ -27,10 +28,16 @@ import {
     cancelInAppAlarm,
     setInAppAlarm,
     checkForImplicitSnooze
-} from "../alarmservice/PushController";
+} from "../services/PushController";
 import NotificationsIOS from "react-native-notifications";
 import realm from "../data/DataSchemas";
 import DraggableFlatList from "react-native-draggable-flatlist";
+import {
+    AdMobBanner,
+    // AdMobInterstitial,
+    PublisherBanner
+    // AdMobRewarded
+} from "react-native-admob";
 
 import ProximityManager from "react-native-proximity-manager";
 
@@ -41,6 +48,12 @@ import * as DateUtils from "../util/date_utils";
 import { AlarmModel, AlarmTaskModel } from "../data/models";
 import { scaleByFactor } from "../util/font-scale";
 const { UIManager } = NativeModules;
+import {
+    AdWrapper,
+    AdSvcUpdateAppOpenedStats,
+    AdvSvcOnScreenConstructed,
+    AdvSvcUpdateDateLastOpen
+} from "../services/AdmobService";
 
 /* Dev only */
 import { populateDummyAlarms } from "../data/data-prepop";
@@ -60,6 +73,7 @@ class Alarms extends Component {
     constructor() {
         super();
         console.log("AlarmsList -- Constructor");
+        console.log("App was opened from KILLED state");
         //console.log("Fetching Alarms...");
         this.state = {
             alarms: realm.objects("Alarm").sorted("order"), // TODO: filter by 'visible'=true
@@ -75,6 +89,10 @@ class Alarms extends Component {
         else {
             ProximityManager.enable();
         }
+
+        InteractionManager.runAfterInteractions(() => {
+            AdvSvcOnScreenConstructed("Alarms");
+        });
     }
 
     onPushRegistered(deviceToken) {
@@ -232,7 +250,9 @@ class Alarms extends Component {
             // DeviceEventEmitter.addListener("remoteNotificationReceived", e => {
             //     console.log("Notification event: ", e);
             // });
-            DeviceEventEmitter.removeAllListeners("notificationActionReceived");
+            DeviceEventEmitter.removeAllSubscriptions(
+                "notificationActionReceived"
+            );
             PushNotificationAndroid.unregister();
             // console.log(
             //     "notificationActionReceived listeners.length",
@@ -303,13 +323,16 @@ class Alarms extends Component {
                 this.onNotificationOpened.bind(this)
             );
         } else {
-            DeviceEventEmitter.removeAllListeners("notificationActionReceived");
+            DeviceEventEmitter.removeAllSubscriptions(
+                "notificationActionReceived"
+            );
         }
+
+        this.props.navigation.removeListener("didFocus");
+        this.props.navigation.removeListener("didBlur");
 
         AppState.removeEventListener("change", this._handleAppStateChange);
 
-        this.props.navigation.removeAllListeners("didFocus");
-        this.props.navigation.removeAllListeners("didBlur");
     }
 
     _handleAppStateChange = nextAppState => {
@@ -319,6 +342,7 @@ class Alarms extends Component {
         ) {
             console.log("App has come to the foreground! (ALARMS LIST)");
 
+            AdSvcUpdateAppOpenedStats();
             // Implicit Snoozing and In-App Timers: Check if we need to manually switch any Alarms into 'snooze'. (ie: snooze Count)arent to user)
             let mNow = moment();
 
@@ -351,6 +375,8 @@ class Alarms extends Component {
             for (let i = 0; i < alarms.length; i++) {
                 cancelInAppAlarm(alarms[i]);
             }
+
+            AdvSvcUpdateDateLastOpen();
         }
 
         this.setState({ appState: nextAppState });
@@ -632,12 +658,15 @@ class Alarms extends Component {
                 style={ListStyle.container}
                 onPressIn={this._onPressBackground}
             >
-                <SafeAreaView style={ListStyle.container}>
-                    <LinearGradient
-                        style={{ flex: 1 }}
-                        start={{ x: 0.2, y: 0 }}
-                        end={{ x: 1.5, y: 1 }}
-                        colors={["#ecebf4", "#c2ccd6"]}
+                <LinearGradient
+                    style={{ flex: 1 }}
+                    start={{ x: 0.2, y: 0 }}
+                    end={{ x: 1.5, y: 1 }}
+                    colors={["#ecebf4", "#c2ccd6"]}
+                >
+                    <SafeAreaView
+                        forceInset={{ bottom: "always" }}
+                        style={ListStyle.container}
                     >
                         {/* <PushController /> */}
                         <DraggableFlatList
@@ -745,8 +774,47 @@ class Alarms extends Component {
                             this.setState(this.state);
                         }}
                     /> */}
-                    </LinearGradient>
-                </SafeAreaView>
+                        {true && (
+                            <AdWrapper
+                                borderPosition="top"
+                                // borderColor={Colors.brandDarkGrey}
+
+                                // style={{
+                                //     // height: 400,
+                                //     backgroundColor: "green"
+                                // }}
+                            >
+                                <PublisherBanner
+                                    adSize="largeBanner"
+                                    // validAdSizes={
+                                    //     [
+                                    //         // "banner"
+                                    //         // "smartBannerPortrait"
+                                    //         // "largeBanner",
+                                    //         // "mediumRectangle"
+                                    //         // "smart"
+                                    //     ]
+                                    // }
+                                    adUnitID="ca-app-pub-5775007461562122/3906075015"
+                                    // adUnitID="ca-app-pub-3940256099942544/6300978111"
+                                    testDevices={[AdMobBanner.simulatorId]}
+                                    onAdFailedToLoad={this._bannerError}
+                                    onAdLoaded={() => {
+                                        console.log("adViewDidReceiveAd");
+                                    }}
+                                    style={{
+                                        // flex: 1,
+                                        alignSelf: "center",
+                                        // bottom: 100,
+                                        height: 100,
+                                        width: 320
+                                        // backgroundColor: "green"
+                                    }}
+                                />
+                            </AdWrapper>
+                        )}
+                    </SafeAreaView>
+                </LinearGradient>
             </TouchableWithoutFeedback>
         );
     }

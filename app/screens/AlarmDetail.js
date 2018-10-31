@@ -53,6 +53,7 @@ import { fontPreview } from "../styles/text.js";
 import { scale, scaleByFactor } from "../util/font-scale";
 import * as DateUtils from "../util/date_utils";
 import { ALARM_STATES } from "../data/constants";
+import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15];
@@ -392,6 +393,10 @@ class AlarmDetail extends Component {
                 this
             );
             this.addKeyboardListeners = this.addKeyboardListeners.bind(this);
+        });
+
+        InteractionManager.runAfterInteractions(() => {
+            AdvSvcOnScreenConstructed("AlarmDetail");
         });
     }
 
