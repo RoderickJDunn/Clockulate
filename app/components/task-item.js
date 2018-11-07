@@ -62,6 +62,7 @@ class TaskItem extends React.Component {
     */
     _isSliding = false;
     _tempDuration = null;
+    _isMoving = false;
 
     constructor(props) {
         super(props);
@@ -228,7 +229,7 @@ class TaskItem extends React.Component {
 
     _onLongPress = initialVal => {
         // console.log("_onLongPress task");
-
+        this._isMoving = true;
         this.props.willStartMove();
         this.props.shouldStartMove();
     };
@@ -537,18 +538,18 @@ class TaskItem extends React.Component {
                             /* The only different between the events is the 'touches' array. */
                             if (
                                 e.nativeEvent.touches &&
-                                e.nativeEvent.touches.length == 0
+                                e.nativeEvent.touches.length == 0 &&
+                                this._isMoving == true
                             ) {
                                 // console.log(
                                 //     "Touches arr is empty. Released without sliding!"
                                 // );
                                 this._tempDuration = null;
-                                this.setState({ isSlidingTask: false });
+                                // this.setState({ isSlidingTask: false });
                                 this.props.shouldEndMove();
                                 this.props.didEndMove();
-                            } /* else {
-                                console.log("Touches arr NOT empty!");
-                            } */
+                            }
+                            this._isMoving = false;
                         }}
                         // disabled={this.props.isEditingTasks}
                         {...sortHandlers}
