@@ -288,7 +288,9 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
                     if (success) {
                         console.log("successfully finished playing");
                     } else {
-                        console.log("playback failed due to audio decoding errors");
+                        console.log(
+                            "playback failed due to audio decoding errors"
+                        );
                         // reset the player to its uninitialized state (android only)
                         // this is the only option to recover after an error occured and use the player again
                         sound.reset();
@@ -362,7 +364,6 @@ export let checkForImplicitSnooze = (alarm, mNow) => {
     let expectedSnoozeCount = Math.ceil(secondsDiff / almSnoozeTime);
     console.log("expectedSnoozeCount", expectedSnoozeCount);
 
-    let newSnoozeCount;
     if (alarm.snoozeCount == null || alarm.snoozeCount < expectedSnoozeCount) {
         // user did not explicitly snooze for x number of notifications.
         realm.write(() => {

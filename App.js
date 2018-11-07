@@ -5,7 +5,6 @@ import { AsyncStorage, View, StatusBar, Dimensions } from "react-native";
 // import ArrowView from "./app/components/arrow-view-native";
 
 import insertPrepopData from "./app/data/data-prepop";
-import { AdvSvcInit } from "./app/services/AdmobService";
 
 // configure();
 export default class App extends React.Component {
@@ -30,7 +29,7 @@ export default class App extends React.Component {
                         JSON.stringify(true)
                     );
                     // this.setState({ firstLaunch: true });
-                    insertPrepopData(AdvSvcInit);
+                    insertPrepopData();
                 } else {
                     console.log("Not the first Launch");
                 }

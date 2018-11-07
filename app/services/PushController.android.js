@@ -61,6 +61,8 @@ export let snoozeAlarm = (notificationInfo, reloadAlarmsList) => {
         });
 
         console.log("upped snooze count");
+        // console.log("alarm.snoozeCount", alarm.snoozeCount);
+
         if (reloadAlarmsList) {
             console.log("reloading alarms list");
             reloadAlarmsList();
@@ -103,8 +105,10 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
         "scheduleAlarm for (rn-push-notification lib): " + alarm.wakeUpTime
     );
     // let in30Sec = new Date(Date.now() + 30 * 1000);
-
     // console.log("scheduleAlarm for (rn-push-notification lib): " + in30Sec);
+
+    // TODO: MAKE SURE WE ARE NOT SETTING NOTIF FOR AN ALREADY-ENABLED ALARM
+    ///     This function is called when app comes into foreground, and when
 
     let notifId = alarmUUID_to_notificationID(alarm.id);
     console.log("alarmId", alarm.id);
