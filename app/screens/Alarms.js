@@ -49,9 +49,8 @@ import { AlarmModel, AlarmTaskModel } from "../data/models";
 import { scaleByFactor } from "../util/font-scale";
 const { UIManager } = NativeModules;
 import {
-    AdWrapper,
     AdSvcUpdateAppOpenedStats,
-    AdvSvcOnScreenConstructed,
+    AdWrapper,
     AdvSvcUpdateDateLastOpen
 } from "../services/AdmobService";
 
@@ -776,42 +775,30 @@ class Alarms extends Component {
                     /> */}
                         {true && (
                             <AdWrapper
-                                borderPosition="top"
+                                // borderPosition="top"
+                                animate={true}
                                 // borderColor={Colors.brandDarkGrey}
-
-                                // style={{
-                                //     // height: 400,
-                                //     backgroundColor: "green"
-                                // }}
-                            >
-                                <PublisherBanner
-                                    adSize="largeBanner"
-                                    // validAdSizes={
-                                    //     [
-                                    //         // "banner"
-                                    //         // "smartBannerPortrait"
-                                    //         // "largeBanner",
-                                    //         // "mediumRectangle"
-                                    //         // "smart"
-                                    //     ]
-                                    // }
-                                    adUnitID="ca-app-pub-5775007461562122/3906075015"
-                                    // adUnitID="ca-app-pub-3940256099942544/6300978111"
-                                    testDevices={[AdMobBanner.simulatorId]}
-                                    onAdFailedToLoad={this._bannerError}
-                                    onAdLoaded={() => {
+                                screen={"Alarms"}
+                                style={{
+                                    borderWidth: 0
+                                }}
+                                pubBannerProps={{
+                                    adSize: "smartBannerPortrait",
+                                    // adUnitID: "ca-app-pub-3940256099942544/6300978111",
+                                    adUnitID:
+                                        "ca-app-pub-5775007461562122/9954191195",
+                                    testDevices: [AdMobBanner.simulatorId],
+                                    onAdFailedToLoad: this._bannerError,
+                                    onAdLoaded: () => {
                                         console.log("adViewDidReceiveAd");
-                                    }}
-                                    style={{
-                                        // flex: 1,
+                                    },
+                                    style: {
                                         alignSelf: "center",
-                                        // bottom: 100,
                                         height: 100,
-                                        width: 320
-                                        // backgroundColor: "green"
+                                        width: this.width
+                                    }
                                     }}
                                 />
-                            </AdWrapper>
                         )}
                     </SafeAreaView>
                 </LinearGradient>

@@ -178,35 +178,25 @@ export default class Sounds extends Component {
                 {true && (
                     <AdWrapper
                         borderPosition="top"
+                        screen={"Sounds"}
+                        animate={true}
                         // borderColor={Colors.brandDarkGrey}
-                    >
-                        <PublisherBanner
-                            adSize="smartBannerPortrait"
-                            // validAdSizes={[
-                            //     "banner",
-                            //     "smartBannerPortrait",
-                            //     "largeBanner",
-                            //     "mediumRectangle"
-                            //     // "smart"
-                            // ]}
-                            // adUnitID="ca-app-pub-3940256099942544/6300978111"
-                            adUnitID="ca-app-pub-5775007461562122/7208145331"
-                            testDevices={[AdMobBanner.simulatorId]}
-                            onAdFailedToLoad={this._bannerError}
-                            onAdLoaded={() => {
+                        pubBannerProps={{
+                            adSize: "smartBannerPortrait",
+                            // adUnitID: "ca-app-pub-3940256099942544/6300978111",
+                            adUnitID: "ca-app-pub-5775007461562122/9954191195",
+                            testDevices: [AdMobBanner.simulatorId],
+                            onAdFailedToLoad: this._bannerError,
+                            onAdLoaded: () => {
                                 console.log("adViewDidReceiveAd");
-                            }}
-                            style={{
-                                // flex: 1,
+                            },
+                            style: {
                                 alignSelf: "center",
-                                // bottom: 100,
-                                // height: 400,
-                                // width: 400,
-                                height: 80,
-                                width: 320
-                            }}
-                        />
-                    </AdWrapper>
+                                height: 100,
+                                width: this.width
+                            }
+                        }}
+                    />
                 )}
             </SafeAreaView>
         );

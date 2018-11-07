@@ -332,8 +332,8 @@ const CustomDrawerContentComponent = props => {
                 style={{
                     // height: 95,
                     height: isIphoneX() ? 115 : 104,
-                    alignSelf: "stretch",
-                    backgroundColor: "red"
+                    alignSelf: "stretch"
+                    // backgroundColor: "red"
                 }}
             >
                 <LottieView
@@ -410,8 +410,10 @@ const CustomDrawerContentComponent = props => {
                 />
                 {true && (
                     <AdWrapper
-                        borderPosition="top"
+                        // borderPosition="top"
+                        animate={true}
                         // borderColor={Colors.brandDarkGrey}
+                        screen={"MainMenu"}
                         style={{
                             // overflow: "hidden",
                             alignSelf: "center",
@@ -421,47 +423,47 @@ const CustomDrawerContentComponent = props => {
 
                             transform: [
                                 {
-                                    scale: SCREEN_HEIGHT < 660 ? 0.83 : 0.9
+                                    scale: SCREEN_HEIGHT < 700 ? 0.83 : 0.9
                                 }
                             ]
                         }}
-                    >
-                        {SCREEN_HEIGHT < 660 ? (
-                            <PublisherBanner
-                                adSize="banner"
-                                validAdSizes={["banner"]}
-                                // adUnitID="ca-app-pub-3940256099942544/6300978111"
-                                adUnitID="ca-app-pub-5775007461562122/1503272954"
-                                testDevices={[AdMobBanner.simulatorId]}
-                                onAdFailedToLoad={this._bannerError}
-                                onAdLoaded={() => {
-                                    console.log("adViewDidReceiveAd");
-                                }}
-                                style={{
-                                    // flex: 1,
-                                    alignSelf: "center"
-                                    // bottom: 100,
-                                }}
-                            />
-                        ) : (
-                            <PublisherBanner
-                                adSize="mediumRectangle"
-                                validAdSizes={["mediumRectangle"]}
-                                // adUnitID="ca-app-pub-3940256099942544/6300978111"
-                                adUnitID="ca-app-pub-5775007461562122/1503272954"
-                                testDevices={[AdMobBanner.simulatorId]}
-                                onAdFailedToLoad={this._bannerError}
-                                onAdLoaded={() => {
-                                    console.log("adViewDidReceiveAd");
-                                }}
-                                style={{
-                                    // flex: 1,
-                                    alignSelf: "center"
-                                    // bottom: 100,
-                                }}
-                            />
-                        )}
-                    </AdWrapper>
+                        pubBannerProps={
+                            SCREEN_HEIGHT < 700
+                                ? {
+                                      adSize: "banner",
+                                      // adUnitID: "ca-app-pub-3940256099942544/6300978111",
+                                      adUnitID:
+                                          "ca-app-pub-5775007461562122/1503272954",
+                                      testDevices: [AdMobBanner.simulatorId],
+                                      onAdFailedToLoad: this._bannerError,
+                                      onAdLoaded: () => {
+                                          console.log("adViewDidReceiveAd");
+                                      },
+                                      style: {
+                                          alignSelf: "center",
+                                          height: 100,
+                                          width: 280
+                                      }
+                                  }
+                                : {
+                                      adSize: "mediumRectangle",
+                                      validAdSizes: ["mediumRectangle"],
+                                      // adUnitID: "ca-app-pub-3940256099942544/6300978111",
+                                      adUnitID:
+                                          "ca-app-pub-5775007461562122/1503272954",
+                                      testDevices: [AdMobBanner.simulatorId],
+                                      onAdFailedToLoad: this._bannerError,
+                                      onAdLoaded: () => {
+                                          console.log("adViewDidReceiveAd");
+                                      },
+                                      style: {
+                                          alignSelf: "center",
+                                          height: 300,
+                                          width: 280
+                                      }
+                                  }
+                        }
+                    />
                 )}
             </SafeAreaView>
 
@@ -555,6 +557,7 @@ export const DrawerRoot = createDrawerNavigator(
         },
         headerMode: "screen",
         order: ["Alarms", "Upgrade", "Settings", "Help", "About"],
-        contentComponent: CustomDrawerContentComponent
+        contentComponent: CustomDrawerContentComponent,
+        useNativeAnimations: true
     }
 );

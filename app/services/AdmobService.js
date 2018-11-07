@@ -6,12 +6,23 @@ import {
     Dimensions,
     Text,
     TouchableOpacity,
-    StyleSheet
+    StyleSheet,
+    Image,
+    Animated
 } from "react-native";
+import {
+    AdMobBanner,
+    // AdMobInterstitial,
+    PublisherBanner
+    // AdMobRewarded
+} from "react-native-admob";
 
 import realm from "../data/DataSchemas";
 import { ADV_STAT_TYPES } from "../data/constants";
-
+import { isIphoneX } from "react-native-iphone-x-helper";
+import Colors from "../styles/colors";
+let { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+import getFullImgNameForScreenSize from "../img/image_map";
 /* 
     Factors
     - Number of times app has been opened (make sure this includes opening from backgrounded state)
@@ -62,54 +73,83 @@ import { ADV_STAT_TYPES } from "../data/constants";
     // constants
 */
 let ADV_STATS_RSLT;
-let ADV_STATS = null;
+
 let NON_USE_THRESHOLD = 3600 * 24 * 7; // 1 week
 
 if (__DEV__) {
     NON_USE_THRESHOLD = 10; // 10 second non-use threshold for dev
 }
 
-/* Map of each AdStat to its corresponding screen, or null if not applicable */
-let ADV_STAT_SCREEN_MAP = {
-    dateAppLastOpened: null,
-    appOpenedCountTotal: null,
-    appOpenedCountSinceNUP: null,
-    AlarmsListVCTotal: "Alarms",
-    AlarmsListVCSinceNUP: "Alarms",
-    MainMenuVCTotal: "MainMenu",
-    MainMenuVCSinceNUP: "MainMenu",
-    AlarmDetailVCTotal: "AlarmDetail",
-    AlarmDetailVCSinceNUP: "AlarmDetail",
-    TaskDetailVCTotal: "TaskDetail",
-    TaskDetailVCSinceNUP: "TaskDetail",
-    SoundsVCTotal: "Sounds",
-    SoundsVCSinceNUP: "Sounds"
+let getValueForStat = statName => {
+    let stats = realm.objects("AdvStat");
+    let stat = stats.filtered("name == $0", statName)[0];
+    return stat;
 };
 
-/* Updates DB with statistics relavent to displaying ads */
-export function AdvSvcInit() {
-    console.log("AdvSvcInit");
-    ADV_STATS = {};
-    ADV_STATS_RSLT = realm.objects("AdvStat");
-    console.log("ADV_STATS_RSLT", ADV_STATS_RSLT);
-
-    // create dictionary of individual AdvStats for easier access
-    Object.keys(ADV_STAT_SCREEN_MAP).forEach(name => {
-        ADV_STATS[name] = ADV_STATS_RSLT.filtered("name == $0", name)[0];
-    });
-
-    console.log("ADV_STATS[dateAppLastOpened]", ADV_STATS["dateAppLastOpened"]);
-}
+/* Map of each AdStat to its corresponding screen, or null if not applicable */
+let ADV_STATS_MAP = {
+    dateAppLastOpened: {
+        screen: null,
+        get: getValueForStat.bind(this, "dateAppLastOpened")
+    },
+    appOpenedCountTotal: {
+        screen: null,
+        get: getValueForStat.bind(this, "appOpenedCountTotal")
+    },
+    appOpenedCountSinceNUP: {
+        screen: null,
+        get: getValueForStat.bind(this, "appOpenedCountSinceNUP")
+    },
+    AlarmsListVCTotal: {
+        screen: "Alarms",
+        get: getValueForStat.bind(this, "AlarmsListVCTotal")
+    },
+    AlarmsListVCSinceNUP: {
+        screen: "Alarms",
+        get: getValueForStat.bind(this, "AlarmsListVCSinceNUP")
+    },
+    MainMenuVCTotal: {
+        screen: "MainMenu",
+        get: getValueForStat.bind(this, "MainMenuVCTotal")
+    },
+    MainMenuVCSinceNUP: {
+        screen: "MainMenu",
+        get: getValueForStat.bind(this, "MainMenuVCSinceNUP")
+    },
+    AlarmDetailVCTotal: {
+        screen: "AlarmDetail",
+        get: getValueForStat.bind(this, "AlarmDetailVCTotal")
+    },
+    AlarmDetailVCSinceNUP: {
+        screen: "AlarmDetail",
+        get: getValueForStat.bind(this, "AlarmDetailVCSinceNUP")
+    },
+    TaskDetailVCTotal: {
+        screen: "TaskDetail",
+        get: getValueForStat.bind(this, "TaskDetailVCTotal")
+    },
+    TaskDetailVCSinceNUP: {
+        screen: "TaskDetail",
+        get: getValueForStat.bind(this, "TaskDetailVCSinceNUP")
+    },
+    SoundsVCTotal: {
+        screen: "Sounds",
+        get: getValueForStat.bind(this, "SoundsVCTotal")
+    },
+    SoundsVCSinceNUP: {
+        screen: "Sounds",
+        get: getValueForStat.bind(this, "SoundsVCSinceNUP")
+    }
+};
 
 /* Resets all stats pertaining to the last Non-Use-Period.
     Must be called from within a realm.write block 
 */
 function resetNUPStats() {
     console.log("resetNUPStats");
-    let nup_advStats = ADV_STATS_RSLT.filtered(
-        "statType == $0",
-        ADV_STAT_TYPES.NUP_COUNT
-    );
+    let nup_advStats = realm
+        .objects("AdvStat")
+        .filtered("statType == $0", ADV_STAT_TYPES.NUP_COUNT);
 
     nup_advStats.forEach(stat => {
         stat.value = 0;
@@ -119,6 +159,19 @@ function resetNUPStats() {
 export function AdSvcUpdateAppOpenedStats() {
     console.log("AdSvcUpdateAppOpenedStats");
     // TODO: at a certain point the counts don't matter. There should be a limit otherwise who knows what will happen.
+    let stats = realm.objects("AdvStat");
+    let dateOpenedStat = stats.filtered("name == $0", "dateAppLastOpened")[0];
+
+    if (!dateOpenedStat) return;
+
+    let openedCountSinceNUPStat = stats.filtered(
+        "name == $0",
+        "appOpenedCountSinceNUP"
+    )[0];
+    let openedCountTotalStat = stats.filtered(
+        "name == $0",
+        "appOpenedCountTotal"
+    )[0];
 
     let now = new Date();
     let epoch = Math.floor(now.getTime() / 1000);
@@ -126,11 +179,20 @@ export function AdSvcUpdateAppOpenedStats() {
 
     console.log("NON_USE_THRESHOLD", NON_USE_THRESHOLD);
     console.log("epoch", epoch);
-    console.log("ADV_STATS.dateAppLastOpened", ADV_STATS.dateAppLastOpened);
+    // console.log("ADV_STATS_MAP.dateAppLastOpened", ADV_STATS_MAP.dateAppLastOpened);
+    // console.log(
+    //     "ADV_STATS_MAP.dateAppLastOpened.get()",
+    //     ADV_STATS_MAP.dateAppLastOpened.get()
+    // );
+    console.log("dateOpenedStat", dateOpenedStat);
+
     if (
-        ADV_STATS.dateAppLastOpened.value + NON_USE_THRESHOLD < epoch &&
-        ADV_STATS.dateAppLastOpened.value != 0
+        dateOpenedStat.value + NON_USE_THRESHOLD < epoch &&
+        dateOpenedStat.value != 0
     ) {
+        // ADV_STATS_MAP.dateAppLastOpened.get().value + NON_USE_THRESHOLD <
+        //     epoch &&
+        // ADV_STATS_MAP.dateAppLastOpened.get().value != 0
         console.log("set reset to true");
         // it has been more than NON_USE_THRESHOLD since app was last opened. Reset counters
         shouldResetCounters = true;
@@ -139,12 +201,14 @@ export function AdSvcUpdateAppOpenedStats() {
     realm.write(() => {
         console.log("Updating advStats in DB...");
 
-        ADV_STATS.appOpenedCountTotal.value++;
+        // ADV_STATS_MAP.appOpenedCountTotal.get().value++;
+        openedCountTotalStat.value++;
 
         if (shouldResetCounters == true) {
             resetNUPStats();
         } else {
-            ADV_STATS.appOpenedCountSinceNUP.value++;
+            // ADV_STATS_MAP.appOpenedCountSinceNUP.get().value++;
+            openedCountSinceNUPStat.value++;
         }
     });
 }
@@ -155,22 +219,16 @@ export function AdvSvcUpdateDateLastOpen() {
 
     realm.write(() => {
         console.log("Updating dateAppLastOpen in DB...");
-        ADV_STATS.dateAppLastOpened.value = epoch;
+        ADV_STATS_MAP.dateAppLastOpened.get().value = epoch;
     });
 }
 
 export function AdvSvcOnScreenConstructed(navScreen) {
-    console.log("ADV_STATS", ADV_STATS);
-    if (
-        ADV_STATS == null ||
-        ADV_STATS == undefined ||
-        ADV_STATS.dateAppLastOpened == undefined
-    ) {
-        console.log("Its null");
-        AdvSvcInit();
-    }
-    let statsToUpdate = Object.keys(ADV_STAT_SCREEN_MAP).filter(statName => {
-        if (ADV_STAT_SCREEN_MAP[statName] == navScreen) {
+    let now = new Date();
+    let epoch = Math.floor(now.getTime() / 1000);
+
+    let statsToUpdate = Object.keys(ADV_STATS_MAP).filter(stat => {
+        if (ADV_STATS_MAP[stat].screen == navScreen) {
             return true;
         }
     }, []);
@@ -185,9 +243,11 @@ export function AdvSvcOnScreenConstructed(navScreen) {
 
     realm.write(() => {
         statsToUpdate.forEach(statName => {
-            console.log("ADV_STATS[statName]", ADV_STATS[statName]);
-            ADV_STATS[statName] && ADV_STATS[statName].value++;
+            console.log("ADV_STATS_MAP[statName]", ADV_STATS_MAP[statName]);
+            ADV_STATS_MAP[statName] && ADV_STATS_MAP[statName].get().value++;
         });
+
+        ADV_STATS_MAP.dateAppLastOpened.get().value = epoch;
     });
 }
 
@@ -227,24 +287,114 @@ function shouldShowAdv(displayArea /* or ad ID */) {
     */
 }
 
+let MAP_SCREEN_TO_ADV_IMG = {
+    MainMenu: "",
+    Alarms: "ProAdv_alarms_banner",
+    TaskDetail: "ProAdv_squarish",
+    Sounds: "ProAdv_sounds_banner"
+};
+
+class ProAdv extends Component {
+    advAnimValue = new Animated.Value(0);
+
+    componentDidMount() {
+        if (this.props.animate) {
+            Animated.spring(this.advAnimValue, {
+                toValue: 1,
+                damping: 20,
+                mass: 3,
+                delay: 1500
+            }).start();
+        } else {
+            this.advAnimValue.setValue(1);
+        }
+    }
+
+    render() {
+        console.log("before imgBaseName");
+        console.log("this.props.screen", this.props.screen);
+        let imgBaseName = MAP_SCREEN_TO_ADV_IMG[this.props.screen];
+        console.log("imgBaseName", imgBaseName);
+        return (
+            <Animated.View
+                style={{
+                    transform: [
+                        {
+                            translateX: this.advAnimValue.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [-400, 0]
+                            })
+                        }
+                    ]
+                }}
+            >
+                <Image
+                    style={{
+                        alignSelf: "center",
+                        // flex: 1
+                        width: this.props.imgDims.width,
+                        height: this.props.imgDims.height
+                    }}
+                    source={[
+                        {
+                            uri: getFullImgNameForScreenSize(
+                                imgBaseName,
+                                SCREEN_WIDTH
+                            )
+                        }
+                    ]}
+                />
+            </Animated.View>
+        );
+    }
+}
+
+let SHOW_ADMOB_ADV = false;
+
+/* Wrapper requirements for aesthetics of bottom banner 
+    AlarmsList / AlarmDetail / TaskDetail / Sounds
+        - if SCREEN_WIDTH == 320 (width of ad) OR isIPhoneX == true
+            => marginBottom: 0, marginTop: 20
+            NOTE: For iphoneX, the SafeAreaView should take care of it.
+        - if SCREEN_WIDTH > 320 
+            => marginBottom: 20, marginTop: 20
+*/
 export let AdWrapper = props => {
     console.log("props.borderPosition", props.borderPosition);
+    console.log("props.hide", props.hide);
+    console.log("props.screen", props.screen);
     let border;
-    if (props.borderPosition == "top")
-        border = {
-            borderTopWidth: 20,
-            borderTopColor: props.borderColor || "transparent"
-        };
-    else if (props.borderPosition == "bottom")
-        border = {
-            borderBottomWidth: 20,
-            borderBottomColor: props.borderColor || "transparent"
-        };
+    let marginBottom = {};
+    if (SCREEN_WIDTH <= 320 || isIphoneX()) {
+        marginBottom = { marginBottom: 0 };
+    }
 
     console.log("border", border);
     return (
-        <View style={[styles.adWrapper, border, props.style]}>
-            {props.children}
+        <View style={[styles.adWrapper, marginBottom, props.style]}>
+            {SHOW_ADMOB_ADV ? (
+                <PublisherBanner {...props.pubBannerProps} />
+            ) : (
+                <ProAdv
+                    animate={props.animate}
+                    imgDims={{
+                        width: props.pubBannerProps.style.width,
+                        height: props.pubBannerProps.style.height
+                    }}
+                    screen={props.screen}
+                />
+            )}
+            {props.hide && (
+                <View
+                    style={{
+                        // flex: 1,
+                        position: "absolute",
+                        width: props.pubBannerProps.style.width,
+                        height: props.pubBannerProps.style.height,
+                        backgroundColor: Colors.backgroundGrey
+                    }}
+                />
+            )}
         </View>
     );
 };
@@ -252,7 +402,10 @@ export let AdWrapper = props => {
 const styles = StyleSheet.create({
     adWrapper: {
         // width: 320,
-        alignSelf: "stretch"
+        alignSelf: "stretch",
+        overflow: "hidden",
+        marginTop: 20
+        // backgroundColor: "green"
         // alignSelf: "center"
         // paddingHorizontal: 10
     }

@@ -166,7 +166,7 @@ class TaskDetail extends Component {
                 suggestions: taskSuggestions,
                 filteredSuggestions: [],
                 hideSuggestions: true,
-                keyboardHeight: 0,
+                keyboardHeight: 1, // starting this off != 0, so that Ad doesn't flash when this screen first renders.
                 showDurationInfo: false,
                 setAsDefault: false,
                 currNameHasMatch: false,
@@ -199,7 +199,7 @@ class TaskDetail extends Component {
                 suggestions: taskSuggestions,
                 filteredSuggestions: null,
                 hideSuggestions: true,
-                keyboardHeight: 0,
+                keyboardHeight: 1, // starting this off != 0, so that Ad doesn't flash when this screen first renders.
                 newTask: false,
                 showDurationInfo: false,
                 setAsDefault: false,
@@ -664,7 +664,38 @@ class TaskDetail extends Component {
                 keyboardShouldPersistTaps="handled"
                 scrollEnabled={false}
             >
-                <View style={{ flex: 1 }}>
+                <View
+                    style={{ flex: 1, backgroundColor: Colors.backgroundGrey }}
+                >
+                    {true && (
+                        <AdWrapper
+                            animate={false}
+                            screen={"TaskDetail"}
+                            style={{
+                                position: "absolute",
+                                top: SCREEN_HEIGHT * 0.25,
+                                alignSelf: "center"
+                            }}
+                            hide={this.state.keyboardHeight != 0}
+                            pubBannerProps={{
+                                adSize: "smartBannerPortrait",
+                                // adUnitID: "ca-app-pub-3940256099942544/6300978111",
+                                adUnitID:
+                                    "ca-app-pub-5775007461562122/9954191195",
+                                testDevices: [AdMobBanner.simulatorId],
+                                onAdFailedToLoad: this._bannerError,
+                                onAdLoaded: () => {
+                                    console.log("adViewDidReceiveAd");
+                                },
+                                style: {
+                                    alignSelf: "center",
+                                    height: SCREEN_WIDTH * 0.8,
+                                    width: SCREEN_WIDTH * 0.8
+                                }
+                            }}
+                            // borderColor={Colors.brandDarkGrey}
+                        />
+                    )}
                     <KeyboardAvoidingView
                         behavior="padding"
                         // style={{ flex: 1 }}
@@ -691,182 +722,161 @@ class TaskDetail extends Component {
                                         Delete
                                     </Text>
                                 </TouchableOpacity>
-                                {true && (
-                                    <AdWrapper
-                                        borderPosition="top"
-                                        // borderColor={Colors.brandDarkGrey}
-                                    >
-                                        <PublisherBanner
-                                            adSize="smartBannerPortrait"
-                                            // validAdSizes={[
-                                            //     // "banner",
-                                            //     "smartBannerPortrait"
-                                            //     // "largeBanner",
-                                            //     // "mediumRectangle"
-                                            //     // "smart"
-                                            // ]}
-                                            //adUnitID="ca-app-pub-3940256099942544/6300978111"
-                                            adUnitID="ca-app-pub-5775007461562122/9954191195"
-                                            testDevices={[
-                                                AdMobBanner.simulatorId
-                                            ]}
-                                            onAdFailedToLoad={this._bannerError}
-                                            onAdLoaded={() => {
-                                                console.log(
-                                                    "adViewDidReceiveAd"
-                                                );
-                                            }}
-                                            style={{
-                                                // flex: 1,
-                                                alignSelf: "center",
-                                                // bottom: 100,
-                                                // height: 400,
-                                                // width: 400,
-                                                height: 80,
-                                                width: 320
-                                            }}
-                                        />
-                                    </AdWrapper>
-                                )}
                             </View>
                         </View>
                     </KeyboardAvoidingView>
-                    <Text style={[TextStyle.labelText, Styles.fieldLabelText]}>
-                        Task
-                    </Text>
-                    <Autocomplete
-                        placeholder="Take a shower..."
-                        defaultValue={this.currName}
-                        data={
-                            this.currName &&
-                            this.state.filteredSuggestions != null &&
-                            this.state.filteredSuggestions.length > 0
-                                ? Array.from(this.state.filteredSuggestions)
-                                : []
-                        }
-                        onChangeText={this._onTaskNameChange.bind(this)}
-                        renderItem={this._renderSuggestionItem.bind(this)}
-                        containerStyle={Styles.autocompleteContainer}
-                        hideResults={this.state.hideSuggestions}
-                        renderTextInput={this._renderAutoCompInput}
-                        inputContainerStyle={{
-                            borderColor: "transparent",
-                            paddingHorizontal: 0
-                        }}
-                        listContainerStyle={[Styles.suggestionsContainer]}
-                        listStyle={{
-                            backgroundColor: Colors.backgroundGrey,
-                            elevation: 3,
-                            margin: 0,
-                            borderLeftWidth: 0,
-                            borderRightWidth: 0,
-                            maxHeight: maxHeight_autocomplete
-                        }}
-                    />
-
                     <View
                         style={{
-                            flexDirection: "row",
-                            alignContent: "center",
-                            alignItems: "center",
-                            position: "absolute",
-                            top: scaleByFactor(35, 0.6) + 35,
-                            backgroundColor: Colors.backgroundGrey
-
-                            // borderRadius: 7,
-                            // backgroundColor: "#c8d6e5",
-                            // padding: 5,
-                            // borderWidth: 1
-
-                            // backgroundColor: "green"
+                            backgroundColor: Colors.backgroundGrey,
+                            margin: scaleByFactor(10, 0.5)
                         }}
                     >
-                        <LabeledDurationInput
-                            labelText="Duration"
-                            time={durationDisplayed}
-                            onChange={this._onTaskDurationChanged.bind(this)}
-                            inputFontSize={scaleByFactor(36, 0.55)}
-                            separation={7}
-                            style={{
-                                backgroundColor: "transparent",
-                                // backgroundColor: "red",
-                                flex: 2
+                        <Text
+                            style={[TextStyle.labelText, Styles.fieldLabelText]}
+                        >
+                            Task
+                        </Text>
+                        <Autocomplete
+                            placeholder="Take a shower..."
+                            defaultValue={this.currName}
+                            data={
+                                this.currName &&
+                                this.state.filteredSuggestions != null &&
+                                this.state.filteredSuggestions.length > 0
+                                    ? Array.from(this.state.filteredSuggestions)
+                                    : []
+                            }
+                            onChangeText={this._onTaskNameChange.bind(this)}
+                            renderItem={this._renderSuggestionItem.bind(this)}
+                            containerStyle={Styles.autocompleteContainer}
+                            hideResults={this.state.hideSuggestions}
+                            renderTextInput={this._renderAutoCompInput}
+                            inputContainerStyle={{
+                                borderColor: "transparent",
+                                paddingHorizontal: 0
                             }}
-                            showDurationPicker={() => {
-                                this._nameInputRef.blur();
-                                this.setState({ showDurationPicker: true });
+                            listContainerStyle={[Styles.suggestionsContainer]}
+                            listStyle={{
+                                backgroundColor: Colors.backgroundGrey,
+                                elevation: 3,
+                                margin: 0,
+                                borderLeftWidth: 0,
+                                borderRightWidth: 0,
+                                maxHeight: maxHeight_autocomplete
                             }}
                         />
-                        {this.state.currNameHasMatch &&
-                            this.state.alarmTask.duration !=
-                                this.state.alarmTask.task.defaultDuration && (
-                                <View
-                                    style={{
-                                        flex: 1,
-                                        alignSelf: "stretch",
-                                        alignContent: "flex-end",
-                                        alignItems: "flex-end",
-                                        flexDirection: "row",
-                                        justifyContent: "flex-end",
-                                        // paddingLeft: 10,
-                                        paddingBottom: 7
-                                        // borderBottomColor: "black",
-                                        // borderBottomWidth: 1
-                                        // backgroundColor: "green"
-                                    }}
-                                >
-                                    <View style={{ width: scale(8) }} />
-                                    <TouchableOpacity
+
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                alignContent: "center",
+                                alignItems: "center",
+                                position: "absolute",
+                                top: scaleByFactor(35, 0.6) + 35,
+                                backgroundColor: Colors.backgroundGrey
+
+                                // borderRadius: 7,
+                                // backgroundColor: "#c8d6e5",
+                                // padding: 5,
+                                // borderWidth: 1
+
+                                // backgroundColor: "green"
+                            }}
+                        >
+                            <LabeledDurationInput
+                                labelText="Duration"
+                                time={durationDisplayed}
+                                onChange={this._onTaskDurationChanged.bind(
+                                    this
+                                )}
+                                inputFontSize={scaleByFactor(36, 0.55)}
+                                separation={7}
+                                style={{
+                                    backgroundColor: "transparent",
+                                    // backgroundColor: "red",
+                                    flex: 2
+                                }}
+                                showDurationPicker={() => {
+                                    this._nameInputRef.blur();
+                                    this.setState({ showDurationPicker: true });
+                                }}
+                            />
+                            {this.state.currNameHasMatch &&
+                                this.state.alarmTask.duration !=
+                                    this.state.alarmTask.task
+                                        .defaultDuration && (
+                                    <View
                                         style={{
-                                            marginLeft: 10,
-                                            marginBottom: 5,
-                                            flexDirection: "row"
-                                            // backgroundColor: "blue",
-                                            // flex: 1
-                                        }}
-                                        onPress={() => {
-                                            this.setState({
-                                                showDurationInfo: true
-                                            });
+                                            flex: 1,
+                                            alignSelf: "stretch",
+                                            alignContent: "flex-end",
+                                            alignItems: "flex-end",
+                                            flexDirection: "row",
+                                            justifyContent: "flex-end",
+                                            // paddingLeft: 10,
+                                            paddingBottom: 7
+                                            // borderBottomColor: "black",
+                                            // borderBottomWidth: 1
+                                            // backgroundColor: "green"
                                         }}
                                     >
-                                        {/* <EntypoIcon
-                                            name="info-with-circle"
-                                            size={15}
-                                        />
-                                        <View style={{ width: 5 }} /> */}
-                                        <Text style={[TextStyle.labelText]}>
-                                            Set as default
-                                        </Text>
-                                    </TouchableOpacity>
-                                    <StyleProvider style={getTheme(material)}>
-                                        <CheckBox
-                                            onPress={() =>
-                                                this._onTapCheckBox(
-                                                    !this.state.setAsDefault
-                                                )
-                                            }
-                                            checked={this.state.setAsDefault}
+                                        <View style={{ width: scale(8) }} />
+                                        <TouchableOpacity
                                             style={{
-                                                // paddingTop: 1,
-                                                paddingLeft: 0,
-                                                marginRight: 10,
-                                                // marginBottom: 5,
-                                                backgroundColor:
-                                                    Colors.brandLightPurple,
-                                                borderColor: "transparent",
-                                                alignItems: "center"
+                                                marginLeft: 10,
+                                                marginBottom: 5,
+                                                flexDirection: "row"
+                                                // backgroundColor: "blue",
+                                                // flex: 1
                                             }}
-                                            hitSlop={{
-                                                top: 15,
-                                                bottom: 15,
-                                                left: 5,
-                                                right: 15
+                                            onPress={() => {
+                                                this.setState({
+                                                    showDurationInfo: true
+                                                });
                                             }}
-                                        />
-                                    </StyleProvider>
-                                </View>
-                            )}
+                                        >
+                                            {/* <EntypoIcon
+                                                name="info-with-circle"
+                                                size={15}
+                                            />
+                                            <View style={{ width: 5 }} /> */}
+                                            <Text style={[TextStyle.labelText]}>
+                                                Set as default
+                                            </Text>
+                                        </TouchableOpacity>
+                                        <StyleProvider
+                                            style={getTheme(material)}
+                                        >
+                                            <CheckBox
+                                                onPress={() =>
+                                                    this._onTapCheckBox(
+                                                        !this.state.setAsDefault
+                                                    )
+                                                }
+                                                checked={
+                                                    this.state.setAsDefault
+                                                }
+                                                style={{
+                                                    // paddingTop: 1,
+                                                    paddingLeft: 0,
+                                                    marginRight: 10,
+                                                    // marginBottom: 5,
+                                                    backgroundColor:
+                                                        Colors.brandLightPurple,
+                                                    borderColor: "transparent",
+                                                    alignItems: "center"
+                                                }}
+                                                hitSlop={{
+                                                    top: 15,
+                                                    bottom: 15,
+                                                    left: 5,
+                                                    right: 15
+                                                }}
+                                            />
+                                        </StyleProvider>
+                                    </View>
+                                )}
+                        </View>
                     </View>
                 </View>
                 {this.state.showDurationPicker && (
@@ -936,6 +946,7 @@ const Styles = StyleSheet.create({
     },
     DeleteButton: {
         padding: 10,
+        marginHorizontal: scaleByFactor(10, 0.5),
         backgroundColor: Colors.deleteBtnRed,
         alignSelf: "stretch",
         height: 50,

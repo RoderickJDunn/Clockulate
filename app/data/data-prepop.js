@@ -92,7 +92,7 @@ let prePopAdvStats = [
 ];
 
 // Create Realm objects and write to local storage
-function insertPrepopData(onFinished) {
+function insertPrepopData() {
     realm.write(() => {
         /* Insert Sounds data */
         console.log("Insert Sounds");
@@ -309,8 +309,6 @@ function insertPrepopData(onFinished) {
         });
         // console.log(alarm2, alarm1, task2, task4, task5);
         console.log("Inserted pre-pop data");
-
-        onFinished();
     });
 
     // const longTasks = realm.objects("Task").filtered("defaultDuration > 1000");
