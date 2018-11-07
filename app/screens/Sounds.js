@@ -26,8 +26,7 @@ import { SOUND_TYPES } from "../data/constants";
 import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
 export default class Sounds extends Component {
     static navigationOptions = () => ({
-        title: "Sounds",
-        drawerLockMode: "locked-closed" // prevents drawer from being opening by swipe-back gesture
+        title: "Sounds"
     });
 
     width = Dimensions.get("window").width; //full width

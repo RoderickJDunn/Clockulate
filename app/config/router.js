@@ -138,8 +138,10 @@ const navigationConfig = {
             // style the Title text of the header
             color: Colors.brandLightGrey
         },
-        headerTintColor: Colors.brandLightGrey // this sets color for 'Back' icon and text
+        headerTintColor: Colors.brandLightGrey, // this sets color for 'Back' icon and text
+        gesturesEnabled: false
     },
+    useNativeAnimations: true,
     // this hides the white top-padding in place of header for child screens that are animating
     // in from bottom
     cardStyle: { backgroundColor: "transparent" },
@@ -247,7 +249,6 @@ const MainStack = createStackNavigator(
         AlarmDetail: {
             screen: AlarmDetail,
             navigationOptions: ({ navigation }) => ({
-                drawerLockMode: "locked-closed", // this prevents the drawer from opening when user swipes from left of screen to go Back
                 headerStyle: {
                     backgroundColor: Colors.brandDarkGrey,
                     // backgroundColor: "transparent",
@@ -261,7 +262,6 @@ const MainStack = createStackNavigator(
         TaskDetail: {
             screen: TaskDetail,
             navigationOptions: ({ navigation }) => ({
-                drawerLockMode: "locked-closed", // this prevents the drawer from opening when user swipes from left of screen to go Back
                 headerStyle: {
                     backgroundColor: Colors.brandDarkGrey
                     // backgroundColor: "transparent",
@@ -279,6 +279,20 @@ const MainStack = createStackNavigator(
     },
     navigationConfig
 );
+
+/* This is the only way I could find to disable drawer-opening on certain screens of 
+    the stack navigator 
+*/
+MainStack.navigationOptions = ({ navigation }) => {
+    let drawerLockMode = "unlocked";
+    if (navigation.state.index > 0) {
+        drawerLockMode = "locked-closed";
+    }
+
+    return {
+        drawerLockMode
+    };
+};
 
 let screenMenuIcons = [
     { type: "MaterialIcon", name: "access-alarm", size: 24 },

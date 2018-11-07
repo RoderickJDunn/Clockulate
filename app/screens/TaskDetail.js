@@ -69,7 +69,6 @@ class TaskDetail extends Component {
                 : "Edit Task";
         return {
             title: screenTitle,
-            drawerLockMode: "locked-closed",
             headerStyle: {
                 backgroundColor: "transparent"
                 // backgroundColor: Colors.brandDarkGrey,
