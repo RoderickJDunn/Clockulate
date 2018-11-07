@@ -11,7 +11,8 @@ import {
     DeviceEventEmitter,
     AppState,
     NativeModules,
-    InteractionManager
+    InteractionManager,
+    PanResponder
     // TouchableOpacity
 } from "react-native";
 import moment from "moment";
@@ -69,6 +70,10 @@ class Alarms extends Component {
 
     _activeRow = null;
 
+    _idleTimer = null;
+    proxMgrEnabled = false;
+    isCurrentScreen = true;
+
     constructor() {
         super();
         console.log("AlarmsList -- Constructor");
@@ -86,12 +91,47 @@ class Alarms extends Component {
             UIManager.setLayoutAnimationEnabledExperimental(true);
         } // setup notifications
         else {
-            ProximityManager.enable();
+            ProximityManager.disable();
         }
 
-        InteractionManager.runAfterInteractions(() => {
-            AdvSvcOnScreenConstructed("Alarms");
+        this._idlePanResponder = PanResponder.create({
+            // Ask to be the responder:
+            onStartShouldSetPanResponderCapture: () => {
+                console.log("onStartShouldSetPanResponderCapture (AlarmsList)");
+                this.handleActivity();
+                return false;
+            }
         });
+
+        InteractionManager.runAfterInteractions(() => {
+            AdSvcUpdateAppOpenedStats();
+        });
+    }
+
+    handleActivity() {
+        console.log("this.proxMgrEnabled ", this.proxMgrEnabled);
+
+        if (this.proxMgrEnabled == true) {
+            this.disableProxManager();
+        }
+
+        if (this.isCurrentScreen == false) {
+            if (this._idleTimer) clearTimeout(this._idleTimer);
+            return;
+        }
+
+        clearTimeout(this._idleTimer);
+        this._idleTimer = setTimeout(this.enableProxManager.bind(this), 5000);
+    }
+
+    enableProxManager() {
+        this.proxMgrEnabled = true;
+        ProximityManager.enable();
+    }
+
+    disableProxManager() {
+        this.proxMgrEnabled = false;
+        ProximityManager.disable();
     }
 
     onPushRegistered(deviceToken) {
@@ -294,14 +334,17 @@ class Alarms extends Component {
         this._didBlurListener = this.props.navigation.addListener(
             "didBlur",
             payload => {
-                ProximityManager.disable();
+                this.isCurrentScreen = false;
+                clearTimeout(this._idleTimer);
+                this.disableProxManager();
             }
         );
 
         this._didFocusListener = this.props.navigation.addListener(
             "didFocus",
             payload => {
-                ProximityManager.enable();
+                this.isCurrentScreen = true;
+                this.handleActivity();
             }
         );
     }
@@ -331,7 +374,6 @@ class Alarms extends Component {
         this.props.navigation.removeListener("didBlur");
 
         AppState.removeEventListener("change", this._handleAppStateChange);
-
     }
 
     _handleAppStateChange = nextAppState => {
@@ -374,7 +416,6 @@ class Alarms extends Component {
             for (let i = 0; i < alarms.length; i++) {
                 cancelInAppAlarm(alarms[i]);
             }
-
             AdvSvcUpdateDateLastOpen();
         }
 
@@ -630,8 +671,11 @@ class Alarms extends Component {
 
     _onPressBackground = () => {
         console.info("AlarmsList - _onPressBackground");
-        this._activeRow = null;
-        this.setState(this.state);
+
+        if (this._activeRow != null) {
+            this._activeRow = null;
+            this.setState(this.state);
+        }
     };
 
     render() {
@@ -662,6 +706,7 @@ class Alarms extends Component {
                     start={{ x: 0.2, y: 0 }}
                     end={{ x: 1.5, y: 1 }}
                     colors={["#ecebf4", "#c2ccd6"]}
+                    {...this._idlePanResponder.panHandlers}
                 >
                     <SafeAreaView
                         forceInset={{ bottom: "always" }}
@@ -722,8 +767,6 @@ class Alarms extends Component {
                                     shadowRadius: 10,
                                     elevation: 3,
                                     shadowColor: "black"
-                                    // borderWidth: 3,
-                                    // borderColor: "blue"
                                 }}
                                 alarm={duplicationInfo.alarm}
                                 onPress={this._onPressItem}
@@ -797,8 +840,8 @@ class Alarms extends Component {
                                         height: 100,
                                         width: this.width
                                     }
-                                    }}
-                                />
+                                }}
+                            />
                         )}
                     </SafeAreaView>
                 </LinearGradient>
