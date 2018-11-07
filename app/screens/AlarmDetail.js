@@ -82,7 +82,6 @@ const SNAP_FACTOR_TL_VIEW = isSmallScreen ? 0.44 : 0.385;
 class AlarmDetail extends Component {
     static navigationOptions = ({ navigation }) => {
         let menuIsOpen = navigation.state.params.menuIsOpen;
-
         return {
             title: "Edit Alarm",
             // This is how you define a custom back button. Apart from styling, this also seems like the best way to
@@ -330,7 +329,6 @@ class AlarmDetail extends Component {
 
         // console.log(this.state);
         // console.log(params);
-        InteractionManager.runAfterInteractions(() => {
             console.log("InteractionManager");
 
             this._onPressAnimHandle = this._onPressAnimHandle.bind(this);
@@ -348,9 +346,7 @@ class AlarmDetail extends Component {
             );
             this._clearLabeledInput = this._clearLabeledInput.bind(this);
             this._willStartTaskMove = this._willStartTaskMove.bind(this);
-            this._closeSnoozeTimePicker = this._closeSnoozeTimePicker.bind(
-                this
-            );
+        this._closeSnoozeTimePicker = this._closeSnoozeTimePicker.bind(this);
             this._saveSnoozeTime = this._saveSnoozeTime.bind(this);
             this._onReorderTasks = this._onReorderTasks.bind(this);
             this._didEndMove = this._didEndMove.bind(this);
@@ -358,9 +354,7 @@ class AlarmDetail extends Component {
             this._onSnapTask = this._onSnapTask.bind(this);
             this._onDeleteTask = this._onDeleteTask.bind(this);
             this._calcStartTimes = this._calcStartTimes.bind(this);
-            this._calculateHoursOfSleep = this._calculateHoursOfSleep.bind(
-                this
-            );
+        this._calculateHoursOfSleep = this._calculateHoursOfSleep.bind(this);
             this._calcWakeUpTime = this._calcWakeUpTime.bind(this);
             this._hideDateTimePicker = this._hideDateTimePicker.bind(this);
             this._showDateTimePicker = this._showDateTimePicker.bind(this);
@@ -389,28 +383,9 @@ class AlarmDetail extends Component {
             this._snapToIdx = this._snapToIdx.bind(this);
             this._realm_snap_idx = this._realm_snap_idx.bind(this);
             this._setMenuState = this._setMenuState.bind(this);
-            this.removeKeyboardListeners = this.removeKeyboardListeners.bind(
-                this
-            );
+        this.removeKeyboardListeners = this.removeKeyboardListeners.bind(this);
             this.addKeyboardListeners = this.addKeyboardListeners.bind(this);
-        });
-
-        InteractionManager.runAfterInteractions(() => {
-            AdvSvcOnScreenConstructed("AlarmDetail");
-        });
     }
-
-    // componentWillMount() {
-    // console.log("AlarmDetail: componentWillMount");
-    // this.addKeyboardListeners();
-    // InteractionManager.runAfterInteractions(() => {
-    // this.props.navigation.setParams({
-    //     handleBackBtn: this.handleBackPress.bind(this),
-    //     menuOpen: false,
-    //     setMenuState: this._setMenuState.bind(this),
-    //     openSnoozeTimePicker: this._openSnoozeTimePicker.bind(this)
-    // });
-    // }
 
     componentWillUnmount() {
         // console.debug("AlarmDetail: componentWillUnmount");
@@ -440,20 +415,17 @@ class AlarmDetail extends Component {
         // console.log("this.state.alarm", this.state.alarm);
 
         this.addKeyboardListeners();
-        InteractionManager.runAfterInteractions(() => {
+
             this.props.navigation.setParams({
                 handleBackBtn: this.handleBackPress,
                 menuOpen: false,
                 setMenuState: this._setMenuState,
                 openSnoozeTimePicker: this._openSnoozeTimePicker
             });
-        });
 
         this._lastMeasuredView = "autocalc"; // set initial lastView to calcmode index
 
-        // this._playModeIndicatorAnimation();
-
-        this.headerHeight = Header.HEIGHT;
+        AdvSvcOnScreenConstructed("AlarmDetail");
     }
 
     _setMenuState(nextMenuState, nextState) {
