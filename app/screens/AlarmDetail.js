@@ -329,62 +329,62 @@ class AlarmDetail extends Component {
 
         // console.log(this.state);
         // console.log(params);
-            console.log("InteractionManager");
+        console.log("InteractionManager");
 
-            this._onPressAnimHandle = this._onPressAnimHandle.bind(this);
-            this._onPressTasksHeader = this._onPressTasksHeader.bind(this);
-            this._onDragInteractable = this._onDragInteractable.bind(this);
-            this._getMeasurementsForTaskRow = this._getMeasurementsForTaskRow.bind(
-                this
-            );
-            this._onSelectViewFromMenu = this._onSelectViewFromMenu.bind(this);
-            this._toggleShowStartTimes = this._toggleShowStartTimes.bind(this);
-            this._toggleHideHrsOfSleep = this._toggleHideHrsOfSleep.bind(this);
-            this._navigateToSounds = this._navigateToSounds.bind(this);
-            this._toggleHideDisabledTasks = this._toggleHideDisabledTasks.bind(
-                this
-            );
-            this._clearLabeledInput = this._clearLabeledInput.bind(this);
-            this._willStartTaskMove = this._willStartTaskMove.bind(this);
+        this._onPressAnimHandle = this._onPressAnimHandle.bind(this);
+        this._onPressTasksHeader = this._onPressTasksHeader.bind(this);
+        this._onDragInteractable = this._onDragInteractable.bind(this);
+        this._getMeasurementsForTaskRow = this._getMeasurementsForTaskRow.bind(
+            this
+        );
+        this._onSelectViewFromMenu = this._onSelectViewFromMenu.bind(this);
+        this._toggleShowStartTimes = this._toggleShowStartTimes.bind(this);
+        this._toggleHideHrsOfSleep = this._toggleHideHrsOfSleep.bind(this);
+        this._navigateToSounds = this._navigateToSounds.bind(this);
+        this._toggleHideDisabledTasks = this._toggleHideDisabledTasks.bind(
+            this
+        );
+        this._clearLabeledInput = this._clearLabeledInput.bind(this);
+        this._willStartTaskMove = this._willStartTaskMove.bind(this);
         this._closeSnoozeTimePicker = this._closeSnoozeTimePicker.bind(this);
-            this._saveSnoozeTime = this._saveSnoozeTime.bind(this);
-            this._onReorderTasks = this._onReorderTasks.bind(this);
-            this._didEndMove = this._didEndMove.bind(this);
-            this._closeTaskRows = this._closeTaskRows.bind(this);
-            this._onSnapTask = this._onSnapTask.bind(this);
-            this._onDeleteTask = this._onDeleteTask.bind(this);
-            this._calcStartTimes = this._calcStartTimes.bind(this);
+        this._saveSnoozeTime = this._saveSnoozeTime.bind(this);
+        this._onReorderTasks = this._onReorderTasks.bind(this);
+        this._didEndMove = this._didEndMove.bind(this);
+        this._closeTaskRows = this._closeTaskRows.bind(this);
+        this._onSnapTask = this._onSnapTask.bind(this);
+        this._onDeleteTask = this._onDeleteTask.bind(this);
+        this._calcStartTimes = this._calcStartTimes.bind(this);
         this._calculateHoursOfSleep = this._calculateHoursOfSleep.bind(this);
-            this._calcWakeUpTime = this._calcWakeUpTime.bind(this);
-            this._hideDateTimePicker = this._hideDateTimePicker.bind(this);
-            this._showDateTimePicker = this._showDateTimePicker.bind(this);
-            this._onWakeTimePicked = this._onWakeTimePicked.bind(this);
-            this._onArrivalTimePicked = this._onArrivalTimePicked.bind(this);
-            this.saveSound = this.saveSound.bind(this);
-            this._onPressClock = this._onPressClock.bind(this);
-            this.onSnap = this.onSnap.bind(this);
-            this.onCompleteGestureAnimation = this.onCompleteGestureAnimation.bind(
-                this
-            );
-            this.onChangeTaskDuration = this.onChangeTaskDuration.bind(this);
-            this.onChangeTaskEnabled = this.onChangeTaskEnabled.bind(this);
-            this.onLabelInputFocus = this.onLabelInputFocus.bind(this);
-            this.onLabelInputBlur = this.onLabelInputBlur.bind(this);
-            this.onChangeLabel = this.onChangeLabel.bind(this);
-            this._onPressTask = this._onPressTask.bind(this);
-            this.onTaskListChanged = this.onTaskListChanged.bind(this);
-            this._onPressAddTask = this._onPressAddTask.bind(this);
-            this._willLeaveNavScreen = this._willLeaveNavScreen.bind(this);
-            this._willShowNavScreen = this._willShowNavScreen.bind(this);
-            this.handleBackPress = this.handleBackPress.bind(this);
-            this.keyboardWillHide = this.keyboardWillHide.bind(this);
-            this.keyboardWillShow = this.keyboardWillShow.bind(this);
-            this._openSnoozeTimePicker = this._openSnoozeTimePicker.bind(this);
-            this._snapToIdx = this._snapToIdx.bind(this);
-            this._realm_snap_idx = this._realm_snap_idx.bind(this);
-            this._setMenuState = this._setMenuState.bind(this);
+        this._calcWakeUpTime = this._calcWakeUpTime.bind(this);
+        this._hideDateTimePicker = this._hideDateTimePicker.bind(this);
+        this._showDateTimePicker = this._showDateTimePicker.bind(this);
+        this._onWakeTimePicked = this._onWakeTimePicked.bind(this);
+        this._onArrivalTimePicked = this._onArrivalTimePicked.bind(this);
+        this.saveSound = this.saveSound.bind(this);
+        this._onPressClock = this._onPressClock.bind(this);
+        this.onSnap = this.onSnap.bind(this);
+        this.onCompleteGestureAnimation = this.onCompleteGestureAnimation.bind(
+            this
+        );
+        this.onChangeTaskDuration = this.onChangeTaskDuration.bind(this);
+        this.onChangeTaskEnabled = this.onChangeTaskEnabled.bind(this);
+        this.onLabelInputFocus = this.onLabelInputFocus.bind(this);
+        this.onLabelInputBlur = this.onLabelInputBlur.bind(this);
+        this.onChangeLabel = this.onChangeLabel.bind(this);
+        this._onPressTask = this._onPressTask.bind(this);
+        this.onTaskListChanged = this.onTaskListChanged.bind(this);
+        this._onPressAddTask = this._onPressAddTask.bind(this);
+        this._willLeaveNavScreen = this._willLeaveNavScreen.bind(this);
+        this._willShowNavScreen = this._willShowNavScreen.bind(this);
+        this.handleBackPress = this.handleBackPress.bind(this);
+        this.keyboardWillHide = this.keyboardWillHide.bind(this);
+        this.keyboardWillShow = this.keyboardWillShow.bind(this);
+        this._openSnoozeTimePicker = this._openSnoozeTimePicker.bind(this);
+        this._snapToIdx = this._snapToIdx.bind(this);
+        this._realm_snap_idx = this._realm_snap_idx.bind(this);
+        this._setMenuState = this._setMenuState.bind(this);
         this.removeKeyboardListeners = this.removeKeyboardListeners.bind(this);
-            this.addKeyboardListeners = this.addKeyboardListeners.bind(this);
+        this.addKeyboardListeners = this.addKeyboardListeners.bind(this);
     }
 
     componentWillUnmount() {
@@ -416,12 +416,12 @@ class AlarmDetail extends Component {
 
         this.addKeyboardListeners();
 
-            this.props.navigation.setParams({
-                handleBackBtn: this.handleBackPress,
-                menuOpen: false,
-                setMenuState: this._setMenuState,
-                openSnoozeTimePicker: this._openSnoozeTimePicker
-            });
+        this.props.navigation.setParams({
+            handleBackBtn: this.handleBackPress,
+            menuOpen: false,
+            setMenuState: this._setMenuState,
+            openSnoozeTimePicker: this._openSnoozeTimePicker
+        });
 
         this._lastMeasuredView = "autocalc"; // set initial lastView to calcmode index
 
@@ -1290,6 +1290,7 @@ class AlarmDetail extends Component {
     _onDragInteractable(event) {
         console.log("drag:", event.nativeEvent);
         Keyboard.dismiss();
+        
         let { state, y, targetSnapPointId } = event.nativeEvent;
         if (state == "start" && y < 50 && y > -100) {
             console.log("y < 50");
@@ -1898,7 +1899,7 @@ class AlarmDetail extends Component {
                             position: "absolute",
                             left:
                                 SCREEN_WIDTH / 2 -
-                                scaleByFactor(25, 0.5) / 2 -
+                                scaleByFactor(28, 0.5) / 2 -
                                 30, // padding (30 left + 30 right / 2 == 30)
                             top: 0,
                             backgroundColor: "transparent",
@@ -2263,10 +2264,7 @@ class AlarmDetail extends Component {
                         // ref={elem => (this._animHandle = elem)}
                         style={{
                             position: "absolute",
-                            left:
-                                SCREEN_WIDTH / 2 -
-                                scaleByFactor(25, 0.5) / 2 -
-                                30, // padding (30 left + 30 right / 2 == 30)
+                            alignSelf: "center",
                             top: SCREEN_HEIGHT * 1.159,
                             backgroundColor: "transparent",
                             // backgroundColor: "blue",
@@ -2453,14 +2451,21 @@ class AlarmDetail extends Component {
                         showSeparator={false}
                     />
                 </Animated.View>
-                {/* Measuring line -- dev view to check whether views are aligned properly */}
+                {/* Measuring line -- dev view to measure whether views are aligned properly */}
                 {/* <View
                     style={{
                         position: "absolute",
-                        left: 0,
-                        right: 0,
-                        top: 64,
-                        height: 2,
+                        // use this for a horizontal line
+                        // left: 0,
+                        // right: 0,
+                        // top: 64,
+                        // height: 2,
+
+                        // use this for a vertical line
+                        alignSelf: "center",
+                        width: 1,
+                        top: 0,
+                        bottom: 0,
                         backgroundColor: "red"
                     }}
                 /> */}
