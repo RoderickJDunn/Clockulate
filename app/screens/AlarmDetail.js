@@ -457,6 +457,7 @@ class AlarmDetail extends Component {
                 break;
             case 1:
                 alarm.mode = "autocalc";
+                alarm.wakeUpTime = this._calcWakeUpTime();
                 this._snapPoints = this._ALL_SNAP_POINTS;
                 this._layoutAnimateToCalcMode({
                     taskListFullScreen: false,
@@ -1253,6 +1254,20 @@ class AlarmDetail extends Component {
         // console.log("_onPressAnimHandle");
         // console.log("this.state.alarm.mode ", this.state.alarm.mode);
         let nextIdx = this.state.alarm.mode == "normal" ? 1 : 0;
+        // if (this.state.alarm.mode == "normal") {
+        //     // changing to Calc mode
+        //     let newWakeUpTime = this._calcWakeUpTime();
+        //     // alarmState.wakeUpTime = this._calcWakeUpTime();
+        //     realm.write(() => {
+        //         let { alarm } = this.state;
+
+        //         if (newWakeUpTime) {
+        //             alarm.wakeUpTime = newWakeUpTime;
+        //         }
+        //         Object.assign({ alarm: alarm }, nextState);
+        //     });
+        // }
+
         // console.log("nextIdx", nextIdx);
         this._snapToIdx(nextIdx);
     }
