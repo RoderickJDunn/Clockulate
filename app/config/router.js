@@ -16,17 +16,17 @@ import {
     createStackNavigator,
     createDrawerNavigator,
     SafeAreaView,
-    DrawerItems,
-    Header,
-    StackViewTransitionConfigs
+    DrawerItems
+    // Header,
+    // StackViewTransitionConfigs
 } from "react-navigation";
-import { Icon } from "react-native-elements";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
+import MaterialComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
 import {
-    AdMobBanner,
+    AdMobBanner
     // AdMobInterstitial,
-    PublisherBanner
+    // PublisherBanner
     // AdMobRewarded
 } from "react-native-admob";
 import LottieView from "lottie-react-native";
@@ -38,6 +38,7 @@ import Settings from "../screens/Settings";
 import About from "../screens/About";
 import Sounds from "../screens/Sounds";
 import Upgrade from "../screens/Upgrade";
+import SleepLog from "../screens/SleepLog";
 import Help from "../screens/Help";
 import LinearGradient from "react-native-linear-gradient";
 import { isIphoneX } from "react-native-iphone-x-helper";
@@ -152,7 +153,7 @@ const alarmListNavOptions = ({ navigation }) => ({
     title: "Alarms",
     drawerLabel: "Alarms",
     headerRight: (
-        <Icon
+        <MaterialIcon
             name={"add"}
             color={Colors.brandLightGrey}
             underlayColor={Colors.brandDarkGrey}
@@ -163,12 +164,12 @@ const alarmListNavOptions = ({ navigation }) => ({
         />
     ),
     headerLeft: (
-        <Icon
+        <MaterialIcon
             name={"menu"}
             color={Colors.brandLightGrey}
             underlayColor={Colors.brandDarkGrey}
             size={28}
-            /* "DrawerOpen" is a built-in navigation function. I did not define it anywhere*/
+            /* "openDrawer" is a built-in navigation function. I did not define it anywhere*/
             onPress={() => {
                 InteractionManager.runAfterInteractions(() => {
                     AdvSvcOnScreenConstructed("MainMenu");
@@ -196,12 +197,12 @@ const otherDrawerNavOptions = title => {
             color: Colors.brandLightGrey
         },
         headerLeft: (
-            <Icon
+            <MaterialIcon
                 name={"menu"}
                 color={Colors.brandLightGrey}
                 underlayColor={Colors.brandDarkGrey}
                 size={28}
-                /* "DrawerOpen" is a built-in navigation function. I did not define it anywhere*/
+                /* "openDrawer" is a built-in navigation function. I did not define it anywhere*/
                 onPress={() => {
                     InteractionManager.runAfterInteractions(() => {
                         AdvSvcOnScreenConstructed("MainMenu");
@@ -230,6 +231,16 @@ function renderMenuIcon({ type, name, size }) {
     } else if (type == "FontAwesomeIcon") {
         return (
             <FontAwesomeIcon
+                name={name}
+                color={Colors.brandVeryLightPurple}
+                underlayColor={Colors.brandDarkGrey}
+                size={size}
+                // style={{ flex: 0.1 }}
+            />
+        );
+    } else if (type == "MaterialComIcon") {
+        return (
+            <MaterialComIcon
                 name={name}
                 color={Colors.brandVeryLightPurple}
                 underlayColor={Colors.brandDarkGrey}
@@ -297,6 +308,7 @@ MainStack.navigationOptions = ({ navigation }) => {
 let screenMenuIcons = [
     { type: "MaterialIcon", name: "access-alarm", size: 24 },
     { type: "FontAwesomeIcon", name: "magic", size: 22 },
+    { type: "MaterialComIcon", name: "bullhorn", size: 27 },
     { type: "MaterialIcon", name: "settings", size: 22 },
     { type: "MaterialIcon", name: "help", size: 22 },
     { type: "FontAwesomeIcon", name: "info-circle", size: 22 }
@@ -498,6 +510,21 @@ export const DrawerRoot = createDrawerNavigator(
                 }
             )
         },
+        SleepLog: {
+            screen: createStackNavigator(
+                {
+                    SleepLogScreen: {
+                        screen: SleepLog
+                    }
+                },
+                {
+                    navigationOptions: otherDrawerNavOptions("Sleep Log")
+                }
+            ),
+            navigationOptions: {
+                drawerLabel: "Sleep Log"
+            }
+        },
         Settings: {
             screen: createStackNavigator(
                 {
@@ -556,7 +583,7 @@ export const DrawerRoot = createDrawerNavigator(
             }
         },
         headerMode: "screen",
-        order: ["Alarms", "Upgrade", "Settings", "Help", "About"],
+        order: ["Alarms", "Upgrade", "SleepLog", "Settings", "Help", "About"],
         contentComponent: CustomDrawerContentComponent,
         useNativeAnimations: true
     }

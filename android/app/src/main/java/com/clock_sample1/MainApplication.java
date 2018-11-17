@@ -3,6 +3,7 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.reactlibrary.RNTooltipsPackage;
 import com.sbugert.rnadmob.RNAdMobPackage;
 import com.wheelpicker.WheelPickerPackage;
 import com.airbnb.android.react.lottie.LottiePackage;
@@ -19,7 +20,6 @@ import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.calendarevents.CalendarEventsPackage;
 import com.horcrux.svg.SvgPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
-import com.beefe.picker.PickerViewPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -40,6 +40,7 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(new MainReactPackage(),
+            new RNTooltipsPackage(),
             new RNAdMobPackage(),
             new WheelPickerPackage(),
             new LottiePackage(),
