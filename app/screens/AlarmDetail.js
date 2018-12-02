@@ -197,38 +197,6 @@ class AlarmDetail extends Component {
 
     startTimesPanRef;
 
-    static closeMenu = (isMenuOpen, navigation) => {
-        let config = {
-            duration: 150,
-            update: {
-                duration: 150,
-                type: "easeInEaseOut"
-                // springDamping: 0.5,
-                // property: "scaleXY"
-            }
-        };
-        let nextMenuIsOpen = !isMenuOpen;
-        Animated.timing(_menuIconAnim, {
-            toValue: nextMenuIsOpen ? 1 : 0,
-            duration: 200,
-            delay: nextMenuIsOpen ? 0 : 100,
-            useNativeDriver: true
-        }).start();
-        //isMenuAnimating
-
-        LayoutAnimation.configureNext(config, () => {
-            navigation.setParams({
-                isMenuAnimating: false,
-                menuOpen: nextMenuIsOpen
-            });
-        });
-
-        navigation.setParams({
-            menuIsAnimating: nextMenuIsOpen == true ? 1 : 0
-            // menuOpen: nextMenuIsOpen
-        });
-    };
-
     constructor(props) {
         super(props);
         console.log("AlarmDetail -- Constructor");
@@ -418,7 +386,7 @@ class AlarmDetail extends Component {
 
         this.props.navigation.setParams({
             handleBackBtn: this.handleBackPress,
-            menuOpen: false,
+            menuIsOpen: false,
             setMenuState: this._setMenuState,
             openSnoozeTimePicker: this._openSnoozeTimePicker
         });
@@ -1290,7 +1258,7 @@ class AlarmDetail extends Component {
     _onDragInteractable(event) {
         console.log("drag:", event.nativeEvent);
         Keyboard.dismiss();
-        
+
         let { state, y, targetSnapPointId } = event.nativeEvent;
         if (state == "start" && y < 50 && y > -100) {
             console.log("y < 50");

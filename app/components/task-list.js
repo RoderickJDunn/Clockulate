@@ -3,11 +3,7 @@
  */
 
 import React from "react";
-import {
-    StyleSheet,
-    TouchableWithoutFeedback,
-    View
-} from "react-native";
+import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import TaskItem from "./task-item";
 
@@ -122,6 +118,7 @@ class TaskList extends React.Component {
                                 moveInfo.to
                             );
                         }}
+                        bounces={false}
                         // scrollEnabled={!this.props.isSlidingTask}
                         // scrollEnabled={true}
                         forceRemeasure={this.props.forceRemeasure}

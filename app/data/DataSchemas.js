@@ -80,6 +80,7 @@ SoundSchema.schema = {
         enabled: "bool" // this property will never be changed in the DB. It is just here to more easily create a functional array from this DB table
     }
 };
+
 class AlarmSoundSchema extends Realm.Object {}
 AlarmSoundSchema.schema = {
     name: "AlarmSound",
@@ -90,6 +91,7 @@ AlarmSoundSchema.schema = {
         type: "int"
     }
 };
+
 class SettingsSchema extends Realm.Object {}
 SettingsSchema.schema = {
     name: "Setting",
@@ -110,7 +112,19 @@ AdvStatSchema.schema = {
         id: "string",
         name: "string",
         value: { type: "int", default: 0 },
-        statType: { type: "int", default: 0}
+        statType: { type: "int", default: 0 }
+    }
+};
+
+class SleepDisturbanceSchema extends Realm.Object {}
+SleepDisturbanceSchema.schema = {
+    name: "SleepDisturbance",
+    primaryKey: "id",
+    properties: {
+        id: "string",
+        time: "date",
+        recording: "string?",
+        duration: { type: "int", default: 0 }
     }
 };
 
@@ -124,6 +138,7 @@ export default new Realm({
         SoundSchema,
         AlarmSoundSchema,
         SettingsSchema,
-        AdvStatSchema
+        AdvStatSchema,
+        SleepDisturbanceSchema
     ]
 });

@@ -88,6 +88,14 @@ export class AlarmTaskModel {
     }
 }
 
+export class DisturbanceModel {
+    constructor() {
+        this.id = uuid.v1();
+        this.time = new Date();
+        this.recording = null;
+    }
+}
+
 // /*
 // This function creates a new Task, and the associated AlarmTask. Then returns the AlarmTask.
 //  */

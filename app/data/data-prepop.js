@@ -40,6 +40,11 @@ let prePopSettings = [
         name: "defaultShowHrsOfSleep",
         enabled: true,
         value: 0 // unused for this setting
+    },
+    {
+        name: "dayRange",
+        enabled: true,
+        value: 75600 // 9pm (60*60*21)
     }
 ];
 
@@ -90,7 +95,99 @@ let prePopAdvStats = [
         statType: ADV_STAT_TYPES.NUP_COUNT
     }
 ];
-
+let now = moment();
+let prePopDummyDist = [
+    {
+        time: now.toDate()
+    },
+    {
+        time: now.subtract(10, "minutes").toDate()
+    },
+    {
+        time: now.subtract(10, "minutes").toDate()
+    },
+    {
+        time: now.subtract(1, "minutes").toDate()
+    },
+    {
+        time: now.subtract(55, "seconds").toDate()
+    },
+    {
+        time: now.subtract(1, "minutes").toDate()
+    },
+    {
+        time: now.subtract(80, "minutes").toDate()
+    },
+    {
+        time: now.subtract(1, "day").toDate()
+    },
+    {
+        time: now.add(50, "minutes").toDate()
+    },
+    {
+        time: now.add(1098, "seconds").toDate()
+    },
+    {
+        time: now.add(10, "seconds").toDate()
+    },
+    {
+        time: now.subtract(11, "minutes").toDate()
+    },
+    {
+        time: now.subtract(1, "days").toDate()
+    },
+    {
+        time: now.subtract(11, "minutes").toDate()
+    },
+    {
+        time: now.subtract(1, "days").toDate()
+    },
+    {
+        time: now.subtract(11, "minutes").toDate()
+    },
+    {
+        time: now.subtract(11, "minutes").toDate()
+    },
+    {
+        time: now.subtract(1, "day").toDate()
+    },
+    {
+        time: now.subtract(1, "week").toDate()
+    },
+    {
+        time: now.subtract(11, "minutes").toDate()
+    },
+    {
+        time: now.subtract(11, "minutes").toDate()
+    },
+    {
+        time: now.add(47, "minutes").toDate()
+    },
+    {
+        time: now.add(13, "minutes").toDate()
+    },
+    {
+        time: now.subtract(1, "week").toDate()
+    },
+    {
+        time: now.subtract(22, "minutes").toDate()
+    },
+    {
+        time: now.subtract(1, "week").toDate()
+    },
+    {
+        time: now.subtract(1, "week").toDate()
+    },
+    {
+        time: now.add(1, "minutes").toDate()
+    },
+    {
+        time: now.subtract(4, "minutes").toDate()
+    },
+    {
+        time: now.add(22, "minutes").toDate()
+    }
+];
 // Create Realm objects and write to local storage
 function insertPrepopData() {
     realm.write(() => {
@@ -192,6 +289,15 @@ function insertPrepopData() {
                 name: prePopAdvStats[index].name,
                 statType:
                     prePopAdvStats[index].statType || ADV_STAT_TYPES.TOTAL_COUNT
+            });
+        }
+
+        /* Create Fake Sleep Disturbances */
+        for (let index = 0; index < prePopDummyDist.length; index++) {
+            realm.create("SleepDisturbance", {
+                id: uuid.v1(),
+                time: prePopDummyDist[index].time
+                // recording: prePopDummyDist[index].recording,
             });
         }
 

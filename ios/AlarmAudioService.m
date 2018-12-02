@@ -7,3 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "React/RCTBridgeModule.h"
+#import "React/RCTEventEmitter.h"
+
+@interface RCT_EXTERN_MODULE(AlarmAudioService, RCTEventEmitter)
+
+RCT_EXTERN_METHOD(initializeAlarm: (NSDictionary)alarmInfo: (RCTResponseSenderBlock)callback)
+RCT_EXTERN_METHOD(snoozeAlarm: (double)minutes)
+RCT_EXTERN_METHOD(turnOffAlarm)
+
+@end

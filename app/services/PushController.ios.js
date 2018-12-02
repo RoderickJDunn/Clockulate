@@ -1,4 +1,4 @@
-import { Alert } from "react-native";
+import { Alert, NativeModules, NativeEventEmitter } from "react-native";
 import NotificationsIOS, {
     NotificationAction,
     NotificationCategory
@@ -8,6 +8,46 @@ import moment from "moment";
 import Sound from "react-native-sound";
 import { SOUND_TYPES, ALARM_STATES } from "../data/constants";
 import realm from "../data/DataSchemas";
+import { DisturbanceModel } from "../data/models";
+
+console.log(NativeModules.AlarmAudioService);
+
+let {
+    initializeAlarm: initNativeAlarm,
+    snoozeAlarm: snoozeNative,
+    turnOffAlarm: turnOffNative
+} = NativeModules.AlarmAudioService;
+
+const NoiseDetectionEvents = new NativeEventEmitter(
+    NativeModules.AlarmAudioService
+);
+
+let initializeAlarm = alarm => {
+    console.log("sending time: ", alarm.wakeUpTime.toISOString());
+    initNativeAlarm(
+        { time: alarm.wakeUpTime.toISOString(), sound: alarm.sound },
+        err => {
+            console.log("didInitializeAlarm?: ", err ? false : true);
+        }
+    );
+};
+
+NoiseDetectionEvents.addListener("onNoiseDetected", info => {
+    console.log("JS Got NOISE_DETECTED EVT. info:", info);
+
+    // Save disturbance + filepath (if present) to DB
+    let newDisturbance = new DisturbanceModel();
+    realm.write(() => {
+        let dt = new Date(info.timestamp);
+        newDisturbance.time = dt; // TODO: convert timestamp string to a Date object
+        newDisturbance.recording = info.file;
+        newDisturbance.duration = info.duration;
+        realm.create("SleepDisturbance", newDisturbance);
+    });
+
+    console.log("added new disturbance: ");
+    console.log(newDisturbance);
+});
 
 let snoozeAction = new NotificationAction(
     {
@@ -24,6 +64,12 @@ let snoozeAction = new NotificationAction(
 
             let currAlarm = realm.objectForPrimaryKey("Alarm", _data.alarmId);
             if (currAlarm) {
+                let snoozeTime = currAlarm.snoozeTime;
+                if (__DEV__) {
+                    snoozeTime = 0.25;
+                }
+                snoozeNative(snoozeTime);
+
                 realm.write(() => {
                     if (currAlarm.snoozeCount == null) {
                         currAlarm.snoozeCount = 1;
@@ -51,6 +97,8 @@ let disableAction = new NotificationAction(
     (action, completed) => {
         console.log("ACTION RECEIVED");
         console.log(action);
+
+        turnOffNative();
         try {
             let { _data } = action.notification;
             console.log(
@@ -90,7 +138,7 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
     let wakeUpMoment = moment(alarm.wakeUpTime);
 
     /* Make sure there are no System or In-App notifications already set for this alarm 
-        Passing in 'false' as third param to 'clearAlarm' means this function will leave this Alarm set to 'enabled' == SET
+        Passing in 'false' as third param to 'clearAlarm' means this function will leave this Alarm set to 'enabled' == SET in DB
     */
     clearAlarm(alarm, null, false);
 
@@ -125,6 +173,11 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
     }
     console.log("shortSoundFile", shortSoundFile);
     console.log("longSoundFile", longSoundFile);
+
+    initializeAlarm({
+        wakeUpTime: alarm.wakeUpTime,
+        sound: longSoundFile.slice(0, -4)
+    });
 
     setInAppAlarm(alarm, reloadAlarmsList, longSoundFile);
 
@@ -174,6 +227,7 @@ export let clearAlarm = (alarm, notificationId, disableAlarm = true) => {
         realm.write(() => {
             if (disableAlarm) {
                 alarm.status = ALARM_STATES.OFF;
+                turnOffNative();
             }
             alarm.snoozeCount = 0;
         });
@@ -188,6 +242,8 @@ let onInAppSnoozePressed = (alarm, reloadAlarmsList, sound, soundFile) => {
         sound.stop();
         sound.release();
     }
+
+    snoozeNative(alarm.snoozeTime);
 
     realm.write(() => {
         if (alarm.snoozeCount == null) {
@@ -266,39 +322,39 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
             alarm.status = ALARM_STATES.RINGING;
         });
         reloadAlarmsList();
-        console.log("soundFile", soundFile);
 
         /* Start sound playback */
         var sound = null;
 
-        if (soundFile && soundFile.length > 0) {
-            sound = new Sound(soundFile, Sound.MAIN_BUNDLE, error => {
-                if (error) {
-                    console.log("failed to load the sound", error);
-                    return;
-                }
-                // loaded successfully
-                console.log(
-                    "duration in seconds: " +
-                        sound.getDuration() +
-                        "number of channels: " +
-                        sound.getNumberOfChannels()
-                );
-                sound.play(success => {
-                    if (success) {
-                        console.log("successfully finished playing");
-                    } else {
-                        console.log(
-                            "playback failed due to audio decoding errors"
-                        );
-                        // reset the player to its uninitialized state (android only)
-                        // this is the only option to recover after an error occured and use the player again
-                        sound.reset();
-                    }
-                    sound.release();
-                });
-            });
-        }
+        //  Commenting out, since native-side will play the audio instead
+        // if (soundFile && soundFile.length > 0) {
+        //     sound = new Sound(soundFile, Sound.MAIN_BUNDLE, error => {
+        //         if (error) {
+        //             console.log("failed to load the sound", error);
+        //             return;
+        //         }
+        //         // loaded successfully
+        //         console.log(
+        //             "duration in seconds: " +
+        //                 sound.getDuration() +
+        //                 "number of channels: " +
+        //                 sound.getNumberOfChannels()
+        //         );
+        //         sound.play(success => {
+        //             if (success) {
+        //                 console.log("successfully finished playing");
+        //             } else {
+        //                 console.log(
+        //                     "playback failed due to audio decoding errors"
+        //                 );
+        //                 // reset the player to its uninitialized state (android only)
+        //                 // this is the only option to recover after an error occured and use the player again
+        //                 sound.reset();
+        //             }
+        //             sound.release();
+        //         });
+        //     });
+        // }
 
         Alert.alert(
             "!!!",
