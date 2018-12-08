@@ -8,7 +8,8 @@ import {
     FlatList,
     StyleSheet,
     InteractionManager,
-    Animated
+    Animated,
+    ActivityIndicator
 } from "react-native";
 import moment, { max } from "moment";
 import Sound from "react-native-sound";
@@ -22,6 +23,7 @@ import CalendarStrip from "react-native-calendar-strip";
 import { Header } from "react-navigation";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import DateTimePicker from "react-native-modal-datetime-picker";
+import Pager from "react-native-swiper";
 
 import realm from "../data/DataSchemas";
 import Colors from "../styles/colors";
@@ -114,6 +116,7 @@ export default class SleepLog extends React.Component {
                         />
                     </Animated.View>
                 </TouchableOpacity>
+            )
         };
     };
 
@@ -157,20 +160,19 @@ export default class SleepLog extends React.Component {
         tmrw12am.add(dayRange.getHours(), "hours");
         tmrw12am.add(dayRange.getMinutes(), "minutes");
 
+        let alarmInstAll = realm
+            .objects("AlarmInstance")
+            .sorted("start", false);
+
         this.state = {
             menuIsOpen: false,
             isDatePickerVisible: false,
-            selectedDate: today12am,
+            selectedDate: today12am.s,
             genInfoPage: GEN_INFO_PAGES.day.idx,
             walkthroughIdx: null,
-            disturbances: realm
-                .objects("SleepDisturbance")
-                .filtered(
-                    "time >= $0 && time < $1",
-                    today12am.toDate(),
-                    tmrw12am.toDate()
-                )
-                .sorted("time", true),
+            alarmInstAll: alarmInstAll,
+            alarmInst: alarmInstAll.length > 0 ? alarmInstAll[0] : null,
+            alarmInstIdx: alarmInstAll.length - 1,
             playingDisturbance: null,
             activeSound: null,
             dayRange: dayRange
@@ -245,10 +247,10 @@ export default class SleepLog extends React.Component {
 
         let minDate = moment(selectedDate);
         let maxDate = moment(selectedDate);
-        console.log(
-            "_updateDisturbanceList. selectedDate: ",
-            selectedDate.toDate()
-        );
+        // console.log(
+        //     "_updateDisturbanceList. selectedDate: ",
+        //     selectedDate.toDate()
+        // );
         switch (rangeTypeIdx) {
             case GEN_INFO_PAGES.day.idx:
                 minDate.startOf("day");
@@ -421,8 +423,8 @@ export default class SleepLog extends React.Component {
             timestamp = time.format("h:mm a (MMM-DD)");
         }
 
-        console.log("item", item);
-        console.log("playingDisturbance", this.state.playingDisturbance);
+        // console.log("item", item);
+        // console.log("playingDisturbance", this.state.playingDisturbance);
         return (
             <View style={styles.disturbanceItemWrap}>
                 <View style={[styles.distItemSection, { flex: 0.7 }]}>
@@ -465,71 +467,55 @@ export default class SleepLog extends React.Component {
         );
     };
 
-    _renderGeneralInfoPage = (idx, selectedDate) => {
+    _renderGeneralInfoPage = (idx = 0, alrmInst) => {
         let now = moment();
         let weekStart;
         let title;
         let { dayRange } = this.state;
+        // console.log("alrmInst", alrmInst);
         switch (idx) {
             case GEN_INFO_PAGES.day.idx:
-                if (dayRange.getHours() == 0 && dayRange.getMinutes() == 0) {
-                    // dayRange is Midnight-Midnight
-                    if (selectedDate.isSame(now, "day")) {
-                        title = "Today";
-                    } else if (
-                        selectedDate.isSame(now.subtract(1, "day"), "day")
-                    ) {
-                        title = "Yesterday";
+                if (!alrmInst) {
+                    title = "";
+                } else {
+                    let minDate = moment(alrmInst.start);
+                    let maxDate = moment(alrmInst.end);
+
+                    if (minDate.isSame(maxDate, "day")) {
+                        title = maxDate.format("MMM DD");
                     } else {
-                        title = selectedDate.format("MMMM DD,  YYYY");
+                        let minDateFmt = minDate.format("MMM DD - ");
+                        let maxDateFmt = maxDate.format("MMM DD");
+                        title = minDateFmt + maxDateFmt;
                     }
-                } else {
-                    let minDate = moment(selectedDate);
-                    let maxDate = moment(selectedDate);
-
-                    minDate.startOf("day");
-
-                    maxDate.add(1, "days");
-                    maxDate.startOf("day");
-
-                    // apply dayRange offset
-                    minDate.add(dayRange.getHours(), "hours");
-                    minDate.add(dayRange.getMinutes(), "minutes");
-
-                    maxDate.add(dayRange.getHours(), "hours");
-                    maxDate.add(dayRange.getMinutes(), "minutes");
-
-                    let minDateFmt = minDate.format("MMM DD - ");
-                    let maxDateFmt = maxDate.format("MMM DD");
-                    title = minDateFmt + maxDateFmt;
                 }
 
                 break;
-            case GEN_INFO_PAGES.week.idx:
-                // get start of current week, to check if selectedDate is in this week
-                weekStart = moment(now).startOf("isoWeek");
-                if (selectedDate.isSame(weekStart, "isoWeek")) {
-                    title = "This Week";
-                } else {
-                    // Selected date is not this week.
-                    // get start of week for selected date
-                    weekStart = moment(selectedDate).startOf("isoWeek");
-                    title = [];
-                    title.push(weekStart.format("MMM DD"));
-                    title.push(" - ");
+            // case GEN_INFO_PAGES.week.idx:
+            //     // get start of current week, to check if selectedDate is in this week
+            //     weekStart = moment(now).startOf("isoWeek");
+            //     if (selectedDate.isSame(weekStart, "isoWeek")) {
+            //         title = "This Week";
+            //     } else {
+            //         // Selected date is not this week.
+            //         // get start of week for selected date
+            //         weekStart = moment(selectedDate).startOf("isoWeek");
+            //         title = [];
+            //         title.push(weekStart.format("MMM DD"));
+            //         title.push(" - ");
 
-                    weekStart.endOf("isoWeek");
-                    title.push(weekStart.format("MMM DD"));
-                    title.push(",  ");
-                    title.push(weekStart.format("YYYY"));
-                    title = title.join("");
-                }
-                break;
-            case GEN_INFO_PAGES.month.idx:
-                // monthStart = moment(selectedDate).startOf("month");
-                // monthStart.startOf("month");
-                title = selectedDate.format("MMMM YYYY");
-                break;
+            //         weekStart.endOf("isoWeek");
+            //         title.push(weekStart.format("MMM DD"));
+            //         title.push(",  ");
+            //         title.push(weekStart.format("YYYY"));
+            //         title = title.join("");
+            //     }
+            //     break;
+            // case GEN_INFO_PAGES.month.idx:
+            //     // monthStart = moment(selectedDate).startOf("month");
+            //     // monthStart.startOf("month");
+            //     title = selectedDate.format("MMMM YYYY");
+            //     break;
             default:
                 console.error("No index");
         }
@@ -547,7 +533,7 @@ export default class SleepLog extends React.Component {
                             ]}
                         >
                             <Text style={styles.textGeneralInfoStat}>
-                                {this.state.disturbances.length}
+                                {alrmInst && alrmInst.disturbances.length}
                             </Text>
                         </View>
                         <Text>Disturbances</Text>
@@ -560,15 +546,61 @@ export default class SleepLog extends React.Component {
                             ]}
                         >
                             <Text style={styles.textGeneralInfoStat}>
-                                {
-                                    this.state.disturbances.filtered(
+                                {alrmInst &&
+                                    alrmInst.disturbances.filtered(
                                         "recording != null"
-                                    ).length
-                                }
+                                    ).length}
                             </Text>
                         </View>
                         <Text>Recordings</Text>
                     </View>
+                </View>
+                <View
+                    style={[
+                        StyleSheet.absoluteFill,
+                        {
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignContent: "center",
+                            alignItems: "center"
+                        }
+                    ]}
+                >
+                    <MaterialComIcon
+                        name="chevron-left"
+                        size={35}
+                        // onPress={() => {
+                        //     let { alarmInstIdx, alarmInstAll } = this.state;
+
+                        //     alarmInstIdx--;
+
+                        //     if (alarmInstIdx <= 0) {
+                        //         alarmInstIdx = alarmInstAll.length - 1;
+                        //     }
+                        //     this.setState({
+                        //         alarmInstIdx: alarmInstIdx
+                        //     });
+                        // }}
+                    />
+                    <MaterialComIcon
+                        name="chevron-right"
+                        size={35}
+                        // onPress={() => {
+                        //     let { alarmInstIdx } = this.state;
+                        //     let alarmInstAll = realm
+                        //         .objects("AlarmInstance")
+                        //         .sorted("start", false);
+                        //     let nextAlmInst = null;
+                        //     if (alarmInstIdx > 0) {
+                        //         alarmInstIdx--;
+                        //         nextAlmInst = alarmInstAll[alarmInstIdx];
+                        //     }
+                        //     this.setState({
+                        //         alarmInst: nextAlmInst,
+                        //         alarmInstIdx: alarmInstIdx
+                        //     });
+                        // }}
+                    />
                 </View>
             </View>
         );
@@ -606,80 +638,11 @@ export default class SleepLog extends React.Component {
         );
     };
 
-    render() {
-        console.log("SleepLog -- render() ");
-        // console.log(this.state);
-        let wtIdx = this.state.walkthroughIdx;
-        let { selectedDate } = this.state;
-        console.log("selectedDate", selectedDate.toDate());
-        // console.log("this.refGenInfo", this.refGenInfo && "true");
+    _renderEmptyPage = (isLoading, date) => {
         return (
-            <View
-                style={{ flex: 1 }}
-                ref={target => {
-                    this.refScreenContainer = target;
-                }}
-            >
-                <DimmableView isDimmed={wtIdx != null && wtIdx != 0}>
-                    <CalendarStrip
-                        calendarAnimation={{ type: "sequence", duration: 30 }}
-                        daySelectionAnimation={{
-                            type: "border",
-                            duration: 200,
-                            borderWidth: 1,
-                            borderHighlightColor: "white"
-                        }}
-                        style={{
-                            height: 100,
-                            paddingTop: 10,
-                            paddingBottom: 5
-                        }}
-                        calendarHeaderStyle={{ color: "white" }}
-                        calendarColor={Colors.brandLightPurple}
-                        dateNumberStyle={{ color: "white" }}
-                        dateNameStyle={{ color: "white" }}
-                        highlightDateNumberStyle={{ color: "#EEC166" }}
-                        highlightDateNameStyle={{ color: "#EEC166" }}
-                        disabledDateNameStyle={{ color: "grey" }}
-                        disabledDateNumberStyle={{ color: "grey" }}
-                        // datesWhitelist={datesWhitelist}
-                        // datesBlacklist={datesBlacklist}
-                        // iconLeft={require('./img/left-arrow.png')}
-                        // iconRight={require('./img/right-arrow.png')}
-                        iconContainer={{ flex: 0.1 }}
-                        ref={target => {
-                            this.refCalendarView = target;
-                            tooltipMap.calendar.ref = target;
-                        }}
-                        onLayout={() => {}}
-                        onDateSelected={selectedDate => {
-                            console.log("onDateSelected");
-                            InteractionManager.runAfterInteractions(() => {
-                                this._updateDisturbanceList(
-                                    selectedDate,
-                                    this.state.genInfoPage
-                                );
-                            });
-                        }}
-                        onWeekChanged={startOfWeek => {
-                            if (this.refCalendarView) {
-                                setImmediate(() =>
-                                    this.refCalendarView.setSelectedDate(
-                                        startOfWeek
-                                    )
-                                );
-                            }
-                            InteractionManager.runAfterInteractions(() => {
-                                this._updateDisturbanceList(
-                                    startOfWeek,
-                                    this.state.genInfoPage
-                                );
-                            });
-                        }}
-                    />
-                </DimmableView>
+            <View style={{ flex: 1 }}>
                 <DimmableView
-                    isDimmed={wtIdx != null && wtIdx != 1}
+                    isDimmed={false}
                     style={styles.generalInfoSectionWrap}
                 >
                     <View
@@ -695,73 +658,11 @@ export default class SleepLog extends React.Component {
                             tooltipMap.genInfo.ref = target;
                         }}
                     >
-                        <Interactable.View
-                            //  ref={interactableRef}
-                            horizontalOnly={true}
-                            snapPoints={[
-                                { x: 0, id: "day" },
-                                { x: -SCREEN_WIDTH, id: "week" },
-                                { x: -SCREEN_WIDTH * 2, id: "month" }
-                            ]}
-                            dragWithSpring={{ tension: 1000, damping: 0.5 }}
-                            animatedNativeDriver={true}
-                            // animatedValueX={this._position}
-                            onDrag={event => {
-                                // console.log("Snapping");
-                                let {
-                                    state,
-                                    targetSnapPointId
-                                } = event.nativeEvent;
-                                if (state == "end") {
-                                    this._updateDisturbanceList(
-                                        selectedDate,
-                                        GEN_INFO_PAGES[targetSnapPointId].idx
-                                    );
-                                }
-                            }}
-                            style={[styles.generalInfoSection]}
-                        >
-                            {this._renderGeneralInfoPage(0, selectedDate)}
-                            {this._renderGeneralInfoPage(1, selectedDate)}
-                            {this._renderGeneralInfoPage(2, selectedDate)}
-                        </Interactable.View>
-                        {this._renderPagingDots(this.state.genInfoPage)}
+                        {this._renderGeneralInfoPage(0, {})}
                     </View>
                 </DimmableView>
-                <DimmableView
-                    style={{ flex: 1 }}
-                    isDimmed={wtIdx != null && wtIdx != 2}
-                >
-                    <FlatList
-                        style={{ flex: 1 }}
-                        data={this.state.disturbances}
-                        keyExtractor={item => item.id}
-                        ListEmptyComponent={
-                            <View
-                                style={{
-                                    alignContent: "stretch",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    flex: 1
-                                }}
-                            >
-                                <Text
-                                    style={{
-                                        fontSize: 28,
-                                        fontFamily: "Quesha"
-                                    }}
-                                >
-                                    No Recordings for Date Range
-                                </Text>
-                            </View>
-                        }
-                        renderItem={this._renderDisturbanceItem}
-                        ref={target => {
-                            this.refFlatlist = target;
-                            tooltipMap.flatlist.ref = target;
-                        }}
-                        extraData={this.state.playingDisturbance}
-                    />
+                <DimmableView style={{ flex: 1 }} isDimmed={false}>
+                    <ActivityIndicator />
                     {isIphoneX() ? (
                         <View
                             style={{
@@ -771,6 +672,175 @@ export default class SleepLog extends React.Component {
                         />
                     ) : null}
                 </DimmableView>
+            </View>
+        );
+    };
+    pageIdx = 9;
+    render() {
+        console.log("SleepLog -- render() ");
+        // console.log(this.state);
+        let wtIdx = this.state.walkthroughIdx;
+        let { alarmInstAll, alarmInstIdx } = this.state;
+        console.log("alarmInstIdx ", alarmInstIdx);
+        console.log("pageIdx", this.pageIdx);
+        // console.log("alarmInstAll count", alarmInstAll.length);
+
+        let instGroup = alarmInstAll.slice(alarmInstIdx - 9, alarmInstIdx + 1);
+
+        for (let i = 0; i < instGroup.length; i++) {
+            console.debug(i, instGroup[i].start);
+        }
+
+        return (
+            <View
+                style={{ flex: 1 }}
+                ref={target => {
+                    this.refScreenContainer = target;
+                }}
+            >
+                <Pager
+                    ref={elem => (this.pagerRef = elem)}
+                    style={styles.wrapper}
+                    showsButtons={true}
+                    showsPagination={false}
+                    loadMinimal
+                    loadMinimalSize={1}
+                    index={this.pageIdx}
+                    loop={false}
+                    ListEmptyComponent={this._renderEmptyPage}
+                    onIndexChanged={idx => {
+                        if (this.ignoreNext) {
+                            this.ignoreNext = false;
+                            return;
+                        }
+
+                        let { alarmInstIdx } = this.state;
+                        console.log("onIndexChanged", idx);
+                        if (idx == 0) {
+                            alarmInstIdx -= 9;
+                            if (alarmInstIdx > 0) {
+                                this.ignoreNext = true;
+                                this.pageIdx = 9;
+                                this.setState(
+                                    {
+                                        alarmInstIdx: alarmInstIdx
+                                        // pageIdx: 9
+                                    },
+                                    () => {
+                                        this.pagerRef.scrollBy(9, false);
+                                    }
+                                );
+                            }
+                        } else if (idx == 9) {
+                            alarmInstIdx += 9;
+                            if (
+                                alarmInstIdx <
+                                this.state.alarmInstAll.length - 1
+                            ) {
+                                this.ignoreNext = true;
+                                this.pageIdx = 0;
+                                this.setState(
+                                    {
+                                        alarmInstIdx: alarmInstIdx
+                                        // pageIdx: 0
+                                    },
+                                    () => {
+                                        // this.pagerRef.scrollTo(9);
+                                        this.pagerRef.scrollBy(1);
+                                    }
+                                );
+                            }
+                        }
+                    }}
+                >
+                    {alarmInstAll
+                        .slice(alarmInstIdx - 9, alarmInstIdx + 1) // slices 10 items including the one @ alarmInstIdx
+                        .map((almInst, key) => {
+                            // console.log(
+                            //     `almInst: ${almInst.start} | key: ${key}`
+                            // );
+                            return (
+                                <View key={key} style={{ flex: 1 }}>
+                                    <DimmableView
+                                        isDimmed={wtIdx != null && wtIdx != 1}
+                                        style={styles.generalInfoSectionWrap}
+                                    >
+                                        <View
+                                            style={[
+                                                styles.generalInfoSectionWrap,
+                                                {
+                                                    borderBottomColor:
+                                                        "#898989",
+                                                    borderBottomWidth: 0.8
+                                                }
+                                            ]}
+                                            ref={target => {
+                                                this.refGenInfo = target;
+                                                tooltipMap.genInfo.ref = target;
+                                            }}
+                                        >
+                                            {this._renderGeneralInfoPage(
+                                                0,
+                                                almInst
+                                            )}
+                                        </View>
+                                    </DimmableView>
+                                    <DimmableView
+                                        style={{ flex: 1 }}
+                                        isDimmed={wtIdx != null && wtIdx != 2}
+                                    >
+                                        <FlatList
+                                            style={{ flex: 1 }}
+                                            data={
+                                                almInst && almInst.disturbances
+                                            }
+                                            keyExtractor={item => item.id}
+                                            ListEmptyComponent={
+                                                <View
+                                                    style={{
+                                                        alignContent: "stretch",
+                                                        justifyContent:
+                                                            "center",
+                                                        alignItems: "center",
+                                                        flex: 1
+                                                    }}
+                                                >
+                                                    <Text
+                                                        style={{
+                                                            fontSize: 28,
+                                                            fontFamily: "Quesha"
+                                                        }}
+                                                    >
+                                                        No Recordings for Date
+                                                        Range
+                                                    </Text>
+                                                </View>
+                                            }
+                                            renderItem={
+                                                this._renderDisturbanceItem
+                                            }
+                                            ref={target => {
+                                                this.refFlatlist = target;
+                                                tooltipMap.flatlist.ref = target;
+                                            }}
+                                            extraData={
+                                                this.state.playingDisturbance
+                                            }
+                                        />
+                                        {isIphoneX() ? (
+                                            <View
+                                                style={{
+                                                    height: 34 // height of bottom safe area in Portrait mode
+                                                    // backgroundColor: "green"
+                                                }}
+                                            />
+                                        ) : null}
+                                    </DimmableView>
+                                </View>
+                            );
+                        })}
+                </Pager>
+
                 {wtIdx != null && (
                     <TouchableWithoutFeedback onPress={() => this._playIntro()}>
                         <View style={StyleSheet.absoluteFill} />

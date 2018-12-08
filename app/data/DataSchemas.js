@@ -128,6 +128,18 @@ SleepDisturbanceSchema.schema = {
     }
 };
 
+class AlarmInstanceSchema extends Realm.Object {}
+AlarmInstanceSchema.schema = {
+    name: "AlarmInstance",
+    primaryKey: "id",
+    properties: {
+        id: "string",
+        start: "date",
+        end: "date",
+        disturbances: { type: "list", objectType: "SleepDisturbance" }
+    }
+};
+
 console.log("Realm path: ", Realm.defaultPath);
 
 export default new Realm({
@@ -139,6 +151,7 @@ export default new Realm({
         AlarmSoundSchema,
         SettingsSchema,
         AdvStatSchema,
-        SleepDisturbanceSchema
+        SleepDisturbanceSchema,
+        AlarmInstanceSchema
     ]
 });
