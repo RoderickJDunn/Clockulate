@@ -9,6 +9,7 @@ target 'Alarm_AutoSet' do
   pod "yoga", :path => "#{react_native_path}/ReactCommon/yoga"
   pod "React", :path => react_native_path, :subspecs => [
     'Core',
+    'CxxBridge', # Include this for RN >= 0.47
     'RCTActionSheet',
     'RCTAnimation',
     'RCTGeolocation',
@@ -20,6 +21,10 @@ target 'Alarm_AutoSet' do
     'RCTVibration',
     'RCTWebSocket'
   ]
+  
+  pod 'DoubleConversion', :podspec => '../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec'
+  pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
+  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'	
 
 # when not using frameworks  we can do this instead of including the source files in our project (1/4):
 #  pod 'react-native-maps', path: '../../'
@@ -28,22 +33,25 @@ target 'Alarm_AutoSet' do
 
 # pod 'lottie-ios', :path => '../node_modules/lottie-ios'
 pod 'Google-Mobile-Ads-SDK'
+
 end
 
-#post_install do |installer|
-#    installer.pods_project.targets.each do |target|
-#
-#        # The following is needed to ensure the "archive" step works in XCode.
-#        # It removes React & Yoga from the Pods project, as it is already included in the main project.
-#        # Without this, you'd see errors when you archive like:
-#        # "Multiple commands produce ... libReact.a"
-#        # "Multiple commands produce ... libyoga.a"
-#
-#        targets_to_ignore = %w(React yoga)
-#
-#        if targets_to_ignore.include? target.name
-#            target.remove_from_project
-#        end
-#
-#    end
-#end
+
+
+post_install do |installer|
+    installer.pods_project.targets.each do |target|
+
+        # The following is needed to ensure the "archive" step works in XCode.
+        # It removes React & Yoga from the Pods project, as it is already included in the main project.
+        # Without this, you'd see errors when you archive like:
+        # "Multiple commands produce ... libReact.a"
+        # "Multiple commands produce ... libyoga.a"
+
+        targets_to_ignore = %w(React yoga)
+
+        if targets_to_ignore.include? target.name
+            target.remove_from_project
+        end
+
+    end
+end
