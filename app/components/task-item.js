@@ -444,17 +444,18 @@ class TaskItem extends React.Component {
         }
 
         let movingStyle;
-        let borderBottomColor = "black";
+        let borderBottomColor = Colors.disabledGrey;
         if (this.props.isMoving) {
             // console.log("isMoving", "true");
             movingStyle = {
                 flex: undefined,
-                backgroundColor: Colors.brandSuperLightPurple,
-                shadowOpacity: 0.2,
+                left: -1,
+                backgroundColor: Colors.brandLightPurple,
+                shadowOpacity: 1,
                 shadowRadius: 10,
                 shadowColor: "black",
                 width: SCREEN_WIDTH - scaleByFactor(20, 0.4)
-                // elevation: 10
+                // elevation: 10 TODO: Why is this commented out
             };
             borderBottomColor = "transparent";
         } else {

@@ -27,8 +27,8 @@ export const TextStyle = StyleSheet.create({
         // TODO: Figure out a good font for editable text (eg: alarm labels, time fields)
         fontFamily: "Quesha",
         // fontFamily: "Verdana",
-        color: Colors.black,
-        opacity: 0.8
+        color: Colors.brandLightGrey
+        // opacity: 0.85
     },
     clockText: {
         // TODO: Figure out a good font for the main Clock (and probably the large times in Alarms screen)
@@ -37,8 +37,9 @@ export const TextStyle = StyleSheet.create({
     timeText: {
         // fontFamily: "Baskerville"
         fontFamily: "Quesha",
-        color: Colors.black,
-        opacity: 0.85
+        // color: Colors.black,
+        color: Colors.brandLightGrey
+        // opacity: 0.85
     }
 });
 

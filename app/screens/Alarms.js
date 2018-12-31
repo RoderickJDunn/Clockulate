@@ -42,6 +42,7 @@ import {
 
 import ProximityManager from "react-native-proximity-manager";
 
+import Colors from "../styles/colors";
 import { ListStyle } from "../styles/list";
 import AlarmItem from "../components/alarm-item";
 import RNSound from "react-native-sound";
@@ -590,8 +591,11 @@ class Alarms extends Component {
             /* *** DEBUGGING *** */
             // set alarm to next whole minute
             if (__DEV__) {
-                let inOneMin = moment().add(1, "minutes");
-                wakeUpTime = inOneMin.second(0).toDate();
+                // let inOneMin = moment().add(1, "minutes");
+                // wakeUpTime = inOneMin.second(0).toDate();
+
+                let inTenSec = moment().add(10, "seconds");
+                wakeUpTime = inTenSec.toDate();
             }
             /* ***************** */
 
@@ -705,12 +709,15 @@ class Alarms extends Component {
                     style={{ flex: 1 }}
                     start={{ x: 0.2, y: 0 }}
                     end={{ x: 1.5, y: 1 }}
-                    colors={["#ecebf4", "#c2ccd6"]}
+                    colors={[Colors.brandMidGrey, Colors.brandDarkGrey]}
                     {...this._idlePanResponder.panHandlers}
                 >
                     <SafeAreaView
                         forceInset={{ bottom: "always" }}
-                        style={ListStyle.container}
+                        style={[
+                            ListStyle.container,
+                            { backgroundColor: "transparent" }
+                        ]}
                     >
                         {/* <PushController /> */}
                         <DraggableFlatList

@@ -26,6 +26,7 @@ import { ListStyle, AlarmListStyle } from "../styles/list";
 import { scaleByFactor } from "../util/font-scale";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { ALARM_STATES } from "../data/constants";
+import LinearGradient from "react-native-linear-gradient";
 
 let shakeAnimMap = new Map([
     [0, 0],
@@ -320,9 +321,9 @@ class AlarmItem extends React.PureComponent {
         this._ringTransform.push(this._translateX);
         this._ringTransform.push(this._rotate);
 
-        console.log(this._rotate.rotate._config.outputRange);
-        console.log(this._translateX.translateX._config.outputRange);
-        console.log(this._translateY.translateY._config.outputRange);
+        // console.log(this._rotate.rotate._config.outputRange);
+        // console.log(this._translateX.translateX._config.outputRange);
+        // console.log(this._translateY.translateY._config.outputRange);
     }
 
     render() {
@@ -355,7 +356,7 @@ class AlarmItem extends React.PureComponent {
         // Grab correct colors depending on whether alarm is enabled/disabled
         let textColor, buttonColor;
         if (this.props.alarm.status > ALARM_STATES.OFF) {
-            textColor = Colors.darkGreyText;
+            textColor = Colors.brandLightOpp;
             buttonColor = "#6bf47b";
         } else {
             textColor = Colors.disabledGrey;
@@ -413,7 +414,7 @@ class AlarmItem extends React.PureComponent {
                 style={[
                     this.props.style,
                     {
-                        backgroundColor: Colors.brandLightGrey,
+                        backgroundColor: Colors.brandMidGrey,
                         transform: [
                             {
                                 translateY: this._appearAnim.interpolate({
@@ -550,157 +551,175 @@ class AlarmItem extends React.PureComponent {
                         this.props.onSnap(e.nativeEvent.id);
                     }}
                 >
-                    {this.props.alarm.status == ALARM_STATES.SNOOZED && (
-                        <Icon
-                            name="sleep"
-                            size={25}
-                            style={{ padding: 7, position: "absolute" }}
-                        />
-                    )}
-                    <TouchableOpacity
-                        activeOpacity={touchedOpacity}
-                        id={this.props.alarm.id}
-                        label={this.props.alarm.label}
-                        onStartShouldSetResponder={evt => true}
-                        // onPressIn={() => this.setState({ isMoving: true })}
-                        onPress={() => {
-                            this.props.onPress(this.props.alarm);
-                        }}
-                        onLongPress={this.props.startMove}
-                        // onPressOut={this.props.endMove}
-                        onPressOut={() => {
-                            if (this.props.isActive == true) {
-                                this.props.endMove();
-                            }
-                        }}
-                        style={[
-                            {
-                                width: this.width - 20, // subtract padding
-                                flexDirection: "row"
-                            }
-                            // movingStyle
+                    <LinearGradient
+                        start={{ x: 0.0, y: 0.25 }}
+                        end={{ x: 0.5, y: 1.0 }}
+                        locations={[0, 0.5, 1.4]}
+                        colors={[
+                            Colors.brandDarkGrey,
+                            Colors.brandMidLightGrey,
+                            Colors.brandDarkGrey
                         ]}
+                        style={{ padding: 10 }}
                     >
-                        {/* onStartShouldSetResponder: returning true prevents touches from bubbling up further! */}
+                        {this.props.alarm.status == ALARM_STATES.SNOOZED && (
+                            <Icon
+                                name="sleep"
+                                size={25}
+                                style={{ padding: 7, position: "absolute" }}
+                            />
+                        )}
                         <TouchableOpacity
+                            activeOpacity={touchedOpacity}
+                            id={this.props.alarm.id}
+                            label={this.props.alarm.label}
+                            onStartShouldSetResponder={evt => true}
+                            // onPressIn={() => this.setState({ isMoving: true })}
+                            onPress={() => {
+                                this.props.onPress(this.props.alarm);
+                            }}
+                            onLongPress={this.props.startMove}
+                            // onPressOut={this.props.endMove}
+                            onPressOut={() => {
+                                if (this.props.isActive == true) {
+                                    this.props.endMove();
+                                }
+                            }}
                             style={[
-                                AlarmListStyle.toggleButton,
                                 {
-                                    alignContent: "center",
-                                    justifyContent: "center",
-                                    alignItems: "center",
+                                    width: this.width - 20, // subtract padding
                                     flexDirection: "row"
                                 }
+                                // movingStyle
                             ]}
-                            onStartShouldSetResponder={evt => true}
-                            // onPress={e => {
-                            //     console.log(e.nativeEvent);
-                            // }}
-                            onPress={this._triggerAnimation.bind(
-                                this,
-                                !this.state.switchValue,
-                                true
-                            )}
                         >
-                            <Animated.View
-                                onLayout={({ nativeEvent }) => {
-                                    let {
-                                        x,
-                                        y,
-                                        width,
-                                        height
-                                    } = nativeEvent.layout;
-                                    console.log("Lottie Wrapper layout:");
-                                    console.log("width", width);
-                                    console.log("height", height);
-
-                                    this._lottieCenterX = width / 2;
-                                    this._lottieCenterY = height / 2;
-
-                                    this._lottiePivotX =
-                                        this._lottieCenterX + 20;
-                                    this._lottiePivotY = this._lottieCenterY;
-                                    this._calcShakeAnim();
-                                    // this.setState(this.state);
-                                }}
+                            {/* onStartShouldSetResponder: returning true prevents touches from bubbling up further! */}
+                            <TouchableOpacity
                                 style={[
+                                    AlarmListStyle.toggleButton,
                                     {
-                                        flex:
-                                            2.0 *
-                                            Math.exp(
-                                                -1.46 *
-                                                    (this.width / this.height)
-                                            ),
-                                        // backgroundColor: "green",
-                                        alignSelf: "stretch",
                                         alignContent: "center",
                                         justifyContent: "center",
-                                        transform: this._ringTransform
+                                        alignItems: "center",
+                                        flexDirection: "row"
                                     }
                                 ]}
+                                onStartShouldSetResponder={evt => true}
+                                // onPress={e => {
+                                //     console.log(e.nativeEvent);
+                                // }}
+                                onPress={this._triggerAnimation.bind(
+                                    this,
+                                    !this.state.switchValue,
+                                    true
+                                )}
                             >
-                                <LottieView
-                                    source={require("../img/off-to-clock-lottie.json")}
-                                    progress={this.state.animProgress}
-                                    resizeMode={"contain"}
-                                    style={[StyleSheet.absoluteFill]}
-                                />
-                            </Animated.View>
-                        </TouchableOpacity>
-                        <View style={AlarmListStyle.infoContainer}>
-                            {this.props.alarm.mode == "autocalc" && (
-                                <Text
+                                <Animated.View
+                                    onLayout={({ nativeEvent }) => {
+                                        let {
+                                            x,
+                                            y,
+                                            width,
+                                            height
+                                        } = nativeEvent.layout;
+                                        // console.log("Lottie Wrapper layout:");
+                                        // console.log("width", width);
+                                        // console.log("height", height);
+
+                                        this._lottieCenterX = width / 2;
+                                        this._lottieCenterY = height / 2;
+
+                                        this._lottiePivotX =
+                                            this._lottieCenterX + 20;
+                                        this._lottiePivotY = this._lottieCenterY;
+                                        this._calcShakeAnim();
+                                        // this.setState(this.state);
+                                    }}
                                     style={[
-                                        TextStyle.timeText,
                                         {
-                                            alignSelf: "flex-end",
-                                            position: "absolute",
-                                            fontSize: scaleByFactor(23, 0.3),
-                                            top: 0,
-                                            right: 0,
-                                            color: textColor
+                                            flex:
+                                                2.0 *
+                                                Math.exp(
+                                                    -1.46 *
+                                                        (this.width /
+                                                            this.height)
+                                                ),
+                                            // backgroundColor: "green",
+                                            alignSelf: "stretch",
+                                            alignContent: "center",
+                                            justifyContent: "center",
+                                            transform: this._ringTransform
                                         }
                                     ]}
                                 >
-                                    {fArriveTime}
+                                    <LottieView
+                                        source={require("../img/off-to-clock-lottie.json")}
+                                        progress={this.state.animProgress}
+                                        resizeMode={"contain"}
+                                        style={[StyleSheet.absoluteFill]}
+                                    />
+                                </Animated.View>
+                            </TouchableOpacity>
+                            <View style={AlarmListStyle.infoContainer}>
+                                {this.props.alarm.mode == "autocalc" && (
                                     <Text
                                         style={[
+                                            TextStyle.timeText,
                                             {
-                                                fontSize: scaleByFactor(22, 0.3)
+                                                alignSelf: "flex-end",
+                                                position: "absolute",
+                                                fontSize: scaleByFactor(
+                                                    23,
+                                                    0.3
+                                                ),
+                                                top: 0,
+                                                right: 0,
+                                                color: textColor
                                             }
                                         ]}
                                     >
-                                        {" " + amPmArriveTime}
+                                        {fArriveTime}
+                                        <Text
+                                            style={[
+                                                {
+                                                    fontSize: scaleByFactor(
+                                                        22,
+                                                        0.3
+                                                    )
+                                                }
+                                            ]}
+                                        >
+                                            {" " + amPmArriveTime}
+                                        </Text>
+                                    </Text>
+                                )}
+                                <Text
+                                    style={[
+                                        AlarmListStyle.timeText,
+                                        TextStyle.timeText,
+                                        {
+                                            color: textColor,
+                                            backgroundColor: "transparent"
+                                        }
+                                    ]}
+                                >
+                                    {fWakeUpTime}
+                                    <Text style={TextStyle.AmPm}>
+                                        {" " + amPmWakeUpTime}
                                     </Text>
                                 </Text>
-                            )}
-                            <Text
-                                style={[
-                                    AlarmListStyle.timeText,
-                                    TextStyle.timeText,
-                                    {
-                                        color: textColor,
-                                        backgroundColor: "transparent"
-                                    }
-                                ]}
-                            >
-                                {fWakeUpTime}
-                                <Text style={TextStyle.AmPm}>
-                                    {" " + amPmWakeUpTime}
-                                </Text>
-                            </Text>
-                            {this.props.alarm.label.length > 0 && (
-                                <Text
-                                    style={{
-                                        color: textColor,
-                                        fontSize: scaleByFactor(15, 0.4)
-                                    }}
-                                    numberOfLines={2}
-                                >
-                                    {this.props.alarm.label}
-                                </Text>
-                            )}
-                            {/* <View
+                                {this.props.alarm.label.length > 0 && (
+                                    <Text
+                                        style={{
+                                            color: textColor,
+                                            fontSize: scaleByFactor(15, 0.4)
+                                        }}
+                                        numberOfLines={2}
+                                    >
+                                        {this.props.alarm.label}
+                                    </Text>
+                                )}
+                                {/* <View
                                 style={{
                                     position: "absolute",
                                     right: 0,
@@ -767,13 +786,14 @@ class AlarmItem extends React.PureComponent {
                                     </Text>
                                 </TouchableOpacity>
                             </View> */}
-                        </View>
-                    </TouchableOpacity>
+                            </View>
+                        </TouchableOpacity>
+                    </LinearGradient>
                 </Interactable.View>
                 <View
                     style={{
                         height: 1,
-                        backgroundColor: Colors.backgroundGrey
+                        backgroundColor: Colors.disabledGrey
                     }}
                 />
             </Animated.View>

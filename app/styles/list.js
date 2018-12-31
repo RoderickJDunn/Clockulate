@@ -14,12 +14,12 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 export const ListStyle = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#ecebf4",
+        backgroundColor: Colors.backgroundGrey,
         zIndex: 50
     },
     item: {
-        height: scaleByFactor(100, 0.2),
-        padding: 10
+        height: scaleByFactor(100, 0.2)
+        // padding: 10
     }
 });
 
@@ -28,8 +28,9 @@ export const AlarmListStyle = StyleSheet.create({
         flex: 1,
         flexDirection: "row",
         width: SCREEN_WIDTH,
-        opacity: 1,
-        backgroundColor: "#ecebf4"
+        opacity: 1
+        // backgroundColor: "#ecebf4"
+        // backgroundColor: Colors.brandMidGrey
     },
     toggleButton: {
         flexDirection: "column",
@@ -110,7 +111,7 @@ export const TaskItemStyle = StyleSheet.create({
         width: SCREEN_WIDTH - scaleByFactor(20, 0.4) + 10, // SIDE_PADDING = 10 * 2.  PAD_DURATION_DELETE = 5
         height: 55,
         alignContent: "stretch",
-        borderBottomColor: "black",
+        borderBottomColor: Colors.brandLightOpp,
         borderBottomWidth: 0.8
         // alignItems: "center",
         // backgroundColor: "green"
@@ -137,11 +138,9 @@ export const TaskItemStyle = StyleSheet.create({
     },
     description: {
         flex: 0.68,
-        // flexGrow: 0.7,
-        color: Colors.black,
-        opacity: 0.8
-        // borderColor: "black",
-        // borderWidth: 2
+        // color: Colors.black,
+        color: Colors.brandLightGrey,
+        opacity: 0.9
     },
     duration: {
         // alignSelf: 'stretch',

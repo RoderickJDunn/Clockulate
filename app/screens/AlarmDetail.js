@@ -26,7 +26,6 @@ import MaterialComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import FAIcon from "react-native-vector-icons/FontAwesome";
 import MenuItem from "../components/menu-item";
 import StyledRadio from "../components/styled-radio";
-import { Icon } from "react-native-elements";
 
 import Interactable from "react-native-interactable";
 import DateTimePicker from "react-native-modal-datetime-picker";
@@ -55,7 +54,7 @@ import * as DateUtils from "../util/date_utils";
 import { ALARM_STATES } from "../data/constants";
 import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+let { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15];
 
 let _menuIconAnim = new Animated.Value(0);
@@ -94,7 +93,7 @@ class AlarmDetail extends Component {
                     }}
                     hitSlop={{ top: 10, bottom: 10, left: 0, right: 20 }}
                 >
-                    <Icon
+                    <MaterialIcon
                         name={"chevron-left"}
                         color={Colors.brandLightGrey}
                         underlayColor={Colors.brandDarkGrey}
@@ -1674,6 +1673,7 @@ class AlarmDetail extends Component {
                 keyboardShouldPersistTaps={"handled"}
                 scrollEnabled={false}
             >
+                <View style={{ width: SCREEN_WIDTH, height: 200 }} />
                 <TouchableBackdrop />
                 {/* <StatusBar style={{ backgroundColor: Colors.brandDarkGrey }} /> */}
                 {/*This is the actual Star image. It takes up the whole screen. */}
@@ -1846,7 +1846,7 @@ class AlarmDetail extends Component {
                                 // backgroundColor: "#AA6",
                                 fontSize: scaleByFactor(16, 0.6),
                                 textAlign: "center",
-                                color: Colors.brandOffWhiteBlue,
+                                color: Colors.brandMidOpp,
                                 fontWeight: "400",
                                 justifyContent: "center",
                                 height: 100,
@@ -1906,7 +1906,7 @@ class AlarmDetail extends Component {
                         <MaterialComIcon
                             name="arrow-up-drop-circle-outline" //upcircle ("AntDesign")
                             size={scaleByFactor(28, 0.5)}
-                            color={Colors.disabledGrey}
+                            color={Colors.brandMidOpp}
                         />
                     </this.AnimatedHandle>
                     <View
@@ -1933,7 +1933,8 @@ class AlarmDetail extends Component {
                                 onTextInputBlur={this.onLabelInputBlur}
                                 separation={0}
                                 textInputStyle={{
-                                    fontSize: scaleByFactor(32, 0.5)
+                                    fontSize: scaleByFactor(32, 0.5),
+                                    color: Colors.brandLightGrey
                                 }}
                                 flex={0.5}
                                 autoResize={false}
@@ -2020,6 +2021,7 @@ class AlarmDetail extends Component {
                                                 }}
                                                 size={25}
                                                 name="moon"
+                                                color={Colors.brandMidOpp}
                                             />
                                         )
                                     }
@@ -2070,7 +2072,8 @@ class AlarmDetail extends Component {
                                             height: scaleByFactor(50, 0.6), // needs to be scaled to screen height
                                             backgroundColor: "transparent",
                                             // backgroundColor: "green",
-                                            borderBottomColor: "#c8c8c8",
+                                            borderBottomColor:
+                                                Colors.brandLightOpp,
                                             borderBottomWidth: 0.8
                                         }
                                     ]}
@@ -2096,7 +2099,8 @@ class AlarmDetail extends Component {
                                                     fontSize: scaleByFactor(
                                                         17,
                                                         0.3
-                                                    )
+                                                    ),
+                                                    color: Colors.brandLightOpp
                                                 }
                                             ]}
                                         >
@@ -2126,7 +2130,7 @@ class AlarmDetail extends Component {
                                             name="add-to-list"
                                             size={scaleByFactor(30, 0.2)}
                                             // color="#7a7677"
-                                            color={Colors.brandLightOpp}
+                                            color={Colors.brandMidOpp}
                                         />
                                         {/* {editTasksBtn} */}
                                     </TouchableOpacity>
@@ -2154,14 +2158,14 @@ class AlarmDetail extends Component {
                                                 name="eye-with-line"
                                                 size={scaleByFactor(26, 0.2)}
                                                 // color="#7a7677"
-                                                color={Colors.brandLightOpp}
+                                                color={Colors.brandMidOpp}
                                             />
                                         ) : (
                                             <EntypoIcon
                                                 name="eye"
                                                 size={scaleByFactor(26, 0.2)}
                                                 // color="#7a7677"
-                                                color={Colors.brandLightOpp}
+                                                color={Colors.brandMidOpp}
                                             />
                                         )}
                                     </TouchableOpacity>
@@ -2226,10 +2230,9 @@ class AlarmDetail extends Component {
                                 />
                             </View>
                         </Animated.View>
-                        {/* </LinearGradient> */}
+                        {/* </View> */}
                     </View>
                     <TouchableOpacity
-                        // ref={elem => (this._animHandle = elem)}
                         style={{
                             position: "absolute",
                             alignSelf: "center",
@@ -2244,7 +2247,7 @@ class AlarmDetail extends Component {
                         <FAIcon
                             name="minus"
                             size={scaleByFactor(25, 0.5)}
-                            color={Colors.disabledGrey}
+                            color={Colors.brandMidOpp}
                         />
                     </TouchableOpacity>
                 </Interactable.View>
@@ -2295,7 +2298,8 @@ class AlarmDetail extends Component {
                             name="music"
                             size={scaleByFactor(23, 0.4)}
                             // color="#ECECEC"
-                            color={Colors.brandOffWhiteBlue}
+                            // color={Colors.brandOffWhiteBlue}
+                            color={Colors.brandLightGrey}
                             // color="#10ac84"
                             iconStyle={{
                                 color: "blue"
@@ -2330,7 +2334,7 @@ class AlarmDetail extends Component {
                             <MaterialComIcon
                                 name="sleep"
                                 size={25}
-                                color={Colors.brandDarkPurple}
+                                color={Colors.brandMidPurple}
                             />
                         }
                         center="Snooze Time"
@@ -2345,7 +2349,7 @@ class AlarmDetail extends Component {
                             <EntypoIcon
                                 size={25}
                                 name="moon"
-                                color={Colors.brandDarkPurple}
+                                color={Colors.brandMidPurple}
                             />
                         }
                         center={"Hide Hours of Sleep"}
@@ -2365,13 +2369,13 @@ class AlarmDetail extends Component {
                                 <MaterialComIcon
                                     size={25}
                                     name="timetable"
-                                    color={Colors.brandDarkPurple}
+                                    color={Colors.brandMidPurple}
                                 />
                             ) : (
                                 <EntypoIcon
                                     size={25}
                                     name="time-slot"
-                                    color={Colors.brandDarkPurple}
+                                    color={Colors.brandMidPurple}
                                 />
                             )
                         }
@@ -2390,7 +2394,7 @@ class AlarmDetail extends Component {
                             <MaterialComIcon
                                 name="view-dashboard-variant"
                                 size={25}
-                                color={Colors.brandDarkPurple}
+                                color={Colors.brandMidPurple}
                             />
                         }
                         centerRight={
@@ -2506,7 +2510,8 @@ const styles = StyleSheet.create({
         top: SCREEN_HEIGHT * 0.9,
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        backgroundColor: Colors.backgroundGrey
+        // backgroundColor: Colors.backgroundGrey
+        backgroundColor: Colors.brandDarkGrey
         // borderWidth: 3,
         // borderColor: "blue"
     },
@@ -2540,10 +2545,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: scaleByFactor(10, 0.4),
         paddingBottom: scaleByFactor(10, 0.4),
         alignSelf: "stretch",
-        backgroundColor: Colors.backgroundLightGrey,
+        // backgroundColor: Colors.backgroundLightGrey,
+        backgroundColor: Colors.brandMidGrey,
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.35,
         shadowRadius: 10,
         shadowColor: "black",
         shadowOffset: {
@@ -2579,7 +2585,8 @@ const styles = StyleSheet.create({
     },
     timeText: {
         // color: "#d5d5d5",
-        color: Colors.brandOffWhiteBlue,
+        // color: Colors.brandOffWhiteBlue,
+        color: Colors.brandLightOpp,
         fontSize: scaleByFactor(105, 0.7),
         backgroundColor: "transparent",
         alignSelf: "center",

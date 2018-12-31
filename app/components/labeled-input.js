@@ -9,7 +9,7 @@ import {
     TextInput,
     TouchableWithoutFeedback
 } from "react-native";
-import { randomColor } from "../styles/colors";
+import Colors, { randomColor } from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { scale, scaleByFactor } from "../util/font-scale";
 
@@ -130,6 +130,7 @@ class LabeledInput extends Component {
                                 }
                             ]}
                             // underlineColorAndroid="transparent"
+                            placeholderTextColor={Colors.disabledGrey}
                             placeholder={this.props.placeholder}
                             defaultValue={this.props.fieldText}
                             onChangeText={this._onChangeTextInput.bind(this)}

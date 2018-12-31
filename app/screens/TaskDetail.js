@@ -18,7 +18,6 @@ import {
     Alert,
     InteractionManager
 } from "react-native";
-import { Icon } from "react-native-elements";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import IonIcon from "react-native-vector-icons/Ionicons";
 import { NavigationActions, Header } from "react-navigation";
@@ -222,7 +221,7 @@ class TaskDetail extends Component {
         this.props.navigation.setParams({
             handleSave: this.handleSave.bind(this)
         });
-        if (this._nameInputRef) setTimeout(this._nameInputRef.focus, 100);
+        if (this._nameInputRef) setTimeout(this._nameInputRef.focus, 600);
     }
 
     componentWillUnmount() {
@@ -534,6 +533,7 @@ class TaskDetail extends Component {
                     textAlign={"left"}
                     // underlineColorAndroid="transparent"
                     placeholder={props.placeholder}
+                    placeholderTextColor={Colors.disabledGrey}
                     onChangeText={props.onChangeText}
                     defaultValue={props.defaultValue}
                     // onBlur={e => {
@@ -664,12 +664,11 @@ class TaskDetail extends Component {
                 keyboardShouldPersistTaps="handled"
                 scrollEnabled={false}
             >
-                <View
-                    style={{ flex: 1, backgroundColor: Colors.backgroundGrey }}
-                >
-                    {true && (
+                <View style={{ flex: 1, backgroundColor: Colors.brandMidGrey }}>
+                    {true && this.state.keyboardHeight == 0 && (
                         <AdWrapper
-                            animate={false}
+                            animate={true}
+                            delay={250}
                             screen={"TaskDetail"}
                             style={{
                                 position: "absolute",
@@ -727,7 +726,7 @@ class TaskDetail extends Component {
                     </KeyboardAvoidingView>
                     <View
                         style={{
-                            backgroundColor: Colors.backgroundGrey,
+                            backgroundColor: Colors.brandMidGrey,
                             margin: scaleByFactor(10, 0.5)
                         }}
                     >
@@ -757,7 +756,7 @@ class TaskDetail extends Component {
                             }}
                             listContainerStyle={[Styles.suggestionsContainer]}
                             listStyle={{
-                                backgroundColor: Colors.backgroundGrey,
+                                backgroundColor: Colors.brandMidGrey,
                                 elevation: 3,
                                 margin: 0,
                                 borderLeftWidth: 0,
@@ -773,7 +772,7 @@ class TaskDetail extends Component {
                                 alignItems: "center",
                                 position: "absolute",
                                 top: scaleByFactor(35, 0.6) + 35,
-                                backgroundColor: Colors.backgroundGrey
+                                backgroundColor: Colors.brandMidGrey
 
                                 // borderRadius: 7,
                                 // backgroundColor: "#c8d6e5",
@@ -972,7 +971,7 @@ const Styles = StyleSheet.create({
         zIndex: 1,
         borderWidth: 0,
         borderColor: "transparent",
-        backgroundColor: Colors.backgroundGrey
+        backgroundColor: Colors.brandMidGrey
     },
     suggestionsContainer: {
         shadowOffset: {
@@ -995,13 +994,14 @@ const Styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: Colors.disabledGrey,
         // backgroundColor: "#dfdee0"
-        backgroundColor: Colors.backgroundGrey
+        backgroundColor: Colors.brandMidGrey
     },
     suggestionDurationText: {
         fontSize: 18
     },
     suggestionText: {
         textAlign: "center",
-        textAlignVertical: "center"
+        textAlignVertical: "center",
+        color: Colors.brandLightOpp
     }
 });

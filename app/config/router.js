@@ -132,12 +132,13 @@ const navigationConfig = {
         title: "Alarms",
         headerStyle: {
             // Style the header view itself (aka. the nav bar)
+            // backgroundColor: Colors.brandDarkGrey,
             backgroundColor: Colors.brandDarkGrey,
             borderBottomWidth: 0
         },
         headerTitleStyle: {
             // style the Title text of the header
-            color: Colors.brandLightGrey
+            color: Colors.brandLightOpp
         },
         headerTintColor: Colors.brandLightGrey, // this sets color for 'Back' icon and text
         gesturesEnabled: false
@@ -194,7 +195,7 @@ const otherDrawerNavOptions = title => {
         },
         headerTitleStyle: {
             // style the Title text of the header
-            color: Colors.brandLightGrey
+            color: Colors.brandLightOpp
         },
         headerLeft: (
             <MaterialIcon
@@ -262,12 +263,15 @@ const MainStack = createStackNavigator(
             navigationOptions: ({ navigation }) => ({
                 headerStyle: {
                     backgroundColor: Colors.brandDarkGrey,
+                    // backgroundColor: "rgba(19, 7, 39, 0.7)",
+                    // backgroundColor: Colors.brandDarkPurple,
                     // backgroundColor: "transparent",
                     borderBottomWidth: 0
                 },
                 headerTitleStyle: {
-                    color: Colors.brandLightGrey
+                    color: Colors.brandLightOpp
                 }
+                // headerTransparent: true,
             })
         },
         TaskDetail: {
@@ -280,7 +284,7 @@ const MainStack = createStackNavigator(
                 },
                 // headerTransparent: true,
                 headerTitleStyle: {
-                    color: Colors.brandLightGrey
+                    color: Colors.brandLightOpp
                 }
             })
         },
@@ -292,14 +296,12 @@ const MainStack = createStackNavigator(
 );
 
 /* This is the only way I could find to disable drawer-opening on certain screens of 
-    the stack navigator 
-*/
+    the stack navigator */
 MainStack.navigationOptions = ({ navigation }) => {
     let drawerLockMode = "unlocked";
     if (navigation.state.index > 0) {
         drawerLockMode = "locked-closed";
     }
-
     return {
         drawerLockMode
     };
@@ -308,7 +310,7 @@ MainStack.navigationOptions = ({ navigation }) => {
 let screenMenuIcons = [
     { type: "MaterialIcon", name: "access-alarm", size: 24 },
     { type: "FontAwesomeIcon", name: "magic", size: 22 },
-    { type: "MaterialComIcon", name: "bullhorn", size: 27 },
+    { type: "MaterialComIcon", name: "notebook", size: 26 },
     { type: "MaterialIcon", name: "settings", size: 22 },
     { type: "MaterialIcon", name: "help", size: 22 },
     { type: "FontAwesomeIcon", name: "info-circle", size: 22 }
@@ -333,7 +335,7 @@ const CustomDrawerContentComponent = props => {
             end={{ x: 0.6, y: 1.96 }}
             // colors={["rgba(255, 255, 0, 1)", "rgba(255, 255, 150, 1)"]}
             // colors={[Colors.brandLightPurple, "#FFFFFF"]}
-            colors={[Colors.brandDarkPurple, "#000"]}
+            colors={[Colors.brandMidPurple, "#000"]}
             style={[
                 {
                     flex: 1
@@ -564,7 +566,7 @@ export const DrawerRoot = createDrawerNavigator(
     },
     {
         // drawerWidth: 250,
-        initialRouteName: "Alarms",
+        initialRouteName: "SleepLog", // change back to 'Alarms'
         contentOptions: {
             activeBackgroundColor: "transparent",
             activeTintColor: Colors.brandLightPurple,

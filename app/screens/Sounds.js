@@ -40,6 +40,7 @@ export default class Sounds extends Component {
         let { currSound } = props.navigation.state.params;
         console.log(currSound);
         Sound.setCategory("Playback", false);
+
         let dbSounds = Array.from(realm.objects("Sound").sorted("order"));
         let sounds = dbSounds.map(x => Object.assign({}, x));
         this.state = {
@@ -112,6 +113,7 @@ export default class Sounds extends Component {
                         "number of channels: " +
                         s.getNumberOfChannels()
                 );
+                s.setVolume(0.5);
                 s.play(success => {
                     if (success) {
                         console.log("successfully finished playing");
@@ -136,7 +138,7 @@ export default class Sounds extends Component {
         return (
             <SafeAreaView
                 forceInset={{ bottom: "always" }}
-                style={{ flex: 1, backgroundColor: Colors.backgroundGrey }}
+                style={{ flex: 1, backgroundColor: Colors.brandMidGrey }}
             >
                 <View style={[styles.listContainer]}>
                     <FlatList
@@ -207,7 +209,7 @@ const styles = StyleSheet.create({
     listContainer: {
         flex: 1,
         paddingHorizontal: 10,
-        backgroundColor: Colors.backgroundGrey
+        backgroundColor: Colors.brandMidGrey
     },
     soundListItem: {
         flex: 1,
@@ -218,6 +220,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1
     },
     soundRowContent: {
-        alignSelf: "center"
+        alignSelf: "center",
+        color: Colors.brandMidOpp
     }
 });
