@@ -9,10 +9,13 @@ import {
     StyleSheet,
     InteractionManager,
     Animated,
-    ActivityIndicator
+    ActivityIndicator,
+    TextInput,
+    ART
 } from "react-native";
 import moment, { max } from "moment";
 import Sound from "react-native-sound";
+const { Group, Shape, Surface, Text: ARTText } = ART;
 
 import { isIphoneX } from "react-native-iphone-x-helper";
 import Interactable from "react-native-interactable";
@@ -24,6 +27,8 @@ import { Header } from "react-navigation";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import Pager from "react-native-swiper";
+import Pie from "react-native-pie";
+import _ from "lodash";
 
 import realm from "../data/DataSchemas";
 import Colors from "../styles/colors";
@@ -31,6 +36,7 @@ import DimmableView from "../components/dimmable-view";
 import MenuItem from "../components/menu-item";
 import TouchableBackdrop from "../components/touchable-backdrop";
 
+const MINUTES_IN_HALFDAY = 60 * 12;
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const GEN_INFO_PAGES = {
@@ -52,7 +58,7 @@ let tooltipMap = {
     calendar: {
         ref: null,
         text:
-            "Select date to view data on sleep disturbances and associated recordings"
+            "Select date to view data on sleep disruptions and associated recordings"
     },
     genInfo: {
         ref: [null, null, null],
@@ -61,7 +67,7 @@ let tooltipMap = {
     flatlist: {
         ref: null,
         text:
-            "Browse times of sleep disturbances for selected date(s), and tap to listen to a recording (if available)"
+            "Browse times of sleep disruptions for selected date(s), and tap to listen to a recording (if available)"
     }
 };
 
@@ -71,12 +77,16 @@ let ttNameToIdx = {
     2: "flatlist"
 };
 
+const radians = 0.0174532925;
+const startAngle = 0;
+
 let _menuIconAnim = new Animated.Value(0);
 
 export default class SleepLog extends React.Component {
     static navigationOptions = ({ navigation }) => {
         console.log("blah");
         console.log("navigation", navigation.state);
+        console.log("SleepLog.headerTitle", typeof SleepLog.headerTitle);
         let menuIsOpen = navigation.state.params
             ? navigation.state.params.menuIsOpen
             : false;
@@ -116,6 +126,26 @@ export default class SleepLog extends React.Component {
                         />
                     </Animated.View>
                 </TouchableOpacity>
+            ),
+            headerTitle: (
+                <View style={styles.textGeneralInfoTitleSec}>
+                    <TextInput
+                        ref={elem => {
+                            if (
+                                navigation.state.params &&
+                                navigation.state.params.setTitleRef
+                            ) {
+                                console.log(
+                                    "navigation.state.params",
+                                    navigation.state.params
+                                );
+                                navigation.state.params.setTitleRef(elem);
+                            }
+                        }}
+                        editable={false}
+                        style={styles.textGeneralInfoTitle}
+                    />
+                </View>
             )
         };
     };
@@ -125,6 +155,9 @@ export default class SleepLog extends React.Component {
     refCalendarView = null;
 
     dayRangeDBSetting = null;
+    currAlmInstIdx = null;
+    headerTitleRef = "pizza";
+
     /*
     Props: 
      */
@@ -164,6 +197,8 @@ export default class SleepLog extends React.Component {
             .objects("AlarmInstance")
             .sorted("start", false);
 
+        this.currAlmInstIdx = alarmInstAll.length - 1;
+
         this.state = {
             menuIsOpen: false,
             isDatePickerVisible: false,
@@ -171,8 +206,11 @@ export default class SleepLog extends React.Component {
             genInfoPage: GEN_INFO_PAGES.day.idx,
             walkthroughIdx: null,
             alarmInstAll: alarmInstAll,
-            alarmInst: alarmInstAll.length > 0 ? alarmInstAll[0] : null,
-            alarmInstIdx: alarmInstAll.length - 1,
+            alarmInst:
+                alarmInstAll.length > 0
+                    ? alarmInstAll[this.currAlmInstIdx]
+                    : null,
+            alarmInstIdx: alarmInstAll.length - 1 - 2,
             playingDisturbance: null,
             activeSound: null,
             dayRange: dayRange
@@ -186,7 +224,12 @@ export default class SleepLog extends React.Component {
     componentDidMount() {
         this.props.navigation.setParams({
             menuIsOpen: false,
-            setMenuState: this._setMenuState.bind(this)
+            setMenuState: this._setMenuState.bind(this),
+            setTitleRef: this._setTitleRef.bind(this)
+        });
+
+        setImmediate(() => {
+            this._updateScreenTitle(this.state.alarmInst);
         });
 
         // if (this.state.walkthroughIdx != null) {
@@ -229,6 +272,10 @@ export default class SleepLog extends React.Component {
             this.setState({ menuIsOpen: nextMenuState });
         }
         this.props.navigation.setParams({ menuIsOpen: nextMenuState });
+    }
+
+    _setTitleRef(elem) {
+        this.headerTitleRef = elem;
     }
 
     _showDateTimePicker() {
@@ -428,7 +475,7 @@ export default class SleepLog extends React.Component {
         return (
             <View style={styles.disturbanceItemWrap}>
                 <View style={[styles.distItemSection, { flex: 0.7 }]}>
-                    <Text>{timestamp}</Text>
+                    <Text style={styles.distItemText}>{timestamp}</Text>
                 </View>
 
                 {item.recording ? (
@@ -455,17 +502,105 @@ export default class SleepLog extends React.Component {
                             }}
                         >
                             {this.state.playingDisturbance == item.id ? (
-                                <MaterialComIcon name="stop" size={25} />
+                                <MaterialComIcon
+                                    name="stop"
+                                    size={25}
+                                    color={Colors.brandDarkGrey}
+                                />
                             ) : (
-                                <MaterialComIcon name="play" size={25} />
+                                <MaterialComIcon
+                                    name="play"
+                                    size={25}
+                                    color={Colors.brandDarkGrey}
+                                />
                             )}
                         </TouchableOpacity>
-                        <Text>{item.duration > 0 && "0:" + item.duration}</Text>
+                        <Text style={styles.distItemText}>
+                            {item.duration > 0 && "0:" + item.duration}
+                        </Text>
                     </View>
                 ) : null}
             </View>
         );
     };
+
+    _renderTextStatRow = (label, value) => {
+        return (
+            <View
+                style={[
+                    {
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        marginBottom: 2
+                    }
+                ]}
+            >
+                <Text style={[styles.extraStatsText, { flex: 0.8 }]}>
+                    {label}
+                </Text>
+                <Text style={[styles.extraStatsText, { flex: 0.2 }]}>
+                    {value}
+                </Text>
+            </View>
+        );
+    };
+
+    x(angle, radius, charCount) {
+        // change to clockwise
+        //   let a = 360 - angle
+        let charOffset = 0;
+        if (charCount) {
+            charOffset = ((charCount - 1) * radius) / 10;
+        }
+
+        let a = angle;
+        // start from 12 o'clock
+        a = a + 180 - startAngle;
+        return radius * Math.sin(a * radians) - charOffset;
+    }
+
+    y(angle, radius, charCount) {
+        // change to clockwise
+        //   let a = 360 - angle
+        let a = angle;
+        // start from 12 o'clock
+        a = a + 180 - startAngle;
+        return radius * Math.cos(a * radians);
+    }
+
+    clockNums = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+    arcAngle = 30;
+    labelRadius = 62;
+
+    renderClockNums() {
+        let labelInfo = this.clockNums
+            .map((d, i) => {
+                let label = {};
+                let labelAngle = i * this.arcAngle; // + arcAngle / 2
+                label.text = d + "";
+                label.x = this.x(
+                    labelAngle,
+                    this.labelRadius,
+                    label.text.length
+                );
+                label.y =
+                    this.y(labelAngle, this.labelRadius, label.text.length) - 8;
+                return label;
+            })
+            .slice(0, 12);
+
+        return labelInfo.map(label => (
+            <ARTText
+                font={`21px "Quesha", "Helvetica", Arial`}
+                fill={Colors.brandLightGrey}
+                x={label.x}
+                y={label.y}
+                key={label.text}
+            >
+                {label.text}
+            </ARTText>
+        ));
+    }
 
     _renderGeneralInfoPage = (idx = 0, alrmInst) => {
         let now = moment();
@@ -519,43 +654,214 @@ export default class SleepLog extends React.Component {
             default:
                 console.error("No index");
         }
+
+        /*
+            TODO: calculate series, and rotation
+            1. If startTime is not 12:00, calculate rotation to apply
+            2. Calculate duration (then device convert to perecent (/ 24))
+                2a. If duration < 12 hrs, convert it to percent (dur / 12 * 100)
+                2b. If duration > 12 hrs, convert extra (beyond 12hrs) to percent (extra / 12 * 100)
+            3. Create series
+                3a. If duration < 12 hrs, simply use the percent calculated in step 2a as the series
+                3b. If duration > 12 hrs, create an extra pie view (inner) for it, and use the extra percent
+        */
+
+        let mStart = moment(alrmInst.start);
+        console.log("alrmInst.start", alrmInst.start);
+        let mEnd = moment(alrmInst.end || new Date());
+        console.log("alrmInst.end", alrmInst.end);
+
+        let hour = mStart.hour() % 12 || 12; // converts hour to 12hr time format (1-12)
+        let angle = ((hour + mStart.minute() / 60) / 12) * 360;
+        console.log("angle", angle);
+
+        let duration = mEnd.diff(mStart, "minutes");
+        console.log("duration", duration);
+        let series1 = null;
+        let series2 = null;
+
+        if (duration > MINUTES_IN_HALFDAY) {
+            series1 = [97];
+            let leftover = duration - MINUTES_IN_HALFDAY;
+            series2 = [(leftover / MINUTES_IN_HALFDAY) * 100];
+        } else {
+            series1 = [Math.min((duration / MINUTES_IN_HALFDAY) * 100, 99)];
+        }
+
         return (
             <View style={[styles.generalInfoPage]}>
-                <View style={styles.textGeneralInfoTitleSec}>
+                {/* <View style={styles.textGeneralInfoTitleSec}>
                     <Text style={styles.textGeneralInfoTitle}>{title}</Text>
-                </View>
+                </View> */}
                 <View style={styles.textGeneralInfoContent}>
-                    <View style={styles.statWrapper}>
+                    <View
+                        style={[
+                            styles.statWrapper,
+                            {
+                                flex: 0.5
+                                // backgroundColor: "yellow"
+                            }
+                        ]}
+                    >
                         <View
-                            style={[
-                                styles.genInfoCircle,
-                                { backgroundColor: "#EEC166" }
-                            ]}
+                            style={{
+                                alignSelf: "center",
+                                justifyContent: "center",
+                                padding: 25,
+                                borderRadius: 100,
+                                backgroundColor: "#473B5B",
+                                position: "absolute",
+                                top: 10
+                                // left: 0
+                            }}
                         >
-                            <Text style={styles.textGeneralInfoStat}>
-                                {alrmInst && alrmInst.disturbances.length}
+                            <View
+                                style={{
+                                    transform: [{ rotate: angle + "deg" }]
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        alignSelf: "center",
+                                        justifyContent: "center"
+                                    }}
+                                >
+                                    <Pie
+                                        radius={50}
+                                        innerRadius={43}
+                                        series={series1}
+                                        colors={["#3A1598"]}
+                                        backgroundColor={
+                                            series2 ? "#88F" : "#281D47"
+                                        }
+                                        strokeCap="round"
+                                    />
+                                </View>
+                                {/* This next Pie view will only be used if duration > 12 hrs */}
+                                {series2 && (
+                                    <View
+                                        style={[
+                                            StyleSheet.absoluteFill,
+                                            {
+                                                alignSelf: "center",
+                                                alignContent: "center",
+                                                alignItems: "center",
+                                                justifyContent: "center"
+                                            }
+                                        ]}
+                                    >
+                                        <Pie
+                                            radius={42}
+                                            innerRadius={35}
+                                            /*TODO: calculate series, and rotation
+                                            1. If startTime is not 12:00, calculate rotation to apply
+                                            2. Calculate duration (then device convert to perecent (/ 24))
+                                                2a. If duration < 12 hrs, convert it to percent (dur / 12 * 100)
+                                                2b. If duration > 12 hrs, convert extra (beyond 12hrs) to percent (extra / 12 * 100)
+                                            3. Create series
+                                                3a. If duration < 12 hrs, simply use the percent calculated in step 2a as the series
+                                                3b. If duration > 12 hrs
+                                                    - Series 1 will be the first 12 hrs, but only that not masked by series 2
+                                                        --> Series1 = 12 - extra, and must start 
+                                        */
+                                            series={series2}
+                                            colors={["#88F"]}
+                                            backgroundColor="rgba(0,0,0,0)"
+                                        />
+                                    </View>
+                                )}
+                            </View>
+                            <Text
+                                style={[
+                                    styles.statLabelText,
+
+                                    {
+                                        fontSize: 14,
+                                        alignSelf: "center",
+                                        position: "absolute"
+                                    }
+                                ]}
+                            >
+                                {_.round(duration / 60, 1) + " hrs"}
                             </Text>
                         </View>
-                        <Text>Disturbances</Text>
+                        <View
+                            style={[
+                                StyleSheet.absoluteFill
+                                // {
+                                //     backgroundColor: "green"
+                                // }
+                            ]}
+                        >
+                            <Surface width={SCREEN_WIDTH} height={600}>
+                                <Group
+                                    x={((SCREEN_WIDTH - 20) * 0.5 - 5) * 0.5}
+                                    y={(210 - 25) / 2 - 15}
+                                >
+                                    {this.renderClockNums()}
+                                </Group>
+                            </Surface>
+                        </View>
+                        <View
+                            style={{
+                                position: "absolute",
+                                bottom: 10
+                            }}
+                        >
+                            <Text
+                                style={[styles.statLabelText, { fontSize: 15 }]}
+                            >
+                                {mStart.format("h:mm a") +
+                                    " - " +
+                                    mEnd.format("h:mm a")}
+                            </Text>
+                        </View>
                     </View>
-                    <View style={styles.statWrapper}>
+                    <View style={[styles.statWrapper, { flex: 0.5 }]}>
+                        <View style={[styles.statWrapper]}>
+                            <Text style={styles.statLabelText}>
+                                Disruptions
+                            </Text>
+                            <View
+                                style={[
+                                    styles.genInfoCircle,
+                                    // { backgroundColor: "#EEC166" }
+                                    { backgroundColor: "#CE3333" }
+                                ]}
+                            >
+                                <Text style={styles.textGeneralInfoStat}>
+                                    {alrmInst && alrmInst.disturbances.length}
+                                </Text>
+                            </View>
+                        </View>
                         <View
                             style={[
-                                styles.genInfoCircle,
-                                { backgroundColor: "#CE3333" }
+                                styles.statWrapper,
+                                { justifyContent: "flex-start" }
                             ]}
                         >
-                            <Text style={styles.textGeneralInfoStat}>
-                                {alrmInst &&
-                                    alrmInst.disturbances.filtered(
-                                        "recording != null"
-                                    ).length}
-                            </Text>
+                            <View>
+                                <Text
+                                    style={[
+                                        styles.statLabelText,
+                                        { marginBottom: 5 }
+                                    ]}
+                                >
+                                    Time in Bed (Avg)
+                                </Text>
+                            </View>
+                            {this._renderTextStatRow("This Week", "8:01")}
+                            {this._renderTextStatRow("This Month", "7:57")}
+                            {this._renderTextStatRow(
+                                `Total (${
+                                    this.state.alarmInstAll.length
+                                } days)`,
+                                "8:52"
+                            )}
                         </View>
-                        <Text>Recordings</Text>
                     </View>
                 </View>
-                <View
+                {/* <View
                     style={[
                         StyleSheet.absoluteFill,
                         {
@@ -601,7 +907,7 @@ export default class SleepLog extends React.Component {
                         //     });
                         // }}
                     />
-                </View>
+                </View> */}
             </View>
         );
     };
@@ -647,11 +953,11 @@ export default class SleepLog extends React.Component {
                 >
                     <View
                         style={[
-                            styles.generalInfoSectionWrap,
-                            {
-                                borderBottomColor: "#898989",
-                                borderBottomWidth: 0.8
-                            }
+                            styles.generalInfoSectionWrap
+                            // {
+                            //     borderBottomColor: "#898989",
+                            //     borderBottomWidth: 0.8
+                            // }
                         ]}
                         ref={target => {
                             this.refGenInfo = target;
@@ -675,6 +981,38 @@ export default class SleepLog extends React.Component {
             </View>
         );
     };
+
+    _updateScreenTitle(alrmInst) {
+        if (alrmInst == null) {
+            return;
+        }
+
+        let title = "";
+        if (this.headerTitleRef == null) {
+            console.error("headerTitle is null!");
+        } else if (typeof this.headerTitleRef != "string") {
+            if (!alrmInst) {
+                title = "";
+            } else {
+                let minDate = moment(alrmInst.start);
+                let maxDate = moment(alrmInst.end);
+
+                if (minDate.isSame(maxDate, "day")) {
+                    title = maxDate.format("MMM D");
+                } else {
+                    let minDateFmt = minDate.format("MMM D - ");
+                    let maxDateFmt = maxDate.format("MMM D");
+                    title = minDateFmt + maxDateFmt;
+                }
+            }
+            this.headerTitleRef.setNativeProps({
+                text: title
+            });
+        } else {
+            console.warn("this.headerTitleRef is: " + this.headerTitleRef);
+        }
+    }
+
     pageIdx = 9;
     render() {
         console.log("SleepLog -- render() ");
@@ -685,7 +1023,7 @@ export default class SleepLog extends React.Component {
         console.log("pageIdx", this.pageIdx);
         // console.log("alarmInstAll count", alarmInstAll.length);
 
-        let instGroup = alarmInstAll.slice(alarmInstIdx - 9, alarmInstIdx + 1);
+        let instGroup = alarmInstAll.slice(alarmInstIdx - 7, alarmInstIdx + 3);
 
         for (let i = 0; i < instGroup.length; i++) {
             console.debug(i, instGroup[i].start);
@@ -693,7 +1031,8 @@ export default class SleepLog extends React.Component {
 
         return (
             <View
-                style={{ flex: 1 }}
+                style={{ flex: 1, backgroundColor: "#E1D5CC" }}
+                // style={{ flex: 1, backgroundColor: "rgba(0,0,,0.65)" }}
                 ref={target => {
                     this.refScreenContainer = target;
                 }}
@@ -705,7 +1044,7 @@ export default class SleepLog extends React.Component {
                     showsPagination={false}
                     loadMinimal
                     loadMinimalSize={1}
-                    index={this.pageIdx}
+                    index={instGroup.length - 1}
                     loop={false}
                     ListEmptyComponent={this._renderEmptyPage}
                     onIndexChanged={idx => {
@@ -716,63 +1055,88 @@ export default class SleepLog extends React.Component {
 
                         let { alarmInstIdx } = this.state;
                         console.log("onIndexChanged", idx);
-                        if (idx == 0) {
-                            alarmInstIdx -= 9;
+
+                        console.log("current alarmInstIdx", alarmInstIdx);
+                        if (idx <= 2 && this.pageIdx == idx + 1) {
+                            console.log("Reached lower bound (2)");
+                            alarmInstIdx -= 5;
                             if (alarmInstIdx > 0) {
-                                this.ignoreNext = true;
-                                this.pageIdx = 9;
+                                //this.ignoreNext = true;
+                                console.log(
+                                    "setting new alarmInstIdx",
+                                    alarmInstIdx
+                                );
                                 this.setState(
                                     {
                                         alarmInstIdx: alarmInstIdx
-                                        // pageIdx: 9
                                     },
                                     () => {
-                                        this.pagerRef.scrollBy(9, false);
+                                        this.pagerRef.scrollBy(5, false);
                                     }
                                 );
+                            } else {
+                                this.pageIdx = idx;
+                                alarmInstIdx += 5; // reset alarmInstIdx since we need to use it below
                             }
-                        } else if (idx == 9) {
-                            alarmInstIdx += 9;
+                        } else if (idx >= 7 && this.pageIdx == idx - 1) {
+                            console.log("Reached upper bound (7)");
+                            alarmInstIdx += 5;
                             if (
                                 alarmInstIdx <
                                 this.state.alarmInstAll.length - 1
                             ) {
-                                this.ignoreNext = true;
-                                this.pageIdx = 0;
+                                //this.ignoreNext = true;
                                 this.setState(
                                     {
                                         alarmInstIdx: alarmInstIdx
-                                        // pageIdx: 0
                                     },
                                     () => {
-                                        // this.pagerRef.scrollTo(9);
-                                        this.pagerRef.scrollBy(1);
+                                        this.pagerRef.scrollBy(-5, false);
                                     }
                                 );
+                            } else {
+                                this.pageIdx = idx;
+                                alarmInstIdx -= 5; // reset alarmInstIdx since we need to use it below
                             }
+                        } else {
+                            this.pageIdx = idx;
                         }
+
+                        let lowerBoundIdx = alarmInstIdx - 7;
+                        this.currAlmInstIdx = lowerBoundIdx + this.pageIdx;
+
+                        let alrmInst = this.state.alarmInstAll[
+                            this.currAlmInstIdx
+                        ];
+
+                        this._updateScreenTitle(alrmInst);
                     }}
                 >
                     {alarmInstAll
-                        .slice(alarmInstIdx - 9, alarmInstIdx + 1) // slices 10 items including the one @ alarmInstIdx
+                        .slice(alarmInstIdx - 7, alarmInstIdx + 3) // slices 10 items including the one @ alarmInstIdx
                         .map((almInst, key) => {
                             // console.log(
                             //     `almInst: ${almInst.start} | key: ${key}`
                             // );
                             return (
-                                <View key={key} style={{ flex: 1 }}>
+                                <View
+                                    key={key}
+                                    style={{
+                                        flex: 1
+                                    }}
+                                >
                                     <DimmableView
                                         isDimmed={wtIdx != null && wtIdx != 1}
                                         style={styles.generalInfoSectionWrap}
                                     >
                                         <View
                                             style={[
-                                                styles.generalInfoSectionWrap,
-                                                {
-                                                    borderBottomColor:
-                                                        "#898989",
-                                                    borderBottomWidth: 0.8
-                                                }
+                                                styles.generalInfoSectionWrap
+                                                // {
+                                                //     borderBottomColor:
+                                                //         "#898989",
+                                                //     borderBottomWidth: 0.8
+                                                // }
                                             ]}
                                             ref={target => {
                                                 this.refGenInfo = target;
@@ -786,11 +1150,17 @@ export default class SleepLog extends React.Component {
                                         </View>
                                     </DimmableView>
                                     <DimmableView
-                                        style={{ flex: 1 }}
+                                        style={{ height: SCREEN_HEIGHT - 210 }}
                                         isDimmed={wtIdx != null && wtIdx != 2}
                                     >
                                         <FlatList
-                                            style={{ flex: 1 }}
+                                            style={{
+                                                height: SCREEN_HEIGHT - 210
+                                            }}
+                                            contentContainerStyle={{
+                                                height: SCREEN_HEIGHT - 210
+                                                // backgroundColor: "yellow"
+                                            }}
                                             data={
                                                 almInst && almInst.disturbances
                                             }
@@ -836,6 +1206,30 @@ export default class SleepLog extends React.Component {
                                             />
                                         ) : null}
                                     </DimmableView>
+                                    {/* <TouchableOpacity
+                                        style={{
+                                            height: 70,
+                                            width: 100,
+                                            backgroundColor: "green"
+                                        }}
+                                        onPress={() => {
+                                            let {
+                                                alarmInstIdx: groupIdx,
+                                                alarmInstAll
+                                            } = this.state;
+                                            // let actualIndex = groupIdx + this.pageIdx;
+                                            alert(
+                                                "group idx: " +
+                                                    groupIdx +
+                                                    " | pageIdx: " +
+                                                    this.pageIdx +
+                                                    " | total: " +
+                                                    alarmInstAll.length +
+                                                    " | actualIndex: " +
+                                                    this.currAlmInstIdx
+                                            );
+                                        }}
+                                    /> */}
                                 </View>
                             );
                         })}
@@ -916,7 +1310,7 @@ export default class SleepLog extends React.Component {
                     pointerEvents="box-none"
                 >
                     {/* <MenuHeader title="Alarm Options" open={isMenuOpen} /> */}
-                    <MenuItem
+                    {/* <MenuItem
                         left={
                             <MaterialComIcon
                                 size={29}
@@ -938,6 +1332,40 @@ export default class SleepLog extends React.Component {
                             this._setMenuState(false, {
                                 isDatePickerVisible: true
                             });
+                        }}
+                    /> */}
+                    <MenuItem
+                        left={
+                            <MaterialComIcon
+                                size={29}
+                                name="delete"
+                                color={Colors.brandDarkPurple}
+                            />
+                        }
+                        centerRight={<Text>Delete this Entry</Text>}
+                        separatorPosition={SCREEN_WIDTH * 0.15}
+                        onPressItem={() => {
+                            let {
+                                alarmInstIdx: groupIdx,
+                                alarmInstAll
+                            } = this.state;
+                            // let actualIndex = groupIdx + this.pageIdx;
+                            alert(
+                                "group idx: " +
+                                    groupIdx +
+                                    " | pageIdx: " +
+                                    this.pageIdx +
+                                    " | total: " +
+                                    alarmInstAll.length +
+                                    " | actualIndex: " +
+                                    this.currAlmInstIdx
+                            );
+                            // let currAlmInst = alarmInstAll[actualIndex];
+                            // alert(
+                            //     "not fully implemented. Delete almInst with start-date: " +
+                            //         currAlmInst.start
+                            // );
+                            this._setMenuState(false);
                         }}
                     />
                     <MenuItem
@@ -975,12 +1403,13 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         marginLeft: 10,
+        marginRight: 10,
         paddingRight: 10,
         borderBottomColor: Colors.disabledGrey,
         borderBottomWidth: 1
     },
     generalInfoSectionWrap: {
-        height: 190,
+        height: 210,
         width: SCREEN_WIDTH
         // backgroundColor: "green"
     },
@@ -993,9 +1422,20 @@ const styles = StyleSheet.create({
     },
     generalInfoPage: {
         alignSelf: "stretch",
-        width: SCREEN_WIDTH,
-        height: "100%"
-        // backgroundColor: "green"
+        // width: SCREEN_WIDTH,
+        margin: 10,
+        borderRadius: 29,
+        flex: 1,
+        // height: "100%",
+        backgroundColor: "#23113E",
+        // shadowOffset: {
+        //     height: 2,
+        //     width: 0
+        // },
+        shadowOpacity: 0.5,
+        shadowRadius: 2,
+        elevation: 3,
+        shadowColor: "black"
     },
     sectionSeparator: {
         height: 0.8,
@@ -1012,20 +1452,23 @@ const styles = StyleSheet.create({
     statWrapper: {
         alignContent: "center",
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        flex: 0.5
     },
     textGeneralInfoTitleSec: {
-        paddingBottom: 12,
-        paddingHorizontal: 10
+        // paddingBottom: 12,
+        paddingHorizontal: 10,
+        alignSelf: "stretch",
+        justifyContent: "center"
     },
     genInfoCircle: {
         borderRadius: 40,
-        width: 75,
-        height: 75,
+        width: 45,
+        height: 45,
         alignContent: "center",
         justifyContent: "center",
         alignItems: "center",
-        marginBottom: 7,
+        marginTop: 7,
         shadowOpacity: 0.2,
         shadowOffset: {
             height: 1,
@@ -1036,17 +1479,31 @@ const styles = StyleSheet.create({
         elevation: 10
     },
     textGeneralInfoTitle: {
-        fontSize: 37,
-        fontFamily: "Quesha"
+        fontSize: SCREEN_WIDTH > 350 ? 37 : 32,
+        fontFamily: "Quesha",
+        color: Colors.brandLightOpp,
+        justifyContent: "center"
     },
     textGeneralInfoContent: {
         flexDirection: "row",
-        justifyContent: "space-around"
+        justifyContent: "space-around",
+        flex: 1
+        // backgroundColor: "blue"
     },
     textGeneralInfoStat: {
         fontSize: 22,
         color: Colors.backgroundBright
         // color: Colors.brandDarkGrey
+    },
+    statLabelText: {
+        color: Colors.backgroundBright
+    },
+    extraStatsText: {
+        color: Colors.brandLightOpp,
+        fontSize: 13
+    },
+    distItemText: {
+        color: Colors.brandDarkGrey
     },
     generalInfoFooter: {
         height: 30,
