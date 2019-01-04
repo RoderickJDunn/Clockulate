@@ -20,7 +20,7 @@ const { Group, Shape, Surface, Text: ARTText } = ART;
 import { isIphoneX } from "react-native-iphone-x-helper";
 import Interactable from "react-native-interactable";
 import MaterialComIcon from "react-native-vector-icons/MaterialCommunityIcons";
-// import AwesomeAlert from "react-native-awesome-alerts";
+import AwesomeAlert from "react-native-awesome-alerts";
 import RNTooltips from "react-native-tooltips";
 import CalendarStrip from "react-native-calendar-strip";
 import { Header } from "react-navigation";
@@ -170,13 +170,13 @@ export default class SleepLog extends React.Component {
 
         console.log("settings: ", settings);
 
-        this.dayRangeDBSetting = realm
-            .objects("Setting")
-            .filtered("name = 'dayRange'")[0];
+        // this.dayRangeDBSetting = realm
+        //     .objects("Setting")
+        //     .filtered("name = 'dayRange'")[0];
 
-        console.log("this.dayRangeDBSetting", this.dayRangeDBSetting);
+        // console.log("this.dayRangeDBSetting", this.dayRangeDBSetting);
 
-        let dayRange = this._secondsToDateTime(this.dayRangeDBSetting.value);
+        // let dayRange = this._secondsToDateTime(this.dayRangeDBSetting.value);
 
         let today12am = moment();
         today12am.startOf("day");
@@ -187,15 +187,17 @@ export default class SleepLog extends React.Component {
 
         console.log("today12am", today12am.toDate());
 
-        today12am.add(dayRange.getHours(), "hours");
-        today12am.add(dayRange.getMinutes(), "minutes");
+        // today12am.add(dayRange.getHours(), "hours");
+        // today12am.add(dayRange.getMinutes(), "minutes");
 
-        tmrw12am.add(dayRange.getHours(), "hours");
-        tmrw12am.add(dayRange.getMinutes(), "minutes");
+        // tmrw12am.add(dayRange.getHours(), "hours");
+        // tmrw12am.add(dayRange.getMinutes(), "minutes");
 
         let alarmInstAll = realm
             .objects("AlarmInstance")
             .sorted("start", false);
+
+        console.log("alarmInstAll.length", alarmInstAll.length);
 
         this.currAlmInstIdx = alarmInstAll.length - 1;
 
@@ -213,7 +215,8 @@ export default class SleepLog extends React.Component {
             alarmInstIdx: alarmInstAll.length - 1 - 2,
             playingDisturbance: null,
             activeSound: null,
-            dayRange: dayRange
+            // dayRange: dayRange,
+            showNoRecAlert: false
         };
 
         this._hideDateTimePicker = this._hideDateTimePicker.bind(this);
@@ -287,10 +290,10 @@ export default class SleepLog extends React.Component {
     }
 
     _updateDisturbanceList(selectedDate, rangeTypeIdx, newDayRange) {
-        let dayRange = newDayRange;
-        if (!newDayRange) {
-            dayRange = this.state.dayRange;
-        }
+        // let dayRange = newDayRange;
+        // if (!newDayRange) {
+        //     dayRange = this.state.dayRange;
+        // }
 
         let minDate = moment(selectedDate);
         let maxDate = moment(selectedDate);
@@ -326,11 +329,11 @@ export default class SleepLog extends React.Component {
         }
 
         // apply dayRange offset
-        minDate.add(dayRange.getHours(), "hours");
-        minDate.add(dayRange.getMinutes(), "minutes");
+        // minDate.add(dayRange.getHours(), "hours");
+        // minDate.add(dayRange.getMinutes(), "minutes");
 
-        maxDate.add(dayRange.getHours(), "hours");
-        maxDate.add(dayRange.getMinutes(), "minutes");
+        // maxDate.add(dayRange.getHours(), "hours");
+        // maxDate.add(dayRange.getMinutes(), "minutes");
 
         let updatedDist = realm
             .objects("SleepDisturbance")
@@ -473,7 +476,16 @@ export default class SleepLog extends React.Component {
         // console.log("item", item);
         // console.log("playingDisturbance", this.state.playingDisturbance);
         return (
-            <View style={styles.disturbanceItemWrap}>
+            <TouchableOpacity
+                style={styles.disturbanceItemWrap}
+                onPress={() => {
+                    if (item.recording) {
+                        this._playSound(item);
+                    } else {
+                        this.setState({ showNoRecAlert: true });
+                    }
+                }}
+            >
                 <View style={[styles.distItemSection, { flex: 0.7 }]}>
                     <Text style={styles.distItemText}>{timestamp}</Text>
                 </View>
@@ -520,7 +532,7 @@ export default class SleepLog extends React.Component {
                         </Text>
                     </View>
                 ) : null}
-            </View>
+            </TouchableOpacity>
         );
     };
 
@@ -550,7 +562,7 @@ export default class SleepLog extends React.Component {
         //   let a = 360 - angle
         let charOffset = 0;
         if (charCount) {
-            charOffset = ((charCount - 1) * radius) / 10;
+            charOffset = ((charCount - 1) * radius) / 35;
         }
 
         let a = angle;
@@ -606,7 +618,7 @@ export default class SleepLog extends React.Component {
         let now = moment();
         let weekStart;
         let title;
-        let { dayRange } = this.state;
+        // let { dayRange } = this.state;
         // console.log("alrmInst", alrmInst);
         switch (idx) {
             case GEN_INFO_PAGES.day.idx:
@@ -681,11 +693,20 @@ export default class SleepLog extends React.Component {
         let series2 = null;
 
         if (duration > MINUTES_IN_HALFDAY) {
-            series1 = [97];
+            series1 = [100];
             let leftover = duration - MINUTES_IN_HALFDAY;
             series2 = [(leftover / MINUTES_IN_HALFDAY) * 100];
         } else {
             series1 = [Math.min((duration / MINUTES_IN_HALFDAY) * 100, 99)];
+        }
+
+        let timeAwakeFmt = "0";
+
+        if (alrmInst) {
+            console.log("formatting timeAwake: ", alrmInst.timeAwake);
+            let mTimeAwake = moment.duration(alrmInst.timeAwake, "minutes");
+            let mins = mTimeAwake.minutes() + "";
+            timeAwakeFmt = `${mTimeAwake.hours()}:${mins.padStart(2, "0")}`;
         }
 
         return (
@@ -694,6 +715,34 @@ export default class SleepLog extends React.Component {
                     <Text style={styles.textGeneralInfoTitle}>{title}</Text>
                 </View> */}
                 <View style={styles.textGeneralInfoContent}>
+                    <View style={[styles.statWrapper, { flex: 0.25 }]}>
+                        <View
+                            style={[
+                                // styles.statWrapper,
+                                {
+                                    flex: 0.5,
+                                    justifyContent: "center",
+                                    alignSelf: "center",
+                                    alignItems: "center"
+                                }
+                            ]}
+                        >
+                            <Text style={styles.statLabelText}>
+                                Disruptions
+                            </Text>
+                            <View
+                                style={[
+                                    styles.genInfoCircle,
+                                    // { backgroundColor: "#EEC166" }
+                                    { backgroundColor: "#CE3333" }
+                                ]}
+                            >
+                                <Text style={styles.textGeneralInfoStat}>
+                                    {alrmInst && alrmInst.disturbances.length}
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
                     <View
                         style={[
                             styles.statWrapper,
@@ -730,9 +779,9 @@ export default class SleepLog extends React.Component {
                                         radius={50}
                                         innerRadius={43}
                                         series={series1}
-                                        colors={["#3A1598"]}
+                                        colors={["#4219B4"]}
                                         backgroundColor={
-                                            series2 ? "#88F" : "#281D47"
+                                            series2 ? "#A8AFCB" : "#281D47"
                                         }
                                         strokeCap="round"
                                     />
@@ -752,7 +801,7 @@ export default class SleepLog extends React.Component {
                                     >
                                         <Pie
                                             radius={42}
-                                            innerRadius={35}
+                                            innerRadius={38}
                                             /*TODO: calculate series, and rotation
                                             1. If startTime is not 12:00, calculate rotation to apply
                                             2. Calculate duration (then device convert to perecent (/ 24))
@@ -776,7 +825,7 @@ export default class SleepLog extends React.Component {
                                     styles.statLabelText,
 
                                     {
-                                        fontSize: 14,
+                                        fontSize: series2 ? 14 : 17,
                                         alignSelf: "center",
                                         position: "absolute"
                                     }
@@ -795,7 +844,7 @@ export default class SleepLog extends React.Component {
                         >
                             <Surface width={SCREEN_WIDTH} height={600}>
                                 <Group
-                                    x={((SCREEN_WIDTH - 20) * 0.5 - 5) * 0.5}
+                                    x={((SCREEN_WIDTH - 20) * 0.5 - 8) * 0.5}
                                     y={(210 - 25) / 2 - 15}
                                 >
                                     {this.renderClockNums()}
@@ -817,47 +866,52 @@ export default class SleepLog extends React.Component {
                             </Text>
                         </View>
                     </View>
-                    <View style={[styles.statWrapper, { flex: 0.5 }]}>
-                        <View style={[styles.statWrapper]}>
-                            <Text style={styles.statLabelText}>
-                                Disruptions
-                            </Text>
+                    <View style={[styles.statWrapper, { flex: 0.25 }]}>
+                        <View
+                            style={[
+                                // styles.statWrapper,
+                                {
+                                    flex: 0.5,
+                                    justifyContent: "center",
+                                    alignSelf: "center",
+                                    alignItems: "center"
+                                }
+                            ]}
+                        >
+                            <Text style={styles.statLabelText}>Time Awake</Text>
                             <View
                                 style={[
                                     styles.genInfoCircle,
-                                    // { backgroundColor: "#EEC166" }
-                                    { backgroundColor: "#CE3333" }
+                                    { backgroundColor: "#EEC166" }
+                                    // { backgroundColor: "#CE3333" }
                                 ]}
                             >
-                                <Text style={styles.textGeneralInfoStat}>
-                                    {alrmInst && alrmInst.disturbances.length}
-                                </Text>
-                            </View>
-                        </View>
-                        <View
-                            style={[
-                                styles.statWrapper,
-                                { justifyContent: "flex-start" }
-                            ]}
-                        >
-                            <View>
                                 <Text
                                     style={[
-                                        styles.statLabelText,
-                                        { marginBottom: 5 }
+                                        styles.textGeneralInfoStat,
+                                        {
+                                            fontSize:
+                                                timeAwakeFmt.length > 4
+                                                    ? 17
+                                                    : 19
+                                        }
                                     ]}
                                 >
-                                    Time in Bed (Avg)
+                                    {/* TODO: Create a formula that estimates time awake. 
+                                        1) Add up durations of all recordings 
+                                        2) Check the durations between each 2 adjacent disturbances.
+                                            If space between any 2 adjacent disturbances is < 10 min, consider this period 'Awake' time
+                                            Add these durations to the total.
+                                            NOTE: This may be better done as disturbances are added to DB. Create a new bool field in 'Disturbace' table
+                                                    called timeAwake, which will function as follows. When a new disturbance is detected,
+                                                    the timeAwake will initially be set to == the recording duration (or 0 if no recording). Then,
+                                                    fetch the previous disturbance check how much time has passed since then, and if it has been 
+                                                    less than 10 min
+                                        3)
+                                    */}
+                                    {timeAwakeFmt}
                                 </Text>
                             </View>
-                            {this._renderTextStatRow("This Week", "8:01")}
-                            {this._renderTextStatRow("This Month", "7:57")}
-                            {this._renderTextStatRow(
-                                `Total (${
-                                    this.state.alarmInstAll.length
-                                } days)`,
-                                "8:52"
-                            )}
                         </View>
                     </View>
                 </View>
@@ -1058,7 +1112,7 @@ export default class SleepLog extends React.Component {
 
                         console.log("current alarmInstIdx", alarmInstIdx);
                         if (idx <= 2 && this.pageIdx == idx + 1) {
-                            console.log("Reached lower bound (2)");
+                            console.log("Idx has decreased and reached lower bound (2)");
                             alarmInstIdx -= 5;
                             if (alarmInstIdx > 0) {
                                 //this.ignoreNext = true;
@@ -1079,7 +1133,7 @@ export default class SleepLog extends React.Component {
                                 alarmInstIdx += 5; // reset alarmInstIdx since we need to use it below
                             }
                         } else if (idx >= 7 && this.pageIdx == idx - 1) {
-                            console.log("Reached upper bound (7)");
+                            console.log("Idx has increased and reached upper bound (7)");
                             alarmInstIdx += 5;
                             if (
                                 alarmInstIdx <
@@ -1102,8 +1156,12 @@ export default class SleepLog extends React.Component {
                             this.pageIdx = idx;
                         }
 
-                        let lowerBoundIdx = alarmInstIdx - 7;
+                        let lowerBoundIdx = Math.max(alarmInstIdx - 7, 0);
+
                         this.currAlmInstIdx = lowerBoundIdx + this.pageIdx;
+                        console.log("this.pageIdx", this.pageIdx);
+                        console.log("lowerBoundIdx", lowerBoundIdx);
+                        console.log("this.currAlmInstIdx", this.currAlmInstIdx);
 
                         let alrmInst = this.state.alarmInstAll[
                             this.currAlmInstIdx
@@ -1150,17 +1208,12 @@ export default class SleepLog extends React.Component {
                                         </View>
                                     </DimmableView>
                                     <DimmableView
-                                        style={{ height: SCREEN_HEIGHT - 210 }}
+                                        style={{
+                                            height: SCREEN_HEIGHT - 210
+                                        }}
                                         isDimmed={wtIdx != null && wtIdx != 2}
                                     >
                                         <FlatList
-                                            style={{
-                                                height: SCREEN_HEIGHT - 210
-                                            }}
-                                            contentContainerStyle={{
-                                                height: SCREEN_HEIGHT - 210
-                                                // backgroundColor: "yellow"
-                                            }}
                                             data={
                                                 almInst && almInst.disturbances
                                             }
@@ -1260,7 +1313,7 @@ export default class SleepLog extends React.Component {
                         }}
                     />
                 )}
-                {this.state.isDatePickerVisible && (
+                {/* {this.state.isDatePickerVisible && (
                     <DateTimePicker
                         date={this.state.dayRange} // time has been converted into a Date() for this Component
                         mode={"time"}
@@ -1288,7 +1341,7 @@ export default class SleepLog extends React.Component {
                         }}
                         onCancel={this._hideDateTimePicker}
                     />
-                )}
+                )} */}
                 <Animated.View
                     style={{
                         position: "absolute",
@@ -1349,22 +1402,31 @@ export default class SleepLog extends React.Component {
                                 alarmInstIdx: groupIdx,
                                 alarmInstAll
                             } = this.state;
-                            // let actualIndex = groupIdx + this.pageIdx;
-                            alert(
-                                "group idx: " +
-                                    groupIdx +
-                                    " | pageIdx: " +
-                                    this.pageIdx +
-                                    " | total: " +
-                                    alarmInstAll.length +
-                                    " | actualIndex: " +
-                                    this.currAlmInstIdx
-                            );
-                            // let currAlmInst = alarmInstAll[actualIndex];
+
+                            let actualIndex = groupIdx - this.pageIdx;
                             // alert(
-                            //     "not fully implemented. Delete almInst with start-date: " +
-                            //         currAlmInst.start
+                            //     "group idx: " +
+                            //         groupIdx +
+                            //         " | pageIdx: " +
+                            //         this.pageIdx +
+                            //         " | total: " +
+                            //         alarmInstAll.length +
+                            //         " | actualIndex: " +
+                            //         this.currAlmInstIdx
                             // );
+
+                            let currAlmInst = alarmInstAll[this.currAlmInstIdx];
+
+                            console.log(
+                                "this.currAlmInstIdx",
+                                this.currAlmInstIdx
+                            );
+                            alert(
+                                "not fully implemented. Delete almInst with index " +
+                                    this.currAlmInstIdx +
+                                    ", and start-date: "
+                                // currAlmInst.start
+                            );
                             this._setMenuState(false);
                         }}
                     />
@@ -1388,6 +1450,44 @@ export default class SleepLog extends React.Component {
                         }}
                     />
                 </Animated.View>
+                {this.state.showNoRecAlert && (
+                    <AwesomeAlert
+                        alertContainerStyle={{
+                            top: 0,
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            width: "auto"
+                        }}
+                        // contentContainerStyle={{}}
+                        show={true}
+                        showProgress={false}
+                        title="No Recording Available"
+                        message={`No recording was saved for this disturbance, as it occurred too soon after another disturbance. You can increase the number of disturbances that are recorded in the Settings screen.`}
+                        messageStyle={{ textAlign: "center" }}
+                        closeOnTouchOutside={true}
+                        closeOnHardwareBackPress={false}
+                        showConfirmButton={true}
+                        showCancelButton={true}
+                        cancelText="Ok"
+                        confirmText="Go to Settings"
+                        confirmButtonColor="#54c0ff"
+                        onConfirmPressed={() => {
+                            // this.setState({ showNoRecAlert: false });
+                            alert(
+                                "not implemented (should navigate to Settings Screen)"
+                            );
+                        }}
+                        onCancelPressed={() => {
+                            this.setState({ showNoRecAlert: false });
+                        }}
+                        onDismiss={() => {
+                            if (this.state.showDurationInfo) {
+                                this.setState({ showNoRecAlert: false });
+                            }
+                        }}
+                    />
+                )}
             </View>
         );
     }
@@ -1496,7 +1596,10 @@ const styles = StyleSheet.create({
         // color: Colors.brandDarkGrey
     },
     statLabelText: {
-        color: Colors.backgroundBright
+        fontSize: SCREEN_WIDTH > 350 ? 14 : 12,
+        color: Colors.backgroundBright,
+        textAlign: "center",
+        fontFamily: "Gurmukhi MN"
     },
     extraStatsText: {
         color: Colors.brandLightOpp,
