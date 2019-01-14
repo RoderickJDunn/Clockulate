@@ -45,6 +45,14 @@ let prePopSettings = [
         name: "dayRange",
         enabled: true,
         value: 75600 // 9pm (60*60*21)
+    },
+    {
+        name: "maxLogs",
+        value: 500
+    },
+    {
+        name: "recCooldown",
+        value: 5
     }
 ];
 
@@ -96,98 +104,7 @@ let prePopAdvStats = [
     }
 ];
 let now = moment();
-let prePopDummyDist = [
-    {
-        time: now.toDate()
-    },
-    {
-        time: now.subtract(10, "minutes").toDate()
-    },
-    {
-        time: now.subtract(10, "minutes").toDate()
-    },
-    {
-        time: now.subtract(1, "minutes").toDate()
-    },
-    {
-        time: now.subtract(55, "seconds").toDate()
-    },
-    {
-        time: now.subtract(1, "minutes").toDate()
-    },
-    {
-        time: now.subtract(80, "minutes").toDate()
-    },
-    {
-        time: now.subtract(1, "day").toDate()
-    },
-    {
-        time: now.add(50, "minutes").toDate()
-    },
-    {
-        time: now.add(1098, "seconds").toDate()
-    },
-    {
-        time: now.add(10, "seconds").toDate()
-    },
-    {
-        time: now.subtract(11, "minutes").toDate()
-    },
-    {
-        time: now.subtract(1, "days").toDate()
-    },
-    {
-        time: now.subtract(11, "minutes").toDate()
-    },
-    {
-        time: now.subtract(1, "days").toDate()
-    },
-    {
-        time: now.subtract(11, "minutes").toDate()
-    },
-    {
-        time: now.subtract(11, "minutes").toDate()
-    },
-    {
-        time: now.subtract(1, "day").toDate()
-    },
-    {
-        time: now.subtract(1, "week").toDate()
-    },
-    {
-        time: now.subtract(11, "minutes").toDate()
-    },
-    {
-        time: now.subtract(11, "minutes").toDate()
-    },
-    {
-        time: now.add(47, "minutes").toDate()
-    },
-    {
-        time: now.add(13, "minutes").toDate()
-    },
-    {
-        time: now.subtract(1, "week").toDate()
-    },
-    {
-        time: now.subtract(22, "minutes").toDate()
-    },
-    {
-        time: now.subtract(1, "week").toDate()
-    },
-    {
-        time: now.subtract(1, "week").toDate()
-    },
-    {
-        time: now.add(1, "minutes").toDate()
-    },
-    {
-        time: now.subtract(4, "minutes").toDate()
-    },
-    {
-        time: now.add(22, "minutes").toDate()
-    }
-];
+
 // Create Realm objects and write to local storage
 function insertPrepopData() {
     realm.write(() => {
@@ -292,13 +209,57 @@ function insertPrepopData() {
             });
         }
 
-        /* Create Fake Sleep Disturbances */
-        for (let index = 0; index < prePopDummyDist.length; index++) {
-            realm.create("SleepDisturbance", {
+        /* Create Fake Sleep Disturbances, and LogDates to group them by day */
+        console.log("dummy disturbances");
+        let distForAlarmInst = [];
+        let currTime = moment();
+        for (let index = 0; index < 300; index++) {
+            let almEnd = moment(currTime.subtract(1, "hour"));
+            almEnd.subtract(Math.random() * 60, "minutes");
+            let almStart = moment(
+                currTime.subtract(Math.floor(Math.random() * 12) + 6, "hour")
+            );
+
+            let distTime = moment(currTime);
+
+            let timeSinceLastDist = 0;
+            let timeAwakeAcum = 0;
+            // create some disturbances for time range of alarm
+            for (let i = 0; i < index % 3 == 0 ? 25 : index % 3; i++) {
+                distTime.add(2 * i, "minutes");
+                if (distTime.isAfter(almEnd)) {
+                    console.log("Exit early. distTime isAfter almEnd:");
+                    console.log("timeAwakeAcum", timeAwakeAcum);
+                    console.log("timeSinceLastDist", timeSinceLastDist);
+                    // timeAwakeAcum -= timeSinceLastDist;
+                    console.log("distTime", distTime.toDate());
+                    console.log("almEnd", almEnd.toDate());
+                    break;
+                }
+
+                let dist = realm.create("SleepDisturbance", {
+                    id: uuid.v1(),
+                    time: distTime.toDate()
+                });
+                distForAlarmInst.push(dist);
+
+                timeSinceLastDist = 2 * (i + 1); // minutes till next disturbance
+
+                if (timeSinceLastDist < 15) {
+                    timeAwakeAcum += timeSinceLastDist;
+                    console.log("timeSinceLastDist", timeSinceLastDist);
+                    console.log("timeAwakeAcum", timeAwakeAcum);
+                }
+            }
+            realm.create("AlarmInstance", {
                 id: uuid.v1(),
-                time: prePopDummyDist[index].time
-                // recording: prePopDummyDist[index].recording,
+                start: almStart.toDate(),
+                end: almEnd.toDate(),
+                disturbances: distForAlarmInst,
+                timeAwake: timeAwakeAcum
             });
+            currTime.subtract(1, "day");
+            distForAlarmInst = [];
         }
 
         /**** Create AlarmTasks *****/

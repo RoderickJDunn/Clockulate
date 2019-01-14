@@ -11,7 +11,8 @@ import {
     Animated,
     ActivityIndicator,
     TextInput,
-    ART
+    ART,
+    ImageBackground
 } from "react-native";
 import moment, { max } from "moment";
 import Sound from "react-native-sound";
@@ -157,6 +158,7 @@ export default class SleepLog extends React.Component {
     dayRangeDBSetting = null;
     currAlmInstIdx = null;
     headerTitleRef = "pizza";
+    pageIdx = null;
 
     /*
     Props: 
@@ -200,6 +202,7 @@ export default class SleepLog extends React.Component {
         console.log("alarmInstAll.length", alarmInstAll.length);
 
         this.currAlmInstIdx = alarmInstAll.length - 1;
+        this.pageIdx = Math.min(9, alarmInstAll.length - 1);
 
         this.state = {
             menuIsOpen: false,
@@ -212,7 +215,8 @@ export default class SleepLog extends React.Component {
                 alarmInstAll.length > 0
                     ? alarmInstAll[this.currAlmInstIdx]
                     : null,
-            alarmInstIdx: alarmInstAll.length - 1 - 2,
+            alarmInstIdx: alarmInstAll.length - 1,
+            // alarmInstIdx: alarmInstAll.length - 1 - 2,
             playingDisturbance: null,
             activeSound: null,
             // dayRange: dayRange,
@@ -517,13 +521,13 @@ export default class SleepLog extends React.Component {
                                 <MaterialComIcon
                                     name="stop"
                                     size={25}
-                                    color={Colors.brandDarkGrey}
+                                    color={Colors.brandLightGrey}
                                 />
                             ) : (
                                 <MaterialComIcon
                                     name="play"
                                     size={25}
-                                    color={Colors.brandDarkGrey}
+                                    color={Colors.brandLightGrey}
                                 />
                             )}
                         </TouchableOpacity>
@@ -854,7 +858,7 @@ export default class SleepLog extends React.Component {
                         <View
                             style={{
                                 position: "absolute",
-                                bottom: 10
+                                bottom: 1
                             }}
                         >
                             <Text
@@ -892,23 +896,11 @@ export default class SleepLog extends React.Component {
                                         {
                                             fontSize:
                                                 timeAwakeFmt.length > 4
-                                                    ? 17
-                                                    : 19
+                                                    ? 18
+                                                    : 20
                                         }
                                     ]}
                                 >
-                                    {/* TODO: Create a formula that estimates time awake. 
-                                        1) Add up durations of all recordings 
-                                        2) Check the durations between each 2 adjacent disturbances.
-                                            If space between any 2 adjacent disturbances is < 10 min, consider this period 'Awake' time
-                                            Add these durations to the total.
-                                            NOTE: This may be better done as disturbances are added to DB. Create a new bool field in 'Disturbace' table
-                                                    called timeAwake, which will function as follows. When a new disturbance is detected,
-                                                    the timeAwake will initially be set to == the recording duration (or 0 if no recording). Then,
-                                                    fetch the previous disturbance check how much time has passed since then, and if it has been 
-                                                    less than 10 min
-                                        3)
-                                    */}
                                     {timeAwakeFmt}
                                 </Text>
                             </View>
@@ -1067,7 +1059,6 @@ export default class SleepLog extends React.Component {
         }
     }
 
-    pageIdx = 9;
     render() {
         console.log("SleepLog -- render() ");
         // console.log(this.state);
@@ -1077,16 +1068,21 @@ export default class SleepLog extends React.Component {
         console.log("pageIdx", this.pageIdx);
         // console.log("alarmInstAll count", alarmInstAll.length);
 
-        let instGroup = alarmInstAll.slice(alarmInstIdx - 7, alarmInstIdx + 3);
+        let instGroup = alarmInstAll.slice(
+            Math.max(alarmInstIdx - 10, 0),
+            alarmInstIdx + 1
+        );
 
         for (let i = 0; i < instGroup.length; i++) {
             console.debug(i, instGroup[i].start);
         }
 
         return (
-            <View
-                style={{ flex: 1, backgroundColor: "#E1D5CC" }}
-                // style={{ flex: 1, backgroundColor: "rgba(0,0,,0.65)" }}
+            <ImageBackground
+                // source={require("../img/paper_texture1.jpg")}
+                // style={{ width: "100%", height: "100%", }}
+                style={{ flex: 1, backgroundColor: Colors.brandMidGrey }}
+                // style={{ flex: 1, backgroundColor: "#E1D5CC" }}
                 ref={target => {
                     this.refScreenContainer = target;
                 }}
@@ -1112,7 +1108,9 @@ export default class SleepLog extends React.Component {
 
                         console.log("current alarmInstIdx", alarmInstIdx);
                         if (idx <= 2 && this.pageIdx == idx + 1) {
-                            console.log("Idx has decreased and reached lower bound (2)");
+                            console.log(
+                                "Idx has decreased and reached lower bound (2)"
+                            );
                             alarmInstIdx -= 5;
                             if (alarmInstIdx > 0) {
                                 //this.ignoreNext = true;
@@ -1133,7 +1131,9 @@ export default class SleepLog extends React.Component {
                                 alarmInstIdx += 5; // reset alarmInstIdx since we need to use it below
                             }
                         } else if (idx >= 7 && this.pageIdx == idx - 1) {
-                            console.log("Idx has increased and reached upper bound (7)");
+                            console.log(
+                                "Idx has increased and reached upper bound (7)"
+                            );
                             alarmInstIdx += 5;
                             if (
                                 alarmInstIdx <
@@ -1170,8 +1170,7 @@ export default class SleepLog extends React.Component {
                         this._updateScreenTitle(alrmInst);
                     }}
                 >
-                    {alarmInstAll
-                        .slice(alarmInstIdx - 7, alarmInstIdx + 3) // slices 10 items including the one @ alarmInstIdx
+                    {instGroup // slice of up to 10 items including the one @ alarmInstIdx
                         .map((almInst, key) => {
                             // console.log(
                             //     `almInst: ${almInst.start} | key: ${key}`
@@ -1488,7 +1487,7 @@ export default class SleepLog extends React.Component {
                         }}
                     />
                 )}
-            </View>
+            </ImageBackground>
         );
     }
 }
@@ -1528,14 +1527,15 @@ const styles = StyleSheet.create({
         flex: 1,
         // height: "100%",
         backgroundColor: "#23113E",
-        // shadowOffset: {
-        //     height: 2,
-        //     width: 0
-        // },
-        shadowOpacity: 0.5,
-        shadowRadius: 2,
+        shadowOffset: {
+            height: 1,
+            width: 0
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
         elevation: 3,
-        shadowColor: "black"
+        // shadowColor: "black"
+        shadowColor: "white"
     },
     sectionSeparator: {
         height: 0.8,
@@ -1563,8 +1563,8 @@ const styles = StyleSheet.create({
     },
     genInfoCircle: {
         borderRadius: 40,
-        width: 45,
-        height: 45,
+        width: 50,
+        height: 50,
         alignContent: "center",
         justifyContent: "center",
         alignItems: "center",
@@ -1591,8 +1591,10 @@ const styles = StyleSheet.create({
         // backgroundColor: "blue"
     },
     textGeneralInfoStat: {
-        fontSize: 22,
-        color: Colors.backgroundBright
+        fontSize: 23,
+        color: Colors.backgroundBright,
+        fontFamily: "Gurmukhi MN",
+        marginTop: 4
         // color: Colors.brandDarkGrey
     },
     statLabelText: {
@@ -1606,7 +1608,7 @@ const styles = StyleSheet.create({
         fontSize: 13
     },
     distItemText: {
-        color: Colors.brandDarkGrey
+        color: Colors.brandLightGrey
     },
     generalInfoFooter: {
         height: 30,

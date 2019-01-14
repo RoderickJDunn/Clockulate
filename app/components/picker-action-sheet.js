@@ -13,6 +13,8 @@ import {
 import { WheelPicker } from "react-native-wheel-picker-android";
 import TouchableBackdrop from "../components/touchable-backdrop";
 
+let AnimTouchableBackdrop = Animated.createAnimatedComponent(TouchableBackdrop);
+
 import Colors from "../styles/colors";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -76,14 +78,18 @@ class PickerActionSheet extends React.Component {
             : 0;
         return (
             <View style={StyleSheet.absoluteFill}>
-                <TouchableBackdrop
+                <AnimTouchableBackdrop
                     style={{
                         position: "absolute",
                         top: 0, // - (isIphoneX() ? 15 : 0),
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        backgroundColor: "rgba(0, 0, 0, 0.4)"
+                        backgroundColor: "#000",
+                        opacity: this._pickerAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, 0.4]
+                        })
                     }}
                     onPress={() => {
                         this.animateExit(this.props.onPressedCancel);
@@ -375,6 +381,11 @@ const styles = StyleSheet.create({
         textAlign: "center",
         color: Colors.darkGreyText,
         fontSize: 20
+    },
+    subtitleText: {
+        // textAlign: "center",
+        color: Colors.disabledGrey,
+        fontSize: 17
     },
     buttonText: {
         textAlign: "center",

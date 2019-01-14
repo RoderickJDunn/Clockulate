@@ -98,7 +98,8 @@ export const TaskListStyle = StyleSheet.create({
         // marginLeft: 5,
         // marginRight: 5,
         fontSize: 20,
-        overflow: "hidden"
+        lineHeight: 20
+        // overflow: "hidden"
     }
 });
 
@@ -140,7 +141,10 @@ export const TaskItemStyle = StyleSheet.create({
         flex: 0.68,
         // color: Colors.black,
         color: Colors.brandLightGrey,
-        opacity: 0.9
+        opacity: 0.9,
+        fontFamily: "Gurmukhi MN",
+        marginTop: 8
+        // textAlignVertical: "center",
     },
     duration: {
         // alignSelf: 'stretch',

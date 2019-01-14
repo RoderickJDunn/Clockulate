@@ -18,9 +18,8 @@ export const TextStyle = StyleSheet.create({
         overflow: "hidden"
     },
     labelText: {
-        // TODO: Figure out a good font for labels
-        fontFamily: "Verdana",
-        fontSize: 12,
+        fontFamily: "Gurmukhi MN",
+        fontSize: 13,
         color: Colors.labelText
     },
     editableText: {

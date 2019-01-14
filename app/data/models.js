@@ -6,6 +6,7 @@ import uuid from "react-native-uuid";
 import { DefaultTask, DefaultAlarm, SOUND_TYPES } from "../data/constants";
 import { isEmpty } from "../util/general_util";
 import realm from "../data/DataSchemas";
+import moment from "moment";
 
 export class AlarmModel {
     constructor(order, wakeUpTime = null, defaultShowHrsOfSleep = null) {
@@ -44,6 +45,15 @@ export class AlarmModel {
         } else {
             return false;
         }
+    }
+}
+
+export class AlarmInstance {
+    constructor() {
+        this.id = uuid.v1();
+        this.start = moment().toDate();
+        this.disturbances = [];
+        this.timeAwake = 0;
     }
 }
 

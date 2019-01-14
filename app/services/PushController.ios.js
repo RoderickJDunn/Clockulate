@@ -3,14 +3,25 @@ import NotificationsIOS, {
     NotificationAction,
     NotificationCategory
 } from "react-native-notifications";
-import { PushNotificationIOS } from "react-native";
+import { PushNotificationIOS, AsyncStorage } from "react-native";
 import moment from "moment";
 import Sound from "react-native-sound";
 import { SOUND_TYPES, ALARM_STATES } from "../data/constants";
 import realm from "../data/DataSchemas";
-import { DisturbanceModel } from "../data/models";
+import { DisturbanceModel, AlarmInstance } from "../data/models";
+import Settings from "../config/settings";
 
-console.log(NativeModules.AlarmAudioService);
+// console.log(NativeModules.AlarmAudioService);
+
+// let initNativeAlarm = () => {
+//     console.log("Fake initNativeAlarm");
+// };
+// let snoozeNative = () => {
+//     console.log("Fake snoozeNative");
+// };
+// let turnOffNative = () => {
+//     console.log("Fake turnOffNative");
+// };
 
 let {
     initializeAlarm: initNativeAlarm,
@@ -24,8 +35,10 @@ const NoiseDetectionEvents = new NativeEventEmitter(
 
 let initializeAlarm = alarm => {
     console.log("sending time: ", alarm.wakeUpTime.toISOString());
+
     initNativeAlarm(
         { time: alarm.wakeUpTime.toISOString(), sound: alarm.sound },
+        { recCooldown: Settings.recCooldown() },
         err => {
             console.log("didInitializeAlarm?: ", err ? false : true);
         }
@@ -35,14 +48,38 @@ let initializeAlarm = alarm => {
 NoiseDetectionEvents.addListener("onNoiseDetected", info => {
     console.log("JS Got NOISE_DETECTED EVT. info:", info);
 
+    // TODO: Add disturbance/recording in context of current active Alarm instance
+    // TODO: Handle intializing/completing AlarmInstances when Alarms are enabled, triggered/disabled
+    // TODO: Handle deleting AlarmInstances if Alarm span is too short
+
+    /*  TODO:
+        1. Fetch currently active AlarmInstance (will only have start property, end will be null)
+        2. Create disturbance, then add it to this current AlarmInstance
+    */
+
+    let almInsts = realm.objects("AlarmInstance").sorted("start", true);
+    let currAlmInst = almInsts
+        ? almInsts.length > 0
+            ? almInsts[0]
+            : null
+        : null;
+
+    if (currAlmInst == null) {
+        console.error(
+            "No active alarm instance found on noise detected event."
+        );
+        return;
+    }
+
     // Save disturbance + filepath (if present) to DB
     let newDisturbance = new DisturbanceModel();
     realm.write(() => {
         let dt = new Date(info.timestamp);
-        newDisturbance.time = dt; // TODO: convert timestamp string to a Date object
+        newDisturbance.time = dt;
         newDisturbance.recording = info.file;
         newDisturbance.duration = info.duration;
-        realm.create("SleepDisturbance", newDisturbance);
+        let distDBO = realm.create("SleepDisturbance", newDisturbance);
+        currAlmInst.disturbances.push(distDBO);
     });
 
     console.log("added new disturbance: ");
@@ -106,7 +143,6 @@ let disableAction = new NotificationAction(
                 _data
             );
             PushNotificationIOS.cancelLocalNotifications(_data);
-            console.log("done");
 
             let currAlarm = realm.objectForPrimaryKey("Alarm", _data.alarmId);
             if (currAlarm) {
@@ -115,6 +151,8 @@ let disableAction = new NotificationAction(
                     currAlarm.snoozeCount = 0;
                 });
             }
+
+            setAlarmInstEnd();
         } catch (e) {
             console.log("Error: ", e);
         }
@@ -179,6 +217,12 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
         sound: longSoundFile.slice(0, -4)
     });
 
+    // create AlarmInstance with start date of now, and empty End date, and empty disturbance list
+    realm.write(() => {
+        let almInst = new AlarmInstance();
+        realm.create("AlarmInstance", almInst);
+    });
+
     setInAppAlarm(alarm, reloadAlarmsList, longSoundFile);
 
     // schedule notifications for this Alarm, staggering them by the "SNOOZE Time"
@@ -228,6 +272,7 @@ export let clearAlarm = (alarm, notificationId, disableAlarm = true) => {
             if (disableAlarm) {
                 alarm.status = ALARM_STATES.OFF;
                 turnOffNative();
+                setAlarmInstEnd(); // set end time of active AlarmInstance
             }
             alarm.snoozeCount = 0;
         });
@@ -258,6 +303,41 @@ let onInAppSnoozePressed = (alarm, reloadAlarmsList, sound, soundFile) => {
     setInAppAlarm(alarm, reloadAlarmsList, soundFile);
 
     reloadAlarmsList();
+};
+
+let setAlarmInstEnd = () => {
+    // Fetch current AlarmInstance and set its 'end' datetime to now.
+    let almInsts = realm.objects("AlarmInstance").sorted("start", true);
+    let currAlmInst = almInsts
+        ? almInsts.length > 0
+            ? almInsts[0]
+            : null
+        : null;
+
+    if (currAlmInst != null) {
+        // store running averages of sleep
+        // Async: totalSleepEver, totalSleepThisYear, totalSleepThisMonth, totalSleepThisWeek
+        try {
+            AsyncStorage.getItem("totalSleepEver").then(value => {
+                console.log("First Launch");
+                AsyncStorage.setItem("alreadyLaunched", JSON.stringify(true));
+            });
+        } catch (error) {
+            console.error(
+                `Unable to check if app has already been launched: ${error}`
+            );
+        }
+
+        if (realm.isInTransaction) {
+            currAlmInst.end = new Date();
+        } else {
+            realm.write(() => {
+                currAlmInst.end = new Date();
+            });
+        }
+    } else {
+        console.error("No active alarm instance found on Alarm trigger");
+    }
 };
 
 let onInAppTurnOffPressed = (alarm, reloadAlarmsList, sound) => {
@@ -323,38 +403,7 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
         });
         reloadAlarmsList();
 
-        /* Start sound playback */
-        var sound = null;
-
-        //  Commenting out, since native-side will play the audio instead
-        // if (soundFile && soundFile.length > 0) {
-        //     sound = new Sound(soundFile, Sound.MAIN_BUNDLE, error => {
-        //         if (error) {
-        //             console.log("failed to load the sound", error);
-        //             return;
-        //         }
-        //         // loaded successfully
-        //         console.log(
-        //             "duration in seconds: " +
-        //                 sound.getDuration() +
-        //                 "number of channels: " +
-        //                 sound.getNumberOfChannels()
-        //         );
-        //         sound.play(success => {
-        //             if (success) {
-        //                 console.log("successfully finished playing");
-        //             } else {
-        //                 console.log(
-        //                     "playback failed due to audio decoding errors"
-        //                 );
-        //                 // reset the player to its uninitialized state (android only)
-        //                 // this is the only option to recover after an error occured and use the player again
-        //                 sound.reset();
-        //             }
-        //             sound.release();
-        //         });
-        //     });
-        // }
+        setAlarmInstEnd();
 
         Alert.alert(
             "!!!",
@@ -366,7 +415,7 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
                         this,
                         alarm,
                         reloadAlarmsList,
-                        sound,
+                        null,
                         soundFile
                     )
                 },
@@ -376,7 +425,7 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
                         this,
                         alarm,
                         reloadAlarmsList,
-                        sound
+                        null
                     )
                 }
                 // { text: "OK", onPress: () => console.log("OK Pressed") }

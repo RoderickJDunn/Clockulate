@@ -15,7 +15,7 @@ class DimmableView extends React.Component {
     // }
 
     render() {
-        console.debug("Render dimmable-view");
+        //console.debug("Render dimmable-view");
 
         return this.props.isDimmed ? (
             <View {...this.props}>

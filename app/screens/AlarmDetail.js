@@ -663,8 +663,8 @@ class AlarmDetail extends Component {
         });
         // this.props.navigation.setParams({ shouldReload: true });
 
-        this.props.navigation.state.params.reloadAlarms(this.state.alarm.id);
         this.props.navigation.goBack();
+        this.props.navigation.state.params.reloadAlarms(this.state.alarm.id);
         // setTimeout(() => {
         //     this.props.navigation.goBack();
         // }, 500);
@@ -2097,7 +2097,7 @@ class AlarmDetail extends Component {
                                                 TextStyle.labelText,
                                                 {
                                                     fontSize: scaleByFactor(
-                                                        17,
+                                                        19,
                                                         0.3
                                                     ),
                                                     color: Colors.brandLightOpp

@@ -124,7 +124,7 @@ SleepDisturbanceSchema.schema = {
         id: "string",
         time: "date",
         recording: "string?",
-        duration: { type: "int", default: 0 }
+        duration: { type: "int", default: 0 },
     }
 };
 
@@ -135,8 +135,9 @@ AlarmInstanceSchema.schema = {
     properties: {
         id: "string",
         start: "date",
-        end: "date",
-        disturbances: { type: "list", objectType: "SleepDisturbance" }
+        end: { type: "date", optional: true },
+        disturbances: { type: "list", objectType: "SleepDisturbance" },
+        timeAwake: {type: "int", default: 0}
     }
 };
 

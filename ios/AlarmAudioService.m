@@ -12,7 +12,7 @@
 
 @interface RCT_EXTERN_MODULE(AlarmAudioService, RCTEventEmitter)
 
-RCT_EXTERN_METHOD(initializeAlarm: (NSDictionary)alarmInfo: (RCTResponseSenderBlock)callback)
+RCT_EXTERN_METHOD(initializeAlarm: (NSDictionary)alarmInfo: (NSDictionary)settings: (RCTResponseSenderBlock)callback)
 RCT_EXTERN_METHOD(snoozeAlarm: (double)minutes)
 RCT_EXTERN_METHOD(turnOffAlarm)
 

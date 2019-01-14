@@ -30,15 +30,17 @@ import {
     // AdMobRewarded
 } from "react-native-admob";
 import LottieView from "lottie-react-native";
+import VersionNumber from "react-native-version-number";
 
 import Alarms from "../screens/Alarms";
 import AlarmDetail from "../screens/AlarmDetail";
 import TaskDetail from "../screens/TaskDetail";
-import Settings from "../screens/Settings";
+import Settings from "../screens/SettingsScreen";
 import About from "../screens/About";
 import Sounds from "../screens/Sounds";
 import Upgrade from "../screens/Upgrade";
 import SleepLog from "../screens/SleepLog";
+import TextInputPage from "../screens/TextInputPage";
 import Help from "../screens/Help";
 import LinearGradient from "react-native-linear-gradient";
 import { isIphoneX } from "react-native-iphone-x-helper";
@@ -318,8 +320,10 @@ let screenMenuIcons = [
 // NICE_COLOR: #234853
 
 let menuImage = isIphoneX()
-    ? require("../img/menu_header_v9_e20_g1_h3.json")
-    : require("../img/menu_header_v10_e1_g1_1_notchless.json");
+    ? require("../img/menu_header_v16_notch.json")
+    : require("../img/menu_header_v13_notchless.json");
+
+// menuImage = require("../img/gradient_sleepy_loader.json");
 
 const CustomDrawerContentComponent = props => {
     // console.log("props", props);
@@ -338,22 +342,26 @@ const CustomDrawerContentComponent = props => {
             colors={[Colors.brandMidPurple, "#000"]}
             style={[
                 {
-                    flex: 1
+                    flex: 1,
+                    overflow: "hidden"
                 }
             ]}
         >
             <View
                 style={{
                     // height: 95,
-                    height: isIphoneX() ? 115 : 104,
-                    alignSelf: "stretch"
-                    // backgroundColor: "red"
+                    height: isIphoneX() ? 140 : 110,
+                    alignSelf: "stretch",
+                    // backgroundColor: "red",
+                    shadowOpacity: 0.7,
+                    shadowRadius: 5,
+                    shadowColor: "black",
+                    elevation: 3
                 }}
             >
                 <LottieView
-                    // source={}
                     source={menuImage}
-                    // progress={this.state.animProgress}
+                    // progress={animate}
                     resizeMode={"cover"}
                     // resizeMode={"contain"}
                     style={[StyleSheet.absoluteFill]}
@@ -489,7 +497,7 @@ const CustomDrawerContentComponent = props => {
                     color: Colors.brandVeryLightPurple
                 }}
             >
-                v0.2
+                {"v" + VersionNumber.appVersion}
             </Text>
         </LinearGradient>
     );
@@ -528,16 +536,28 @@ export const DrawerRoot = createDrawerNavigator(
             }
         },
         Settings: {
-            screen: createStackNavigator(
-                {
-                    SettingsScreen: {
-                        screen: Settings
-                    }
-                },
-                {
+            screen: createStackNavigator({
+                SettingsScreen: {
+                    screen: Settings,
                     navigationOptions: otherDrawerNavOptions("Settings")
+                },
+                TextInputScreen: {
+                    screen: TextInputPage,
+                    navigationOptions: {
+                        headerStyle: {
+                            // Style the header view itself (aka. the nav bar)
+                            backgroundColor: Colors.brandDarkGrey,
+                            borderBottomWidth: 0
+                        },
+                        headerTintColor: Colors.brandLightOpp,
+
+                        headerTitleStyle: {
+                            // style the Title text of the header
+                            color: Colors.brandLightOpp
+                        }
+                    }
                 }
-            )
+            })
         },
         Help: {
             screen: createStackNavigator(
@@ -566,7 +586,7 @@ export const DrawerRoot = createDrawerNavigator(
     },
     {
         // drawerWidth: 250,
-        initialRouteName: "SleepLog", // change back to 'Alarms'
+        initialRouteName: "Settings", // change back to 'Alarms'
         contentOptions: {
             activeBackgroundColor: "transparent",
             activeTintColor: Colors.brandLightPurple,

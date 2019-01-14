@@ -182,11 +182,13 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
     
     /// Receiver for status updates
     open weak var delegate: FDSoundActivatedRecorderDelegate?
-    
-    deinit {
-        self.abort()
-    }
-    
+  
+  
+    /// This is commented out because it was causing crashes on React-native reloads
+//    deinit {
+//        self.abort()
+//    }
+  
     /// Listen and start recording when triggered
     open func startListening() {
         print("startListening")

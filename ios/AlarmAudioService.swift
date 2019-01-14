@@ -15,17 +15,17 @@ import MediaPlayer
 class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   private let TAG = "AlarmAudioService: "
   
-  var recorder = FDSoundActivatedRecorder()
+  var recorder: FDSoundActivatedRecorder?
   var alarmTimer = Timer()
   var refractoryTimer = Timer()
   var auxAnalyzeTimer = Timer()
-//  var recorder: AVAudioRecorder!
   var player: AVAudioPlayer?
   var volumeView = MPVolumeView()
   let FADE_IN_CB_LIMIT = 75
   let SYS_VOLUME_LIMIT: Float = 0.8
   var fadein_cnt = 0
   var currAlarm: NSDictionary = [:]
+  var refractoryTime = 300.0
   
   func CKT_LOG(_ msg: String) {
       print(TAG, msg)
@@ -40,8 +40,21 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
     return ["onNoiseDetected"]
   }
   
+  deinit {
+    CKT_LOG("deinit")
+    // perform the deinitialization
+    //recorder = nil
+  }
+  
   override init() {
     super.init()
+    CKT_LOG("init")
+    
+    if recorder == nil {
+        CKT_LOG("recorder is nil. Re-initializing")
+        recorder = FDSoundActivatedRecorder()
+        CKT_LOG("Created recorder")
+    }
     AVAudioSession.sharedInstance().requestRecordPermission() { [unowned self] allowed in
       DispatchQueue.main.async {
         if allowed {
@@ -54,11 +67,17 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   }
   
   @objc
-  func initializeAlarm(_ alarmInfo: NSDictionary, _ onCompletion: RCTResponseSenderBlock) {
+  func initializeAlarm(_ alarmInfo: NSDictionary, _ settings: NSDictionary, _ onCompletion: RCTResponseSenderBlock) {
       CKT_LOG("starting to listen")
     
       CKT_LOG(alarmInfo.description)
       currAlarm = alarmInfo
+    
+      // unpack settings
+      refractoryTime = (settings["recCooldown"] as! Double) * 60
+    
+      CKT_LOG("Setting refractoryTime to \(refractoryTime)")
+      recorder?.refractoryPeriodLen = refractoryTime
     
       let ret = beginMonitoringAudio()
       var error: String? = nil
@@ -135,11 +154,11 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
 //      print("Recording")
     
     
-      recorder.delegate = self
+      recorder!.delegate = self
 //      recorder.addObserver(self, forKeyPath: "microphoneLevel", options:.new, context: nil)
-      recorder.timeoutSeconds = 0
-    recorder.sarMode = FDSoundActivatedRecorderMode.recordOnTrigger // TODO: depending on IAP ?
-      recorder.startListening()
+      recorder!.timeoutSeconds = 0
+    recorder!.sarMode = FDSoundActivatedRecorderMode.recordOnTrigger // TODO: depending on IAP ?
+      recorder!.startListening()
     
 //      auxAnalyzeTimer = Timer.scheduledTimer(timeInterval: 0.05, target: self, selector: #selector(analyzeAudio), userInfo: nil, repeats: true)
     
@@ -173,7 +192,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   @objc
   func alarmDidTrigger(_ timer: Timer) {
     // set flag to ignore all noise (so analyzeAudio() doesn't think there is snoring happening)
-    recorder.sarMode = FDSoundActivatedRecorderMode.ignoreAll
+    recorder!.sarMode = FDSoundActivatedRecorderMode.ignoreAll
 
 
     // play the alarm sound found in userInfo
@@ -276,7 +295,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
         player.stop()
     }
     
-    recorder.abort() // TODO: ?? or a better function
+    recorder!.abort() // TODO: ?? or a better function
       
   }
   

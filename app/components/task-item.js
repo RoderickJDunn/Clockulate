@@ -560,10 +560,12 @@ class TaskItem extends React.Component {
                             style={[
                                 TaskListStyle.allChildren,
                                 TaskItemStyle.description
-                                // { backgroundColor: "blue" }
+                                // {
+                                //     backgroundColor: "blue"
+                                // }
                             ]}
-                            numberOfLines={2}
-                            ellipsizeMode="tail"
+                            // numberOfLines={1}
+                            // ellipsizeMode="tail"
                             selectable={false}
                         >
                             {this.props.data.task.name}

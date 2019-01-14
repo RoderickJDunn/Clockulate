@@ -221,6 +221,9 @@ const styles = StyleSheet.create({
     },
     soundRowContent: {
         alignSelf: "center",
+        fontFamily: "Gurmukhi MN",
+        fontSize: 15,
+        marginTop: 6,
         color: Colors.brandMidOpp
     }
 });
