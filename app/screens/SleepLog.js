@@ -12,7 +12,8 @@ import {
     ActivityIndicator,
     TextInput,
     ART,
-    ImageBackground
+    ImageBackground,
+    Alert
 } from "react-native";
 import moment, { max } from "moment";
 import Sound from "react-native-sound";
@@ -199,7 +200,12 @@ export default class SleepLog extends React.Component {
             .objects("AlarmInstance")
             .sorted("start", false);
 
+        console.log("alarmInstAll INFO ------------- ");
         console.log("alarmInstAll.length", alarmInstAll.length);
+
+        for (let i = 0; i < alarmInstAll.length; i++) {
+            console.debug(i, alarmInstAll[i].start);
+        }
 
         this.currAlmInstIdx = alarmInstAll.length - 1;
         this.pageIdx = Math.min(9, alarmInstAll.length - 1);
@@ -215,8 +221,8 @@ export default class SleepLog extends React.Component {
                 alarmInstAll.length > 0
                     ? alarmInstAll[this.currAlmInstIdx]
                     : null,
-            alarmInstIdx: alarmInstAll.length - 1,
-            // alarmInstIdx: alarmInstAll.length - 1 - 2,
+            alarmInstGroupIdx: alarmInstAll.length - 1,
+            // alarmInstGroupIdx: alarmInstAll.length - 1 - 2,
             playingDisturbance: null,
             activeSound: null,
             // dayRange: dayRange,
@@ -438,9 +444,14 @@ export default class SleepLog extends React.Component {
         }
         Sound.setCategory("PlayAndRecord", true);
         console.log("item.recording", disturbance.recording);
-        var s = new Sound(disturbance.recording, Sound.DOCUMENT, error => {
+
+        let alrmInst = this.state.alarmInstAll[this.currAlmInstIdx];
+        let soundPath = alrmInst.id + "/" + disturbance.recording;
+        var s = new Sound(soundPath, Sound.DOCUMENT, error => {
             if (error) {
                 console.log("failed to load the sound", error);
+                Alert.alert("Error", "Failed to load recording");
+                this.setState({ playingDisturbance: null, activeSound: null });
                 return;
             }
             // loaded successfully
@@ -532,7 +543,8 @@ export default class SleepLog extends React.Component {
                             )}
                         </TouchableOpacity>
                         <Text style={styles.distItemText}>
-                            {item.duration > 0 && "0:" + item.duration}
+                            {item.duration > 0 &&
+                                "0:" + String(item.duration).padStart(2, "0")}
                         </Text>
                     </View>
                 ) : null}
@@ -683,16 +695,16 @@ export default class SleepLog extends React.Component {
         */
 
         let mStart = moment(alrmInst.start);
-        console.log("alrmInst.start", alrmInst.start);
+        // console.log("alrmInst.start", alrmInst.start);
         let mEnd = moment(alrmInst.end || new Date());
-        console.log("alrmInst.end", alrmInst.end);
+        // console.log("alrmInst.end", alrmInst.end);
 
         let hour = mStart.hour() % 12 || 12; // converts hour to 12hr time format (1-12)
         let angle = ((hour + mStart.minute() / 60) / 12) * 360;
-        console.log("angle", angle);
+        // console.log("angle", angle);
 
         let duration = mEnd.diff(mStart, "minutes");
-        console.log("duration", duration);
+        // console.log("duration", duration);
         let series1 = null;
         let series2 = null;
 
@@ -707,7 +719,7 @@ export default class SleepLog extends React.Component {
         let timeAwakeFmt = "0";
 
         if (alrmInst) {
-            console.log("formatting timeAwake: ", alrmInst.timeAwake);
+            // console.log("formatting timeAwake: ", alrmInst.timeAwake);
             let mTimeAwake = moment.duration(alrmInst.timeAwake, "minutes");
             let mins = mTimeAwake.minutes() + "";
             timeAwakeFmt = `${mTimeAwake.hours()}:${mins.padStart(2, "0")}`;
@@ -907,53 +919,6 @@ export default class SleepLog extends React.Component {
                         </View>
                     </View>
                 </View>
-                {/* <View
-                    style={[
-                        StyleSheet.absoluteFill,
-                        {
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            alignContent: "center",
-                            alignItems: "center"
-                        }
-                    ]}
-                >
-                    <MaterialComIcon
-                        name="chevron-left"
-                        size={35}
-                        // onPress={() => {
-                        //     let { alarmInstIdx, alarmInstAll } = this.state;
-
-                        //     alarmInstIdx--;
-
-                        //     if (alarmInstIdx <= 0) {
-                        //         alarmInstIdx = alarmInstAll.length - 1;
-                        //     }
-                        //     this.setState({
-                        //         alarmInstIdx: alarmInstIdx
-                        //     });
-                        // }}
-                    />
-                    <MaterialComIcon
-                        name="chevron-right"
-                        size={35}
-                        // onPress={() => {
-                        //     let { alarmInstIdx } = this.state;
-                        //     let alarmInstAll = realm
-                        //         .objects("AlarmInstance")
-                        //         .sorted("start", false);
-                        //     let nextAlmInst = null;
-                        //     if (alarmInstIdx > 0) {
-                        //         alarmInstIdx--;
-                        //         nextAlmInst = alarmInstAll[alarmInstIdx];
-                        //     }
-                        //     this.setState({
-                        //         alarmInst: nextAlmInst,
-                        //         alarmInstIdx: alarmInstIdx
-                        //     });
-                        // }}
-                    />
-                </View> */}
             </View>
         );
     };
@@ -1029,6 +994,12 @@ export default class SleepLog extends React.Component {
     };
 
     _updateScreenTitle(alrmInst) {
+        console.log(
+            `Updating header title. alrmInst: ${alrmInst.start}. Dist count: ${
+                alrmInst.disturbances.length
+            }`
+        );
+
         if (alrmInst == null) {
             return;
         }
@@ -1060,17 +1031,19 @@ export default class SleepLog extends React.Component {
     }
 
     render() {
-        console.log("SleepLog -- render() ");
+        console.log(
+            "SleepLog -- render -------------------------------------------------- "
+        );
         // console.log(this.state);
         let wtIdx = this.state.walkthroughIdx;
-        let { alarmInstAll, alarmInstIdx } = this.state;
-        console.log("alarmInstIdx ", alarmInstIdx);
+        let { alarmInstAll, alarmInstGroupIdx } = this.state;
+        console.log("alarmInstGroupIdx ", alarmInstGroupIdx);
         console.log("pageIdx", this.pageIdx);
         // console.log("alarmInstAll count", alarmInstAll.length);
 
         let instGroup = alarmInstAll.slice(
-            Math.max(alarmInstIdx - 10, 0),
-            alarmInstIdx + 1
+            Math.max(alarmInstGroupIdx - 9, 0),
+            alarmInstGroupIdx + 1
         );
 
         for (let i = 0; i < instGroup.length; i++) {
@@ -1103,60 +1076,83 @@ export default class SleepLog extends React.Component {
                             return;
                         }
 
-                        let { alarmInstIdx } = this.state;
+                        let { alarmInstGroupIdx } = this.state;
                         console.log("onIndexChanged", idx);
 
-                        console.log("current alarmInstIdx", alarmInstIdx);
+                        console.log(
+                            "previous alarmInstGroupIdx",
+                            alarmInstGroupIdx
+                        );
                         if (idx <= 2 && this.pageIdx == idx + 1) {
                             console.log(
                                 "Idx has decreased and reached lower bound (2)"
                             );
-                            alarmInstIdx -= 5;
-                            if (alarmInstIdx > 0) {
+
+                            if (alarmInstGroupIdx > 9) {
+                                // check if groupIdx is still greater than lowest permitted groupIdx one
                                 //this.ignoreNext = true;
+                                let newGroupIdx = Math.max(
+                                    alarmInstGroupIdx - 5,
+                                    9
+                                );
                                 console.log(
-                                    "setting new alarmInstIdx",
-                                    alarmInstIdx
+                                    "setting new alarmInstGroupIdx",
+                                    newGroupIdx
                                 );
                                 this.setState(
                                     {
-                                        alarmInstIdx: alarmInstIdx
+                                        alarmInstGroupIdx: newGroupIdx
                                     },
                                     () => {
-                                        this.pagerRef.scrollBy(5, false);
+                                        this.pagerRef.scrollBy(
+                                            alarmInstGroupIdx - newGroupIdx,
+                                            false
+                                        );
                                     }
                                 );
                             } else {
                                 this.pageIdx = idx;
-                                alarmInstIdx += 5; // reset alarmInstIdx since we need to use it below
                             }
                         } else if (idx >= 7 && this.pageIdx == idx - 1) {
                             console.log(
                                 "Idx has increased and reached upper bound (7)"
                             );
-                            alarmInstIdx += 5;
+
+                            // check if groupIdx is below highest permitted group index (it should always be, but this is a sanity check.)
                             if (
-                                alarmInstIdx <
+                                alarmInstGroupIdx <
                                 this.state.alarmInstAll.length - 1
                             ) {
+                                let newGrpIdx = Math.min(
+                                    alarmInstGroupIdx + 5,
+                                    this.state.alarmInstAll.length - 1
+                                );
+
+                                console.log(
+                                    "setting new alarmInstGroupIdx",
+                                    newGrpIdx
+                                );
+
                                 //this.ignoreNext = true;
                                 this.setState(
                                     {
-                                        alarmInstIdx: alarmInstIdx
+                                        alarmInstGroupIdx: newGrpIdx
                                     },
                                     () => {
-                                        this.pagerRef.scrollBy(-5, false);
+                                        this.pagerRef.scrollBy(
+                                            alarmInstGroupIdx - newGrpIdx,
+                                            false
+                                        );
                                     }
                                 );
                             } else {
                                 this.pageIdx = idx;
-                                alarmInstIdx -= 5; // reset alarmInstIdx since we need to use it below
                             }
                         } else {
                             this.pageIdx = idx;
                         }
 
-                        let lowerBoundIdx = Math.max(alarmInstIdx - 7, 0);
+                        let lowerBoundIdx = alarmInstGroupIdx - 9;
 
                         this.currAlmInstIdx = lowerBoundIdx + this.pageIdx;
                         console.log("this.pageIdx", this.pageIdx);
@@ -1170,7 +1166,7 @@ export default class SleepLog extends React.Component {
                         this._updateScreenTitle(alrmInst);
                     }}
                 >
-                    {instGroup // slice of up to 10 items including the one @ alarmInstIdx
+                    {instGroup // slice of up to 10 items including the one @ alarmInstGroupIdx
                         .map((almInst, key) => {
                             // console.log(
                             //     `almInst: ${almInst.start} | key: ${key}`
@@ -1266,7 +1262,7 @@ export default class SleepLog extends React.Component {
                                         }}
                                         onPress={() => {
                                             let {
-                                                alarmInstIdx: groupIdx,
+                                                alarmInstGroupIdx: groupIdx,
                                                 alarmInstAll
                                             } = this.state;
                                             // let actualIndex = groupIdx + this.pageIdx;
@@ -1398,7 +1394,7 @@ export default class SleepLog extends React.Component {
                         separatorPosition={SCREEN_WIDTH * 0.15}
                         onPressItem={() => {
                             let {
-                                alarmInstIdx: groupIdx,
+                                alarmInstGroupIdx: groupIdx,
                                 alarmInstAll
                             } = this.state;
 
