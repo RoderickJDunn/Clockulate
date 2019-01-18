@@ -86,9 +86,8 @@ let _menuIconAnim = new Animated.Value(0);
 
 export default class SleepLog extends React.Component {
     static navigationOptions = ({ navigation }) => {
-        console.log("blah");
-        console.log("navigation", navigation.state);
-        console.log("SleepLog.headerTitle", typeof SleepLog.headerTitle);
+        // console.log("blah");
+        // console.log("navigation", navigation.state);
         let menuIsOpen = navigation.state.params
             ? navigation.state.params.menuIsOpen
             : false;
@@ -137,10 +136,10 @@ export default class SleepLog extends React.Component {
                                 navigation.state.params &&
                                 navigation.state.params.setTitleRef
                             ) {
-                                console.log(
-                                    "navigation.state.params",
-                                    navigation.state.params
-                                );
+                                // console.log(
+                                //     "navigation.state.params",
+                                //     navigation.state.params
+                                // );
                                 navigation.state.params.setTitleRef(elem);
                             }
                         }}
@@ -231,7 +230,6 @@ export default class SleepLog extends React.Component {
 
         this._hideDateTimePicker = this._hideDateTimePicker.bind(this);
         this._showDateTimePicker = this._showDateTimePicker.bind(this);
-        console.log("done construction");
     }
 
     componentDidMount() {
@@ -924,7 +922,7 @@ export default class SleepLog extends React.Component {
     };
 
     _renderPagingDots = genInfoPage => {
-        console.log("genInfoPage", genInfoPage);
+        // console.log("genInfoPage", genInfoPage);
         return (
             <View style={styles.generalInfoFooter}>
                 <View
@@ -1031,14 +1029,14 @@ export default class SleepLog extends React.Component {
     }
 
     render() {
-        console.log(
-            "SleepLog -- render -------------------------------------------------- "
-        );
+        // console.log(
+        //     "SleepLog -- render -------------------------------------------------- "
+        // );
         // console.log(this.state);
         let wtIdx = this.state.walkthroughIdx;
         let { alarmInstAll, alarmInstGroupIdx } = this.state;
-        console.log("alarmInstGroupIdx ", alarmInstGroupIdx);
-        console.log("pageIdx", this.pageIdx);
+        // console.log("alarmInstGroupIdx ", alarmInstGroupIdx);
+        // console.log("pageIdx", this.pageIdx);
         // console.log("alarmInstAll count", alarmInstAll.length);
 
         let instGroup = alarmInstAll.slice(
@@ -1046,9 +1044,9 @@ export default class SleepLog extends React.Component {
             alarmInstGroupIdx + 1
         );
 
-        for (let i = 0; i < instGroup.length; i++) {
-            console.debug(i, instGroup[i].start);
-        }
+        // for (let i = 0; i < instGroup.length; i++) {
+        //     console.debug(i, instGroup[i].start);
+        // }
 
         return (
             <ImageBackground
@@ -1077,28 +1075,28 @@ export default class SleepLog extends React.Component {
                         }
 
                         let { alarmInstGroupIdx } = this.state;
-                        console.log("onIndexChanged", idx);
+                        // console.log("onIndexChanged", idx);
 
-                        console.log(
-                            "previous alarmInstGroupIdx",
-                            alarmInstGroupIdx
-                        );
+                        // console.log(
+                        //     "previous alarmInstGroupIdx",
+                        //     alarmInstGroupIdx
+                        // );
                         if (idx <= 2 && this.pageIdx == idx + 1) {
-                            console.log(
-                                "Idx has decreased and reached lower bound (2)"
-                            );
+                            // console.log(
+                            //     "Idx has decreased and reached lower bound (2)"
+                            // );
 
                             if (alarmInstGroupIdx > 9) {
-                                // check if groupIdx is still greater than lowest permitted groupIdx one
+                                // check if groupIdx is still greater than lowest permitted groupIdx one. It should always be
                                 //this.ignoreNext = true;
                                 let newGroupIdx = Math.max(
                                     alarmInstGroupIdx - 5,
                                     9
                                 );
-                                console.log(
-                                    "setting new alarmInstGroupIdx",
-                                    newGroupIdx
-                                );
+                                // console.log(
+                                //     "setting new alarmInstGroupIdx",
+                                //     newGroupIdx
+                                // );
                                 this.setState(
                                     {
                                         alarmInstGroupIdx: newGroupIdx
@@ -1114,9 +1112,9 @@ export default class SleepLog extends React.Component {
                                 this.pageIdx = idx;
                             }
                         } else if (idx >= 7 && this.pageIdx == idx - 1) {
-                            console.log(
-                                "Idx has increased and reached upper bound (7)"
-                            );
+                            // console.log(
+                            //     "Idx has increased and reached upper bound (7)"
+                            // );
 
                             // check if groupIdx is below highest permitted group index (it should always be, but this is a sanity check.)
                             if (
@@ -1128,10 +1126,10 @@ export default class SleepLog extends React.Component {
                                     this.state.alarmInstAll.length - 1
                                 );
 
-                                console.log(
-                                    "setting new alarmInstGroupIdx",
-                                    newGrpIdx
-                                );
+                                // console.log(
+                                //     "setting new alarmInstGroupIdx",
+                                //     newGrpIdx
+                                // );
 
                                 //this.ignoreNext = true;
                                 this.setState(
@@ -1150,20 +1148,24 @@ export default class SleepLog extends React.Component {
                             }
                         } else {
                             this.pageIdx = idx;
+
+                            let lowerBoundIdx = alarmInstGroupIdx - 9;
+
+                            this.currAlmInstIdx = lowerBoundIdx + this.pageIdx;
+                            // console.log("this.pageIdx", this.pageIdx);
+                            // console.log("lowerBoundIdx", lowerBoundIdx);
+                            // console.log("this.currAlmInstIdx", this.currAlmInstIdx);
+
+                            let alrmInst = this.state.alarmInstAll[
+                                this.currAlmInstIdx
+                            ];
+
+                            this._updateScreenTitle(alrmInst);
+                            return;
                         }
 
                         let lowerBoundIdx = alarmInstGroupIdx - 9;
-
                         this.currAlmInstIdx = lowerBoundIdx + this.pageIdx;
-                        console.log("this.pageIdx", this.pageIdx);
-                        console.log("lowerBoundIdx", lowerBoundIdx);
-                        console.log("this.currAlmInstIdx", this.currAlmInstIdx);
-
-                        let alrmInst = this.state.alarmInstAll[
-                            this.currAlmInstIdx
-                        ];
-
-                        this._updateScreenTitle(alrmInst);
                     }}
                 >
                     {instGroup // slice of up to 10 items including the one @ alarmInstGroupIdx
@@ -1412,10 +1414,10 @@ export default class SleepLog extends React.Component {
 
                             let currAlmInst = alarmInstAll[this.currAlmInstIdx];
 
-                            console.log(
-                                "this.currAlmInstIdx",
-                                this.currAlmInstIdx
-                            );
+                            // console.log(
+                            //     "this.currAlmInstIdx",
+                            //     this.currAlmInstIdx
+                            // );
                             alert(
                                 "not fully implemented. Delete almInst with index " +
                                     this.currAlmInstIdx +
