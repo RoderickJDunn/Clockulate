@@ -78,7 +78,7 @@
         "react-native-version-number": "^0.3.4",
         "react-native-walkthrough-tooltip": "^0.3.0",
         "react-native-wheel-picker-android": "^1.1.4",
-        "react-navigation": "^2.14.2",
+        "react-navigation": "^3.0.9",
         "realm": "^2.15.3",
         "url-parse": "^1.4.3"
     },

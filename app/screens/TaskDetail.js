@@ -68,10 +68,6 @@ class TaskDetail extends Component {
                 : "Edit Task";
         return {
             title: screenTitle,
-            headerStyle: {
-                backgroundColor: "transparent"
-                // backgroundColor: Colors.brandDarkGrey,
-            },
             headerLeft: (
                 <TouchableOpacity
                     style={{
@@ -665,36 +661,6 @@ class TaskDetail extends Component {
                 scrollEnabled={false}
             >
                 <View style={{ flex: 1, backgroundColor: Colors.brandMidGrey }}>
-                    {true && this.state.keyboardHeight == 0 && (
-                        <AdWrapper
-                            animate={true}
-                            delay={250}
-                            screen={"TaskDetail"}
-                            style={{
-                                position: "absolute",
-                                top: SCREEN_HEIGHT * 0.25,
-                                alignSelf: "center"
-                            }}
-                            hide={this.state.keyboardHeight != 0}
-                            pubBannerProps={{
-                                adSize: "smartBannerPortrait",
-                                // adUnitID: "ca-app-pub-3940256099942544/6300978111",
-                                adUnitID:
-                                    "ca-app-pub-5775007461562122/9954191195",
-                                testDevices: [AdMobBanner.simulatorId],
-                                onAdFailedToLoad: this._bannerError,
-                                onAdLoaded: () => {
-                                    console.log("adViewDidReceiveAd");
-                                },
-                                style: {
-                                    alignSelf: "center",
-                                    height: SCREEN_WIDTH * 0.8,
-                                    width: SCREEN_WIDTH * 0.8
-                                }
-                            }}
-                            // borderColor={Colors.brandDarkGrey}
-                        />
-                    )}
                     <KeyboardAvoidingView
                         behavior="padding"
                         // style={{ flex: 1 }}
@@ -877,6 +843,37 @@ class TaskDetail extends Component {
                                 )}
                         </View>
                     </View>
+                    {true && this.state.keyboardHeight == 0 && (
+                        <AdWrapper
+                            animate={true}
+                            delay={250}
+                            screen={"TaskDetail"}
+                            style={{
+                                position: "absolute",
+                                top: SCREEN_HEIGHT * 0.25,
+                                alignSelf: "center"
+                            }}
+                            hide={this.state.keyboardHeight != 0}
+                            navigation={this.props.navigation}
+                            pubBannerProps={{
+                                adSize: "smartBannerPortrait",
+                                // adUnitID: "ca-app-pub-3940256099942544/6300978111",
+                                adUnitID:
+                                    "ca-app-pub-5775007461562122/9954191195",
+                                testDevices: [AdMobBanner.simulatorId],
+                                onAdFailedToLoad: this._bannerError,
+                                onAdLoaded: () => {
+                                    console.log("adViewDidReceiveAd");
+                                },
+                                style: {
+                                    alignSelf: "center",
+                                    height: SCREEN_WIDTH * 0.8,
+                                    width: SCREEN_WIDTH * 0.8
+                                }
+                            }}
+                            // borderColor={Colors.brandDarkGrey}
+                        />
+                    )}
                 </View>
                 {this.state.showDurationPicker && (
                     <PickerActionSheet
@@ -982,6 +979,7 @@ const Styles = StyleSheet.create({
         shadowRadius: 3,
         elevation: 3,
         shadowColor: "black",
+        backgroundColor: "red",
         zIndex: 999
     },
     suggestionItemWrapper: {

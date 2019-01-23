@@ -352,6 +352,10 @@ class Alarms extends Component {
                 this.handleActivity();
             }
         );
+
+        // setTimeout(() => {
+        //     this.props.navigation.navigate("Upgrade");
+        // }, 5000);
     }
 
     componentWillUnmount() {

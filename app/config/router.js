@@ -16,7 +16,8 @@ import {
     createStackNavigator,
     createDrawerNavigator,
     SafeAreaView,
-    DrawerItems
+    DrawerItems,
+    createAppContainer
     // Header,
     // StackViewTransitionConfigs
 } from "react-navigation";
@@ -130,7 +131,7 @@ const TransitionConfiguration = () => {
 const navigationConfig = {
     initialRouteName: "AlarmsList",
     headerMode: "float",
-    navigationOptions: {
+    defaultNavigationOptions: {
         title: "Alarms",
         headerStyle: {
             // Style the header view itself (aka. the nav bar)
@@ -299,7 +300,7 @@ const MainStack = createStackNavigator(
 
 /* This is the only way I could find to disable drawer-opening on certain screens of 
     the stack navigator */
-MainStack.navigationOptions = ({ navigation }) => {
+MainStack.defaultNavigationOptions = ({ navigation }) => {
     let drawerLockMode = "unlocked";
     if (navigation.state.index > 0) {
         drawerLockMode = "locked-closed";
@@ -394,7 +395,7 @@ const CustomDrawerContentComponent = props => {
                         if (index % 2 != 0) {
                             shade = "rgba(255, 255, 255, 0.05)";
                         }
-                        console.log("created icon");
+                        // console.log("created icon");
                         return (
                             <View
                                 style={{
@@ -449,6 +450,7 @@ const CustomDrawerContentComponent = props => {
                                 }
                             ]
                         }}
+                        // navigation={this.props.navigation}
                         pubBannerProps={
                             SCREEN_HEIGHT < 700
                                 ? {
@@ -503,7 +505,7 @@ const CustomDrawerContentComponent = props => {
     );
 };
 
-export const DrawerRoot = createDrawerNavigator(
+const DrawerRoot = createDrawerNavigator(
     {
         Alarms: {
             screen: MainStack
@@ -516,7 +518,7 @@ export const DrawerRoot = createDrawerNavigator(
                     }
                 },
                 {
-                    navigationOptions: otherDrawerNavOptions("Upgrade")
+                    defaultNavigationOptions: otherDrawerNavOptions("Upgrade")
                 }
             )
         },
@@ -528,10 +530,10 @@ export const DrawerRoot = createDrawerNavigator(
                     }
                 },
                 {
-                    navigationOptions: otherDrawerNavOptions("Sleep Log")
+                    defaultNavigationOptions: otherDrawerNavOptions("Sleep Log")
                 }
             ),
-            navigationOptions: {
+            defaultNavigationOptions: {
                 drawerLabel: "Sleep Log"
             }
         },
@@ -567,7 +569,7 @@ export const DrawerRoot = createDrawerNavigator(
                     }
                 },
                 {
-                    navigationOptions: otherDrawerNavOptions("Help")
+                    defaultNavigationOptions: otherDrawerNavOptions("Help")
                 }
             )
         },
@@ -579,14 +581,14 @@ export const DrawerRoot = createDrawerNavigator(
                     }
                 },
                 {
-                    navigationOptions: otherDrawerNavOptions("About")
+                    defaultNavigationOptions: otherDrawerNavOptions("About")
                 }
             )
         }
     },
     {
         // drawerWidth: 250,
-        initialRouteName: "Settings", // change back to 'Alarms'
+        initialRouteName: "Alarms", // change back to 'Alarms'
         contentOptions: {
             activeBackgroundColor: "transparent",
             activeTintColor: Colors.brandLightPurple,
@@ -610,3 +612,5 @@ export const DrawerRoot = createDrawerNavigator(
         useNativeAnimations: true
     }
 );
+
+export const AppContainer = createAppContainer(DrawerRoot);

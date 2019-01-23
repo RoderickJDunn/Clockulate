@@ -232,7 +232,7 @@ export let scheduleAlarm = (alarm, reloadAlarmsList, alarmDidInitialize) => {
 
     console.log("allDists with recordings count", allDists.length);
 
-    if (allDists.length > Settings.maxRecs()) {
+    if (Settings.maxRecs() > -1 && allDists.length > Settings.maxRecs()) {
         console.log("allDists with recordings count", allDists.length);
 
         let allAIs = realm.objects("AlarmInstance").sorted("start");
