@@ -18,7 +18,7 @@ import Settings from "../config/settings";
 const fontFamily = Platform.OS === "ios" ? "Avenir" : "sans-serif";
 
 const coolDownOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 60];
-const maxLogsOptions = [10, 25, 50, 100, 200, 500, 1000, "Unlimited"];
+const maxRecsOptions = [50, 100, 150, 200, 250, 500, 1000, "Unlimited"];
 
 export default class SettingsScreenCkt extends React.Component {
     /*
@@ -48,8 +48,8 @@ export default class SettingsScreenCkt extends React.Component {
         this.state = {
             settings: {
                 recCooldown: Settings.recCooldown(),
-                maxLogs:
-                    Settings.maxLogs() > 0 ? Settings.maxLogs() : "Unlimited"
+                maxRecs:
+                    Settings.maxRecs() > 0 ? Settings.maxRecs() : "Unlimited"
             },
             permissions: {
                 mic: null,
@@ -66,17 +66,17 @@ export default class SettingsScreenCkt extends React.Component {
             header: "Sleep Monitoring".toUpperCase(),
             rows: [
                 {
-                    title: "Recording Cooldown",
-                    subtitle: "Min. time between recordings",
+                    title: "Recording Frequency",
+                    subtitle: "Minimum time between recordings",
                     subtitleStyles: { numberOfLines: 2 },
                     onPress: () => {
                         this.props.navigation.navigate("TextInputScreen", {
                             dataSets: [coolDownOptions],
                             dataLabels: ["minutes"],
-                            currValues: [this.state.settings.recCooldown], // TODO: send value currently in Settings table
-                            title: "Recording Cooldown",
-                            description:
-                                "The minimum time allowed between recordings. If 2 or more noises are detected within this time period, only the first will be recorded.",
+                            currValues: [this.state.settings.recCooldown],
+                            title: "Recording Frequency",
+                            description: minutes =>
+                                `The minimum time allowed between recordings. With the current setting, a recording will be made at most once every ${minutes} minutes.`,
                             onNavigateBack: this.didSetRecCooldown
                         });
                     },
@@ -101,24 +101,24 @@ export default class SettingsScreenCkt extends React.Component {
                     showDisclosureIndicator: true
                 },
                 {
-                    title: "Max Logs",
-                    subtitle: "Maximum number of logs that will be kept",
+                    title: "Recordings Limit",
+                    subtitle: "Maximum number of recordings to be kept",
                     subtitleStyles: { numberOfLines: 2 },
                     onPress: () => {
                         this.props.navigation.navigate("TextInputScreen", {
-                            dataSets: [maxLogsOptions],
-                            dataLabels: ["logs"],
-                            currValues: [this.state.settings.maxLogs], // TODO: send value currently in Settings table
-                            title: "Maximum Logs",
+                            dataSets: [maxRecsOptions],
+                            dataLabels: ["recordings"],
+                            currValues: [this.state.settings.maxRecs],
+                            title: "Saved Recordings Limit",
                             description:
-                                "The maximum number of logs Clockulate will store. Any logs created above this number, will result in the oldest log being deleted.",
-                            onNavigateBack: this.didSetMaxLogs
+                                "The maximum number of recordings Clockulate will store. Any recordings created above this number, will cause the oldest one(s) to be deleted.",
+                            onNavigateBack: this.didSetMaxRecs
                         });
                         // this.setState({ showMaxRecsPicker: true });
                     },
                     renderAccessory: () => {
-                        let { maxLogs } = this.state.settings;
-                        return maxLogs != null ? (
+                        let { maxRecs } = this.state.settings;
+                        return maxRecs != null ? (
                             <Text
                                 style={{
                                     color: "#999",
@@ -126,7 +126,7 @@ export default class SettingsScreenCkt extends React.Component {
                                     fontSize: 18
                                 }}
                             >
-                                {this.state.settings.maxLogs}
+                                {this.state.settings.maxRecs}
                             </Text>
                         ) : (
                             <ActivityIndicator />
@@ -333,21 +333,21 @@ export default class SettingsScreenCkt extends React.Component {
         this.setState({ showCooldownPicker: false, showMaxRecsPicker: false });
     };
 
-    didSetMaxLogs = newVal => {
-        console.log("didSetMaxLogs", newVal);
+    didSetMaxRecs = newVal => {
+        console.log("didSetMaxRecs", newVal);
         let { settings } = this.state;
-        settings.maxLogs = newVal;
+        settings.maxRecs = newVal;
 
         if (newVal == "Unlimited") {
             newVal = -1;
         }
-        Settings.maxLogs(newVal);
+        Settings.maxRecs(newVal);
 
         this.setState({ settings });
     };
 
     didSetRecCooldown = newVal => {
-        console.log("didSetMaxLogs", newVal);
+        console.log("didSetRecCooldown", newVal);
         let { settings } = this.state;
         Settings.recCooldown(newVal);
         settings.recCooldown = newVal;
@@ -356,8 +356,6 @@ export default class SettingsScreenCkt extends React.Component {
     };
 
     render() {
-        let { showCooldownPicker, showMaxRecsPicker } = this.state;
-
         return (
             <View style={styles.container}>
                 <SettingsScreen
@@ -365,29 +363,6 @@ export default class SettingsScreenCkt extends React.Component {
                     globalTextStyle={{ fontFamily }}
                     style={{ backgroundColor: Colors.backgroundBright }}
                 />
-                {showCooldownPicker && (
-                    <PickerActionSheet
-                        initialValues={[100]}
-                        onValueSelected={this._saveSnoozeTime}
-                        onPressedCancel={this._closePicker}
-                        dataSets={[coolDownOptions]}
-                        dataLabels={["minutes"]}
-                        title={"Recording Cooldown Time"}
-                        subtitle={
-                            "Number of minutes after a recording, where a noise will not trigger another recording."
-                        }
-                    />
-                )}
-                {showMaxRecsPicker && (
-                    <PickerActionSheet
-                        initialValues={[1]}
-                        onValueSelected={this._saveSnoozeTime}
-                        onPressedCancel={this._closePicker}
-                        dataSets={[coolDownOptions]}
-                        dataLabels={["days"]}
-                        title={"Maximum Number of Logs Kept"}
-                    />
-                )}
             </View>
         );
     }

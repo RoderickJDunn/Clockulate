@@ -1,4 +1,6 @@
 rootProject.name = 'Clock_Sample1'
+include ':react-native-fs'
+project(':react-native-fs').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fs/android')
 include ':react-native-tooltips'
 project(':react-native-tooltips').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-tooltips/android')
 include ':react-native-admob'

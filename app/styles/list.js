@@ -14,8 +14,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 export const ListStyle = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.backgroundGrey,
-        zIndex: 50
+        backgroundColor: Colors.backgroundGrey
     },
     item: {
         height: scaleByFactor(100, 0.2)
@@ -78,22 +77,19 @@ export const AlarmListStyle = StyleSheet.create({
     }
 });
 
-// const AlarmItemStyle = StyleSheet.create({});
-
 export const TaskListStyle = StyleSheet.create({
     taskRow: {
         flex: 1,
         flexDirection: "row",
         paddingTop: 10,
         paddingBottom: 10,
-        width: SCREEN_WIDTH + 90 - scaleByFactor(20, 0.4), // 440
+        width: SCREEN_WIDTH + 91 - scaleByFactor(20, 0.4), // 440
         height: 55,
         alignContent: "stretch",
-        alignItems: "center",
-        backgroundColor: "transparent"
+        alignItems: "center"
+        // backgroundColor: "transparent"
         // backgroundColor: "yellow"
     },
-
     allChildren: {
         // marginLeft: 5,
         // marginRight: 5,

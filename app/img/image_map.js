@@ -88,12 +88,12 @@ let getFullImgNameForScreenSize = (imgBaseName, screenWidth) => {
         sizeClass = roundDownToSizeClass(screenWidth);
         imgMap = IMG_MAP_ANDROID;
     }
-    console.log("screenWidth", screenWidth);
-    console.log("sizeClass", sizeClass);
+    // console.log("screenWidth", screenWidth);
+    // console.log("sizeClass", sizeClass);
 
     // look up imgBaseName in IMG_MAP, then the screen size in that:
     let fullImgName = imgMap[imgBaseName] && imgMap[imgBaseName][sizeClass];
-    console.log("returning image: ", fullImgName);
+    // console.log("returning image: ", fullImgName);
     return fullImgName;
 };
 

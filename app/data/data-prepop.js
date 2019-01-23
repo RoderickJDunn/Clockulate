@@ -10,6 +10,9 @@ import * as DateUtils from "../util/date_utils";
 import SOUND_DATA from "./sound-data";
 import { AlarmModel, AlarmSound } from "./models";
 
+// for testing
+import RNFS from "react-native-fs";
+
 console.log("dummy data file");
 
 let prePopTasks = [
@@ -47,7 +50,7 @@ let prePopSettings = [
         value: 75600 // 9pm (60*60*21)
     },
     {
-        name: "maxLogs",
+        name: "maxRecordings",
         value: 500
     },
     {
@@ -213,7 +216,7 @@ function insertPrepopData() {
         console.log("dummy disturbances");
         let distForAlarmInst = [];
         let currTime = moment();
-        for (let index = 0; index < 300; index++) {
+        for (let index = 0; index < 350; index++) {
             let almEnd = moment(currTime.subtract(1, "hour"));
             almEnd.subtract(Math.random() * 60, "minutes");
             let almStart = moment(
@@ -224,6 +227,10 @@ function insertPrepopData() {
 
             let timeSinceLastDist = 0;
             let timeAwakeAcum = 0;
+
+            let almInstId = uuid.v1();
+            let almInstPath = RNFS.DocumentDirectoryPath + "/" + almInstId;
+
             // create some disturbances for time range of alarm
             for (let i = 0; i < index % 3 == 0 ? 25 : index % 3; i++) {
                 distTime.add(2 * i, "minutes");
@@ -237,10 +244,36 @@ function insertPrepopData() {
                     break;
                 }
 
+                let rec = i % 3 != 0 ? null : uuid.v1();
+
                 let dist = realm.create("SleepDisturbance", {
                     id: uuid.v1(),
-                    time: distTime.toDate()
+                    time: distTime.toDate(),
+                    recording: rec
                 });
+
+                if (rec) {
+                    // create 'fake' recording (real file, but not an actual recording') -- TODO: Test what happens when trying to playback such a file
+                    RNFS.mkdir(almInstPath)
+                        .then(success => {
+                            console.log("Dir created!");
+                            RNFS.writeFile(
+                                almInstPath + "/" + rec,
+                                "test",
+                                "utf8"
+                            )
+                                .then(success => {
+                                    console.log("FILE WRITTEN!");
+                                })
+                                .catch(err => {
+                                    console.log(err.message);
+                                });
+                        })
+                        .catch(err => {
+                            console.log(err.message);
+                        });
+                }
+
                 distForAlarmInst.push(dist);
 
                 timeSinceLastDist = 2 * (i + 1); // minutes till next disturbance
@@ -252,7 +285,7 @@ function insertPrepopData() {
                 }
             }
             realm.create("AlarmInstance", {
-                id: uuid.v1(),
+                id: almInstId,
                 start: almStart.toDate(),
                 end: almEnd.toDate(),
                 disturbances: distForAlarmInst,

@@ -6,6 +6,8 @@ import NotificationsIOS, {
 import { PushNotificationIOS, AsyncStorage } from "react-native";
 import moment from "moment";
 import Sound from "react-native-sound";
+import RNFS from "react-native-fs";
+
 import { SOUND_TYPES, ALARM_STATES } from "../data/constants";
 import realm from "../data/DataSchemas";
 import { DisturbanceModel, AlarmInstance } from "../data/models";
@@ -33,14 +35,19 @@ const NoiseDetectionEvents = new NativeEventEmitter(
     NativeModules.AlarmAudioService
 );
 
-let initializeAlarm = alarm => {
+let initializeAlarm = (alarm, alarmDidInitialize) => {
     console.log("sending time: ", alarm.wakeUpTime.toISOString());
 
     initNativeAlarm(
-        { time: alarm.wakeUpTime.toISOString(), sound: alarm.sound },
+        {
+            time: alarm.wakeUpTime.toISOString(),
+            sound: alarm.sound,
+            instId: alarm.instId
+        },
         { recCooldown: Settings.recCooldown() },
         err => {
             console.log("didInitializeAlarm?: ", err ? false : true);
+            alarmDidInitialize();
         }
     );
 };
@@ -171,7 +178,7 @@ export const ALARM_CAT = new NotificationCategory({
     context: "default"
 });
 
-export let scheduleAlarm = (alarm, reloadAlarmsList) => {
+export let scheduleAlarm = (alarm, reloadAlarmsList, alarmDidInitialize) => {
     console.log("scheduleAlarm");
     let wakeUpMoment = moment(alarm.wakeUpTime);
 
@@ -184,8 +191,8 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
     let shortSoundFile = "";
     let longSoundFile = "";
     let filesLen = alarm.alarmSound.sound.files.length;
-    console.log("filesLen", filesLen);
-    console.log("alarm.alarmSound", alarm.alarmSound);
+    // console.log("filesLen", filesLen);
+    // console.log("alarm.alarmSound", alarm.alarmSound);
     if (alarm.alarmSound.type == SOUND_TYPES.RANDOM) {
         /* Get all 'normal' Sounds (not Silent or Random) */
         let allSounds = realm
@@ -209,26 +216,129 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
     } else if (alarm.alarmSound.type == SOUND_TYPES.RANDOM_SUBSET) {
         // TODO: This functionality will be a premium feature
     }
-    console.log("shortSoundFile", shortSoundFile);
-    console.log("longSoundFile", longSoundFile);
 
-    initializeAlarm({
-        wakeUpTime: alarm.wakeUpTime,
-        sound: longSoundFile.slice(0, -4)
-    });
-
+    let currAlmInst;
     // create AlarmInstance with start date of now, and empty End date, and empty disturbance list
     realm.write(() => {
-        let almInst = new AlarmInstance();
-        realm.create("AlarmInstance", almInst);
+        currAlmInst = new AlarmInstance();
+        realm.create("AlarmInstance", currAlmInst);
     });
+
+    console.log("currAlmInst", currAlmInst);
+
+    let allDists = realm
+        .objects("SleepDisturbance")
+        .filtered("recording != null AND recording != ''");
+
+    console.log("allDists with recordings count", allDists.length);
+
+    if (allDists.length > Settings.maxRecs()) {
+        console.log("allDists with recordings count", allDists.length);
+
+        let allAIs = realm.objects("AlarmInstance").sorted("start");
+
+        let deleteRecsCount = allDists.length - Settings.maxRecs();
+        let dirsToDelete = [];
+        let indivRecsToDelete = [];
+
+        console.log("Recs to delete:", deleteRecsCount);
+
+        /* Loop through AI recording directories, and delete recordings until total rec count is reduced to Max allowed
+            The idea here is loop through all AlmInsts, accumulate a list of directories to delete (and associated DB disturbances),
+            as well as a list of individual recording file paths to delete (each associated with a DB disturbance). Then using
+            the 2 accumulated lists, run the async code that deletes each directory and file. In the promise callbacks, I then
+            set the associated DB Distrubance.recording to "". On promise rejection, I should probably set the recording string
+            to "" anyway, since the promise likely failed because the file doesn't exist.
+        */
+        for (let i = 0; i < allAIs.length; i++) {
+            if (deleteRecsCount <= 0) {
+                break;
+            }
+
+            let almInst = allAIs[i];
+            // Gets a list of disturbances for this AlmInst sorted oldest-newest, only those that have valid recordings.
+            let recs = almInst.disturbances
+                .sorted("time")
+                .filtered("recording != null AND recording != ''");
+
+            if (recs.length == 0) {
+                // no recordings to delete for this Alarm Instance. Continue to next AlmInst
+                continue;
+            } else if (recs.length <= deleteRecsCount) {
+                // delete all recs for this instance...
+                var path = RNFS.DocumentDirectoryPath + "/" + almInst.id;
+                console.log("path", path);
+                // console.log(
+                //     `Deleting all recordings ${
+                //         recs.length
+                //     } for AlarmInstance w/ start time:`,
+                //     almInst.start
+                // );
+
+                let recsCopy = recs.snapshot();
+
+                realm.write(() => {
+                    recsCopy.forEach(dist => {
+                        dist.recording = "";
+                    });
+                });
+
+                RNFS.unlink(path).then(() => {
+                    console.log(
+                        `Directory deleted for alarmInst ${
+                            almInst.start
+                        } (path: ${path})`
+                    );
+                });
+
+                // dirsToDelete.push(deletionInfo);
+                deleteRecsCount -= recsCopy.length;
+            } else {
+                // Remove the most recent recordings from the array such that exactly 'deleteRecsCount' are leftover
+                let recsToDelete = recs.snapshot().slice(0, deleteRecsCount); // remove (in-place) from index "numRecsToKeep" to end of array.
+                // recs should now contain only items that should be deleted
+
+                let almInstPath =
+                    RNFS.DocumentDirectoryPath + "/" + almInst.id + "/";
+
+                realm.write(() => {
+                    recsToDelete.forEach(rec => {
+                        let path = almInstPath + rec.recording;
+                        rec.recording = "";
+                        RNFS.unlink(path).then(() => {
+                            console.log(
+                                `Rec file deleted for alarmInst ${
+                                    almInst.start
+                                } (path: ${path})`
+                            );
+                        });
+                    });
+                });
+
+                deleteRecsCount -= recsToDelete.length;
+            }
+
+            console.log("Number of recs still to delete", deleteRecsCount);
+        }
+
+        console.log("dirsToDelete", dirsToDelete);
+        console.log("indivRecsToDelete", indivRecsToDelete);
+    }
+
+    initializeAlarm(
+        {
+            wakeUpTime: alarm.wakeUpTime,
+            sound: longSoundFile.slice(0, -4),
+            instId: currAlmInst.id
+        },
+        alarmDidInitialize
+    );
+
+    // return;
 
     setInAppAlarm(alarm, reloadAlarmsList, longSoundFile);
 
     // schedule notifications for this Alarm, staggering them by the "SNOOZE Time"
-    // NOTE: "Snooze Time" will likely be changable option for users per Alarm.
-    //         TODO: Add "snoozePeriod" as a property to Alarm entity in database
-    //         TODO: Add UI and functionality to set a Snooze time from AlarmDetail screen (menu maybe?)
 
     // For now, use a constant 15 sec as a Snooze Time for testing
     let snoozeTime = 60;

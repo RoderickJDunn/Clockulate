@@ -298,52 +298,81 @@ class ProAdv extends Component {
     advAnimValue = new Animated.Value(0);
 
     componentDidMount() {
+        let delay = this.props.delay || 1500;
         if (this.props.animate) {
-            Animated.spring(this.advAnimValue, {
-                toValue: 1,
-                damping: 20,
-                mass: 3,
-                delay: 1500
-            }).start();
+            Animated.sequence([
+                Animated.delay(delay),
+                Animated.spring(this.advAnimValue, {
+                    toValue: 1,
+                    bounciness: 17,
+                    speed: 4
+                })
+            ]).start();
         } else {
             this.advAnimValue.setValue(1);
         }
     }
 
     render() {
-        console.log("before imgBaseName");
-        console.log("this.props.screen", this.props.screen);
+        // console.log("before imgBaseName");
+        // console.log("this.props.screen", this.props.screen);
         let imgBaseName = MAP_SCREEN_TO_ADV_IMG[this.props.screen];
-        console.log("imgBaseName", imgBaseName);
+        // console.log("imgBaseName", imgBaseName);
+
+        let tfm =
+            this.props.screen != "TaskDetail"
+                ? [
+                      {
+                          translateX: this.advAnimValue.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [-SCREEN_WIDTH, 0]
+                          })
+                      }
+                  ]
+                : [
+                      {
+                          scale: this.advAnimValue.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0, 1]
+                          })
+                      }
+                  ];
         return (
             <Animated.View
                 style={{
-                    transform: [
-                        {
-                            translateX: this.advAnimValue.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [-400, 0]
-                            })
-                        }
-                    ]
+                    transform: tfm
                 }}
             >
-                <Image
-                    style={{
-                        alignSelf: "center",
-                        // flex: 1
-                        width: this.props.imgDims.width,
-                        height: this.props.imgDims.height
+                <TouchableOpacity
+                    onPress={() => {
+                        console.log("navigating to upgrades");
+                        console.log(
+                            "this.props.navigation",
+                            this.props.navigation
+                        );
+                        // this.props.navigation.navigate("Alarms");
+                        // this.props.navigation.popToTop();
+                        // this.props.navigation.navigate("Upgrade");
+                        // this.props.navigation.
                     }}
-                    source={[
-                        {
-                            uri: getFullImgNameForScreenSize(
-                                imgBaseName,
-                                SCREEN_WIDTH
-                            )
-                        }
-                    ]}
-                />
+                >
+                    <Image
+                        style={{
+                            alignSelf: "center",
+                            // flex: 1
+                            width: this.props.imgDims.width,
+                            height: this.props.imgDims.height
+                        }}
+                        source={[
+                            {
+                                uri: getFullImgNameForScreenSize(
+                                    imgBaseName,
+                                    SCREEN_WIDTH
+                                )
+                            }
+                        ]}
+                    />
+                </TouchableOpacity>
             </Animated.View>
         );
     }
@@ -360,16 +389,16 @@ let SHOW_ADMOB_ADV = false;
             => marginBottom: 20, marginTop: 20
 */
 export let AdWrapper = props => {
-    console.log("props.borderPosition", props.borderPosition);
-    console.log("props.hide", props.hide);
-    console.log("props.screen", props.screen);
+    // console.log("props.borderPosition", props.borderPosition);
+    // console.log("props.hide", props.hide);
+    // console.log("props.screen", props.screen);
     let border;
     let marginBottom = {};
     if (SCREEN_WIDTH <= 320 || isIphoneX()) {
         marginBottom = { marginBottom: 0 };
     }
 
-    console.log("border", border);
+    // console.log("border", border);
     return (
         <View style={[styles.adWrapper, marginBottom, props.style]}>
             {SHOW_ADMOB_ADV ? (
@@ -377,11 +406,13 @@ export let AdWrapper = props => {
             ) : (
                 <ProAdv
                     animate={props.animate}
+                    delay={props.delay}
                     imgDims={{
                         width: props.pubBannerProps.style.width,
                         height: props.pubBannerProps.style.height
                     }}
                     screen={props.screen}
+                    navigation={props.navigation}
                 />
             )}
             {props.hide && (
@@ -391,7 +422,7 @@ export let AdWrapper = props => {
                         position: "absolute",
                         width: props.pubBannerProps.style.width,
                         height: props.pubBannerProps.style.height,
-                        backgroundColor: Colors.backgroundGrey
+                        backgroundColor: Colors.brandMidGrey
                     }}
                 />
             )}

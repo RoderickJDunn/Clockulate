@@ -183,6 +183,7 @@ export default class Sounds extends Component {
                         screen={"Sounds"}
                         animate={true}
                         // borderColor={Colors.brandDarkGrey}
+                        navigation={this.props.navigation}
                         pubBannerProps={{
                             adSize: "smartBannerPortrait",
                             // adUnitID: "ca-app-pub-3940256099942544/6300978111",

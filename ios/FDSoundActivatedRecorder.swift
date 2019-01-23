@@ -118,9 +118,36 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
     public var maxRecordingLength = 20.0 // seconds. Production value: 20.0
     
     public var refractoryPeriodLen = 300.0 // seconds. Production value: 300.0 (5 minutes)
-    
+  
+    public var subdirectory = ""  { // sub-directory of Documents, in which disturbances should be saved
+        didSet {
+            let paths = NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory, FileManager.SearchPathDomainMask.userDomainMask, true)
+          
+            let documentsDirectory = paths.first! as NSString
+
+            let dirPath = documentsDirectory.appendingPathComponent(subdirectory)
+
+            // let trimmedAudioFileURL = NSURL.fileURL(withPathComponents: [paths[0], subdirectory])!
+          
+           // let dirPath = documentsDirectory.appendingPathComponent(subdirectory)!
+          
+            do {
+              try FileManager.default.createDirectory(atPath: dirPath, withIntermediateDirectories: false, attributes: nil)
+            } catch let error as NSError {
+              print(error.localizedDescription);
+            }
+        }
+    }
+  
     fileprivate var totalRecDurationThisHour = 0 // tracks the total Recording duration for the current hour
-    
+  
+  
+  
+  
+  
+  
+  
+  
     fileprivate var currentHour = 0 // tracks the last known hour (only updated in stopAndSaveRecording()
   
     /// Location of the recorded file
@@ -307,7 +334,10 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         let trimmedAudioFileBaseName = "recordingConverted\(UUID().uuidString).caf"
         
         let paths = NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory, FileManager.SearchPathDomainMask.userDomainMask, true)
-        let trimmedAudioFileURL = NSURL.fileURL(withPathComponents: [paths[0], trimmedAudioFileBaseName])!
+        let trimmedAudioFileURL = NSURL.fileURL(withPathComponents: [paths[0], self.subdirectory, trimmedAudioFileBaseName])!
+      
+        print("rec file path: \(trimmedAudioFileURL)")
+      
         if (trimmedAudioFileURL as NSURL).checkResourceIsReachableAndReturnError(nil) {
             let fileManager = FileManager.default
             _ = try? fileManager.removeItem(at: trimmedAudioFileURL)

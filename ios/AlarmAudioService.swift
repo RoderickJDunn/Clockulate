@@ -76,8 +76,9 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
       // unpack settings
       refractoryTime = (settings["recCooldown"] as! Double) * 60
     
-      CKT_LOG("Setting refractoryTime to \(refractoryTime)")
+//      CKT_LOG("Setting refractoryTime to \(refractoryTime)")
       recorder?.refractoryPeriodLen = refractoryTime
+      recorder?.subdirectory = currAlarm["instId"] as! String
     
       let ret = beginMonitoringAudio()
       var error: String? = nil
@@ -160,34 +161,9 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
     recorder!.sarMode = FDSoundActivatedRecorderMode.recordOnTrigger // TODO: depending on IAP ?
       recorder!.startListening()
     
-//      auxAnalyzeTimer = Timer.scheduledTimer(timeInterval: 0.05, target: self, selector: #selector(analyzeAudio), userInfo: nil, repeats: true)
-    
       return true
   }
 
-  
-  /* This function will record audio to a file, for up to 1 minute. */
-  func recordToFile() {
-    
-  }
-  
-  /* Called on the completion of a recording (to file), with a duration of 1-minute or less
-      Emits an event to JS containing the file name so that JS can update the recording table of the database.
-      This fn also sets the refractory_period timer (so that another recording is not started too soon)
-   */
-  func recordingDidFinish() {
-    
-    // setTimer(onEndRefractoryPeriod, 5minutes)
-  }
-  
-  
-  /* Called when the refractory period completes. At this point, level-monitoring can resume,
-    UNLESS there has been too many recordings for this night.
-   */
-  func onEndRefractoryPeriod() {
-    // if (recordingCount < 10) { beginMonitoringAudio(); }
-  }
-  
   
   @objc
   func alarmDidTrigger(_ timer: Timer) {

@@ -12,6 +12,7 @@ import {
     StyleSheet
 } from "react-native";
 import { WheelPicker } from "react-native-wheel-picker-android";
+import _ from "lodash";
 
 import Colors from "../styles/colors";
 
@@ -228,7 +229,11 @@ export default class TextInputPage extends React.Component {
                         )}
                     </View>
                 </View>
-                <Text style={styles.descriptionText}>{params.description}</Text>
+                <Text style={styles.descriptionText}>
+                    {_.isFunction(params.description)
+                        ? params.description(this.state.currValues[0])
+                        : params.description}
+                </Text>
             </View>
         );
     }

@@ -12,7 +12,10 @@ import {
     AppState,
     NativeModules,
     InteractionManager,
-    PanResponder
+    PanResponder,
+    ActivityIndicator,
+    StyleSheet,
+    View
     // TouchableOpacity
 } from "react-native";
 import moment from "moment";
@@ -83,7 +86,8 @@ class Alarms extends Component {
         this.state = {
             alarms: realm.objects("Alarm").sorted("order"), // TODO: filter by 'visible'=true
             menuVisible: false,
-            appState: AppState.currentState
+            appState: AppState.currentState,
+            isLoading: false
         };
 
         console.log("Setting up notifications");
@@ -451,7 +455,15 @@ class Alarms extends Component {
 
                 /* Now schedule notification(s) for the changes */
                 // passing in reloadAlarms function for iOS in-app alarm to be able to refresh AlarmsList screen
-                scheduleAlarm(changedAlarm[0], this.reloadAlarms.bind(this));
+                scheduleAlarm(
+                    changedAlarm[0],
+                    this.reloadAlarms.bind(this),
+                    this.alarmDidInitialize.bind(
+                        this,
+                        changedAlarm,
+                        changedAlarm.status
+                    )
+                );
             } else if (changedAlarm.length > 1) {
                 console.error(
                     `Found more than 1 alarm with alarmId ${alarmId}. This should never happen...`
@@ -575,15 +587,14 @@ class Alarms extends Component {
             alarm.status > ALARM_STATES.OFF
                 ? ALARM_STATES.OFF
                 : ALARM_STATES.SET;
-        realm.write(() => {
-            alarm.status = nextAlarmStatus;
-        });
 
         // console.log(alarm);
 
         // console.log(wakeUpTime);
         console.log("WakeUpTime: " + alarm.wakeUpTime);
         if (nextAlarmStatus == ALARM_STATES.SET) {
+            this.setState({ isLoading: true });
+
             let wakeUpTime = DateUtils.date_to_nextTimeInstance(
                 alarm.wakeUpTime
             );
@@ -603,17 +614,35 @@ class Alarms extends Component {
                 alarm.wakeUpTime = wakeUpTime;
             });
             console.log("Setting alarm");
-            scheduleAlarm(alarm, this.reloadAlarms.bind(this));
+            setTimeout(() => {
+                scheduleAlarm(
+                    alarm,
+                    this.reloadAlarms.bind(this),
+                    this.alarmDidInitialize.bind(this, alarm, nextAlarmStatus)
+                );
+            }, 100);
         } else {
             // Cancel all notification(s) for this alarm
             //  - NOTE: For iOS there are multiple notifications for each Alarm (due to snoozes)
             //          However, on Android the 'repeat' feature works, so there is only one notification
             clearAlarm(alarm);
+            this.setState(this.state);
+
+            realm.write(() => {
+                alarm.status = nextAlarmStatus;
+            });
         }
 
-        // //console.log("this.state", this.state);
-        this.setState(this.state);
+        //console.log("this.state", this.state);
     };
+
+    alarmDidInitialize(alarm, nextAlarmStatus) {
+        console.log("Alarms: alarmDidInitialize");
+        realm.write(() => {
+            alarm.status = nextAlarmStatus;
+            this.setState({ isLoading: false });
+        });
+    }
 
     _onSnap = (row, rowState) => {
         console.info("AlarmsList - _onSnap");
@@ -624,6 +653,7 @@ class Alarms extends Component {
             this._activeRow = row.item.id;
         }
     };
+
     _onReorderAlarms(alarmId, from, to, data) {
         console.info("_onReorderAlarms");
         // console.info("alarmId", alarmId);
@@ -832,6 +862,7 @@ class Alarms extends Component {
                                 style={{
                                     borderWidth: 0
                                 }}
+                                navigation={this.props.navigation}
                                 pubBannerProps={{
                                     adSize: "smartBannerPortrait",
                                     // adUnitID: "ca-app-pub-3940256099942544/6300978111",
@@ -851,10 +882,38 @@ class Alarms extends Component {
                             />
                         )}
                     </SafeAreaView>
+                    {this.state.isLoading && (
+                        <View style={styles.actIndWrapper}>
+                            <ActivityIndicator
+                                size="large"
+                                style={styles.activityIndicator}
+                            />
+                        </View>
+                    )}
                 </LinearGradient>
             </TouchableWithoutFeedback>
         );
     }
 }
+
+const styles = StyleSheet.create({
+    actIndWrapper: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#000",
+        opacity: 0.5
+    },
+    activityIndicator: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        height: 80
+    }
+});
 
 export default Alarms;

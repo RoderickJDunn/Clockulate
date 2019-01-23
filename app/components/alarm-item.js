@@ -242,9 +242,9 @@ class AlarmItem extends React.PureComponent {
                 this.props.onToggle(this.props.alarm);
             }
         } */);
-        if (notifyParentOfToggle) {
-            this.props.onToggle(this.props.alarm);
-        }
+        // if (notifyParentOfToggle) {
+        //     this.props.onToggle(this.props.alarm);
+        // }
         this.setState({ switchValue: nextAlarmState });
     }
 
@@ -605,13 +605,9 @@ class AlarmItem extends React.PureComponent {
                                     }
                                 ]}
                                 onStartShouldSetResponder={evt => true}
-                                // onPress={e => {
-                                //     console.log(e.nativeEvent);
-                                // }}
-                                onPress={this._triggerAnimation.bind(
+                                onPress={this.props.onToggle.bind(
                                     this,
-                                    !this.state.switchValue,
-                                    true
+                                    this.props.alarm
                                 )}
                             >
                                 <Animated.View

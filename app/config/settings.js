@@ -11,13 +11,13 @@ accessor.recCooldown = newVal => {
             setting.value = newVal;
         });
     }
-    console.log("fetching setting recCooldown blah");
+    console.log("fetching setting recCooldown");
     return setting.value;
 };
 
-accessor.maxLogs = newVal => {
-    console.log("fetching setting maxLogs blah");
-    let setting = settings.filtered("name = 'maxLogs'")[0];
+accessor.maxRecs = newVal => {
+    console.log("fetching setting maxRecs");
+    let setting = settings.filtered("name = 'maxRecordings'")[0];
     if (newVal != null) {
         realm.write(() => {
             setting.value = newVal;

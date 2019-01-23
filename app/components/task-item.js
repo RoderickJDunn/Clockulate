@@ -494,7 +494,10 @@ class TaskItem extends React.Component {
                 <View
                     style={[
                         TaskItemStyle.taskInfoWrap,
-                        { borderBottomColor: borderBottomColor }
+                        {
+                            borderBottomColor: borderBottomColor
+                            // backgroundColor: "blue"
+                        }
                     ]}
                     {...this._panResponder.panHandlers}
                 >
@@ -655,34 +658,6 @@ class TaskItem extends React.Component {
                             </Animated.View>
                         </View>
                     </TouchableOpacity>
-                    {/* this.state.isSlidingTask && (
-                        <Slider
-                            ref={component => (this._sliderRef = component)}
-                            style={[styles.slider]}
-                            maximumValue={MAX_SLIDER_VALUE}
-                            minimumValue={0}
-                            step={5}
-                            value={duration}
-                            onStartShouldSetResponder={() => {
-                                // console.log("onStartShouldSetResponder");
-                                return true;
-                            }}
-                            onMoveShouldSetResponder={() => {
-                                // console.log("onMoveShouldSetResponder");
-                                return true;
-                            }}
-                            // onResponderReject={() => {
-                            //     // console.log("onResponderReject");
-                            // }}
-                            onSlidingComplete={value => {
-                                // console.log(
-                                //     "Finished sliding. Final value: " + value
-                                // );
-                                this._tempDuration = null;
-                                this.setState(this.state);
-                            }}
-                        />
-                    ) */}
                 </View>
                 {touchableBackdrop}
                 <TouchableOpacity
