@@ -15,7 +15,8 @@ import {
     PanResponder,
     ActivityIndicator,
     StyleSheet,
-    View
+    View,
+    Alert
     // TouchableOpacity
 } from "react-native";
 import moment from "moment";
@@ -352,10 +353,6 @@ class Alarms extends Component {
                 this.handleActivity();
             }
         );
-
-        // setTimeout(() => {
-        //     this.props.navigation.navigate("Upgrade");
-        // }, 5000);
     }
 
     componentWillUnmount() {
@@ -437,6 +434,47 @@ class Alarms extends Component {
             newAlarm: true,
             reloadAlarms: this.reloadAlarms
         });
+    }
+
+    /* We only allow 1 alarm to be active (SET) at a time. This function checks if there is
+        already an active alarm. If not, returns true. If there is an alarm already active,
+        it returns false, but more importantly, it displays an Alert. The Alert asks user whether
+        to de-activate other alarm(s) so that this one can be activated, or to leave this alarm
+        inactive, and the active Alarm in active state. If user chooses to activate this alarm, 
+        the onAllowed callback will be executed. If they choose to not activate this alarm,
+        the onDisallowed callback will be executed.
+    */
+    verifyAlarmActivationAllowed(onAllowed, onDisallowed) {
+        let activeAlms = this.state.alarms.filtered("status > 0");
+        let setAlmCount = activeAlms.length;
+
+        if (setAlmCount > 0) {
+            Alert.alert(
+                "Enable this alarm?",
+                "Your active alarm will be disabled if you enable this one.",
+                [
+                    {
+                        text: "Enable",
+                        onPress: () => {
+                            // Disable active alarm(s)
+                            for (let i=0; i<setAlmCount; i++) {
+                                this._onAlarmToggled(activeAlms[i]);
+                            }
+
+                            onAllowed && onAllowed();
+                        }
+                    },
+                    {
+                        text: "Don't enable",
+                        style: "cancel"
+                    }
+                ],
+                { cancelable: false }
+            );
+            return false;
+        } else {
+            return true;
+        }
     }
 
     reloadAlarms = alarmId => {
@@ -597,6 +635,12 @@ class Alarms extends Component {
         // console.log(wakeUpTime);
         console.log("WakeUpTime: " + alarm.wakeUpTime);
         if (nextAlarmStatus == ALARM_STATES.SET) {
+            let { alarms } = this.state;
+
+            if (!this.verifyAlarmActivationAllowed(this._onAlarmToggled.bind(this, alarm))) {
+                return;
+            }
+
             this.setState({ isLoading: true });
 
             let wakeUpTime = DateUtils.date_to_nextTimeInstance(

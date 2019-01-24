@@ -8,7 +8,8 @@ import {
     TouchableOpacity,
     StyleSheet,
     Image,
-    Animated
+    Animated,
+    Alert
 } from "react-native";
 import {
     AdMobBanner,
@@ -350,10 +351,25 @@ class ProAdv extends Component {
                             "this.props.navigation",
                             this.props.navigation
                         );
-                        // this.props.navigation.navigate("Alarms");
-                        // this.props.navigation.popToTop();
-                        // this.props.navigation.navigate("Upgrade");
-                        // this.props.navigation.
+                        Alert.alert(
+                            "Learn More",
+                            "Would you like to go to the Upgrades screen to learn more?",
+                            [
+                                {
+                                    text: "Go",
+                                    onPress: () => {
+                                        this.props.navigation.navigate(
+                                            "Upgrade"
+                                        );
+                                    }
+                                },
+                                {
+                                    text: "Not right now",
+                                    style: "cancel"
+                                }
+                            ],
+                            { cancelable: false }
+                        );
                     }}
                 >
                     <Image
