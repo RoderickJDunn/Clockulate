@@ -27,6 +27,7 @@ import { scaleByFactor } from "../util/font-scale";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { ALARM_STATES } from "../data/constants";
 import LinearGradient from "react-native-linear-gradient";
+import Pulse from "react-native-pulse";
 
 let shakeAnimMap = new Map([
     [0, 0],
@@ -610,6 +611,27 @@ class AlarmItem extends React.PureComponent {
                                     this.props.alarm
                                 )}
                             >
+                                {this.props.alarm.status > ALARM_STATES.OFF && (
+                                    <View
+                                        style={{
+                                            backgroundColor: "red",
+                                            position: "absolute",
+                                            width: 10,
+                                            height: 10,
+                                            top: 0,
+                                            left: 0,
+                                            borderRadius: 10
+                                        }}
+                                    >
+                                        <Pulse
+                                            color="#ff6060"
+                                            numPulses={1}
+                                            diameter={100}
+                                            speed={40}
+                                            duration={3000}
+                                        />
+                                    </View>
+                                )}
                                 <Animated.View
                                     onLayout={({ nativeEvent }) => {
                                         let {
@@ -715,73 +737,6 @@ class AlarmItem extends React.PureComponent {
                                         {this.props.alarm.label}
                                     </Text>
                                 )}
-                                {/* <View
-                                style={{
-                                    position: "absolute",
-                                    right: 0,
-                                    top: 0,
-                                    left: 0,
-                                    bottom: 0,
-                                    justifyContent: "center",
-                                    alignItems: "flex-end"
-                                }}
-                            >
-                                <TouchableOpacity
-                                    style={{
-                                        padding: 5,
-                                        backgroundColor: "#47d35a",
-                                        borderRadius: 5,
-                                        shadowOffset: {
-                                            height: 2,
-                                            width: 0
-                                        },
-                                        shadowOpacity: 0.5,
-                                        shadowRadius: 2,
-                                        elevation: 3,
-                                        shadowColor: "black",
-                                        zIndex: 999
-                                    }}
-                                    hitSlop={{
-                                        top: 10,
-                                        bottom: 10,
-                                        left: 20,
-                                        right: 0
-                                    }}
-                                    onPress={() => {
-                                        // Before launching SleepCycle, disable the current Alarm (if its enabled), so that we don't get conflicts
-                                        if (
-                                            this.props.alarm.status >
-                                            ALARM_STATES.OFF
-                                        ) {
-                                            // this will disable the alarm and clear notifications
-                                            this.props.onToggle(
-                                                this.props.alarm
-                                            );
-                                        }
-
-                                        Linking.openURL("fb162575247235://1900")
-                                            .then(() => {
-                                                console.log(
-                                                    "Opening Sleep Cycle"
-                                                );
-                                            })
-                                            .catch(() => {
-                                                console.log(
-                                                    "Failed to launch Sleep Cycle"
-                                                );
-                                            });
-                                    }}
-                                    onLongPress={() => {
-                                        this.setState({ isMoving: true });
-                                    }}
-                                >
-                                    <Text
-                                        style={{ fontSize: 18, color: "white" }}
-                                    >
-                                        SC
-                                    </Text>
-                                </TouchableOpacity>
-                            </View> */}
                             </View>
                         </TouchableOpacity>
                     </LinearGradient>
