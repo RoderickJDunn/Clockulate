@@ -548,8 +548,12 @@ class AlarmItem extends React.PureComponent {
                     dragWithSpring={{ tension: 1000, damping: 0.5 }}
                     animatedNativeDriver={true}
                     animatedValueX={this._position}
-                    onSnap={e => {
-                        this.props.onSnap(e.nativeEvent.id);
+                    onDrag={event => {
+                        // console.log("Snapping");
+                        let { state, y, targetSnapPointId } = event.nativeEvent;
+                        if (state == "end") {
+                            this.props.onSnap(targetSnapPointId);
+                        }
                     }}
                 >
                     <LinearGradient
