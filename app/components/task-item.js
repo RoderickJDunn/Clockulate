@@ -567,7 +567,7 @@ class TaskItem extends React.Component {
                                 //     backgroundColor: "blue"
                                 // }
                             ]}
-                            // numberOfLines={1}
+                            numberOfLines={1}
                             // ellipsizeMode="tail"
                             selectable={false}
                         >
@@ -620,6 +620,7 @@ class TaskItem extends React.Component {
                                 <TextInput
                                     editable={false}
                                     defaultValue={this.props.data.startTime}
+                                    numberOfLines={1}
                                     ref={elem => {
                                         // console.log("Sending data for ref");
                                         // console.log(
@@ -651,7 +652,9 @@ class TaskItem extends React.Component {
                                             // backgroundColor: "blue",
                                             alignSelf: "stretch",
                                             textAlign: "right",
-                                            fontSize: 24
+                                            fontSize: 24,
+                                            height: 30,
+                                            marginTop: 8
                                         }
                                     ]}
                                 />
