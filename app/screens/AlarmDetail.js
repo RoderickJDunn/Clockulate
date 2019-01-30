@@ -2231,25 +2231,29 @@ class AlarmDetail extends Component {
                             </View>
                         </Animated.View>
                         {/* </View> */}
+                        <TouchableOpacity
+                            style={{
+                                position: "absolute",
+                                alignSelf: "center",
+                                alignContent: "flex-start",
+                                alignItems: "flex-start",
+                                // top: SCREEN_HEIGHT * 1.159,
+                                top: 0,
+                                backgroundColor: "transparent",
+                                // backgroundColor: "blue",
+                                paddingHorizontal: 30,
+                                paddingTop: 0,
+                                paddingBottom: 7
+                            }}
+                            onPress={this._onPressAnimHandle}
+                        >
+                            <FAIcon
+                                name="minus"
+                                size={scaleByFactor(25, 0.5)}
+                                color={Colors.brandMidOpp}
+                            />
+                        </TouchableOpacity>
                     </View>
-                    <TouchableOpacity
-                        style={{
-                            position: "absolute",
-                            alignSelf: "center",
-                            top: SCREEN_HEIGHT * 1.159,
-                            backgroundColor: "transparent",
-                            // backgroundColor: "blue",
-                            paddingHorizontal: 30,
-                            paddingVertical: 30
-                        }}
-                        onPress={this._onPressAnimHandle}
-                    >
-                        <FAIcon
-                            name="minus"
-                            size={scaleByFactor(25, 0.5)}
-                            color={Colors.brandMidOpp}
-                        />
-                    </TouchableOpacity>
                 </Interactable.View>
 
                 <Animated.View
