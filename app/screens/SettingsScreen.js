@@ -4,7 +4,9 @@ import {
     Text,
     Platform,
     StyleSheet,
-    ActivityIndicator
+    ActivityIndicator,
+    Alert,
+    Linking
 } from "react-native";
 
 import { SettingsScreen, SettingsData } from "react-native-settings-screen";
@@ -197,9 +199,24 @@ export default class SettingsScreenCkt extends React.Component {
                     onPress: () => {
                         let { permissions } = this.state;
                         console.log("permissions.mic", permissions.mic);
-
+                        // Present alert asking if they want to go to Settings
                         if (permissions.mic == true) {
-                            // TODO: Present alert asking if they want to go to Settings
+                            Alert.alert(
+                                "Change Permissions",
+                                "Recording permission is granted. You can remove this permission in the Settings app, but Clockulate will not be able to monitor your sleep quality, or play alarm sounds when your phone is set to Silent.",
+                                [
+                                    {
+                                        text: "Open Settings",
+                                        onPress: () => {
+                                            Linking.openURL("app-settings:");
+                                        }
+                                    },
+                                    {
+                                        text: "Cancel",
+                                        style: "cancel"
+                                    }
+                                ]
+                            );
                         } else if (permissions.mic == false) {
                             Permissions.request("microphone").then(status => {
                                 console.log("permissions.mic status", status);
@@ -236,7 +253,23 @@ export default class SettingsScreenCkt extends React.Component {
                         let { permissions } = this.state;
                         console.log("permissions.notif", permissions.notif);
                         if (permissions.notif == true) {
-                            // TODO: Present alert asking if they want to go to Settings, to remove permission
+                            // Present alert asking if they want to go to Settings
+                            Alert.alert(
+                                "Change Permissions",
+                                "Notification permission is granted. You can remove this permission in the Settings app, but Clockulate will not be able to send you alerts when your alarms go off.",
+                                [
+                                    {
+                                        text: "Open Settings",
+                                        onPress: () => {
+                                            Linking.openURL("app-settings:");
+                                        }
+                                    },
+                                    {
+                                        text: "Cancel",
+                                        style: "cancel"
+                                    }
+                                ]
+                            );
                         } else if (permissions.notif == false) {
                             Permissions.request("notification").then(status => {
                                 console.log(
