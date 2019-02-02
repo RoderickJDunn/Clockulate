@@ -42,6 +42,7 @@ import Sounds from "../screens/Sounds";
 import Upgrade from "../screens/Upgrade";
 import SleepLog from "../screens/SleepLog";
 import TextInputPage from "../screens/TextInputPage";
+import PlainTextScreen from "../screens/PlainTextScreen";
 import Help from "../screens/Help";
 import LinearGradient from "react-native-linear-gradient";
 import { isIphoneX } from "react-native-iphone-x-helper";
@@ -552,7 +553,6 @@ const DrawerRoot = createDrawerNavigator(
                             borderBottomWidth: 0
                         },
                         headerTintColor: Colors.brandLightOpp,
-
                         headerTitleStyle: {
                             // style the Title text of the header
                             color: Colors.brandLightOpp
@@ -564,7 +564,7 @@ const DrawerRoot = createDrawerNavigator(
         Help: {
             screen: createStackNavigator(
                 {
-                    SettingsScreen: {
+                    HelpScreen: {
                         screen: Help
                     }
                 },
@@ -577,12 +577,28 @@ const DrawerRoot = createDrawerNavigator(
             screen: createStackNavigator(
                 {
                     AboutScreen: {
-                        screen: About
+                        screen: About,
+                        navigationOptions: otherDrawerNavOptions("About")
+                    },
+                    PlainTextScreen: {
+                        screen: PlainTextScreen,
+                        navigationOptions: {
+                            headerStyle: {
+                                // Style the header view itself (aka. the nav bar)
+                                backgroundColor: Colors.brandDarkGrey,
+                                borderBottomWidth: 0
+                            },
+                            headerTintColor: Colors.brandLightOpp,
+                            headerTitleStyle: {
+                                // style the Title text of the header
+                                color: Colors.brandLightOpp
+                            }
+                        }
                     }
-                },
-                {
-                    defaultNavigationOptions: otherDrawerNavOptions("About")
                 }
+                // {
+                //     defaultNavigationOptions: otherDrawerNavOptions("About")
+                // }
             )
         }
     },
