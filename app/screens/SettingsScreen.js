@@ -6,7 +6,8 @@ import {
     StyleSheet,
     ActivityIndicator,
     Alert,
-    Linking
+    Linking,
+    Switch
 } from "react-native";
 
 import { SettingsScreen, SettingsData } from "react-native-settings-screen";
@@ -14,7 +15,7 @@ import Permissions from "react-native-permissions";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 
 import Colors from "../styles/colors";
-import PickerActionSheet from "../components/picker-action-sheet";
+// import PickerActionSheet from "../components/picker-action-sheet";
 import Settings from "../config/settings";
 
 const fontFamily = Platform.OS === "ios" ? "Avenir" : "sans-serif";
@@ -135,6 +136,27 @@ export default class SettingsScreenCkt extends React.Component {
                         );
                     },
                     showDisclosureIndicator: true
+                },
+                {
+                    title: "Charge Reminder",
+                    subtitle: "Remind me to plug in my device",
+                    renderAccessory: () => {
+                        let { settings } = this.state;
+                        return (
+                            <Switch
+                                value={settings.chargeReminder}
+                                onValueChange={newVal => {
+                                    console.log(
+                                        "didSet Charge Reminder",
+                                        newVal
+                                    );
+                                    settings.chargeReminder = newVal;
+                                    Settings.chargeReminder(newVal);
+                                    this.setState({ settings });
+                                }}
+                            />
+                        );
+                    }
                 }
                 // { title: "A non-tappable row" },
                 // {

@@ -40,22 +40,16 @@ let prePopTasks = [
 
 let prePopSettings = [
     {
-        name: "defaultShowHrsOfSleep",
-        enabled: true,
-        value: 0 // unused for this setting
-    },
-    {
-        name: "dayRange",
-        enabled: true,
-        value: 75600 // 9pm (60*60*21)
-    },
-    {
         name: "maxRecordings",
         value: 500
     },
     {
         name: "recCooldown",
         value: 5
+    },
+    {
+        name: "chargeReminder",
+        enabled: true
     }
 ];
 

@@ -26,4 +26,15 @@ accessor.maxRecs = newVal => {
     return setting.value;
 };
 
+accessor.chargeReminder = newVal => {
+    console.log("fetching setting chargeReminder");
+    let setting = settings.filtered("name = 'chargeReminder'")[0];
+    if (newVal != null) {
+        realm.write(() => {
+            setting.enabled = newVal;
+        });
+    }
+    return setting.enabled;
+};
+
 export default accessor;

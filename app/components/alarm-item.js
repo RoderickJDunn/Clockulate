@@ -133,7 +133,10 @@ class AlarmItem extends React.PureComponent {
         // console.log("props", props);
         if (this.state.switchValue != props.alarm.status) {
             // console.log("Triggering animation");
-            this._triggerAnimation(props.alarm.status, false);
+            this._triggerAnimation(
+                props.alarm.status,
+                this.props.onAnimFinished
+            );
         }
 
         if (props.alarm.status == ALARM_STATES.RINGING) {
@@ -212,7 +215,7 @@ class AlarmItem extends React.PureComponent {
         ).start();
     }
 
-    _triggerAnimation(nextAlarmState, notifyParentOfToggle) {
+    _triggerAnimation(nextAlarmState, onAnimFinished) {
         let toValue = 0.9;
         let duration = 1000;
         let easing = Easing.linear;
@@ -238,11 +241,11 @@ class AlarmItem extends React.PureComponent {
             duration: duration,
             easing: easing,
             useNativeDriver: true
-        }).start(/* () => {
-            if (notifyParentOfToggle) {
-                this.props.onToggle(this.props.alarm);
+        }).start(() => {
+            if (onAnimFinished && nextAlarmState == ALARM_STATES.SET) {
+                onAnimFinished();
             }
-        } */);
+        });
         // if (notifyParentOfToggle) {
         //     this.props.onToggle(this.props.alarm);
         // }
@@ -339,6 +342,7 @@ class AlarmItem extends React.PureComponent {
         // );
         // console.log("index", index);
 
+        let { status } = this.props.alarm;
         const config = {
             velocityThreshold: 0.3,
             directionalOffsetThreshold: 80
@@ -356,7 +360,7 @@ class AlarmItem extends React.PureComponent {
 
         // Grab correct colors depending on whether alarm is enabled/disabled
         let textColor, buttonColor;
-        if (this.props.alarm.status > ALARM_STATES.OFF) {
+        if (status > ALARM_STATES.OFF) {
             textColor = Colors.brandLightOpp;
             buttonColor = "#6bf47b";
         } else {
@@ -567,11 +571,15 @@ class AlarmItem extends React.PureComponent {
                         ]}
                         style={{ padding: 10 }}
                     >
-                        {this.props.alarm.status == ALARM_STATES.SNOOZED && (
+                        {status == ALARM_STATES.SNOOZED && (
                             <Icon
                                 name="sleep"
-                                size={25}
-                                style={{ padding: 7, position: "absolute" }}
+                                size={23}
+                                color={Colors.brandLightOpp}
+                                style={{
+                                    padding: 7,
+                                    position: "absolute"
+                                }}
                             />
                         )}
                         <TouchableOpacity
@@ -615,7 +623,7 @@ class AlarmItem extends React.PureComponent {
                                     this.props.alarm
                                 )}
                             >
-                                {this.props.alarm.status > ALARM_STATES.OFF && (
+                                {status > ALARM_STATES.OFF && status < ALARM_STATES.SNOOZED  && (
                                     <View
                                         style={{
                                             backgroundColor: "red",
@@ -627,13 +635,17 @@ class AlarmItem extends React.PureComponent {
                                             borderRadius: 10
                                         }}
                                     >
-                                        <Pulse
-                                            color="#ff6060"
-                                            numPulses={1}
-                                            diameter={100}
-                                            speed={40}
-                                            duration={3000}
-                                        />
+                                        {(status ==
+                                            ALARM_STATES.SET ||
+                                            ALARM_STATES.SNOOZED) && (
+                                            <Pulse
+                                                color="#ff6060"
+                                                numPulses={1}
+                                                diameter={100}
+                                                speed={40}
+                                                duration={3000}
+                                            />
+                                        )}
                                     </View>
                                 )}
                                 <Animated.View

@@ -16,7 +16,8 @@ import {
     ActivityIndicator,
     StyleSheet,
     View,
-    Alert
+    Alert,
+    Text
     // TouchableOpacity
 } from "react-native";
 import moment from "moment";
@@ -43,6 +44,10 @@ import {
     PublisherBanner
     // AdMobRewarded
 } from "react-native-admob";
+import AwesomeAlert from "react-native-awesome-alerts";
+import EntypoIcon from "react-native-vector-icons/Entypo";
+import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import ClkAlert from "../components/clk-awesome-alert";
 
 import ProximityManager from "react-native-proximity-manager";
 
@@ -63,6 +68,7 @@ import {
 /* Dev only */
 import { populateDummyAlarms } from "../data/data-prepop";
 import { ALARM_STATES } from "../data/constants";
+import Settings from "../config/settings";
 
 var loadedSound = null;
 
@@ -85,11 +91,14 @@ class Alarms extends Component {
         console.log("App was opened from KILLED state");
         //console.log("Fetching Alarms...");
         this.state = {
-            alarms: realm.objects("Alarm").sorted("order"), // TODO: filter by 'visible'=true
+            alarms: realm.objects("Alarm").sorted("order"), //
             menuVisible: false,
             appState: AppState.currentState,
-            isLoading: false
+            isLoading: false,
+            showChargePopup: false
         };
+
+        console.log("showChargePopup", this.state.showChargePopup);
 
         console.log("Setting up notifications");
 
@@ -457,7 +466,7 @@ class Alarms extends Component {
                         text: "Enable",
                         onPress: () => {
                             // Disable active alarm(s)
-                            for (let i=0; i<setAlmCount; i++) {
+                            for (let i = 0; i < setAlmCount; i++) {
                                 this._onAlarmToggled(activeAlms[i]);
                             }
 
@@ -637,7 +646,11 @@ class Alarms extends Component {
         if (nextAlarmStatus == ALARM_STATES.SET) {
             let { alarms } = this.state;
 
-            if (!this.verifyAlarmActivationAllowed(this._onAlarmToggled.bind(this, alarm))) {
+            if (
+                !this.verifyAlarmActivationAllowed(
+                    this._onAlarmToggled.bind(this, alarm)
+                )
+            ) {
                 return;
             }
 
@@ -760,6 +773,14 @@ class Alarms extends Component {
         }
     };
 
+    onAnimFinished = () => {
+        console.log("onAnimFinished");
+
+        if (Settings.chargeReminder() == true) {
+            this.setState({ showChargePopup: true });
+        }
+    };
+
     render() {
         console.info("AlarmsList - Render");
         // console.debug(this.state);
@@ -827,6 +848,7 @@ class Alarms extends Component {
                                         startMove={move}
                                         endMove={moveEnd}
                                         isActive={isActive}
+                                        onAnimFinished={this.onAnimFinished}
                                     />
                                 );
                             }}
@@ -901,7 +923,7 @@ class Alarms extends Component {
                             this.setState(this.state);
                         }}
                     /> */}
-                        {true && (
+                        {false && (
                             <AdWrapper
                                 // borderPosition="top"
                                 animate={true}
@@ -937,6 +959,20 @@ class Alarms extends Component {
                                 style={styles.activityIndicator}
                             />
                         </View>
+                    )}
+                    {this.state.showChargePopup && (
+                        <ClkAlert
+                            title="Please Plug in Your Device"
+                            onConfirm={() => {
+                                console.log("Confirmed Plugin popup");
+                                this.setState({ showChargePopup: false });
+                                Settings.chargeReminder(false);
+                            }}
+                            onDismiss={() => {
+                                console.log("Dismissed Plugin popup");
+                                this.setState({ showChargePopup: false });
+                            }}
+                        />
                     )}
                 </LinearGradient>
             </TouchableWithoutFeedback>
