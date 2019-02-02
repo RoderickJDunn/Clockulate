@@ -245,6 +245,26 @@ export default class SettingsScreenCkt extends React.Component {
                                 console.log("permissions.mic status", status);
                                 permissions.mic = status == "authorized";
                                 this.setState({ permissions });
+                                if (!permissions.mic) {
+                                    Alert.alert(
+                                        "Change Permissions",
+                                        "You can add this permission in the Settings app",
+                                        [
+                                            {
+                                                text: "Open Settings",
+                                                onPress: () => {
+                                                    Linking.openURL(
+                                                        "app-settings:"
+                                                    );
+                                                }
+                                            },
+                                            {
+                                                text: "Cancel",
+                                                style: "cancel"
+                                            }
+                                        ]
+                                    );
+                                }
                             });
                         }
                     }
@@ -301,6 +321,27 @@ export default class SettingsScreenCkt extends React.Component {
                                 );
                                 permissions.notif = status == "authorized";
                                 this.setState({ permissions });
+
+                                if (!permissions.notif) {
+                                    Alert.alert(
+                                        "Change Permissions",
+                                        "You can add this permission in the Settings app",
+                                        [
+                                            {
+                                                text: "Open Settings",
+                                                onPress: () => {
+                                                    Linking.openURL(
+                                                        "app-settings:"
+                                                    );
+                                                }
+                                            },
+                                            {
+                                                text: "Cancel",
+                                                style: "cancel"
+                                            }
+                                        ]
+                                    );
+                                }
                             });
                         }
                     }
