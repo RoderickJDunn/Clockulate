@@ -9,7 +9,7 @@ import {
     Linking,
     Switch
 } from "react-native";
-
+import { NavigationEvents } from "react-navigation";
 import { SettingsScreen, SettingsData } from "react-native-settings-screen";
 import Permissions from "react-native-permissions";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -52,7 +52,8 @@ export default class SettingsScreenCkt extends React.Component {
             settings: {
                 recCooldown: Settings.recCooldown(),
                 maxRecs:
-                    Settings.maxRecs() > 0 ? Settings.maxRecs() : "Unlimited"
+                    Settings.maxRecs() > 0 ? Settings.maxRecs() : "Unlimited",
+                chargeReminder: Settings.chargeReminder()
             },
             permissions: {
                 mic: null,
@@ -413,6 +414,33 @@ export default class SettingsScreenCkt extends React.Component {
     render() {
         return (
             <View style={styles.container}>
+                <NavigationEvents
+                    onWillFocus={payload => {
+                        // load Permissions
+                        Permissions.checkMultiple([
+                            "microphone",
+                            "notification"
+                        ]).then(response => {
+                            console.log("response", response);
+                            let { permissions } = this.state;
+                            permissions.mic =
+                                response.microphone == "authorized";
+                            permissions.notif =
+                                response.notification == "authorized";
+                            this.setState({ permissions });
+                        });
+
+                        let { settings } = this.state;
+                        let permissions = {
+                            mic: null,
+                            notif: null
+                        };
+
+                        console.log("will focus", payload);
+                        settings.chargeReminder = Settings.chargeReminder();
+                        this.setState({ settings, permissions });
+                    }}
+                />
                 <SettingsScreen
                     data={this.data}
                     globalTextStyle={{ fontFamily }}
