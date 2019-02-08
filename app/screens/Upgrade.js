@@ -38,9 +38,7 @@ export default class Upgrade extends React.Component {
                     underlayColor={Colors.brandDarkGrey}
                     size={24}
                     onPress={() => {
-                        //TODO: Implement IAP functionality
-                        // navigation.state.params.handleAddAlarm()
-                        console.log("Pressed upgrade button");
+                        navigation.state.params.onPressUpgrade();
                     }}
                     hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
                     style={{
@@ -88,6 +86,12 @@ export default class Upgrade extends React.Component {
 
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
+
+    componentDidMount() {
+        this.props.navigation.setParams({
+            onPressUpgrade: this.onPressUpgrade
+        });
+    }
 
     renderCalcButtons() {
         return (
@@ -353,6 +357,11 @@ export default class Upgrade extends React.Component {
         );
     }
 
+    onPressUpgrade = () => {
+        //TODO: Implement IAP functionality
+        console.log("onPressUpgrade");
+    };
+
     renderUpgradeItem() {
         return (
             <View style={styles.upgradeItem}>
@@ -413,7 +422,7 @@ export default class Upgrade extends React.Component {
                         />
                     )}
                 /> */}
-                <SectionList
+                <Animated.SectionList
                     style={{ flex: 0.8, marginTop: -250 }}
                     onScroll={Animated.event(
                         // scrollX = e.nativeEvent.contentOffset.x
@@ -425,9 +434,32 @@ export default class Upgrade extends React.Component {
                                     }
                                 }
                             }
-                        ]
+                        ],
+                        { useNativeDriver: true }
                     )}
-                    // renderItem={({item, index, section}) => <Text key={index}>{item}</Text>}
+                    ListFooterComponent={() => (
+                        <View
+                            style={{
+                                height: 150,
+                                flex: 0.15,
+                                marginBottom: 35,
+                                alignContent: "center",
+                                justifyContent: "center",
+                                // backgroundColor: Colors.brandLightBlue
+                                // backgroundColor: "#666699"
+                                backgroundColor: "transparent"
+                            }}
+                        >
+                            <TouchableOpacity
+                                style={[styles.upgradeButton]}
+                                onPress={this.onPressUpgrade}
+                            >
+                                <Text style={[styles.upgradeBtnText]}>
+                                    Upgrade Now
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                     renderItem={this.renderUpgradeItem}
                     renderSectionHeader={({ section: { title } }) => {
                         if (title == "Spacer") {
@@ -442,12 +474,14 @@ export default class Upgrade extends React.Component {
                             );
                         } else {
                             return (
-                                <View
+                                <TouchableOpacity
                                     style={{
                                         alignSelf: "stretch",
                                         height: 250,
-                                        justifyContent: "flex-end"
+                                        justifyContent: "flex-end",
+                                        overflow: "hidden"
                                     }}
+                                    onPress={this.onPressUpgrade}
                                 >
                                     <Animated.View
                                         style={[
@@ -515,7 +549,7 @@ export default class Upgrade extends React.Component {
                                                             ],
                                                             outputRange: [
                                                                 1,
-                                                                0.6
+                                                                0.7
                                                             ],
                                                             extrapolate: "clamp"
                                                         }
@@ -526,7 +560,7 @@ export default class Upgrade extends React.Component {
                                         resizeMode="contain"
                                         source={require("../img/UpgradeTitleV1.png")}
                                     />
-                                </View>
+                                </TouchableOpacity>
                             );
                         }
                     }}
@@ -536,25 +570,6 @@ export default class Upgrade extends React.Component {
                     ]}
                     keyExtractor={(item, index) => item + index}
                 />
-                <View
-                    style={{
-                        flex: 0.12,
-                        alignContent: "center",
-                        justifyContent: "center",
-                        // backgroundColor: Colors.brandLightBlue
-                        // backgroundColor: "#666699"
-                        backgroundColor: "rgb(11, 52, 75)"
-                    }}
-                >
-                    <TouchableOpacity
-                        style={[styles.upgradeButton]}
-                        onPress={() => {
-                            console.log("upgrade now");
-                        }}
-                    >
-                        <Text style={[styles.upgradeBtnText]}>Upgrade Now</Text>
-                    </TouchableOpacity>
-                </View>
             </View>
         );
     }
@@ -637,8 +652,8 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
         shadowColor: "#000",
         elevation: 5,
-        // backgroundColor: "#AAAAFF53"
-        backgroundColor: Colors.brandLightBlue + "66"
+        backgroundColor: "#30166a"
+        // backgroundColor: Colors.brandLightBlue + "66"
         // alignContent: "center",
         // justifyContent: "center",
         // alignItems: "center",
@@ -679,11 +694,12 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         width: 180,
         height: 70,
-        shadowOpacity: 0.9,
-        shadowRadius: 10,
-        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowRadius: 40,
+        shadowColor: "#FFF",
         elevation: 5,
-        backgroundColor: Colors.brandMidPurple,
+        backgroundColor: Colors.brandDarkBlue,
+        // backgroundColor: Colors.brandMidPurple,
         // backgroundColor: Colors.brandLightOpp,
         borderRadius: 80
     },
