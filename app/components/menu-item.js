@@ -67,33 +67,29 @@ class MenuItem extends React.Component {
                                     {this.props.left}
                                 </View>
                             )}
-                            {this.props.center &&
-                                !this.props.centerRight && (
-                                    <Text
-                                        style={[
-                                            styles.text,
-                                            {
-                                                flex: this.props.right
-                                                    ? 0.65
-                                                    : 0.75
-                                            }
-                                        ]}
-                                    >
-                                        {this.props.center}
-                                    </Text>
-                                )}
-                            {this.props.right &&
-                                !this.props.centerRight && (
-                                    <View
-                                        style={{
-                                            flex: 0.2,
-                                            alignContent: "flex-end",
-                                            alignItems: "flex-end"
-                                        }}
-                                    >
-                                        {this.props.right}
-                                    </View>
-                                )}
+                            {this.props.center && !this.props.centerRight && (
+                                <Text
+                                    style={[
+                                        styles.text,
+                                        {
+                                            flex: this.props.right ? 0.65 : 0.75
+                                        }
+                                    ]}
+                                >
+                                    {this.props.center}
+                                </Text>
+                            )}
+                            {this.props.right && !this.props.centerRight && (
+                                <View
+                                    style={{
+                                        flex: 0.2,
+                                        alignContent: "flex-end",
+                                        alignItems: "flex-end"
+                                    }}
+                                >
+                                    {this.props.right}
+                                </View>
+                            )}
                             {this.props.centerRight && (
                                 <View
                                     style={{
@@ -159,7 +155,9 @@ const styles = StyleSheet.create({
         // borderColor: "#487d"
     },
     text: {
-        color: Colors.darkGreyText
+        marginTop: 5,
+        color: Colors.darkGreyText,
+        fontFamily: "Gurmukhi MN"
     }
 });
 

@@ -2343,7 +2343,13 @@ class AlarmDetail extends Component {
                         }
                         center="Snooze Time"
                         right={
-                            <Text>{`${this.state.alarm.snoozeTime} min`}</Text>
+                            <Text
+                                style={{
+                                    fontFamily: "Quesha",
+                                    fontSize: 22,
+                                    color: Colors.labelText
+                                }}
+                            >{`${this.state.alarm.snoozeTime} min`}</Text>
                         }
                         separatorPosition={SCREEN_WIDTH * 0.15}
                         onPressItem={this._openSnoozeTimePicker}
@@ -2384,7 +2390,13 @@ class AlarmDetail extends Component {
                             )
                         }
                         centerRight={
-                            <Text>
+                            <Text
+                                style={{
+                                    marginTop: 5,
+                                    color: Colors.darkGreyText,
+                                    fontFamily: "Gurmukhi MN"
+                                }}
+                            >
                                 {this.state.durationsVisible
                                     ? "Show Task Start Times"
                                     : "Show Task Durations"}

@@ -81,7 +81,7 @@ class StyledRadio extends React.Component {
                         this._onSelectItem(0);
                     }}
                 >
-                    <Text style={{ alignSelf: "center" }}>
+                    <Text style={[styles.text, { alignSelf: "center" }]}>
                         {this.props.options[0].name}
                     </Text>
                     {/* {this.state.selectedIdx == 0 && (
@@ -99,7 +99,7 @@ class StyledRadio extends React.Component {
                         this._onSelectItem(1);
                     }}
                 >
-                    <Text style={{ alignSelf: "center" }}>
+                    <Text style={[styles.text, { alignSelf: "center" }]}>
                         {this.props.options[1].name}
                     </Text>
                     {/* {this.state.selectedIdx == 1 && (
@@ -117,7 +117,7 @@ class StyledRadio extends React.Component {
                         this._onSelectItem(2);
                     }}
                 >
-                    <Text style={{ alignSelf: "center" }}>
+                    <Text style={[styles.text, { alignSelf: "center" }]}>
                         {this.props.options[2].name}
                     </Text>
                     {/* {this.state.selectedIdx == 2 && (
@@ -155,16 +155,21 @@ const styles = StyleSheet.create({
         padding: 10
     },
     underscore: {
-        backgroundColor: "#9c75f0",
+        backgroundColor: Colors.brandVeryLightPurple,
         position: "absolute",
         height: 2,
         left: 0,
         // right: 0,
         width: "32%",
         bottom: 10,
-        shadowColor: "#9c75f0",
+        shadowColor: Colors.brandVeryLightPurple,
         shadowRadius: 5,
         shadowOpacity: 0.5
+    },
+    text: {
+        marginTop: 5,
+        color: Colors.darkGreyText,
+        fontFamily: "Gurmukhi MN"
     }
 });
 
