@@ -50,31 +50,85 @@ export default class Upgrade extends React.Component {
         };
     };
 
+    upgradeData = [
+        {
+            key: "0",
+            icon: (
+                <MatComIcon
+                    name="cancel"
+                    size={55}
+                    color={Colors.brandSuperLightPurple}
+                    style={{ height: 55 - 1 }}
+                />
+            ),
+            title: "No more ads",
+            description: [
+                "Say goodbye to in-app advertisments, once and for all"
+            ]
+        },
+        {
+            key: "1",
+            icon: (
+                <MatComIcon
+                    name="alarm-multiple"
+                    size={55}
+                    color={Colors.brandSuperLightPurple}
+                    style={{ height: 55 - 1 }}
+                />
+            ),
+            title: "Unlimited Alarms",
+            description: [
+                "Manage multiple alarms however you want, ",
+                "Save a different Alarm for each day of the week"
+            ]
+        },
+        {
+            key: "2",
+            icon: (
+                <FAIcon
+                    name="list"
+                    size={42}
+                    color={Colors.brandSuperLightPurple}
+                    style={{ height: 42 - 5 }}
+                />
+            ),
+            title: "Unlimited Tasks",
+            description: []
+        },
+        {
+            key: "3",
+            icon: (
+                <MatComIcon
+                    name="timetable"
+                    size={55}
+                    color={Colors.brandSuperLightPurple}
+                    style={{ height: 55 - 4 }}
+                />
+            ),
+            title: "Task Start-Times",
+            description: []
+        },
+        {
+            key: "4",
+            icon: (
+                <FAIcon
+                    name="music"
+                    size={42}
+                    color={Colors.brandSuperLightPurple}
+                    style={{ height: 42 - 1 }}
+                />
+            ),
+            title: "More Sounds",
+            description: []
+        }
+    ];
+
     /*
     Props: 
      */
     constructor(props) {
         super(props);
 
-        this.state = {
-            upgradeData: [
-                {
-                    name: "0"
-                },
-                {
-                    name: "1"
-                },
-                {
-                    name: "2"
-                },
-                {
-                    name: "3"
-                },
-                {
-                    name: "4"
-                }
-            ]
-        };
         console.log("Upgrade -- constructor ");
     }
 
@@ -362,7 +416,7 @@ export default class Upgrade extends React.Component {
         console.log("onPressUpgrade");
     };
 
-    renderUpgradeItem() {
+    UpgradeItem({ item }) {
         return (
             <View style={styles.upgradeItem}>
                 <View
@@ -372,9 +426,10 @@ export default class Upgrade extends React.Component {
                         alignItems: "center",
                         justifyContent: "center",
                         marginHorizontal: 3
+                        // backgroundColor: "red"
                     }}
                 >
-                    <MatComIcon name="alarm-multiple" size={55} />
+                    {item.icon}
                 </View>
                 <View
                     style={{
@@ -382,19 +437,30 @@ export default class Upgrade extends React.Component {
                         alignSelf: "stretch",
                         justifyContent: "center",
                         paddingVertical: 5,
-                        paddingRight: 5
+                        paddingRight: 12
                     }}
                 >
-                    <Text style={[styles.upgradeTitleText]}>
-                        Unlimited Alarms
-                    </Text>
-                    <Text style={[styles.upgradeBodyText]}>
-                        Save a different Alarm for each day of the week
-                    </Text>
-                    <Text style={[styles.upgradeBodyText]}>or</Text>
-                    <Text style={[styles.upgradeBodyText]}>
-                        Manage multiple alarms in your own way
-                    </Text>
+                    <Text style={[styles.upgradeTitleText]}>{item.title}</Text>
+                    {item.description.length > 0 && (
+                        <View
+                            style={{
+                                flex: 0.8,
+                                alignContent: "center",
+                                justifyContent: "center"
+                            }}
+                        >
+                            {item.description.map((text, i) => {
+                                return (
+                                    <Text
+                                        key={i}
+                                        style={[styles.upgradeBodyText]}
+                                    >
+                                        {text}
+                                    </Text>
+                                );
+                            })}
+                        </View>
+                    )}
                 </View>
             </View>
         );
@@ -460,7 +526,7 @@ export default class Upgrade extends React.Component {
                             </TouchableOpacity>
                         </View>
                     )}
-                    renderItem={this.renderUpgradeItem}
+                    renderItem={this.UpgradeItem}
                     renderSectionHeader={({ section: { title } }) => {
                         if (title == "Spacer") {
                             return (
@@ -519,7 +585,7 @@ export default class Upgrade extends React.Component {
                                         style={{
                                             height: 120,
                                             width: 300,
-                                            bottom: 30,
+                                            bottom: 20,
                                             alignSelf: "center",
                                             alignContent: "center",
                                             // justifyContent: "center",
@@ -534,7 +600,7 @@ export default class Upgrade extends React.Component {
                                                             ],
                                                             outputRange: [
                                                                 0,
-                                                                70
+                                                                60
                                                             ],
                                                             extrapolate: "clamp"
                                                         }
@@ -558,7 +624,7 @@ export default class Upgrade extends React.Component {
                                             ]
                                         }}
                                         resizeMode="contain"
-                                        source={require("../img/UpgradeTitleV1.png")}
+                                        source={require("../img/UpgradeTitleV1_3.png")}
                                     />
                                 </TouchableOpacity>
                             );
@@ -566,7 +632,7 @@ export default class Upgrade extends React.Component {
                     }}
                     sections={[
                         { title: "Spacer", data: [] },
-                        { title: "MainList", data: this.state.upgradeData }
+                        { title: "MainList", data: this.upgradeData }
                     ]}
                     keyExtractor={(item, index) => item + index}
                 />
@@ -639,8 +705,8 @@ const styles = StyleSheet.create({
         width: 100
     },
     upgradeItem: {
-        height: 140,
-        marginVertical: 10,
+        height: 170,
+        marginVertical: 15,
         marginHorizontal: 10,
         flexDirection: "row",
         // height: SCREEN_HEIGHT - 200 - 50, // TODO: Change 200 to factor for Title height
@@ -676,7 +742,8 @@ const styles = StyleSheet.create({
     upgradeTitleText: {
         fontFamily: "Quesha",
         fontSize: 30,
-        color: Colors.brandLightOpp
+        color: Colors.brandLightOpp,
+        flex: 0.2
     },
     upgradeBodyText: {
         fontFamily: "Gurmukhi MN",
@@ -699,8 +766,6 @@ const styles = StyleSheet.create({
         shadowColor: "#FFF",
         elevation: 5,
         backgroundColor: Colors.brandDarkBlue,
-        // backgroundColor: Colors.brandMidPurple,
-        // backgroundColor: Colors.brandLightOpp,
         borderRadius: 80
     },
     upgradeBtnText: {
