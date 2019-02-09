@@ -13,6 +13,7 @@ import {
 import LinearGradient from "react-native-linear-gradient";
 import FAIcon from "react-native-vector-icons/FontAwesome";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import EntypoIcon from "react-native-vector-icons/Entypo";
 // import getFullImgNameForScreenSize from "../img/image_map";
 import Colors from "../styles/colors";
 
@@ -61,10 +62,8 @@ export default class Upgrade extends React.Component {
                     style={{ height: 55 - 1 }}
                 />
             ),
-            title: "No more ads",
-            description: [
-                "Say goodbye to in-app advertisments, once and for all"
-            ]
+            title: "No Ads",
+            description: ["Say goodbye to in-app ads, once and for all"]
         },
         {
             key: "1",
@@ -78,8 +77,7 @@ export default class Upgrade extends React.Component {
             ),
             title: "Unlimited Alarms",
             description: [
-                "Manage multiple alarms however you want, ",
-                "Save a different Alarm for each day of the week"
+                "With unlimited alarms,  you are free to save alarms for each day of the week,  or any other way you like"
             ]
         },
         {
@@ -93,7 +91,9 @@ export default class Upgrade extends React.Component {
                 />
             ),
             title: "Unlimited Tasks",
-            description: []
+            description: [
+                "Add as many tasks as you like to each alarm.  With this feature your morning planning can be as detailed as you want!"
+            ]
         },
         {
             key: "3",
@@ -106,7 +106,9 @@ export default class Upgrade extends React.Component {
                 />
             ),
             title: "Task Start-Times",
-            description: []
+            description: [
+                "See what time each of your tasks starts.  Simply toggle between task durations,  and task start-times"
+            ]
         },
         {
             key: "4",
@@ -119,7 +121,24 @@ export default class Upgrade extends React.Component {
                 />
             ),
             title: "More Sounds",
-            description: []
+            description: [
+                "Unlock additional sounds to use with your alarms,  and receive more with each update!"
+            ]
+        },
+        {
+            key: "5",
+            icon: (
+                <EntypoIcon
+                    name="download"
+                    size={42}
+                    color={Colors.brandSuperLightPurple}
+                    style={{ height: 42 - 1 }}
+                />
+            ),
+            title: "Future Pro Features",
+            description: [
+                "Clockulate will be receiving more Pro features soon,  all of which are included with this purchase!"
+            ]
         }
     ];
 
@@ -444,7 +463,7 @@ export default class Upgrade extends React.Component {
                     {item.description.length > 0 && (
                         <View
                             style={{
-                                flex: 0.8,
+                                // flex: 0.8,
                                 alignContent: "center",
                                 justifyContent: "center"
                             }}
@@ -489,7 +508,7 @@ export default class Upgrade extends React.Component {
                     )}
                 /> */}
                 <Animated.SectionList
-                    style={{ flex: 0.8, marginTop: -250 }}
+                    style={{ flex: 0.8, marginTop: -280 }}
                     onScroll={Animated.event(
                         // scrollX = e.nativeEvent.contentOffset.x
                         [
@@ -506,7 +525,7 @@ export default class Upgrade extends React.Component {
                     ListFooterComponent={() => (
                         <View
                             style={{
-                                height: 150,
+                                height: 165,
                                 flex: 0.15,
                                 marginBottom: 35,
                                 alignContent: "center",
@@ -533,7 +552,7 @@ export default class Upgrade extends React.Component {
                                 <View
                                     style={{
                                         alignSelf: "stretch",
-                                        height: 150,
+                                        height: 200,
                                         backgroundColor: "transparent"
                                     }}
                                 />
@@ -543,9 +562,10 @@ export default class Upgrade extends React.Component {
                                 <TouchableOpacity
                                     style={{
                                         alignSelf: "stretch",
-                                        height: 250,
-                                        justifyContent: "flex-end",
+                                        height: 280,
+                                        justifyContent: "center",
                                         overflow: "hidden"
+                                        // backgroundColor: "green"
                                     }}
                                     onPress={this.onPressUpgrade}
                                 >
@@ -583,9 +603,9 @@ export default class Upgrade extends React.Component {
                                     /> */}
                                     <Animated.Image
                                         style={{
-                                            height: 120,
-                                            width: 300,
-                                            bottom: 20,
+                                            height: 180,
+                                            width: 320,
+                                            top: 30,
                                             alignSelf: "center",
                                             alignContent: "center",
                                             // justifyContent: "center",
@@ -596,11 +616,11 @@ export default class Upgrade extends React.Component {
                                                         {
                                                             inputRange: [
                                                                 0,
-                                                                150
+                                                                200
                                                             ],
                                                             outputRange: [
                                                                 0,
-                                                                60
+                                                                90
                                                             ],
                                                             extrapolate: "clamp"
                                                         }
@@ -611,11 +631,11 @@ export default class Upgrade extends React.Component {
                                                         {
                                                             inputRange: [
                                                                 0,
-                                                                150
+                                                                200
                                                             ],
                                                             outputRange: [
                                                                 1,
-                                                                0.7
+                                                                0.6
                                                             ],
                                                             extrapolate: "clamp"
                                                         }
@@ -714,11 +734,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         borderRadius: 35,
-        shadowOpacity: 0.9,
+        shadowOpacity: 0.3,
         shadowRadius: 10,
         shadowColor: "#000",
         elevation: 5,
-        backgroundColor: "#30166a"
+        backgroundColor: "#20114F"
+        // backgroundColor: "#30166a"
         // backgroundColor: Colors.brandLightBlue + "66"
         // alignContent: "center",
         // justifyContent: "center",
@@ -741,26 +762,30 @@ const styles = StyleSheet.create({
     },
     upgradeTitleText: {
         fontFamily: "Quesha",
-        fontSize: 30,
-        color: Colors.brandLightOpp,
-        flex: 0.2
+        fontSize: 37,
+        letterSpacing: 1,
+        color: Colors.brandLightOpp
+        // flex: 0.2
     },
     upgradeBodyText: {
         fontFamily: "Gurmukhi MN",
+        letterSpacing: 0.5,
+
         // textAlign: "center",
-        fontSize: 14,
+        fontSize: 17,
         color: Colors.brandLightOpp,
         marginVertical: 2
     },
     upgradeButton: {
         // bottom: 50,
-        padding: 10,
+        // paddingVertical: 10,
+        // paddingHorizontal: 15,
         alignSelf: "center",
         alignContent: "center",
         alignItems: "center",
         justifyContent: "center",
-        width: 180,
-        height: 70,
+        width: 220,
+        height: 80,
         shadowOpacity: 0.1,
         shadowRadius: 40,
         shadowColor: "#FFF",
@@ -771,6 +796,7 @@ const styles = StyleSheet.create({
     upgradeBtnText: {
         color: Colors.brandLightOpp,
         fontSize: 35,
-        fontFamily: "Quesha"
+        fontFamily: "Quesha",
+        letterSpacing: 1
     }
 });
