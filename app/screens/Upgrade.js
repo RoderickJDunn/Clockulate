@@ -7,13 +7,15 @@ import {
     FlatList,
     StyleSheet,
     Animated,
-    SectionList,
-    ScrollView
+    StatusBar,
+    Platform
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import FAIcon from "react-native-vector-icons/FontAwesome";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import EntypoIcon from "react-native-vector-icons/Entypo";
+import { isIphoneX } from "react-native-iphone-x-helper";
+import { Header } from "react-navigation";
 // import getFullImgNameForScreenSize from "../img/image_map";
 import Colors from "../styles/colors";
 
@@ -21,6 +23,19 @@ import { scaleByFactor } from "../util/font-scale";
 // import { ScrollView } from "react-native-gesture-handler";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+/* The height of the Navigation Bar + Status Bar 
+    The notched devices have a taller status bar (44pt vs. 20pt)
+    The height of the navigation bar in both cases is 44.
+*/
+let STATUS_BAR_HEIGHT;
+if (Platform.OS == "ios") {
+    STATUS_BAR_HEIGHT = isIphoneX() ? 44 : 20;
+} else {
+    STATUS_BAR_HEIGHT = StatusBar.currentHeight;
+}
+
+const FULL_HEADER_HEIGHT = 44 + STATUS_BAR_HEIGHT;
 
 // SCREEN_HEIGHT -= 88; // add 88 since the Nav bar is transparent
 // TODO: In-app purchases
@@ -433,6 +448,8 @@ export default class Upgrade extends React.Component {
     onPressUpgrade = () => {
         //TODO: Implement IAP functionality
         console.log("onPressUpgrade");
+        alert("header height: " + Header.HEIGHT);
+        alert("status bar height: " + StatusBar.currentHeight);
     };
 
     UpgradeItem({ item }) {
@@ -487,28 +504,15 @@ export default class Upgrade extends React.Component {
 
     render() {
         console.log("Upgrade -- render() ");
+
         return (
             <View style={{ flex: 1, backgroundColor: "green" }}>
                 {this.renderCalcButtons()}
-
-                {/* <FlatList
-                    style={{ flex: 0.8, marginTop: -180 }}
-                    keyExtractor={item => item.name}
-                    data={this.state.upgradeData}
-                    renderItem={this.renderUpgradeItem}
-                    stickyHeaderIndices={[0]}
-                    ListHeaderComponent={() => (
-                        <View
-                            style={{
-                                width: 150,
-                                height: 300,
-                                backgroundColor: "green"
-                            }}
-                        />
-                    )}
-                /> */}
                 <Animated.SectionList
-                    style={{ flex: 0.8, marginTop: -280 }}
+                    style={{
+                        flex: 0.8,
+                        marginTop: -SCREEN_HEIGHT * 0.35 - FULL_HEADER_HEIGHT
+                    }}
                     onScroll={Animated.event(
                         // scrollX = e.nativeEvent.contentOffset.x
                         [
@@ -552,7 +556,7 @@ export default class Upgrade extends React.Component {
                                 <View
                                     style={{
                                         alignSelf: "stretch",
-                                        height: 200,
+                                        height: SCREEN_HEIGHT * 0.35,
                                         backgroundColor: "transparent"
                                     }}
                                 />
@@ -562,7 +566,9 @@ export default class Upgrade extends React.Component {
                                 <TouchableOpacity
                                     style={{
                                         alignSelf: "stretch",
-                                        height: 280,
+                                        height:
+                                            SCREEN_HEIGHT * 0.35 +
+                                            FULL_HEADER_HEIGHT,
                                         justifyContent: "center",
                                         overflow: "hidden"
                                         // backgroundColor: "green"
@@ -577,7 +583,10 @@ export default class Upgrade extends React.Component {
                                                     Colors.brandDarkBlue,
                                                 opacity: this._scrollY.interpolate(
                                                     {
-                                                        inputRange: [0, 150],
+                                                        inputRange: [
+                                                            0,
+                                                            SCREEN_HEIGHT * 0.35
+                                                        ],
                                                         outputRange: [0, 1],
                                                         extrapolate: "clamp"
                                                     }
@@ -604,8 +613,9 @@ export default class Upgrade extends React.Component {
                                     <Animated.Image
                                         style={{
                                             height: 180,
-                                            width: 320,
-                                            top: 30,
+                                            width: SCREEN_WIDTH * 0.75,
+                                            // top: 30,
+                                            top: "10%",
                                             alignSelf: "center",
                                             alignContent: "center",
                                             // justifyContent: "center",
@@ -616,11 +626,13 @@ export default class Upgrade extends React.Component {
                                                         {
                                                             inputRange: [
                                                                 0,
-                                                                200
+                                                                SCREEN_HEIGHT *
+                                                                    0.35
                                                             ],
                                                             outputRange: [
                                                                 0,
-                                                                90
+                                                                SCREEN_HEIGHT *
+                                                                    0.155
                                                             ],
                                                             extrapolate: "clamp"
                                                         }
@@ -631,7 +643,8 @@ export default class Upgrade extends React.Component {
                                                         {
                                                             inputRange: [
                                                                 0,
-                                                                200
+                                                                SCREEN_HEIGHT *
+                                                                    0.35
                                                             ],
                                                             outputRange: [
                                                                 1,
@@ -747,22 +760,9 @@ const styles = StyleSheet.create({
         // marginTop: -88,
         // backgroundColor: "yellow"
     },
-    pagerButton: {
-        margin: 10,
-        position: "absolute",
-        bottom: SCREEN_HEIGHT * 0.45,
-        transform: [
-            {
-                scaleY: 1.5
-            },
-            {
-                scaleX: 0.7
-            }
-        ]
-    },
     upgradeTitleText: {
         fontFamily: "Quesha",
-        fontSize: 37,
+        fontSize: scaleByFactor(31, 0.8),
         letterSpacing: 1,
         color: Colors.brandLightOpp
         // flex: 0.2
@@ -772,7 +772,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
 
         // textAlign: "center",
-        fontSize: 17,
+        fontSize: scaleByFactor(15, 0.8),
         color: Colors.brandLightOpp,
         marginVertical: 2
     },
