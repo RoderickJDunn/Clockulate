@@ -519,7 +519,7 @@ const DrawerRoot = createDrawerNavigator(
                     }
                 },
                 {
-                    defaultNavigationOptions: otherDrawerNavOptions("Upgrade")
+                    defaultNavigationOptions: otherDrawerNavOptions("")
                 }
             )
         },

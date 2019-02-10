@@ -27,7 +27,7 @@ export default class About extends React.Component {
     data: SettingsData = [
         {
             type: "SECTION",
-            header: "     ",
+            header: " ",
             rows: [
                 {
                     title: "Attributions",
@@ -48,6 +48,29 @@ export default class About extends React.Component {
                         });
                     },
                     showDisclosureIndicator: true
+                }
+            ]
+        },
+        {
+            type: "SECTION",
+            header: "",
+            rows: [
+                {
+                    title: "Version",
+                    showDisclosureIndicator: false,
+                    renderAccessory: () => {
+                        return (
+                            <Text
+                                style={{
+                                    alignSelf: "center",
+                                    fontSize: 18,
+                                    color: "#999"
+                                }}
+                            >
+                                {VersionNumber.appVersion}
+                            </Text>
+                        );
+                    }
                 }
             ]
         }

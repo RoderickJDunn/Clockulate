@@ -623,31 +623,31 @@ class AlarmItem extends React.PureComponent {
                                     this.props.alarm
                                 )}
                             >
-                                {status > ALARM_STATES.OFF && status < ALARM_STATES.SNOOZED  && (
-                                    <View
-                                        style={{
-                                            backgroundColor: "red",
-                                            position: "absolute",
-                                            width: 10,
-                                            height: 10,
-                                            top: 0,
-                                            left: 0,
-                                            borderRadius: 10
-                                        }}
-                                    >
-                                        {(status ==
-                                            ALARM_STATES.SET ||
-                                            ALARM_STATES.SNOOZED) && (
-                                            <Pulse
-                                                color="#ff6060"
-                                                numPulses={1}
-                                                diameter={100}
-                                                speed={40}
-                                                duration={3000}
-                                            />
-                                        )}
-                                    </View>
-                                )}
+                                {status > ALARM_STATES.OFF &&
+                                    status < ALARM_STATES.SNOOZED && (
+                                        <View
+                                            style={{
+                                                backgroundColor: "red",
+                                                position: "absolute",
+                                                width: 10,
+                                                height: 10,
+                                                top: 0,
+                                                left: 0,
+                                                borderRadius: 10
+                                            }}
+                                        >
+                                            {(status == ALARM_STATES.SET ||
+                                                ALARM_STATES.SNOOZED) && (
+                                                <Pulse
+                                                    color="#ff6060"
+                                                    numPulses={1}
+                                                    diameter={100}
+                                                    speed={40}
+                                                    duration={3000}
+                                                />
+                                            )}
+                                        </View>
+                                    )}
                                 <Animated.View
                                     onLayout={({ nativeEvent }) => {
                                         let {
@@ -746,6 +746,7 @@ class AlarmItem extends React.PureComponent {
                                     <Text
                                         style={{
                                             color: textColor,
+                                            fontFamily: "Gurmukhi MN",
                                             fontSize: scaleByFactor(15, 0.4)
                                         }}
                                         numberOfLines={2}

@@ -810,7 +810,9 @@ export default class SleepLog extends React.Component {
                             right: 0,
                             width: "auto"
                         }}
-                        // contentContainerStyle={{}}
+                        contentContainerStyle={{
+                            borderRadius: 20
+                        }}
                         show={true}
                         showProgress={false}
                         title="No Recording Available"
@@ -822,7 +824,8 @@ export default class SleepLog extends React.Component {
                         showCancelButton={true}
                         cancelText="Ok"
                         confirmText="Go to Settings"
-                        confirmButtonColor="#54c0ff"
+                        confirmButtonColor={Colors.brandGreen}
+                        cancelButtonColor={Colors.disabledGrey}
                         onConfirmPressed={() => {
                             // this.setState({ showNoRecAlert: false });
                             this.props.navigation.navigate("Settings");

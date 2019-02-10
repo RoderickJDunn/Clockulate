@@ -218,7 +218,6 @@ const styles = StyleSheet.create({
         color: Colors.brandLightOpp,
         textAlign: "center",
         fontSize: scaleByFactor(12, 0.7),
-        marginTop: 5,
-        fontFamily: "Gurmukhi MN"
+        fontFamily: "Avenir-Black"
     }
 });

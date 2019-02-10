@@ -789,7 +789,6 @@ class TaskDetail extends Component {
                                         <TouchableOpacity
                                             style={{
                                                 marginLeft: 10,
-                                                marginBottom: 5,
                                                 flexDirection: "row"
                                                 // backgroundColor: "blue",
                                                 // flex: 1
@@ -895,7 +894,8 @@ class TaskDetail extends Component {
                             bottom: 0,
                             left: 0,
                             right: 0,
-                            width: "auto"
+                            width: "auto",
+                            backgroundColor: "rgba(0,0,0,0.8)"
                         }}
                         // contentContainerStyle={{}}
                         show={true}
@@ -914,7 +914,7 @@ class TaskDetail extends Component {
                         closeOnHardwareBackPress={false}
                         showConfirmButton={true}
                         confirmText="Got it!"
-                        confirmButtonColor="#54c0ff"
+                        confirmButtonColor={Colors.brandGreen}
                         onConfirmPressed={() => {
                             this.setState({ showDurationInfo: false });
                         }}
