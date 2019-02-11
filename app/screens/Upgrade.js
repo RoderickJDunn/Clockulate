@@ -833,6 +833,7 @@ const styles = StyleSheet.create({
     },
     rstrPurchaseText: {
         color: Colors.brandLightOpp,
+        textDecorationLine: "underline",
         fontSize: 14,
         textAlign: "center",
         fontFamily: "Avenir-Black",

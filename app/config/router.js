@@ -136,7 +136,6 @@ const navigationConfig = {
         title: "Alarms",
         headerStyle: {
             // Style the header view itself (aka. the nav bar)
-            // backgroundColor: Colors.brandDarkGrey,
             backgroundColor: Colors.brandDarkGrey,
             borderBottomWidth: 0
         },

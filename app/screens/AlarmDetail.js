@@ -2195,7 +2195,7 @@ class AlarmDetail extends Component {
                                                 )
                                             }
                                         ],
-                                        top: this._viewIdx == 2 ? 247.5 :137.5 // Height of 2.5 task-items
+                                        top: this._viewIdx == 2 ? 247.5 : 137.5 // Height of 2.5 task-items
                                     }}
                                     source={require("../img/Indicator_StartTimesV1.png")}
                                 />

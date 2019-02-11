@@ -78,7 +78,7 @@ class EdgeSwiper extends Component {
                 minDist={1}
                 enabled={this.state.stGestureHandlerEnabled}
             >
-                {/* <-- NEEDS TO BE Animated.View */}
+                {/* <-- NEEDS TO BE Animated.View for PanGestureHandler*/}
                 <Animated.View
                     style={[
                         // StyleSheet.absoluteFill,
