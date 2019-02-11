@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import Interactable from "react-native-interactable";
 import EntypoIcon from "react-native-vector-icons/Entypo";
+import EvilIcon from "react-native-vector-icons/EvilIcons";
 
 import DurationText from "./duration-text";
 import { CheckBox, Container, StyleProvider } from "native-base";
@@ -31,6 +32,7 @@ import { TextStyle } from "../styles/text";
 import TouchableBackdrop from "../components/touchable-backdrop";
 import { scaleByFactor } from "../util/font-scale";
 import * as CONST_DIMENSIONS from "../styles/const_dimensions";
+import upgrades from "../config/upgrades";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -658,6 +660,30 @@ class TaskItem extends React.Component {
                                         }
                                     ]}
                                 />
+                                {/* NOTE: 3. IAP-locked Feature - Task Start Times */}
+                                {!upgrades.pro && (
+                                    <View
+                                        style={[
+                                            StyleSheet.absoluteFill,
+                                            {
+                                                margin: 1,
+                                                position: "absolute",
+                                                backgroundColor:
+                                                    Colors.brandMidGrey,
+                                                alignContent: "center",
+                                                alignItems: "center",
+                                                justifyContent: "center"
+                                            }
+                                        ]}
+                                    >
+                                        <EvilIcon
+                                            name="lock"
+                                            size={31}
+                                            color={Colors.brandLightOpp}
+                                        />
+                                        {/* Lock Icon*/}
+                                    </View>
+                                )}
                             </Animated.View>
                         </View>
                     </TouchableOpacity>

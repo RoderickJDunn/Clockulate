@@ -48,7 +48,7 @@ import AwesomeAlert from "react-native-awesome-alerts";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import ClkAlert from "../components/clk-awesome-alert";
-
+import upgrades from "../config/upgrades";
 import ProximityManager from "react-native-proximity-manager";
 
 import Colors from "../styles/colors";
@@ -439,10 +439,16 @@ class Alarms extends Component {
 
     handleAddAlarm() {
         console.info("Adding alarm");
-        this.props.navigation.navigate("AlarmDetail", {
-            newAlarm: true,
-            reloadAlarms: this.reloadAlarms
-        });
+        if (upgrades.pro == true) {
+            //NOTE: 1A. IAP-locked Feature - Alarms Limit
+            this.props.navigation.navigate("AlarmDetail", {
+                newAlarm: true,
+                reloadAlarms: this.reloadAlarms
+            });
+        } else {
+            //TODO: Display CKT-styled upgrade popup
+            alert("Not available in free version (Placeholder)");
+        }
     }
 
     /* We only allow 1 alarm to be active (SET) at a time. This function checks if there is
@@ -594,6 +600,14 @@ class Alarms extends Component {
 
     _onPressDuplicate = (item, event) => {
         console.log("_onPressDuplicate");
+
+        if (upgrades.pro != true) {
+            //NOTE: 1B. IAP-locked Feature - Alarms Limit
+            //TODO: Display CKT-styled upgrade popup
+            alert("Not available in free version (Placeholder)");
+            return;
+        }
+
         let newAlarm = new AlarmModel(this.state.alarms.length);
         newAlarm.wakeUpTime = item.wakeUpTime;
         newAlarm.arrivalTime = item.arrivalTime;

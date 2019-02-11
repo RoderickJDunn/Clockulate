@@ -53,6 +53,7 @@ import { scale, scaleByFactor } from "../util/font-scale";
 import * as DateUtils from "../util/date_utils";
 import { ALARM_STATES } from "../data/constants";
 import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
+import upgrades from "../config/upgrades";
 
 let { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15];
@@ -607,7 +608,7 @@ class AlarmDetail extends Component {
     }
 
     /*
-    NOTE: This method DOES get called when you push 'Back' do go back to parent screen. However, no lifecycle
+    //NOTE: This method DOES get called when you push 'Back' do go back to parent screen. However, no lifecycle
           methods are called in the previous screen (not even Render()), so any work that you want to do in the
           parent screen on navigating back must be done by sending a callback fx upon initial navigation to this screen.
           The callback can be executed from 1) componentWillUnmount (in which case you might see the parent screen update
@@ -680,6 +681,13 @@ class AlarmDetail extends Component {
     }
 
     _onPressAddTask() {
+        if (upgrades.pro != true) {
+            //NOTE: 2. IAP-locked Feature - Tasks Limit
+            //TODO: Display CKT-styled upgrade popup
+            alert("Not available in free version (Placeholder)");
+            return;
+        }
+
         if (this.state.activeTask == null) {
             let nextTaskPosition = this.state.alarm.tasks.length;
             // console.log("passing position of new task: ", nextTaskPosition);
@@ -1446,9 +1454,13 @@ class AlarmDetail extends Component {
         // for (let index = 0; index < this._snapPoints.length; index++) {
         //     console.log(index, this._snapPoints[index].id);
         // }
+        // OPTIMIZATION: Replace redundant String-equality checks with a single one, and save a boolean
+        //               or enumeration (number) flag
+        //               or even better, create a Map of mode name <--> Enumeration value, then here at
+        //                 the start of each render, use the map to get the ENUM numerical value of the
+        //                 current mode.
 
         let imageHeight = SCREEN_HEIGHT + 30;
-
         /* clockAndLabelTranslation:
             This is complicated. There are 2 Animated values that can effect the translateY value of
             the Clock+Label view:
@@ -1463,6 +1475,9 @@ class AlarmDetail extends Component {
         let clockAndLabelTranslation;
         if (this.state.alarm.mode == "normal") {
             console.info("NORMAL MODE ");
+
+            // OPTIMIZATION: Don't build the animation on every render. Build them once,
+            //               then just assign them here
             clockAndLabelTranslation = Animated.add(
                 this._clockTransform,
                 this._animKeyboardHeight.interpolate({
@@ -1481,6 +1496,8 @@ class AlarmDetail extends Component {
         } else {
             console.info("CALC MODE");
 
+            // OPTIMIZATION: Don't build the animation on every render. Build them once,
+            //               then just assign them here
             clockAndLabelTranslation = this._clockTransform.interpolate({
                 inputRange: [this.snapTaskList, this.snapAuto, this.snapNormal],
                 outputRange: [
@@ -1545,35 +1562,6 @@ class AlarmDetail extends Component {
 
         // console.log("forceRemeasure?", forceRemeasure);
 
-        // taskArea = (
-        //     <TaskList
-        //         onPressItem={this._onPressTask}
-        //         onPressItemCheckBox={this.onChangeTaskEnabled}
-        //         onChangeTaskDuration={this.onChangeTaskDuration}
-        //         onPressDelete={this._onDeleteTask}
-        //         // onShowDurationSlider={() =>
-        //         //     this.setState({ isSlidingTask: true })
-        //         // }
-        //         onSnapTask={this._onSnapTask}
-        //         data={sortedTasks}
-        //         activeTask={this.state.activeTask}
-        //         closeTaskRows={this._closeTaskRows}
-        //         isEditingTasks={this.state.isEditingTasks}
-        //         isSlidingTask={this.state.isSlidingTask}
-        //         didEndMove={this._didEndMove}
-        //         onReorderTasks={this._onReorderTasks}
-        //         willStartMove={this._willStartTaskMove}
-        //         forceRemeasure={forceRemeasure} // TODO: is this prop event required anymore?
-        //         hideDisabledTasks={this.state.hideDisabledTasks}
-        //         containerDimensions={this.state.taskListDimensions}
-        //         startTimesAnim={this.startTimesHandleAnim}
-        //         durationsVisible={this.state.durationsVisible}
-        //         // onScroll={this.onScrollTaskList.bind(this)}
-        //         // onEndReached={this.onEndReachedTaskList.bind(this)}
-        //     />
-        // );
-        // }
-
         let wakeUpTime = this.state.alarm.wakeUpTime;
         // console.log("this.state.alarm.mode", this.state.alarm.mode);
         // if (this.state.alarm.mode == "autocalc") {
@@ -1582,6 +1570,8 @@ class AlarmDetail extends Component {
         //     wakeUpTime = this.state.alarm.wakeUpTime;
         // }
 
+        // OPTIMIZATION: Don't format these on every render. Save them in State along with the Alarm
+        //                 whenever relevant parameters change.
         let wakeTimeMoment = moment.utc(wakeUpTime).local();
         let fWakeUpTime = wakeTimeMoment.format("h:mm");
         let amPmWakeUpTime = wakeTimeMoment.format("A");
@@ -1625,43 +1615,6 @@ class AlarmDetail extends Component {
                 />
             );
         }
-
-        // let editTasksBtn;
-        // if (!this.state.isEditingTasks) {
-        //     editTasksBtn = (
-        //         <EntypoIcon
-        //             name="edit"
-        //             size={scaleByFactor(20, 0.2)}
-        //             // color="#7a7677"
-        //             color={Colors.brandLightOpp}
-        //         />
-        //     );
-        // } else {
-        //     editTasksBtn = (
-        //         <View
-        //             style={{
-        //                 flex: 1,
-        //                 paddingHorizontal: 7,
-        //                 // paddingVertical: 3,
-        //                 borderRadius: 12,
-        //                 backgroundColor: Colors.brandLightPurple,
-        //                 alignItems: "center",
-        //                 alignContent: "center",
-        //                 justifyContent: "center"
-        //             }}
-        //         >
-        //             <Text
-        //                 style={{
-        //                     color: "white",
-        //                     fontSize: scaleByFactor(15, 0.1),
-        //                     textAlignVertical: "center"
-        //                 }}
-        //             >
-        //                 DONE
-        //             </Text>
-        //         </View>
-        //     );
-        // }
 
         let labelForceVisible = null;
 
@@ -2222,6 +2175,30 @@ class AlarmDetail extends Component {
                                         }}
                                     />
                                 ) : null}
+                                <Animated.Image
+                                    style={{
+                                        height: 61.5,
+                                        width: 6,
+                                        position: "absolute",
+                                        right: -8,
+                                        transform: [
+                                            {
+                                                scaleX: this.startTimesHandleAnim.interpolate(
+                                                    {
+                                                        inputRange: [
+                                                            -230,
+                                                            -115,
+                                                            0
+                                                        ],
+                                                        outputRange: [1, 3, 1]
+                                                    }
+                                                )
+                                            }
+                                        ],
+                                        top: this._viewIdx == 2 ? 247.5 :137.5 // Height of 2.5 task-items
+                                    }}
+                                    source={require("../img/Indicator_StartTimesV1.png")}
+                                />
                                 <EdgeSwiper
                                     animValue={this.startTimesHandleAnim}
                                     onAnimComplete={
