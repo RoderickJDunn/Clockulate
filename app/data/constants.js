@@ -3,6 +3,7 @@
  */
 
 import * as DateUtils from "../util/date_utils";
+import Settings from "../config/settings";
 
 export let SOUND_TYPES = {
     SILENT: 0,
@@ -25,19 +26,21 @@ export let ADV_STAT_TYPES = {
 
 export const DefaultSound = {};
 
-export const DefaultAlarm = {
-    wakeUpTime: getDateForHour(8), // 8:00 am
-    arrivalTime: getDateForHour(8),
-    mode: "autocalc",
-    tasks: [],
-    label: "",
-    status: ALARM_STATES.SET,
-    visible: true,
-    preset: false,
-    order: null,
-    alarmSound: {},
-    snoozeTime: 10, // minutes
-    showHrsOfSleep: true
+export const DefaultAlarm = () => {
+    return {
+        wakeUpTime: getDateForHour(8), // 8:00 am
+        arrivalTime: getDateForHour(8),
+        mode: "autocalc",
+        tasks: [],
+        label: "",
+        status: ALARM_STATES.SET,
+        visible: true,
+        preset: false,
+        order: null,
+        alarmSound: {},
+        snoozeTime: 10, // minutes
+        showHrsOfSleep: Settings.defaultShowHrsSleep()
+    };
 };
 
 export const DefaultTask = {

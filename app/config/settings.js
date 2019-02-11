@@ -37,4 +37,15 @@ accessor.chargeReminder = newVal => {
     return setting.enabled;
 };
 
+accessor.defaultShowHrsSleep = newVal => {
+    console.log("fetching setting defaultShowHrsOfSleep");
+    let setting = settings.filtered("name = 'defaultShowHrsOfSleep'")[0];
+    if (newVal != null) {
+        realm.write(() => {
+            setting.enabled = newVal;
+        });
+    }
+    return setting.enabled;
+};
+
 export default accessor;

@@ -10,36 +10,39 @@ import moment from "moment";
 
 export class AlarmModel {
     constructor(order, wakeUpTime = null, defaultShowHrsOfSleep = null) {
+        let defAlm = DefaultAlarm();
+
         this.id = uuid.v1();
-        this.wakeUpTime = wakeUpTime ? wakeUpTime : DefaultAlarm.wakeUpTime;
-        this.arrivalTime = DefaultAlarm.arrivalTime;
-        this.mode = DefaultAlarm.mode;
-        this.tasks = DefaultAlarm.tasks;
-        this.label = DefaultAlarm.label;
-        this.status = DefaultAlarm.status;
-        this.visible = DefaultAlarm.visible;
-        this.preset = DefaultAlarm.preset;
+        this.wakeUpTime = wakeUpTime ? wakeUpTime : defAlm.wakeUpTime;
+        this.arrivalTime = defAlm.arrivalTime;
+        this.mode = defAlm.mode;
+        this.tasks = defAlm.tasks;
+        this.label = defAlm.label;
+        this.status = defAlm.status;
+        this.visible = defAlm.visible;
+        this.preset = defAlm.preset;
         this.order = order;
-        this.showHrsOfSleep = DefaultAlarm.defaultShowHrsOfSleep;
+        this.showHrsOfSleep = defAlm.defaultShowHrsOfSleep;
 
         this.alarmSound = new AlarmSound();
         console.log("this.sound", this.sound);
-        this.snoozeTime = DefaultAlarm.snoozeTime;
+        this.snoozeTime = defAlm.snoozeTime;
         this.noticiationId = null;
     }
 
     static isDefault(alarm) {
         console.log("------- Checking if alarm is default -----");
         console.log(alarm);
+        let defAlm = DefaultAlarm();
         if (
-            alarm.wakeUpTime === DefaultAlarm.wakeUpTime &&
-            alarm.arrivalTime === DefaultAlarm.arrivalTime &&
-            // alarm.mode === DefaultAlarm.mode &&
-            alarm.tasks.length === DefaultAlarm.tasks.length &&
-            alarm.label === DefaultAlarm.label &&
-            alarm.status === DefaultAlarm.status &&
-            alarm.visible === DefaultAlarm.visible &&
-            alarm.preset === DefaultAlarm.preset
+            alarm.wakeUpTime === defAlm.wakeUpTime &&
+            alarm.arrivalTime === defAlm.arrivalTime &&
+            // alarm.mode === defAlm.mode &&
+            alarm.tasks.length === defAlm.tasks.length &&
+            alarm.label === defAlm.label &&
+            alarm.status === defAlm.status &&
+            alarm.visible === defAlm.visible &&
+            alarm.preset === defAlm.preset
         ) {
             return true;
         } else {

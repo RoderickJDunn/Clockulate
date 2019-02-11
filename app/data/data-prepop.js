@@ -50,6 +50,10 @@ let prePopSettings = [
     {
         name: "chargeReminder",
         enabled: true
+    },
+    {
+        name: "defaultShowHrsOfSleep",
+        enabled: true
     }
 ];
 
@@ -378,7 +382,7 @@ function insertPrepopData() {
             preset: false, // if tr
             order: 0,
             alarmSound: alarmSound1,
-            snoozeTime: DefaultAlarm.snoozeTime
+            snoozeTime: DefaultAlarm().snoozeTime
         });
 
         let wake2 = moment("10:00", "HH:mm").toDate();
@@ -399,7 +403,7 @@ function insertPrepopData() {
             preset: false, // if tr
             order: 1,
             alarmSound: alarmSound2,
-            snoozeTime: DefaultAlarm.snoozeTime
+            snoozeTime: DefaultAlarm().snoozeTime
         });
         // console.log(alarm2, alarm1, task2, task4, task5);
         console.log("Inserted pre-pop data");
