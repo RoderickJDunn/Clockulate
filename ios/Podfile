@@ -30,6 +30,8 @@ target 'Alarm_AutoSet' do
 #  pod 'react-native-maps', path: '../../'
 #  pod 'react-native-google-maps', path: '../../'  # <~~ if you need GoogleMaps support on iOS
 # Add new pods below this line
+pod 'RNIap', :path => '../node_modules/react-native-iap'
+
 pod 'RNFS', :path => '../node_modules/react-native-fs'
 
 pod 'ReactNativePermissions', :path => '../node_modules/react-native-permissions'

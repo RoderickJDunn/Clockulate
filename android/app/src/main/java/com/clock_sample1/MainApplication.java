@@ -3,6 +3,7 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.dooboolab.RNIap.RNIapPackage;
 import com.rnfs.RNFSPackage;
 import com.reactlibrary.RNTooltipsPackage;
 import com.sbugert.rnadmob.RNAdMobPackage;
@@ -41,6 +42,7 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(new MainReactPackage(),
+            new RNIapPackage(),
             new RNFSPackage(),
             new RNTooltipsPackage(),
             new RNAdMobPackage(),

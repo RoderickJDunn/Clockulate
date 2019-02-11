@@ -10,17 +10,23 @@ import {
     StatusBar,
     Platform
 } from "react-native";
+import * as RNIap from "react-native-iap";
 import LinearGradient from "react-native-linear-gradient";
 import FAIcon from "react-native-vector-icons/FontAwesome";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import { isIphoneX } from "react-native-iphone-x-helper";
-import { Header } from "react-navigation";
+
 // import getFullImgNameForScreenSize from "../img/image_map";
 import Colors from "../styles/colors";
-
+import upgrades from "../config/upgrades";
 import { scaleByFactor } from "../util/font-scale";
 // import { ScrollView } from "react-native-gesture-handler";
+
+const PRODUCTS = Platform.select({
+    ios: ["ClockulateProMain"],
+    android: ["ClockulateProMain"]
+});
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -175,7 +181,16 @@ export default class Upgrade extends React.Component {
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
 
-    componentDidMount() {
+    async componentDidMount() {
+        console.log("Upgrade: ComponentDidMount");
+        try {
+            const products = await RNIap.getProducts(PRODUCTS);
+            console.log("products", products);
+            // this.setState({ products });
+        } catch (err) {
+            console.warn(err); // standardized err.code and err.message available
+        }
+
         this.props.navigation.setParams({
             onPressUpgrade: this.onPressUpgrade
         });
@@ -448,8 +463,15 @@ export default class Upgrade extends React.Component {
     onPressUpgrade = () => {
         //TODO: Implement IAP functionality
         console.log("onPressUpgrade");
-        alert("header height: " + Header.HEIGHT);
-        alert("status bar height: " + StatusBar.currentHeight);
+
+        /* TEST: Simulating user buying the IAP */
+        upgrades.setPro(true);
+        /* ************************************ */
+    };
+
+    onPressRstrPurchase = () => {
+        //TODO: Implement IAP functionality
+        console.log("onPressRstrPurchase");
     };
 
     UpgradeItem({ item }) {
@@ -529,8 +551,7 @@ export default class Upgrade extends React.Component {
                     ListFooterComponent={() => (
                         <View
                             style={{
-                                height: 165,
-                                flex: 0.15,
+                                height: 175,
                                 marginBottom: 35,
                                 alignContent: "center",
                                 justifyContent: "center",
@@ -545,6 +566,14 @@ export default class Upgrade extends React.Component {
                             >
                                 <Text style={[styles.upgradeBtnText]}>
                                     Upgrade Now
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.rstrPurchaseBtn]}
+                                onPress={this.onPressRstrPurchase}
+                            >
+                                <Text style={[styles.rstrPurchaseText]}>
+                                    Already purchased? Tap to Restore Purchase
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -797,6 +826,16 @@ const styles = StyleSheet.create({
         color: Colors.brandLightOpp,
         fontSize: 35,
         fontFamily: "Quesha",
+        letterSpacing: 1
+    },
+    rstrPurchaseBtn: {
+        marginTop: 30
+    },
+    rstrPurchaseText: {
+        color: Colors.brandLightOpp,
+        fontSize: 14,
+        textAlign: "center",
+        fontFamily: "Avenir-Black",
         letterSpacing: 1
     }
 });

@@ -5,6 +5,7 @@
 	};
 	objectVersion = 46;
 	objects = {
+
 /* Begin PBXBuildFile section */
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
@@ -81,6 +82,8 @@
 		77824157201BF0D50077CF2F /* ArrowViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 77824156201BF0D50077CF2F /* ArrowViewManager.m */; };
 		7783E73D20608433006F43AD /* sci-fi-alarm.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7783E71220608432006F43AD /* sci-fi-alarm.mp3 */; };
 		778B4A4D1F96D91000AB5DCA /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 778B4A4C1F96D91000AB5DCA /* LaunchScreen.xib */; };
+		778D96772210BB75003C853E /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 778D96762210BB75003C853E /* StoreKit.framework */; };
+		778D967E2210BEF0003C853E /* libRNIap.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 778D967D2210BEC0003C853E /* libRNIap.a */; };
 		77BFE8A92194E8D800A5F73B /* AlarmAudioService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77BFE8A82194E8D800A5F73B /* AlarmAudioService.swift */; };
 		77BFE8AB2194E94A00A5F73B /* AlarmAudioService.m in Sources */ = {isa = PBXBuildFile; fileRef = 77BFE8AA2194E94A00A5F73B /* AlarmAudioService.m */; };
 		77C7CA1A21C416AC00BF8143 /* libART.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77C7C9DA21C4168100BF8143 /* libART.a */; };
@@ -441,6 +444,13 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RNTooltips;
 		};
+		778D967C2210BEC0003C853E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 778D96782210BEC0003C853E /* RNIap.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNIap;
+		};
 		779E03F31F76B2D800BF19D2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9C3A61DBFF6E456790788EB9 /* RNSVG.xcodeproj */;
@@ -670,6 +680,8 @@
 		77829B011F846B9D00705E6A /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		7783E71220608432006F43AD /* sci-fi-alarm.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "sci-fi-alarm.mp3"; sourceTree = "<group>"; };
 		778B4A4C1F96D91000AB5DCA /* LaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = LaunchScreen.xib; path = Alarm_AutoSet/LaunchScreen.xib; sourceTree = "<group>"; };
+		778D96762210BB75003C853E /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		778D96782210BEC0003C853E /* RNIap.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNIap.xcodeproj; path = "../node_modules/react-native-iap/ios/RNIap.xcodeproj"; sourceTree = "<group>"; };
 		77BFE8A82194E8D800A5F73B /* AlarmAudioService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmAudioService.swift; sourceTree = "<group>"; };
 		77BFE8AA2194E94A00A5F73B /* AlarmAudioService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AlarmAudioService.m; sourceTree = "<group>"; };
 		77C7C9D421C4168100BF8143 /* ART.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ART.xcodeproj; path = "../node_modules/react-native/Libraries/ART/ART.xcodeproj"; sourceTree = "<group>"; };
@@ -729,6 +741,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				778D967E2210BEF0003C853E /* libRNIap.a in Frameworks */,
 				77C7CA1A21C416AC00BF8143 /* libART.a in Frameworks */,
 				77731CE6216B8E0100093969 /* libLottie.a in Frameworks */,
 				77731CD5216B87C000093969 /* libLottieReactNative.a in Frameworks */,
@@ -760,6 +773,7 @@
 				5A7C6D4BF5B34422AAB6558A /* libSRSRadialGradient.a in Frameworks */,
 				2C6B298510FC43DBB1E95683 /* libRNGestureHandler.a in Frameworks */,
 				504DDE3ECBF946DEBB8AB6FB /* libRNAdMobManager.a in Frameworks */,
+				778D96772210BB75003C853E /* StoreKit.framework in Frameworks */,
 				036B9E20CC1A5269FF966BC1 /* libPods-Alarm_AutoSet.a in Frameworks */,
 				2C0398C2DD4A4A3AB508EAB3 /* libRNTooltips.a in Frameworks */,
 			);
@@ -916,6 +930,7 @@
 		2544FA4B4E434F93BCF3E4AB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				778D96762210BB75003C853E /* StoreKit.framework */,
 				47D610DB83674A19979F40D2 /* libc++.tbd */,
 				CCA2ADF618CB48A89CC8DD21 /* libz.tbd */,
 				9D52679FF81E8E3763C75C43 /* libPods-Alarm_AutoSet.a */,
@@ -1117,6 +1132,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		778D96792210BEC0003C853E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				778D967D2210BEC0003C853E /* libRNIap.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		779E03D01F76B2D800BF19D2 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -1196,6 +1219,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				778D96782210BEC0003C853E /* RNIap.xcodeproj */,
 				77C7C9D421C4168100BF8143 /* ART.xcodeproj */,
 				77731CD7216B8BC100093969 /* Lottie.xcodeproj */,
 				77731CCB216B852E00093969 /* LottieReactNative.xcodeproj */,
@@ -1370,6 +1394,9 @@
 							com.apple.BackgroundModes = {
 								enabled = 1;
 							};
+							com.apple.InAppPurchase = {
+								enabled = 1;
+							};
 							com.apple.Push = {
 								enabled = 1;
 							};
@@ -1482,6 +1509,10 @@
 				{
 					ProductGroup = 7714C229216565DB00C6681D /* Products */;
 					ProjectRef = 0329BC7F6BDE4CD39BC223B0 /* RNGestureHandler.xcodeproj */;
+				},
+				{
+					ProductGroup = 778D96792210BEC0003C853E /* Products */;
+					ProjectRef = 778D96782210BEC0003C853E /* RNIap.xcodeproj */;
 				},
 				{
 					ProductGroup = 770A513E209F879400D80A41 /* Products */;
@@ -1844,6 +1875,13 @@
 			fileType = archive.ar;
 			path = libRNTooltips.a;
 			remoteRef = 7788D9B7219E1408004E632B /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		778D967D2210BEC0003C853E /* libRNIap.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNIap.a;
+			remoteRef = 778D967C2210BEC0003C853E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		779E03F41F76B2D800BF19D2 /* libRNSVG.a */ = {
