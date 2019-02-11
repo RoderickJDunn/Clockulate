@@ -13,6 +13,7 @@ import { NavigationEvents } from "react-navigation";
 import { SettingsScreen, SettingsData } from "react-native-settings-screen";
 import Permissions from "react-native-permissions";
 import EntypoIcon from "react-native-vector-icons/Entypo";
+import VersionNumber from "react-native-version-number";
 
 import Colors from "../styles/colors";
 // import PickerActionSheet from "../components/picker-action-sheet";
@@ -53,7 +54,8 @@ export default class SettingsScreenCkt extends React.Component {
                 recCooldown: Settings.recCooldown(),
                 maxRecs:
                     Settings.maxRecs() > 0 ? Settings.maxRecs() : "Unlimited",
-                chargeReminder: Settings.chargeReminder()
+                chargeReminder: Settings.chargeReminder(),
+                defaultShowHrsSleep: Settings.defaultShowHrsSleep()
             },
             permissions: {
                 mic: null,
@@ -153,6 +155,27 @@ export default class SettingsScreenCkt extends React.Component {
                                     );
                                     settings.chargeReminder = newVal;
                                     Settings.chargeReminder(newVal);
+                                    this.setState({ settings });
+                                }}
+                            />
+                        );
+                    }
+                },
+                {
+                    title: "Show Hours of Sleep",
+                    subtitle: "Display hours of sleep by default (new alarms)",
+                    renderAccessory: () => {
+                        let { settings } = this.state;
+                        return (
+                            <Switch
+                                value={settings.defaultShowHrsSleep}
+                                onValueChange={newVal => {
+                                    console.log(
+                                        "didSet defaultShowHrsSleep",
+                                        newVal
+                                    );
+                                    settings.defaultShowHrsSleep = newVal;
+                                    Settings.defaultShowHrsSleep(newVal);
                                     this.setState({ settings });
                                 }}
                             />
@@ -299,7 +322,7 @@ export default class SettingsScreenCkt extends React.Component {
                             // Present alert asking if they want to go to Settings
                             Alert.alert(
                                 "Change Permissions",
-                                "Notification permission is granted. You can remove this permission in the Settings app, but Clockulate will not be able to send you alerts when your alarms go off.",
+                                "Notification permission is granted. You can remove this permission in the Settings app, but Clockulate will not be able to send you alerts when your alarms ring.",
                                 [
                                     {
                                         text: "Open Settings",
@@ -420,7 +443,7 @@ export default class SettingsScreenCkt extends React.Component {
                         fontFamily
                     }}
                 >
-                    v1.2.3
+                    {"v" + VersionNumber.appVersion}
                 </Text>
             )
         }
