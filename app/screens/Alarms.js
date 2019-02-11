@@ -499,7 +499,6 @@ class Alarms extends Component {
         );
         // console.log("this: ", this.constructor.name); /* This is how you check a class's name (here i'm checking 'this') */
         // console.debug(this.state);
-        this.setState({ alarms: realm.objects("Alarm").sorted("order") }); // TODO: filter by 'visible'=true
         // console.debug("Called set state from reloadAlarms");
         // console.debug(this.state);
 
@@ -512,20 +511,25 @@ class Alarms extends Component {
 
                 /* Now schedule notification(s) for the changes */
                 // passing in reloadAlarms function for iOS in-app alarm to be able to refresh AlarmsList screen
-                scheduleAlarm(
-                    changedAlarm[0],
-                    this.reloadAlarms.bind(this),
-                    this.alarmDidInitialize.bind(
-                        this,
-                        changedAlarm,
-                        changedAlarm.status
-                    )
-                );
+                requestAnimationFrame(() => {
+                    scheduleAlarm(
+                        changedAlarm[0],
+                        this.reloadAlarms.bind(this),
+                        this.alarmDidInitialize.bind(
+                            this,
+                            changedAlarm,
+                            changedAlarm.status
+                        )
+                    );
+                });
             } else if (changedAlarm.length > 1) {
                 console.error(
                     `Found more than 1 alarm with alarmId ${alarmId}. This should never happen...`
                 );
             }
+        } else {
+            // general reload. No specific alarm ID is known to have changed.
+            this.setState({ alarms: realm.objects("Alarm").sorted("order") }); // TODO: filter by 'visible'=true
         }
     };
 
@@ -849,7 +853,13 @@ class Alarms extends Component {
                                             this,
                                             alarm.item
                                         )}
-                                        onToggle={this._onAlarmToggled}
+                                        onToggle={() => {
+                                            requestAnimationFrame(() => {
+                                                this._onAlarmToggled(
+                                                    alarm.item
+                                                );
+                                            });
+                                        }}
                                         onSnap={this._onSnap.bind(this, alarm)}
                                         close={
                                             alarm.item.id !== this._activeRow
