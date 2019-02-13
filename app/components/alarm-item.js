@@ -19,6 +19,7 @@ import {
 import moment from "moment";
 import Interactable from "react-native-interactable";
 import LottieView from "lottie-react-native";
+import LinearGradient from "react-native-linear-gradient";
 
 import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
@@ -26,8 +27,7 @@ import { ListStyle, AlarmListStyle } from "../styles/list";
 import { scaleByFactor } from "../util/font-scale";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { ALARM_STATES } from "../data/constants";
-import LinearGradient from "react-native-linear-gradient";
-import Pulse from "react-native-pulse";
+import Pulse from "../components/anim-pulse";
 
 let shakeAnimMap = new Map([
     [0, 0],
@@ -623,6 +623,10 @@ class AlarmItem extends React.PureComponent {
                                     this.props.alarm
                                 )}
                             >
+                                {(status == ALARM_STATES.SET ||
+                                    status == ALARM_STATES.SNOOZED) && (
+                                    <Pulse color="#ff6060" />
+                                )}
                                 {status > ALARM_STATES.OFF &&
                                     status < ALARM_STATES.SNOOZED && (
                                         <View
@@ -635,19 +639,8 @@ class AlarmItem extends React.PureComponent {
                                                 left: 0,
                                                 borderRadius: 10
                                             }}
-                                        >
-                                            {(status == ALARM_STATES.SET ||
-                                                ALARM_STATES.SNOOZED) && (
-                                                <Pulse
-                                                    color="#ff6060"
-                                                    numPulses={1}
-                                                    diameter={100}
-                                                    speed={40}
-                                                    duration={3000}
                                                 />
                                             )}
-                                        </View>
-                                    )}
                                 <Animated.View
                                     onLayout={({ nativeEvent }) => {
                                         let {

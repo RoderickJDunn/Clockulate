@@ -59,7 +59,6 @@
         "react-native-pie": "^0.5.0",
         "react-native-popup-menu": "^0.12.6",
         "react-native-proximity-manager": "git+https://github.com/RoderickJDunn/react-native-ios-proximity-manager.git",
-        "react-native-pulse": "^1.0.7",
         "react-native-push-notification": "^3.0.2",
         "react-native-radial-gradient": "^1.0.5",
         "react-native-settings-screen": "^2.1.2",
