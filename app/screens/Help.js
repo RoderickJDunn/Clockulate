@@ -1,233 +1,654 @@
 import React from "react";
 import {
+    Text,
     View,
     TouchableOpacity,
     Dimensions,
     Switch,
     TouchableWithoutFeedback,
-    StyleSheet
-} from "react-native";
-
-import Svg, {
-    Circle,
-    Ellipse,
-    G,
-    TSpan,
-    TextPath,
-    Polygon,
-    Polyline,
-    Line,
-    Rect,
-    Use,
     Image,
-    Symbol,
-    Defs,
-    LinearGradient,
-    RadialGradient,
-    Stop,
-    ClipPath,
-    Pattern,
-    Mask,
-    Text
-} from "react-native-svg";
+    StyleSheet,
+    Animated
+} from "react-native";
+import LinearGradient from "react-native-linear-gradient";
+import Interactable from "react-native-interactable";
+import FAIcon from "react-native-vector-icons/FontAwesome";
+import getFullImgNameForScreenSize from "../img/image_map";
+import Colors from "../styles/colors";
 
-const points = [
-    { x: 0.5, y: 0 },
-    { x: 1, y: 0.5 },
-    { x: 0.5, y: 1 },
-    { x: 0, y: 0.5 }
-];
+import { scaleByFactor } from "../util/font-scale";
 
-const colors = ["red", "blue", "green", "yellow", "purple"];
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-// TODO: Intro/Tutorial
+// SCREEN_HEIGHT -= 88; // add 88 since the Nav bar is transparent
+// TODO: In-app purchases
 export default class Help extends React.Component {
+    static navigationOptions = ({ navigation }) => {
+        return {
+            headerStyle: {
+                // Style the header view itself (aka. the nav bar)
+                backgroundColor: "transparent",
+                borderBottomWidth: 0
+            },
+            headerRight: (
+                <FAIcon
+                    name={"magic"}
+                    color={Colors.brandLightGrey}
+                    underlayColor={Colors.brandDarkGrey}
+                    size={24}
+                    onPress={() => {
+                        //TODO: Implement IAP functionality
+                        // navigation.state.params.handleAddAlarm()
+                        console.log("Pressed upgrade button");
+                    }}
+                    hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
+                    style={{
+                        paddingLeft: 20,
+                        marginRight: scaleByFactor(8, 0.9)
+                    }}
+                />
+            )
+        };
+    };
     /*
     Props: 
      */
+    constructor(props) {
+        super(props);
+
+        console.log("Upgrade -- constructor ");
+    }
+
+    _bgdPosition = new Animated.Value(0);
+    _interactable = null;
+    _idx = 0;
 
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
 
-    renderGradient(c1, c2, p1, p2) {
-        const x1 = p1.x,
-            y1 = p1.y,
-            x2 = p2.x,
-            y2 = p2.y;
-
-        const id = "grad" + c2 + c2 + x1 + x2 + y1 + y2;
-        const x = x1 < x2 ? x1 : x2;
-        const y = y1 < y2 ? y1 : y2;
-
+    renderCalcButtons() {
         return (
-            <Svg key={id} height="150" width="300">
-                <Defs>
-                    <LinearGradient id="grad" x1="0" y1="0" x2="170" y2="0">
-                        <Stop
-                            offset="0"
-                            stopColor="rgb(255,255,0)"
-                            stopOpacity="0"
-                        />
-                        <Stop offset="1" stopColor="red" stopOpacity="1" />
-                    </LinearGradient>
-                </Defs>
-                <Ellipse cx="150" cy="75" rx="85" ry="55" fill="url(#grad)" />
-            </Svg>
+            <LinearGradient
+                start={{ x: 0.0, y: -1.0 }}
+                end={{ x: 0.5, y: 3.0 }}
+                locations={[0, 0.8, 1]}
+                colors={["#000", "#341576", "#526FCE"]}
+                style={[styles.calcBkgrdContainer]}
+            >
+                <View
+                    style={{
+                        transform: [
+                            {
+                                skewX: "-10deg"
+                            },
+                            {
+                                skewY: "-10deg"
+                            }
+                        ]
+                    }}
+                >
+                    <Animated.View
+                        style={{
+                            transform: [
+                                {
+                                    rotate: "20deg"
+                                },
+                                {
+                                    translateX: this._bgdPosition.interpolate({
+                                        inputRange: [0, SCREEN_WIDTH * 4],
+                                        outputRange: [0, 150]
+                                        // extrapolate: "clamp"
+                                    })
+                                }
+                            ],
+                            borderWidth: 30,
+                            borderColor: "rgba(255,255,255,0.1)",
+                            padding: 15
+                        }}
+                    >
+                        <View style={[styles.calcBtn, styles.calcDisplay]} />
+                        <View
+                            style={[
+                                styles.calcRow,
+                                {
+                                    marginBottom: 10
+                                    // justifyContent: "space-around"
+                                }
+                            ]}
+                        >
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSpecial]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSpecial]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSpecial]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSpecial]}
+                            />
+                            <View
+                                style={[
+                                    styles.calcBtn,
+                                    { backgroundColor: "transparent", flex: 1 }
+                                ]}
+                            />
+                            <View
+                                style={[
+                                    styles.calcRow,
+                                    styles.calcBtn,
+                                    {
+                                        margin: 0,
+                                        backgroundColor: "#FFFFFF0D",
+                                        paddingHorizontal: 5,
+                                        alignSelf: "flex-end"
+                                    }
+                                ]}
+                            >
+                                <View
+                                    style={[
+                                        styles.calcBtn,
+                                        styles.calcBtnSpecial,
+                                        { marginHorizontal: 5 }
+                                    ]}
+                                />
+                                <View
+                                    style={[
+                                        styles.calcBtn,
+                                        styles.calcBtnSpecial,
+                                        { marginHorizontal: 5 }
+                                    ]}
+                                />
+                            </View>
+                        </View>
+
+                        <View style={[styles.calcRow]}>
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                        </View>
+                        <View style={[styles.calcRow]}>
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[
+                                    styles.calcBtn,
+                                    styles.calcBtnSquare,
+                                    styles.calcTopHalfBtn
+                                ]}
+                            />
+                            <View
+                                style={[
+                                    styles.calcBtn,
+                                    styles.calcBtnSquare,
+                                    styles.calcTopHalfBtn
+                                ]}
+                            />
+                        </View>
+                        <View style={[styles.calcRow]}>
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[
+                                    styles.calcBtn,
+                                    styles.calcBtnSquare,
+                                    styles.calcBottomHalfBtn
+                                ]}
+                            />
+                            <View
+                                style={[
+                                    styles.calcBtn,
+                                    styles.calcBtnSquare,
+                                    styles.calcBottomHalfBtn
+                                ]}
+                            />
+                        </View>
+                        <View style={[styles.calcRow]}>
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[
+                                    styles.calcBtn,
+                                    styles.calcBtnSquare,
+                                    styles.calcTopHalfBtn
+                                ]}
+                            />
+                            <View
+                                style={[
+                                    styles.calcBtn,
+                                    styles.calcBtnSquare,
+                                    styles.calcTopHalfBtn
+                                ]}
+                            />
+                        </View>
+                        <View style={[styles.calcRow]}>
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[
+                                    styles.calcBtn,
+                                    styles.calcBtnSquare,
+                                    styles.calcBottomHalfBtn
+                                ]}
+                            />
+                            <View
+                                style={[
+                                    styles.calcBtn,
+                                    styles.calcBtnSquare,
+                                    styles.calcBottomHalfBtn
+                                ]}
+                            />
+                        </View>
+                        <View style={[styles.calcRow]}>
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+                            <View
+                                style={[styles.calcBtn, styles.calcBtnSquare]}
+                            />
+
+                            <View
+                                style={[
+                                    styles.calcBtn,
+                                    styles.calcBtnSquare,
+                                    styles.calcLeftHalfBtn
+                                ]}
+                            />
+                            <View
+                                style={[
+                                    styles.calcBtn,
+                                    styles.calcBtnSquare,
+                                    styles.calcRightHalfBtn
+                                ]}
+                            />
+                        </View>
+                    </Animated.View>
+                </View>
+            </LinearGradient>
+        );
+    }
+
+    renderHelpPage() {
+        return (
+            <View style={styles.helpPage}>
+                <View
+                    style={{
+                        flex: 0.08,
+                        alignSelf: "stretch"
+                        // borderColor: "white",
+                        // borderWidth: 5
+                    }}
+                />
+                <View
+                    style={{
+                        flex: 0.5,
+                        borderColor: "#808080",
+                        borderWidth: 2
+                        // alignContent: "center",
+                        // justifyContent: "center"
+                        // alignItems: "flex-end"
+                    }}
+                >
+                    <Image
+                        style={{
+                            width: SCREEN_WIDTH * 0.7,
+                            flex: 1
+                        }}
+                        source={require("../img/Screen_Alarms1.png")}
+                    />
+                </View>
+                <View
+                    style={{
+                        flex: 0.25,
+                        justifyContent: "center"
+                        // backgroundColor: "green",
+                    }}
+                >
+                    <View
+                        style={{
+                            flex: 0.6,
+                            marginHorizontal: 9,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            borderRadius: 35,
+                            shadowOpacity: 0.9,
+                            shadowRadius: 10,
+                            shadowColor: "#000",
+                            elevation: 5,
+                            alignSelf: "center",
+                            // backgroundColor: "#AAAAFF53"
+                            backgroundColor: Colors.brandDarkBlue + "66"
+                        }}
+                    >
+                        <Text style={[styles.upgradeTitleText]}>
+                            Alarms List
+                        </Text>
+                        <Text style={[styles.upgradeBodyText]}>
+                            View all of your saved alarms, and turn them ON or
+                            OFF
+                        </Text>
+                        <Text style={[styles.upgradeBodyText]}>
+                            View additional actions for an alarm, such as
+                            Deleting and Duplicating, by swiping left on it
+                        </Text>
+                        <Text style={[styles.upgradeBodyText]}>
+                            Long-press and drag Alarms to reorder this list
+                        </Text>
+                    </View>
+                </View>
+            </View>
         );
     }
 
     render() {
-        let canvasSize = 350;
-
-        const x1 = points[0].x,
-            y1 = points[0].y,
-            x2 = points[0].x,
-            y2 = points[0].y;
-
+        // console.log("Upgrade -- render() ");
         return (
-            <View
-                style={[
-                    StyleSheet.absoluteFill,
-                    { alignItems: "center", justifyContent: "center" }
-                ]}
-            >
-                <Svg width="100%" height="100%" viewBox="0 0 800 300">
-                    <Defs>
-                        <LinearGradient
-                            id="Gradient"
-                            gradientUnits="userSpaceOnUse"
-                            x1="0"
-                            y1="0"
-                            x2="800"
-                            y2="0"
-                        >
-                            <Stop
-                                offset="0"
-                                stopColor="#00FF00"
-                                stopOpacity="1"
-                            />
-                            <Stop
-                                offset="1"
-                                stopColor="#FF0000"
-                                stopOpacity="1"
-                            />
-                        </LinearGradient>
-                        <Mask
-                            id="Mask"
-                            maskUnits="userSpaceOnUse"
-                            x="0"
-                            y="0"
-                            width="800"
-                            height="300"
-                        >
-                            <Text
-                                id="Text"
-                                x="400"
-                                y="200"
-                                fontFamily="Verdana"
-                                fontSize="100"
-                                textAnchor="middle"
-                                fill={"green"}
-                            >
-                                Masked text
-                            </Text>
-                        </Mask>
-                        <Rect
-                            id="aRect"
-                            x="0"
-                            y="0"
-                            width="800"
-                            height="300"
-                            fill="url(#Gradient)"
+            <View style={{ flex: 1, backgroundColor: "green" }}>
+                {this.renderCalcButtons()}
+                <Interactable.View
+                    ref={elm => (this._interactable = elm)}
+                    style={{
+                        width: SCREEN_WIDTH * 5,
+                        height: SCREEN_HEIGHT,
+                        marginTop: -88,
+                        flexDirection: "row"
+                        // backgroundColor: "green"
+                    }}
+                    horizontalOnly={true}
+                    snapPoints={[
+                        { x: 0, id: "0" },
+                        { x: -SCREEN_WIDTH, id: "1" },
+                        { x: -SCREEN_WIDTH * 2, id: "2" },
+                        { x: -SCREEN_WIDTH * 3, id: "3" },
+                        { x: -SCREEN_WIDTH * 4, id: "4" }
+                    ]}
+                    // dragWithSpring={{ tension: 1000, damping: 0.5 }}
+                    animatedNativeDriver={true}
+                    animatedValueX={this._bgdPosition}
+                    onDrag={event => {
+                        console.log("onDrag");
+                        let { state, y, targetSnapPointId } = event.nativeEvent;
+                        if (state == "end") {
+                            console.log("onDrag end");
+                            //     this.props.onSnap(targetSnapPointId);
+                            this._idx = parseInt(targetSnapPointId);
+                        }
+                    }}
+                    initialPosition={{ x: 0 }}
+                >
+                    {this.renderHelpPage()}
+                    <View style={styles.helpPage}>
+                        <View
+                            style={{
+                                height: 100,
+                                width: 100,
+                                backgroundColor: "green"
+                            }}
                         />
-                    </Defs>
-                    <Use href="#aRect" mask="url(#Mask)" />
-                    {/* <Use
-                        href="#Text"
-                        fill="none"
-                        stroke="black"
-                        stroke-width="2"
-                    /> */}
-                </Svg>
+                    </View>
+                    <View style={styles.helpPage}>
+                        <View
+                            style={{
+                                height: 100,
+                                width: 100,
+                                backgroundColor: "blue"
+                            }}
+                        />
+                    </View>
+                    <View style={styles.helpPage}>
+                        <View
+                            style={{
+                                height: 100,
+                                width: 100,
+                                backgroundColor: "yellow"
+                            }}
+                        />
+                    </View>
+                    <View style={styles.helpPage}>
+                        <View
+                            style={{
+                                height: 100,
+                                width: 100,
+                                backgroundColor: "purple"
+                            }}
+                        />
+                    </View>
+                </Interactable.View>
+                <TouchableOpacity
+                    style={[
+                        styles.pagerButton,
+                        {
+                            left: 0
+                        }
+                    ]}
+                    onPress={() => {
+                        console.log("previous");
+                        this._idx--;
+                        if (this._idx >= 0) {
+                            this._interactable.snapTo({ index: this._idx });
+                        } else {
+                            this._idx = 0;
+                            this._interactable.changePosition({ x: 50 });
+                        }
+                    }}
+                >
+                    <FAIcon
+                        name="chevron-left"
+                        size={35}
+                        // color={"#AAAAFF"}
+                        color={"#B5B5B533"}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.pagerButton, { right: 0 }]}
+                    onPress={() => {
+                        console.log("next");
+                        this._idx++;
+                        console.log(this._idx);
+                        if (this._idx <= 4) {
+                            this._interactable.snapTo({ index: this._idx });
+                        } else {
+                            this._idx = 4;
+                            console.log(this._idx);
+                            this._interactable.changePosition({
+                                x: -SCREEN_WIDTH * 4 - 50,
+                                y: 0
+                            });
+                        }
+                    }}
+                >
+                    <FAIcon
+                        name="chevron-right"
+                        size={35}
+                        color={"#B5B5B533"}
+                    />
+                </TouchableOpacity>
             </View>
         );
-
-        // return (
-        //     <View style={{ flex: 1 }}>
-        //         <Text>Introduction to Clockulate</Text>
-        //         <Text>Intro</Text>
-        //         <Text>blah</Text>
-        //         <Text>tutorial</Text>
-        //         <Text>blah</Text>
-        //         <Svg width={canvasSize} height={canvasSize} viewBox="0 0 1 1">
-        //             <Circle
-        //                 cx="50"
-        //                 cy="50"
-        //                 r="45"
-        //                 stroke="blue"
-        //                 strokeWidth="2.5"
-        //                 fill="green"
-        //             />
-        //             <Defs>
-        //                 <Mask
-        //                     id="mask"
-        //                     x="0"
-        //                     y="0"
-        //                     width={100}
-        //                     height={100}
-        //                     maskUnits="userSpaceOnUse"
-        //                 >
-        //                     <Circle
-        //                         cx="50"
-        //                         cy="50"
-        //                         r="45"
-        //                         stroke="blue"
-        //                         strokeWidth="2.5"
-        //                         fill="green"
-        //                     />
-
-        //                 </Mask>
-        //             </Defs>
-        //             <G mask={"url(#mask)"}>
-        //                 {this.renderGradient(
-        //                     colors[0],
-        //                     colors[1],
-        //                     points[0],
-        //                     points[1]
-        //                 )}
-        //                 {this.renderGradient(
-        //                     colors[1],
-        //                     colors[2],
-        //                     points[1],
-        //                     points[2]
-        //                 )}
-        //                 {this.renderGradient(
-        //                     colors[2],
-        //                     colors[3],
-        //                     points[2],
-        //                     points[3]
-        //                 )}
-        //                 {this.renderGradient(
-        //                     colors[3],
-        //                     colors[4],
-        //                     points[3],
-        //                     points[0]
-        //                 )}
-        //             </G>
-        //         </Svg>
-        //     </View>
-        // );
     }
 }
 
-{
-    /* <ArcShape
-    key={idx}
-    radius={radius}
-    width={width}
-    color={color}
-    startAngle={startAngle}
-    arcAngle={arcAngle}
-    strokeCap={strokeCap}
-/> */
-}
+const styles = StyleSheet.create({
+    calcBkgrdContainer: {
+        position: "absolute",
+        top: 0,
+        bottom: -150,
+        left: -200,
+        width: 775,
+        marginTop: -88
+        // backgroundColor: "red"
+    },
+    calcDisplay: {
+        width: SCREEN_WIDTH + 300,
+        height: 120,
+        marginBottom: 25
+    },
+    calcRow: {
+        flexDirection: "row"
+        // backgroundColor: "red"
+    },
+    calcBtn: {
+        borderRadius: 15,
+        backgroundColor: "rgba(255, 255, 255, 0.02)",
+        margin: 10
+    },
+    calcBtnSquare: {
+        width: 90,
+        height: 90
+    },
+    calcBtnSpecial: {
+        width: 75,
+        height: 40,
+        marginHorizontal: 8
+    },
+    calcBtnRect: {
+        width: 80,
+        height: 60
+    },
+    calcTopHalfBtn: {
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+        marginBottom: 0,
+        paddingBottom: 0,
+        height: 100
+    },
+    calcBottomHalfBtn: {
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+        marginTop: 0,
+        paddingTop: 0,
+        height: 100
+    },
+    calcRightHalfBtn: {
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
+        marginLeft: 0,
+        width: 100
+    },
+    calcLeftHalfBtn: {
+        borderBottomRightRadius: 0,
+        borderTopRightRadius: 0,
+        marginRight: 0,
+        width: 100
+    },
+    helpPage: {
+        width: SCREEN_WIDTH,
+        // height: SCREEN_HEIGHT - 200 - 50, // TODO: Change 200 to factor for Title height
+        alignSelf: "center",
+        // alignContent: "center",
+        // justifyContent: "center",
+        alignItems: "center"
+        // marginTop: -88,
+        // backgroundColor: "yellow"
+    },
+    pagerButton: {
+        margin: 10,
+        position: "absolute",
+        bottom: SCREEN_HEIGHT * 0.45,
+        transform: [
+            {
+                scaleY: 1.5
+            },
+            {
+                scaleX: 0.7
+            }
+        ]
+    },
+    upgradeTitleText: {
+        fontFamily: "Quesha",
+        fontSize: 30,
+        color: Colors.brandLightOpp,
+        paddingHorizontal: 10
+    },
+    upgradeBodyText: {
+        fontFamily: "Gurmukhi MN",
+        textAlign: "center",
+        fontSize: 14,
+        color: Colors.brandLightOpp,
+        marginVertical: 2,
+        paddingHorizontal: 10
+    },
+    upgradeButton: {
+        position: "absolute",
+        bottom: 50,
+        padding: 10,
+        alignSelf: "center",
+        alignContent: "center",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 180,
+        shadowOpacity: 0.9,
+        shadowRadius: 10,
+        shadowColor: "#000",
+        elevation: 5,
+        backgroundColor: Colors.brandLightPurple,
+        borderRadius: 80
+    },
+    upgradeBtnText: {
+        color: Colors.brandLightOpp,
+        fontSize: 35,
+        fontFamily: "Quesha"
+    }
+});
