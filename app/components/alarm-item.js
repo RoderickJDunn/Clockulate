@@ -601,7 +601,9 @@ class AlarmItem extends React.PureComponent {
                             style={[
                                 {
                                     width: this.width - 20, // subtract padding
-                                    flexDirection: "row"
+                                    flexDirection: "row",
+                                    flex: 1,
+                                    alignSelf: "stretch"
                                 }
                                 // movingStyle
                             ]}
