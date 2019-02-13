@@ -177,7 +177,7 @@ export default class Sounds extends Component {
                         extraData={this.state}
                     />
                 </View>
-                {true && (
+                {false && (
                     <AdWrapper
                         borderPosition="top"
                         screen={"Sounds"}

@@ -52,6 +52,14 @@ import AVFoundation
   func soundActivatedRecorderDidFinishRecording(_ recorder: FDSoundActivatedRecorder, _ timestamp: String,  _ duration: Double, andSaved file:URL?)
 }
 
+func print(_ items: Any...) {
+  #if DEBUG
+  items.forEach { item in
+    Swift.print(item)
+  }
+  #endif
+}
+
 @objc public enum FDSoundActivatedRecorderStatus: Int {
     case inactive
     case listening

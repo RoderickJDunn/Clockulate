@@ -93,7 +93,7 @@ export const TaskListStyle = StyleSheet.create({
     allChildren: {
         // marginLeft: 5,
         // marginRight: 5,
-        fontSize: 20,
+        fontSize: 19,
         lineHeight: 20
         // overflow: "hidden"
     }
