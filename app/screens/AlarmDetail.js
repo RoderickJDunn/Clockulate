@@ -17,7 +17,8 @@ import {
     Platform,
     LayoutAnimation,
     Easing,
-    InteractionManager
+    InteractionManager,
+    ActivityIndicator
 } from "react-native";
 import { Header } from "react-navigation";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -234,6 +235,7 @@ class AlarmDetail extends Component {
                     menuIsOpen: false,
                     showSnoozePicker: false,
                     durationsVisible: true,
+                    isLoadingTasks: true,
                     taskAreaFlex: TASK_AREA_AUTO_VIEW_FLEX_FACTOR,
                     taskHeaderFlex: TASK_HEAD_AUTO_VIEW_FLEX_FACTOR,
                     taskListDimensions: this.tskListDimsAutoView
@@ -255,6 +257,7 @@ class AlarmDetail extends Component {
                 menuIsOpen: false,
                 showSnoozePicker: false,
                 durationsVisible: true,
+                isLoadingTasks: true,
                 taskAreaFlex: TASK_AREA_AUTO_VIEW_FLEX_FACTOR,
                 taskHeaderFlex: TASK_HEAD_AUTO_VIEW_FLEX_FACTOR,
                 taskListDimensions: this.tskListDimsAutoView
@@ -267,11 +270,12 @@ class AlarmDetail extends Component {
             this.state.alarm.wakeUpTime
         );
 
-        this._taskStartTimes = this._calcStartTimes();
+        // this._taskStartTimes = this._calcStartTimes();
 
-        this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
+        // this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
+        this._cachedSortedTasks = [];
 
-        this.renderRowsInclude = [];
+        // this.renderRowsInclude = [];
         /* These may be used for Intro (Tutorial Mode), but removing for now */
         // TODO: Here we need to check whether user has global setting to "Never show mode indicator"
         // this._modeTextOpacity = new Animated.Value(1);
@@ -294,6 +298,31 @@ class AlarmDetail extends Component {
             this._clockTransform = new Animated.Value(this.snapAuto);
             this._snapPoints = this._ALL_SNAP_POINTS;
         }
+
+        this.normModeCLTranslation = Animated.add(
+            this._clockTransform,
+            this._animKeyboardHeight.interpolate({
+                inputRange: [0, 500],
+                outputRange: [0, 250],
+                extrapolate: "clamp"
+            })
+        ).interpolate({
+            inputRange: [this.snapTaskList, this.snapAuto, this.snapNormal],
+            outputRange: [
+                SCREEN_HEIGHT * 0.97,
+                SCREEN_HEIGHT,
+                SCREEN_HEIGHT * 0.3
+            ]
+        });
+
+        this.calcModeCLTranslation = this._clockTransform.interpolate({
+            inputRange: [this.snapTaskList, this.snapAuto, this.snapNormal],
+            outputRange: [
+                SCREEN_HEIGHT * 0.97,
+                SCREEN_HEIGHT,
+                SCREEN_HEIGHT * 0.3
+            ]
+        });
 
         // console.log(this.state);
         // console.log(params);
@@ -378,11 +407,17 @@ class AlarmDetail extends Component {
         if (this.keyboardWillHideSub) this.keyboardWillHideSub.remove();
     }
 
+    // OPTIMIZATION: Try moving content of this function to screen didFocus
     componentDidMount() {
         console.debug("AlarmDetail --- ComponentDidMount");
         // console.log("this.state.alarm", this.state.alarm);
 
         this.addKeyboardListeners();
+
+        this._lastMeasuredView = "autocalc"; // set initial lastView to calcmode index
+
+        this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
+        this._taskStartTimes = this._calcStartTimes();
 
         this.props.navigation.setParams({
             handleBackBtn: this.handleBackPress,
@@ -390,8 +425,6 @@ class AlarmDetail extends Component {
             setMenuState: this._setMenuState,
             openSnoozeTimePicker: this._openSnoozeTimePicker
         });
-
-        this._lastMeasuredView = "autocalc"; // set initial lastView to calcmode index
 
         AdvSvcOnScreenConstructed("AlarmDetail");
     }
@@ -629,37 +662,48 @@ class AlarmDetail extends Component {
         realm.write(() => {
             // TODO: This should work, but it seems that due to a bug, the Tasks list gets unlinked from the parent Alarm object. It should be fixed soon
             // https://github.com/realm/realm-js/issues/1124
-            //realm.create('Alarm', this.state, true);
+            let { alarm } = this.state;
+            alarm.status = ALARM_STATES.SET;
+            if (alarm.mode === "autocalc" && this._calculatedWakeUpTime) {
+                alarm.wakeUpTime = DateUtils.date_to_nextTimeInstance(
+                    this._calculatedWakeUpTime
+                );
+            } else {
+                alarm.wakeUpTime = DateUtils.date_to_nextTimeInstance(
+                    alarm.wakeUpTime
+                );
+            }
+            realm.create("Alarm", alarm, true);
             // TODO: end
 
             // For Now, use this workaround //
-            let alarm = realm
-                .objects("Alarm")
-                .filtered(`id = "${this.state.alarm.id}"`);
-            if (alarm && alarm.length === 1) {
-                // if (AlarmModel.isDefault(alarm[0])) {
-                //     // Since this alarm has default settings, delete it before nav'ing back. User hasn't changed anything.
-                //     realm.delete(alarm);
-                // } else
-                alarm[0].label = this.state.alarm.label;
-                alarm[0].arrivalTime = DateUtils.date_to_nextTimeInstance(
-                    this.state.alarm.arrivalTime
-                );
-                alarm[0].status = ALARM_STATES.SET;
-                alarm[0].alarmSound = this.state.alarm.alarmSound;
-                if (
-                    this.state.alarm.mode === "autocalc" &&
-                    this._calculatedWakeUpTime
-                ) {
-                    alarm[0].wakeUpTime = DateUtils.date_to_nextTimeInstance(
-                        this._calculatedWakeUpTime
-                    );
-                } else {
-                    alarm[0].wakeUpTime = DateUtils.date_to_nextTimeInstance(
-                        this.state.alarm.wakeUpTime
-                    );
-                }
-            }
+            // let alarm = realm
+            //     .objects("Alarm")
+            //     .filtered(`id = "${this.state.alarm.id}"`);
+            // if (alarm && alarm.length === 1) {
+            //     // if (AlarmModel.isDefault(alarm[0])) {
+            //     //     // Since this alarm has default settings, delete it before nav'ing back. User hasn't changed anything.
+            //     //     realm.delete(alarm);
+            //     // } else
+            //     alarm[0].label = this.state.alarm.label;
+            //     alarm[0].arrivalTime = DateUtils.date_to_nextTimeInstance(
+            //         this.state.alarm.arrivalTime
+            //     );
+            //     alarm[0].status = ALARM_STATES.SET;
+            //     alarm[0].alarmSound = this.state.alarm.alarmSound;
+            //     if (
+            //         this.state.alarm.mode === "autocalc" &&
+            //         this._calculatedWakeUpTime
+            //     ) {
+            //         alarm[0].wakeUpTime = DateUtils.date_to_nextTimeInstance(
+            //             this._calculatedWakeUpTime
+            //         );
+            //     } else {
+            //         alarm[0].wakeUpTime = DateUtils.date_to_nextTimeInstance(
+            //             this.state.alarm.wakeUpTime
+            //         );
+            //     }
+            // }
             //////////////////////////////////
         });
         // this.props.navigation.setParams({ shouldReload: true });
@@ -1029,7 +1073,7 @@ class AlarmDetail extends Component {
         }
 
         // console.log("this.state.alarm", this.state.alarm);
-        console.log("_cachedSortedTasks", this._cachedSortedTasks);
+        // console.log("_cachedSortedTasks", this._cachedSortedTasks);
     }
 
     _onDeleteTask(data) {
@@ -1475,40 +1519,13 @@ class AlarmDetail extends Component {
         let clockAndLabelTranslation;
         if (this.state.alarm.mode == "normal") {
             console.info("NORMAL MODE ");
-
-            // OPTIMIZATION: Don't build the animation on every render. Build them once,
-            //               then just assign them here
-            clockAndLabelTranslation = Animated.add(
-                this._clockTransform,
-                this._animKeyboardHeight.interpolate({
-                    inputRange: [0, 500],
-                    outputRange: [0, 250],
-                    extrapolate: "clamp"
-                })
-            ).interpolate({
-                inputRange: [this.snapTaskList, this.snapAuto, this.snapNormal],
-                outputRange: [
-                    SCREEN_HEIGHT * 0.97,
-                    SCREEN_HEIGHT,
-                    SCREEN_HEIGHT * 0.3
-                ]
-            });
+            clockAndLabelTranslation = this.normModeCLTranslation;
         } else {
             console.info("CALC MODE");
-
-            // OPTIMIZATION: Don't build the animation on every render. Build them once,
-            //               then just assign them here
-            clockAndLabelTranslation = this._clockTransform.interpolate({
-                inputRange: [this.snapTaskList, this.snapAuto, this.snapNormal],
-                outputRange: [
-                    SCREEN_HEIGHT * 0.97,
-                    SCREEN_HEIGHT,
-                    SCREEN_HEIGHT * 0.3
-                ]
-            });
+            clockAndLabelTranslation = this.calcModeCLTranslation;
         }
 
-        let sortedTasks = this._cachedSortedTasks.snapshot();
+        let sortedTasks = this._cachedSortedTasks;
 
         console.log("AlarmDetail: this._viewIdx", this._viewIdx);
 
@@ -2125,48 +2142,57 @@ class AlarmDetail extends Component {
                                 </View>
                                 {touchableBackdrop}
                                 {/* {taskArea} */}
-                                <TaskList
-                                    onPressItem={this._onPressTask}
-                                    onPressItemCheckBox={
-                                        this.onChangeTaskEnabled
-                                    }
-                                    onChangeTaskDuration={
-                                        this.onChangeTaskDuration
-                                    }
-                                    onPressDelete={this._onDeleteTask}
-                                    // onShowDurationSlider={() =>
-                                    //     this.setState({ isSlidingTask: true })
-                                    // }
-                                    onSnapTask={this._onSnapTask}
-                                    data={sortedTasks}
-                                    activeTask={this.state.activeTask}
-                                    closeTaskRows={this._closeTaskRows}
-                                    isEditingTasks={this.state.isEditingTasks}
-                                    isSlidingTask={this.state.isSlidingTask}
-                                    didEndMove={this._didEndMove}
-                                    onReorderTasks={this._onReorderTasks}
-                                    willStartMove={this._willStartTaskMove}
-                                    forceRemeasure={forceRemeasure} // TODO: is this prop event required anymore?
-                                    hideDisabledTasks={
-                                        this.state.hideDisabledTasks
-                                    }
-                                    containerDimensions={
-                                        this.state.taskListDimensions
-                                    }
-                                    taskRowDimensions={
-                                        this._getMeasurementsForTaskRow
-                                    }
-                                    startTimesAnim={this.startTimesHandleAnim}
-                                    durationsVisible={
-                                        this.state.durationsVisible
-                                    }
-                                    setStartTimeRef={this.setStartTimeRef}
-                                    // onScroll={this.onScrollTaskList.bind(this)}
-                                    // onEndReached={this.onEndReachedTaskList.bind(this)}
-                                    // tlContainerStyle={{
-                                    //     paddingHorizontal: scaleByFactor(10, 0.4)
-                                    // }}
-                                />
+                                {sortedTasks.length > 0 ? (
+                                    <TaskList
+                                        onPressItem={this._onPressTask}
+                                        onPressItemCheckBox={
+                                            this.onChangeTaskEnabled
+                                        }
+                                        onChangeTaskDuration={
+                                            this.onChangeTaskDuration
+                                        }
+                                        onPressDelete={this._onDeleteTask}
+                                        // onShowDurationSlider={() =>
+                                        //     this.setState({ isSlidingTask: true })
+                                        // }
+                                        onSnapTask={this._onSnapTask}
+                                        data={sortedTasks}
+                                        activeTask={this.state.activeTask}
+                                        closeTaskRows={this._closeTaskRows}
+                                        isEditingTasks={
+                                            this.state.isEditingTasks
+                                        }
+                                        isSlidingTask={this.state.isSlidingTask}
+                                        didEndMove={this._didEndMove}
+                                        onReorderTasks={this._onReorderTasks}
+                                        willStartMove={this._willStartTaskMove}
+                                        forceRemeasure={forceRemeasure} // TODO: is this prop event required anymore?
+                                        hideDisabledTasks={
+                                            this.state.hideDisabledTasks
+                                        }
+                                        containerDimensions={
+                                            this.state.taskListDimensions
+                                        }
+                                        taskRowDimensions={
+                                            this._getMeasurementsForTaskRow
+                                        }
+                                        startTimesAnim={
+                                            this.startTimesHandleAnim
+                                        }
+                                        durationsVisible={
+                                            this.state.durationsVisible
+                                        }
+                                        setStartTimeRef={this.setStartTimeRef}
+                                        // onScroll={this.onScrollTaskList.bind(this)}
+                                        // onEndReached={this.onEndReachedTaskList.bind(this)}
+                                        // tlContainerStyle={{
+                                        //     paddingHorizontal: scaleByFactor(10, 0.4)
+                                        // }}
+                                    />
+                                ) : (
+                                    <ActivityIndicator style={{ flex: 1 }} />
+                                )}
+
                                 {isIphoneX() ? (
                                     <View
                                         style={{

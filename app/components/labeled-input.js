@@ -68,16 +68,6 @@ class LabeledInput extends Component {
         // console.log("LabeledInput -- this.state", this.state);
         // console.log("LabeledInput -- this.props", this.props);
 
-        let { autoResize } = this.props;
-        if (
-            autoResize == true ||
-            (autoResize == "editing" && this.state.isEditing)
-        ) {
-            // If 1) we are editing text input, 2) autoResize prop is True, 3) inputHeight is not null
-            // set textInput height explicitly
-            inputHeight = this.state.inputHeight;
-            multiline = true;
-        }
         if (this.props.separation) {
             labelBottomPadding = this.props.separation;
         }

@@ -707,9 +707,11 @@ class Alarms extends Component {
             clearAlarm(alarm);
             this.setState(this.state);
 
-            realm.write(() => {
-                alarm.status = nextAlarmStatus;
-            });
+            // NOTE: Pretty sure this realm.write is unnecessary since clearAlarm sets the alarm.status to
+            //       OFF when the 3rd parameter is 'true', which it is by default.
+            // realm.write(() => {
+            //     alarm.status = nextAlarmStatus;
+            // });
         }
 
         //console.log("this.state", this.state);

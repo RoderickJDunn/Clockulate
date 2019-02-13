@@ -385,8 +385,8 @@ export let clearAlarm = (alarm, notificationId, disableAlarm = true) => {
                 setAlarmInstEnd(); // set end time of active AlarmInstance
             }
             alarm.snoozeCount = 0;
+            cancelInAppAlarm(alarm);
         });
-        cancelInAppAlarm(alarm);
     }
 };
 
@@ -425,18 +425,18 @@ let setAlarmInstEnd = () => {
         : null;
 
     if (currAlmInst != null) {
-        // store running averages of sleep
-        // Async: totalSleepEver, totalSleepThisYear, totalSleepThisMonth, totalSleepThisWeek
-        try {
-            AsyncStorage.getItem("totalSleepEver").then(value => {
-                console.log("First Launch");
-                AsyncStorage.setItem("alreadyLaunched", JSON.stringify(true));
-            });
-        } catch (error) {
-            console.error(
-                `Unable to check if app has already been launched: ${error}`
-            );
-        }
+        // // store running averages of sleep
+        // // Async: totalSleepEver, totalSleepThisYear, totalSleepThisMonth, totalSleepThisWeek
+        // try {
+        //     AsyncStorage.getItem("totalSleepEver").then(value => {
+        //         console.log("First Launch");
+        //         AsyncStorage.setItem("alreadyLaunched", JSON.stringify(true));
+        //     });
+        // } catch (error) {
+        //     console.error(
+        //         `Unable to check if app has already been launched: ${error}`
+        //     );
+        // }
 
         if (realm.isInTransaction) {
             currAlmInst.end = new Date();
@@ -552,9 +552,7 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
 export let cancelInAppAlarm = alarm => {
     if (alarm && alarm.timeoutId) {
         clearTimeout(alarm.timeoutId);
-        realm.write(() => {
-            alarm.timeoutId = null;
-        });
+        alarm.timeoutId = null;
     }
 };
 

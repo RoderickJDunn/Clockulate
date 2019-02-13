@@ -21,7 +21,6 @@ import EntypoIcon from "react-native-vector-icons/Entypo";
 import EvilIcon from "react-native-vector-icons/EvilIcons";
 
 import DurationText from "./duration-text";
-import { CheckBox, Container, StyleProvider } from "native-base";
 import getTheme from "../../native-base-theme/components";
 import material from "../../native-base-theme/variables/material";
 
@@ -66,6 +65,10 @@ class TaskItem extends React.Component {
     _tempDuration = null;
     _isMoving = false;
 
+    interactiveRef = null;
+
+    setInteractableRef = el => (this.interactiveRef = el);
+
     constructor(props) {
         super(props);
         this.state = {
@@ -87,107 +90,6 @@ class TaskItem extends React.Component {
     }
 
     componentWillMount() {
-        this._panResponder = PanResponder.create({
-            // Ask to be the responder:
-            onMoveShouldSetPanResponder: (evt, gestureState) => {
-                // console.log("onMoveShouldSetPanResponder");
-                // console.log("Returning: ", this.state.tempDuration != null);
-
-                /* If tempDuration is null, the slider is not showing, so return false
-                    Otherwise, if tempDuration is not null, the slider is showing, so we need to follow gestures. Return true
-                */
-                return this._tempDuration != null;
-            },
-            onMoveShouldSetPanResponderCapture: (evt, gestureState) => {
-                // console.log("onMoveShouldSetPanResponderCapture");
-                // console.log("Returning: ", this.state.tempDuration != null);
-
-                /* If tempDuration is null, the slider is not showing, so return false
-                    Otherwise, if tempDuration is not null, the slider is showing, so we need to follow gestures. Return true
-                */
-                return this._tempDuration != null;
-            },
-            // At each drag start
-            onPanResponderGrant: (evt, gestureState) => {
-                // console.log("onPanResponderGrant");
-
-                this._touchable.setOpacityTo(0.5, 100);
-                // console.log("evt", evt.nativeEvent.locationX);
-                // console.log("evt", evt.nativeEvent.pageX);
-                this._isSliding = true;
-                // let tempDuration =
-                //     (evt.nativeEvent.pageX /
-                //         (SCREEN_WIDTH - scaleByFactor(10, 0.4))) *
-                //     MAX_SLIDER_VALUE;
-            },
-
-            onPanResponderMove: (event, gesture) => {
-                // console.log("onPanResponderMove", event.nativeEvent.pageX);
-
-                // If user drags more that 3px around
-                if (
-                    gesture.dx > 3 ||
-                    gesture.dy > 3 ||
-                    gesture.dy < -3 ||
-                    gesture.dx < -3
-                ) {
-                    let tempDuration =
-                        (event.nativeEvent.pageX /
-                            (SCREEN_WIDTH -
-                                CONST_DIMENSIONS.TASK_DELETE_BTN_WIDTH -
-                                scaleByFactor(10, 0.4))) *
-                        MAX_SLIDER_VALUE;
-
-                    /* this line converts the value (currently in seconds with a decimal), to an seconds integer
-                     that is a multiple of 60 (so that it can be converted to minutes with no remainder)*/
-                    tempDuration = Math.trunc(tempDuration / 60) * 60;
-                    // this.setState({ tempDuration: tempDuration });
-                    this._tempDuration = tempDuration;
-                    this.setState(this.state);
-                }
-            },
-            // When the user releases touch
-            onPanResponderRelease: (event, gesture) => {
-                // console.log("onPanResponderRelease");
-
-                // If the user didn't move more than 3px around, I consider it as a press on the button
-                if (
-                    gesture.dx < 3 &&
-                    gesture.dx > -3 &&
-                    gesture.dy < 3 &&
-                    gesture.dy > -3 &&
-                    this._tempDuration == null
-                ) {
-                    // Launch button on click
-                    this._touchable.touchableHandlePress();
-                    // Reset button opacity
-                } else {
-                    // this.setState({ tempDuration: null });
-                    // this._tempDuration = null;
-                    // this.setState(this.state); // TODO: ?
-                    this._onDurationChange();
-                }
-                this._touchable.setOpacityTo(1, 100);
-
-                this._isSliding = false;
-            },
-            onPanResponderTerminationRequest: (evt, gestureState) => {
-                // console.log("onPanResponderTerminationRequest");
-                return true;
-            },
-            onPanResponderTerminate: (evt, gestureState) => {
-                // console.log("onPanResponderTerminate");
-                // Another component has become the responder, so this gesture
-                // should be cancelled
-                // this.setState({ tempDuration: null });
-                this._tempDuration = null;
-                // this.setState(this.state); // TODO: ?
-                this._onDurationChange();
-
-                this._isSliding = false;
-            }
-        });
-
         this.flipFrontToBack = this.props.startTimesAnim.interpolate({
             inputRange: [-230, 0],
             outputRange: ["180deg", "0deg"],
@@ -218,9 +120,12 @@ class TaskItem extends React.Component {
         this.props.onPressDelete(this.props.data);
     };
 
-    _onTapCheckBox = data => {
+    _onTapCheckBox = () => {
         // console.debug(data);
-        this.props.onPressItemCheckBox(data, data.enabled);
+        this.props.onPressItemCheckBox(
+            this.props.data,
+            this.props.data.enabled
+        );
     };
 
     _onDurationChange = () => {
@@ -239,7 +144,15 @@ class TaskItem extends React.Component {
     componentWillReceiveProps(nextProps) {
         // console.log("componentWillReceiveProps: nextProps", nextProps);
         // console.log("componentWillReceiveProps: currState", this.state);
-        let tempDuration = null;
+
+        if (this.props.closed == false && nextProps.closed == true) {
+            setTimeout(() => {
+                // console.log("Timeout closing task delete view...");
+                if (this.interactiveRef) {
+                    this.interactiveRef.snapTo({ index: 0 });
+                }
+            }, 0);
+        }
 
         this.setState({
             data: {
@@ -379,7 +292,6 @@ class TaskItem extends React.Component {
                 ? this.props.data.duration
                 : this.props.data.task.defaultDuration);
 
-        let interactableRef = el => (this.interactiveRef = el);
         // console.log("duration", duration);
 
         // console.log(
@@ -387,14 +299,6 @@ class TaskItem extends React.Component {
         // );
 
         let touchableBackdrop = null;
-        if (this.props.closed == true) {
-            setTimeout(() => {
-                // console.log("Timeout closing task delete view...");
-                if (this.interactiveRef) {
-                    this.interactiveRef.snapTo({ index: 0 });
-                }
-            }, 0);
-        }
 
         if (this.props.activeTask != null) {
             touchableBackdrop = (
@@ -410,58 +314,13 @@ class TaskItem extends React.Component {
             );
         }
 
-        let leftBtn,
-            sortHandlers = null;
-        if (this.props.isEditingTasks) {
-            leftBtn = (
-                <EntypoIcon
-                    name="dots-three-horizontal"
-                    size={scaleByFactor(17, 0.3)}
-                    color="#7a7677"
-                />
-            );
-
-            sortHandlers = this.props.sortHandlers;
-        } else {
-            leftBtn = (
-                <StyleProvider style={getTheme(material)}>
-                    <CheckBox
-                        onPress={() => this._onTapCheckBox(this.props.data)}
-                        checked={this.props.data.enabled}
-                        style={{
-                            backgroundColor: Colors.brandLightPurple,
-                            borderColor: "transparent",
-                            alignItems: "center",
-                            left: 0
-                        }}
-                        hitSlop={{
-                            top: 15,
-                            bottom: 15,
-                            left: 5,
-                            right: 15
-                        }}
-                    />
-                </StyleProvider>
-            );
-        }
+        let sortHandlers = this.props.sortHandlers;
 
         let movingStyle;
         let borderBottomColor = Colors.disabledGrey;
         if (this.props.isMoving) {
-            // console.log("isMoving", "true");
-            movingStyle = {
-                flex: undefined,
-                left: -1,
-                backgroundColor: Colors.brandLightPurple,
-                shadowOpacity: 1,
-                shadowRadius: 10,
-                shadowColor: "black",
-                width: SCREEN_WIDTH - scaleByFactor(20, 0.4)
-                // elevation: 10 TODO: Why is this commented out
-            };
+            movingStyle = styles.movingStyle;
             borderBottomColor = "transparent";
-        } else {
-            // console.log("isMoving", "false");
         }
 
         // console.debug("... actual render");
@@ -473,7 +332,7 @@ class TaskItem extends React.Component {
                         alignContent: "flex-start"
                     }
                 ]}
-                ref={interactableRef}
+                ref={this.setInteractableRef}
                 horizontalOnly={true}
                 snapPoints={[{ x: 0, id: "closed" }, { x: -90, id: "active" }]}
                 dragWithSpring={{ tension: 500, damping: 0.5 }}
@@ -501,7 +360,6 @@ class TaskItem extends React.Component {
                             // backgroundColor: "blue"
                         }
                     ]}
-                    {...this._panResponder.panHandlers}
                 >
                     <TouchableOpacity
                         style={[
@@ -557,10 +415,34 @@ class TaskItem extends React.Component {
                             }
                             this._isMoving = false;
                         }}
-                        // disabled={this.props.isEditingTasks}
                         {...sortHandlers}
                     >
-                        <View style={TaskItemStyle.checkbox}>{leftBtn}</View>
+                        <TouchableOpacity
+                            style={TaskItemStyle.checkbox}
+                            onPress={this._onTapCheckBox}
+                        >
+                            <View
+                                style={{
+                                    backgroundColor: Colors.brandLightPurple,
+                                    borderColor: "transparent",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    left: 0,
+                                    borderRadius: 4,
+                                    width: 25,
+                                    height: 25
+                                }}
+                            >
+                                {this.props.data.enabled && (
+                                    <EntypoIcon
+                                        name="check"
+                                        size={18}
+                                        color={Colors.brandLightOpp}
+                                        style={{ marginTop: 2 }}
+                                    />
+                                )}
+                            </View>
+                        </TouchableOpacity>
                         <Text
                             style={[
                                 TaskListStyle.allChildren,
@@ -736,6 +618,16 @@ const styles = StyleSheet.create({
         // backgroundColor: "red",
         // backgroundColor: Colors.backgroundGrey,
         position: "absolute"
+    },
+    movingStyle: {
+        flex: undefined,
+        left: -1,
+        backgroundColor: Colors.brandLightPurple,
+        shadowOpacity: 1,
+        shadowRadius: 10,
+        shadowColor: "black",
+        width: SCREEN_WIDTH - scaleByFactor(20, 0.4)
+        // elevation: 10 TODO: Why is this commented out
     }
 });
 
