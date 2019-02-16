@@ -281,9 +281,10 @@ const MainStack = createStackNavigator(
             screen: TaskDetail,
             navigationOptions: ({ navigation }) => ({
                 headerStyle: {
-                    backgroundColor: Colors.brandDarkGrey
-                    // backgroundColor: "transparent",
-                    // borderBottomWidth: 0 // is this needed?
+                    backgroundColor: Colors.brandDarkGrey,
+                    // This is required, otherwise TaskDetail header has a bottomBorder. Must be something to
+                    // do with the custom transition.
+                    borderBottomWidth: 0
                 },
                 // headerTransparent: true,
                 headerTitleStyle: {

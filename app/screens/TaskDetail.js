@@ -645,9 +645,10 @@ class TaskDetail extends Component {
         let minutes = calcMinutes(this.state.alarmTask.duration, hours);
         // console.log("this.currName", this.currName);
 
-        let durationDisplayed = this.state.alarmTask.duration
-            ? this.state.alarmTask.duration
-            : this.state.alarmTask.task.defaultDuration;
+        let durationDisplayed =
+            this.state.alarmTask.duration != null
+                ? this.state.alarmTask.duration
+                : this.state.alarmTask.task.defaultDuration;
         return (
             <ScrollView
                 contentContainerStyle={[

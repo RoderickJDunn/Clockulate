@@ -288,7 +288,7 @@ class TaskItem extends React.Component {
         */
         let duration =
             this._tempDuration ||
-            (this.props.data.duration
+            (this.props.data.duration != null
                 ? this.props.data.duration
                 : this.props.data.task.defaultDuration);
 
