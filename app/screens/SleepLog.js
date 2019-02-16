@@ -160,25 +160,6 @@ export default class SleepLog extends React.Component {
 
         // let dayRange = this._secondsToDateTime(this.dayRangeDBSetting.value);
 
-        let today12am = moment();
-        today12am.startOf("day");
-
-        let tmrw12am = moment();
-        tmrw12am.add(1, "days");
-        tmrw12am.startOf("day");
-
-        // console.log("today12am", today12am.toDate());
-
-        // today12am.add(dayRange.getHours(), "hours");
-        // today12am.add(dayRange.getMinutes(), "minutes");
-
-        // tmrw12am.add(dayRange.getHours(), "hours");
-        // tmrw12am.add(dayRange.getMinutes(), "minutes");
-
-        let alarmInstAll = realm
-            .objects("AlarmInstance")
-            .sorted("start", false);
-
         // console.log("alarmInstAll INFO ------------- ");
         // console.log("alarmInstAll.length", alarmInstAll.length);
 
@@ -186,26 +167,20 @@ export default class SleepLog extends React.Component {
         //     console.debug(i, alarmInstAll[i].start);
         // }
 
-        this.currAlmInstIdx = alarmInstAll.length - 1;
-        this.pageIdx = Math.min(9, alarmInstAll.length - 1);
-
         this.state = {
             menuIsOpen: false,
             isDatePickerVisible: false,
-            selectedDate: today12am.s,
             // genInfoPage: GEN_INFO_PAGES.day.idx,
             walkthroughIdx: null,
-            alarmInstAll: alarmInstAll.slice(),
-            alarmInst:
-                alarmInstAll.length > 0
-                    ? alarmInstAll[this.currAlmInstIdx]
-                    : null,
-            alarmInstGroupIdx: alarmInstAll.length - 1,
+            alarmInstAll: [],
+            alarmInst: null,
+            alarmInstGroupIdx: 0,
             // alarmInstGroupIdx: alarmInstAll.length - 1 - 2,
             playingDisturbance: null,
             activeSound: null,
             // dayRange: dayRange,
-            showNoRecAlert: false
+            showNoRecAlert: false,
+            isLoading: true
         };
 
         this._hideDateTimePicker = this._hideDateTimePicker.bind(this);
@@ -214,6 +189,39 @@ export default class SleepLog extends React.Component {
         this.onNoRecordingFound = this.onNoRecordingFound.bind(this);
     }
 
+    screenDidFocus = payload => {
+        if (!this.state.isLoading) {
+            this.setState({ isLoading: true });
+        }
+        InteractionManager.runAfterInteractions(() => {
+            let alarmInstAll = realm
+                .objects("AlarmInstance")
+                .sorted("start", false);
+
+            if (alarmInstAll.length > 0) {
+                this.currAlmInstIdx = alarmInstAll.length - 1;
+                this.pageIdx = Math.min(9, alarmInstAll.length - 1);
+
+                this.setState({
+                    alarmInstAll: alarmInstAll.slice(),
+                    alarmInst:
+                        alarmInstAll.length > 0
+                            ? alarmInstAll[this.currAlmInstIdx]
+                            : null,
+                    alarmInstGroupIdx: alarmInstAll.length - 1,
+                    isLoading: false
+                });
+
+                this._updateScreenTitle(this.state.alarmInst);
+            } else {
+                this.setState({
+                    isLoading: false
+                });
+                this._updateScreenTitle(null);
+            }
+        });
+    };
+
     componentDidMount() {
         this.props.navigation.setParams({
             menuIsOpen: false,
@@ -221,19 +229,29 @@ export default class SleepLog extends React.Component {
             setTitleRef: this._setTitleRef.bind(this)
         });
 
-        setImmediate(() => {
-            this._updateScreenTitle(this.state.alarmInst);
-            // this.pagerRef.scrollToIndex(
-            //     this.state.alarmInstAll.length - 1,
-            //     false
-            // );
-        });
+        // setImmediate(() => {
+        //     this.screenDidFocus();
+        //     this._updateScreenTitle(this.state.alarmInst);
+        //     // this.pagerRef.scrollToIndex(
+        //     //     this.state.alarmInstAll.length - 1,
+        //     //     false
+        //     // );
+        // });
+
+        this._didFocusListener = this.props.navigation.addListener(
+            "didFocus",
+            this.screenDidFocus
+        );
 
         // if (this.state.walkthroughIdx != null) {
         //     setTimeout(() => {
         //         this.forceUpdate();
         //     }, 300);
         // }
+    }
+
+    componentWillUnmount() {
+        this.props.navigation.removeListener("didFocus");
     }
 
     _secondsToDateTime(sec) {
@@ -489,7 +507,7 @@ export default class SleepLog extends React.Component {
                     </View>
                 </DimmableView>
                 <DimmableView style={{ flex: 1 }} isDimmed={false}>
-                    <ActivityIndicator />
+                    <ActivityIndicator size={"large"} />
                     {isIphoneX() ? (
                         <View
                             style={{
@@ -504,15 +522,18 @@ export default class SleepLog extends React.Component {
     };
 
     _updateScreenTitle(alrmInst) {
+        if (alrmInst == null) {
+            this.headerTitleRef.setNativeProps({
+                text: "Sample Log"
+            });
+            return;
+        }
+
         console.log(
             `Updating header title. alrmInst: ${alrmInst.start}. Dist count: ${
                 alrmInst.disturbances.length
             }`
         );
-
-        if (alrmInst == null) {
-            return;
-        }
 
         let title = "";
         if (this.headerTitleRef == null) {
@@ -522,7 +543,14 @@ export default class SleepLog extends React.Component {
                 title = "";
             } else {
                 let minDate = moment(alrmInst.start);
-                let maxDate = moment(alrmInst.end);
+                let maxDate;
+
+                // protect agains end being null, which could happen due to crash etc.
+                if (alrmInst.end) {
+                    maxDate = moment(alrmInst.end);
+                } else {
+                    maxDate = moment(alrmInst.start);
+                }
 
                 if (minDate.isSame(maxDate, "day")) {
                     title = maxDate.format("MMM D");
@@ -545,12 +573,20 @@ export default class SleepLog extends React.Component {
     }
 
     render() {
+        let wtIdx = this.state.walkthroughIdx;
+        let { alarmInstAll, alarmInstGroupIdx } = this.state;
+        let eightHrsAgo;
+
+        if (alarmInstAll.length == 0) {
+            eightHrsAgo = new Date();
+            eightHrsAgo.setMinutes(eightHrsAgo.getMinutes() - 8.5 * 60);
+        }
+
         // console.log(
         //     "SleepLog -- render -------------------------------------------------- "
         // );
         // console.log(this.state);
-        let wtIdx = this.state.walkthroughIdx;
-        let { alarmInstAll, alarmInstGroupIdx } = this.state;
+
         // console.log("alarmInstGroupIdx ", alarmInstGroupIdx);
         // console.log("pageIdx", this.pageIdx);
         // console.log("alarmInstAll count", alarmInstAll.length);
@@ -565,7 +601,7 @@ export default class SleepLog extends React.Component {
         // }
 
         return (
-            <ImageBackground
+            <View
                 // source={require("../img/paper_texture1.jpg")}
                 // style={{ width: "100%", height: "100%", }}
                 style={{ flex: 1, backgroundColor: Colors.brandMidGrey }}
@@ -574,37 +610,69 @@ export default class SleepLog extends React.Component {
                     this.refScreenContainer = target;
                 }}
             >
-                <SwiperFlatList
-                    ref={elem => (this.pagerRef = elem)}
-                    style={styles.wrapper}
-                    showsPagination={false}
-                    // index={instGroup.length - 1}
-                    index={alarmInstAll.length - 1}
-                    renderAll={false}
-                    onMomentumScrollEnd={info => {
-                        console.log("onMomentumScrollEnd", info);
-                        let alrmInst = this.state.alarmInstAll[info.index];
-                        this.currAlmInstIdx = info.index;
-                        // console.log("Next alrmInst", alrmInst);
-                        this._updateScreenTitle(alrmInst);
-                    }}
-                    data={alarmInstAll}
-                    renderItem={row => (
+                {this.state.isLoading ? (
+                    <ActivityIndicator style={{ flex: 1 }} />
+                ) : alarmInstAll.length > 0 ? (
+                    <SwiperFlatList
+                        ref={elem => (this.pagerRef = elem)}
+                        style={styles.wrapper}
+                        showsPagination={false}
+                        // index={instGroup.length - 1}
+                        index={alarmInstAll.length - 1}
+                        renderAll={false}
+                        onMomentumScrollEnd={info => {
+                            console.log("onMomentumScrollEnd", info);
+                            let alrmInst = this.state.alarmInstAll[info.index];
+                            this.currAlmInstIdx = info.index;
+                            // console.log("Next alrmInst", alrmInst);
+                            this._updateScreenTitle(alrmInst);
+                        }}
+                        data={alarmInstAll}
+                        renderItem={row => (
+                            <SleepLogPage
+                                almInst={row.item}
+                                onNoRecordingFound={this.onNoRecordingFound}
+                            />
+                        )}
+                        initialScrollIndex={alarmInstAll.length - 1}
+                        getItemLayout={(data, index) => {
+                            return {
+                                length: SCREEN_WIDTH,
+                                offset: SCREEN_WIDTH * index,
+                                index
+                            };
+                        }}
+                        initialNumToRender={2}
+                    />
+                ) : (
+                    <View style={{ flex: 1 }}>
+                        {/* TODO: Show a sample sleep-log page. Show ClkAlert explaining what's happening (no logs yet etc..) */}
                         <SleepLogPage
-                            almInst={row.item}
+                            almInst={{
+                                id: "string",
+                                start: eightHrsAgo,
+                                end: new Date(),
+                                disturbances: [
+                                    { id: "10" },
+                                    { id: "11" },
+                                    { id: "12" }
+                                ],
+                                timeAwake: 92
+                            }}
                             onNoRecordingFound={this.onNoRecordingFound}
+                            isSample
                         />
-                    )}
-                    initialScrollIndex={alarmInstAll.length - 1}
-                    getItemLayout={(data, index) => {
-                        return {
-                            length: SCREEN_WIDTH,
-                            offset: SCREEN_WIDTH * index,
-                            index
-                        };
-                    }}
-                    initialNumToRender={2}
-                />
+                        {/* <Text
+                            style={{
+                                fontSize: 16,
+                                color: Colors.backgroundBright,
+                                fontFamily: "Gurmukhi MN"
+                            }}
+                        >
+                            No Logs yet! (placeholder)
+                        </Text> */}
+                    </View>
+                )}
                 {wtIdx != null && (
                     <TouchableWithoutFeedback onPress={() => this._playIntro()}>
                         <View style={StyleSheet.absoluteFill} />
@@ -630,35 +698,6 @@ export default class SleepLog extends React.Component {
                         }}
                     />
                 )}
-                {/* {this.state.isDatePickerVisible && (
-                    <DateTimePicker
-                        date={this.state.dayRange} // time has been converted into a Date() for this Component
-                        mode={"time"}
-                        titleIOS={
-                            // "Set the cutoff time for disturbances to be classified as part of the next day"
-                            "Set the time to use as the start of day.\nRecordings will be grouped \
-                            by day using this cutoff time."
-                        }
-                        isVisible={true}
-                        onConfirm={newDayRange => {
-                            let secs = this._dateTimeToSecs(newDayRange);
-                            realm.write(() => {
-                                this.dayRangeDBSetting.value = secs;
-                            });
-
-                            this.setState({
-                                dayRange: newDayRange,
-                                isDatePickerVisible: false
-                            });
-                            this._updateDisturbanceList(
-                                this.state.selectedDate,
-                                this.state.genInfoPage,
-                                newDayRange
-                            );
-                        }}
-                        onCancel={this._hideDateTimePicker}
-                    />
-                )} */}
                 <Animated.View
                     style={{
                         position: "absolute",
@@ -734,6 +773,12 @@ export default class SleepLog extends React.Component {
 
                             let currAlmInst = alarmInstAll[this.currAlmInstIdx];
 
+                            if (!currAlmInst) {
+                                alert("This Sleep Log is a sample.");
+                                this._setMenuState(false);
+                                return;
+                            }
+
                             // console.log(
                             //     "this.currAlmInstIdx",
                             //     this.currAlmInstIdx
@@ -763,22 +808,46 @@ export default class SleepLog extends React.Component {
                                 // Delete AlarmInstance, associated disturbances, and any recording files
                                 realm.delete(currAlmInst.disturbances);
                                 realm.delete(currAlmInst);
-
-                                let alarmInstAll = realm
-                                    .objects("AlarmInstance")
-                                    .sorted("start", false)
-                                    .slice();
-
-                                this._setMenuState(false, {
-                                    alarmInstAll: alarmInstAll
-                                });
                             });
 
-                            this.currAlmInstIdx++;
+                            alarmInstAll = realm
+                                .objects("AlarmInstance")
+                                .sorted("start", false)
+                                .slice();
 
-                            let nextAlmInst = alarmInstAll[this.currAlmInstIdx];
+                            this._setMenuState(false, {
+                                alarmInstAll: alarmInstAll
+                            });
 
-                            this._updateScreenTitle(nextAlmInst);
+                            console.log("alarmInstAll", alarmInstAll);
+
+                            if (
+                                this.currAlmInstIdx >= alarmInstAll.length &&
+                                alarmInstAll.length > 0
+                            ) {
+                                console.log("1");
+                                // After deletion, the current index is greater than highest bound of allInstances array. Set currIdx to most recent.
+                                this.currAlmInstIdx = alarmInstAll.length - 1;
+                            } else if (alarmInstAll.length == 0) {
+                                console.log("2");
+                                // user deleted the only AlarmInstance.
+                                this.currAlmInstIdx = null;
+                            } else {
+                                console.log("3");
+                                // user deleted an AlmInst and there was an adjacent one that was more recent. Do not
+                                // change currAlmInstIdx, as this will now map to the next most recent AlmInst.
+                                // this.currAlmInstIdx++;
+                            }
+
+                            if (this.currAlmInstIdx == null) {
+                                console.log("4");
+                                this._updateScreenTitle(null);
+                            } else {
+                                console.log("5");
+                                let nextAlmInst =
+                                    alarmInstAll[this.currAlmInstIdx];
+                                this._updateScreenTitle(nextAlmInst);
+                            }
                         }}
                     />
                     <MenuItem
@@ -843,7 +912,7 @@ export default class SleepLog extends React.Component {
                         }}
                     />
                 )}
-            </ImageBackground>
+            </View>
         );
     }
 }

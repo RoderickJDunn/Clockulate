@@ -68,7 +68,9 @@ export default class SleepLogPage extends React.PureComponent {
     constructor() {
         super();
         this.state = {
-            wtIdx: null
+            wtIdx: null,
+            activeSound: null,
+            playingDisturbance: null
         };
     }
 
@@ -251,60 +253,10 @@ export default class SleepLogPage extends React.PureComponent {
     }
 
     _renderGeneralInfoPage = (idx = 0, alrmInst) => {
-        let now = moment();
-        let weekStart;
-        let title;
-        // let { dayRange } = this.state;
-        // console.log("alrmInst", alrmInst);
-        switch (idx) {
-            case GEN_INFO_PAGES.day.idx:
-                if (!alrmInst) {
-                    title = "";
-                } else {
-                    let minDate = moment(alrmInst.start);
-                    let maxDate = moment(alrmInst.end);
-
-                    if (minDate.isSame(maxDate, "day")) {
-                        title = maxDate.format("MMM DD");
-                    } else {
-                        let minDateFmt = minDate.format("MMM DD - ");
-                        let maxDateFmt = maxDate.format("MMM DD");
-                        title = minDateFmt + maxDateFmt;
-                    }
-                }
-
-                break;
-            // case GEN_INFO_PAGES.week.idx:
-            //     // get start of current week, to check if selectedDate is in this week
-            //     weekStart = moment(now).startOf("isoWeek");
-            //     if (selectedDate.isSame(weekStart, "isoWeek")) {
-            //         title = "This Week";
-            //     } else {
-            //         // Selected date is not this week.
-            //         // get start of week for selected date
-            //         weekStart = moment(selectedDate).startOf("isoWeek");
-            //         title = [];
-            //         title.push(weekStart.format("MMM DD"));
-            //         title.push(" - ");
-
-            //         weekStart.endOf("isoWeek");
-            //         title.push(weekStart.format("MMM DD"));
-            //         title.push(",  ");
-            //         title.push(weekStart.format("YYYY"));
-            //         title = title.join("");
-            //     }
-            //     break;
-            // case GEN_INFO_PAGES.month.idx:
-            //     // monthStart = moment(selectedDate).startOf("month");
-            //     // monthStart.startOf("month");
-            //     title = selectedDate.format("MMMM YYYY");
-            //     break;
-            default:
-                console.error("No index");
-        }
+        // TODO: Consider for SleepPage stats also/instead using TotalTime, TimeAsleep
 
         /*
-            TODO: calculate series, and rotation
+            calculate series, and rotation
             1. If startTime is not 12:00, calculate rotation to apply
             2. Calculate duration (then device convert to perecent (/ 24))
                 2a. If duration < 12 hrs, convert it to percent (dur / 12 * 100)
@@ -316,6 +268,10 @@ export default class SleepLogPage extends React.PureComponent {
 
         let mStart = moment(alrmInst.start);
         // console.log("alrmInst.start", alrmInst.start);
+
+        // TODO: Handle case where alrmInst.end could be null due to an app crash. As is, this
+        //       calculate a sleep duration of +++++ depending on the time the user is viewing this page (which could be months later).
+        //       I need to check if the AlarmInstance is still running. I should add a flag to the DataSchema of AlarmInstance - 'endedCleanly'
         let mEnd = moment(alrmInst.end || new Date());
         // console.log("alrmInst.end", alrmInst.end);
 
@@ -349,9 +305,6 @@ export default class SleepLogPage extends React.PureComponent {
 
         return (
             <View style={[styles.generalInfoPage]}>
-                {/* <View style={styles.textGeneralInfoTitleSec}>
-                    <Text style={styles.textGeneralInfoTitle}>{title}</Text>
-                </View> */}
                 <View style={styles.textGeneralInfoContent}>
                     <View style={[styles.statWrapper, { flex: 0.25 }]}>
                         <View
@@ -458,7 +411,7 @@ export default class SleepLogPage extends React.PureComponent {
                                     </View>
                                 )}
                             </View>
-                            {/* <Text
+                            <Text
                                 style={[
                                     styles.statLabelText,
 
@@ -470,7 +423,7 @@ export default class SleepLogPage extends React.PureComponent {
                                 ]}
                             >
                                 {_.round(duration / 60, 1) + " hrs"}
-                            </Text> */}
+                            </Text>
                         </View>
                         <View
                             style={[
@@ -520,8 +473,9 @@ export default class SleepLogPage extends React.PureComponent {
                             <View
                                 style={[
                                     styles.genInfoCircle,
-                                    { backgroundColor: "#EEC166" }
+                                    // { backgroundColor: "#EEC166" }
                                     // { backgroundColor: "#CE3333" }
+                                    { backgroundColor: Colors.brandGreen }
                                 ]}
                             >
                                 <Text
@@ -596,11 +550,12 @@ export default class SleepLogPage extends React.PureComponent {
                             >
                                 <Text
                                     style={{
-                                        fontSize: 28,
-                                        fontFamily: "Quesha"
+                                        fontSize: 16,
+                                        color: Colors.backgroundBright,
+                                        fontFamily: "Gurmukhi MN"
                                     }}
                                 >
-                                    No Recordings for Date Range
+                                    No recordings were made for this log
                                 </Text>
                             </View>
                         }
