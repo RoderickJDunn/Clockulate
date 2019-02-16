@@ -4,7 +4,6 @@ import {
     View,
     TouchableOpacity,
     Dimensions,
-    FlatList,
     StyleSheet,
     Animated,
     StatusBar,
@@ -141,7 +140,7 @@ export default class Upgrade extends React.Component {
                     style={{ height: 42 - 1 }}
                 />
             ),
-            title: "More Sounds",
+            title: "More Alarm Tones",
             description: [
                 "Unlock additional sounds to use with your alarms,  and receive more with each update!"
             ]
@@ -195,6 +194,43 @@ export default class Upgrade extends React.Component {
             onPressUpgrade: this.onPressUpgrade
         });
     }
+
+    /* ********************** */
+    /* @Roderick. The following  explanation and function getHeaderInset() 
+        is copied from a react-navigation example. It demonstrates how to
+        compensate for header height when the Header is transparent, 
+        on both Platforms. Not using this yet because what I currently
+        have is working fine for iOS. But I may need to use this logic
+        when I add Android support. 
+    ------------------------------------------------------
+    // Inset to compensate for navigation bar being transparent.
+    // And improved abstraction for this will be built in to react-navigation
+    // at some point.
+    getHeaderInset() {
+        const NOTCH_HEIGHT = isIphoneX() ? 25 : 0;
+
+        // $FlowIgnore: we will remove the HEIGHT static soon enough
+        const BASE_HEADER_HEIGHT = Header.HEIGHT;
+
+        const HEADER_HEIGHT =
+        Platform.OS === 'ios'
+            ? BASE_HEADER_HEIGHT + NOTCH_HEIGHT
+            : BASE_HEADER_HEIGHT + Constants.statusBarHeight;
+
+        return Platform.select({
+        ios: {
+            contentInset: { top: HEADER_HEIGHT },
+            contentOffset: { y: -HEADER_HEIGHT },
+        },
+        android: {
+            contentContainerStyle: {
+            paddingTop: HEADER_HEIGHT,
+            },
+        },
+        });
+    }
+    ------------------------------------------------------
+    */
 
     renderCalcButtons() {
         return (
@@ -614,9 +650,18 @@ export default class Upgrade extends React.Component {
                                                     {
                                                         inputRange: [
                                                             0,
+                                                            SCREEN_HEIGHT * 0.1,
+                                                            SCREEN_HEIGHT * 0.2,
+                                                            SCREEN_HEIGHT * 0.3,
                                                             SCREEN_HEIGHT * 0.35
                                                         ],
-                                                        outputRange: [0, 1],
+                                                        outputRange: [
+                                                            0,
+                                                            0.05,
+                                                            0.1,
+                                                            0.5,
+                                                            1
+                                                        ],
                                                         extrapolate: "clamp"
                                                     }
                                                 )
