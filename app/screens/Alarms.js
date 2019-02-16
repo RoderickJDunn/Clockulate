@@ -49,7 +49,7 @@ import EntypoIcon from "react-native-vector-icons/Entypo";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import ClkAlert from "../components/clk-awesome-alert";
 import upgrades from "../config/upgrades";
-import ProximityManager from "react-native-proximity-manager";
+// import ProximityManager from "react-native-proximity-manager";
 
 import Colors from "../styles/colors";
 import { ListStyle } from "../styles/list";
@@ -82,7 +82,7 @@ class Alarms extends Component {
     _activeRow = null;
 
     _idleTimer = null;
-    proxMgrEnabled = false;
+    // proxMgrEnabled = false;
     isCurrentScreen = true;
 
     constructor() {
@@ -106,48 +106,48 @@ class Alarms extends Component {
             UIManager.setLayoutAnimationEnabledExperimental(true);
         } // setup notifications
         else {
-            ProximityManager.disable();
+            // ProximityManager.disable();
         }
 
-        this._idlePanResponder = PanResponder.create({
-            // Ask to be the responder:
-            onStartShouldSetPanResponderCapture: () => {
-                console.log("onStartShouldSetPanResponderCapture (AlarmsList)");
-                this.handleActivity();
-                return false;
-            }
-        });
+        // this._idlePanResponder = PanResponder.create({
+        //     // Ask to be the responder:
+        //     onStartShouldSetPanResponderCapture: () => {
+        //         console.log("onStartShouldSetPanResponderCapture (AlarmsList)");
+        //         this.handleActivity();
+        //         return false;
+        //     }
+        // });
 
         InteractionManager.runAfterInteractions(() => {
             AdSvcUpdateAppOpenedStats();
         });
     }
 
-    handleActivity() {
-        console.log("this.proxMgrEnabled ", this.proxMgrEnabled);
+    // handleActivity() {
+    //     console.log("this.proxMgrEnabled ", this.proxMgrEnabled);
 
-        if (this.proxMgrEnabled == true) {
-            this.disableProxManager();
-        }
+    //     if (this.proxMgrEnabled == true) {
+    //         this.disableProxManager();
+    //     }
 
-        if (this.isCurrentScreen == false) {
-            if (this._idleTimer) clearTimeout(this._idleTimer);
-            return;
-        }
+    //     if (this.isCurrentScreen == false) {
+    //         if (this._idleTimer) clearTimeout(this._idleTimer);
+    //         return;
+    //     }
 
-        clearTimeout(this._idleTimer);
-        this._idleTimer = setTimeout(this.enableProxManager.bind(this), 5000);
-    }
+    //     clearTimeout(this._idleTimer);
+    //     this._idleTimer = setTimeout(this.enableProxManager.bind(this), 5000);
+    // }
 
-    enableProxManager() {
-        this.proxMgrEnabled = true;
-        ProximityManager.enable();
-    }
+    // enableProxManager() {
+    //     this.proxMgrEnabled = true;
+    //     ProximityManager.enable();
+    // }
 
-    disableProxManager() {
-        this.proxMgrEnabled = false;
-        ProximityManager.disable();
-    }
+    // disableProxManager() {
+    //     this.proxMgrEnabled = false;
+    //     ProximityManager.disable();
+    // }
 
     onPushRegistered(deviceToken) {
         console.log("Device Token Received: " + deviceToken);
@@ -346,22 +346,22 @@ class Alarms extends Component {
             // );
         }
 
-        this._didBlurListener = this.props.navigation.addListener(
-            "didBlur",
-            payload => {
-                this.isCurrentScreen = false;
-                clearTimeout(this._idleTimer);
-                this.disableProxManager();
-            }
-        );
+        // this._didBlurListener = this.props.navigation.addListener(
+        //     "didBlur",
+        //     payload => {
+        //         this.isCurrentScreen = false;
+        //         clearTimeout(this._idleTimer);
+        //         this.disableProxManager();
+        //     }
+        // );
 
-        this._didFocusListener = this.props.navigation.addListener(
-            "didFocus",
-            payload => {
-                this.isCurrentScreen = true;
-                this.handleActivity();
-            }
-        );
+        // this._didFocusListener = this.props.navigation.addListener(
+        //     "didFocus",
+        //     payload => {
+        //         this.isCurrentScreen = true;
+        //         this.handleActivity();
+        //     }
+        // );
     }
 
     componentWillUnmount() {
@@ -385,8 +385,8 @@ class Alarms extends Component {
             );
         }
 
-        this.props.navigation.removeListener("didFocus");
-        this.props.navigation.removeListener("didBlur");
+        // this.props.navigation.removeListener("didFocus");
+        // this.props.navigation.removeListener("didBlur");
 
         AppState.removeEventListener("change", this._handleAppStateChange);
     }
@@ -829,7 +829,7 @@ class Alarms extends Component {
                     start={{ x: 0.2, y: 0 }}
                     end={{ x: 1.5, y: 1 }}
                     colors={[Colors.brandMidGrey, Colors.brandDarkGrey]}
-                    {...this._idlePanResponder.panHandlers}
+                    // {...this._idlePanResponder.panHandlers}
                 >
                     <SafeAreaView
                         forceInset={{ bottom: "always" }}
