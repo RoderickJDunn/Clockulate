@@ -3,9 +3,10 @@
  */
 
 import React from "react";
-import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
+import { StyleSheet, TouchableWithoutFeedback, View, Text } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import TaskItem from "./task-item";
+import Colors from "../styles/colors";
 
 class TaskList extends React.Component {
     // _scrollEnabled = true;
@@ -64,6 +65,7 @@ class TaskList extends React.Component {
     render() {
         // console.debug("Render TaskList");
         // console.debug("props: ", this.props);
+        let contContainerStyle = styles.contContainerStyleNotEmpty;
 
         let alarmTasks = this.props.data;
         let filteredAlarmTasks = this.props.hideDisabledTasks
@@ -75,6 +77,13 @@ class TaskList extends React.Component {
             filterMap = filteredAlarmTasks.map(aTask => {
                 return aTask.order;
             });
+            if (filteredAlarmTasks.length == 0) {
+                contContainerStyle = styles.contContainerStyleEmpty;
+            }
+        } else {
+            if (alarmTasks.length == 0) {
+                contContainerStyle = styles.contContainerStyleEmpty;
+            }
         }
 
         // console.log('alarmTasks', alarmTasks);
@@ -90,8 +99,8 @@ class TaskList extends React.Component {
                 <View
                     style={[
                         {
-                            flex: 1
-                            /* backgroundColor: "red" */
+                            flex: 1,
+                            alignContent: "stretch"
                         },
                         this.props.tlContainerStyle
                     ]}
@@ -123,6 +132,29 @@ class TaskList extends React.Component {
                         // scrollEnabled={true}
                         forceRemeasure={this.props.forceRemeasure}
                         containerDimensions={this.props.containerDimensions}
+                        contentContainerStyle={contContainerStyle}
+                        ListEmptyComponent={
+                            <View
+                                style={{
+                                    alignSelf: "stretch",
+                                    alignContent: "stretch",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    flex: 1
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        fontSize: 16,
+                                        color: Colors.backgroundBright,
+                                        fontFamily: "Gurmukhi MN",
+                                        letterSpacing: 0.5
+                                    }}
+                                >
+                                    No tasks yet...
+                                </Text>
+                            </View>
+                        }
                         // rowDimensions={this.props.taskRowDimensions}
                         // renderRowsInclude={this.props.renderRowsInclude}
                         // onScroll={this.props.onScroll}
@@ -167,7 +199,7 @@ class TaskList extends React.Component {
     }
 }
 
-const listStyle = StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
         flex: 0.9,
         backgroundColor: "transparent",
@@ -177,6 +209,13 @@ const listStyle = StyleSheet.create({
         padding: 10,
         fontSize: 18,
         height: 44
+    },
+    contContainerStyleEmpty: {
+        flexGrow: 1,
+        justifyContent: "center"
+    },
+    contContainerStyleNotEmpty: {
+        flexGrow: 1
     }
 });
 

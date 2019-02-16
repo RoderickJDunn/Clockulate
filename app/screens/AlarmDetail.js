@@ -426,6 +426,10 @@ class AlarmDetail extends Component {
             openSnoozeTimePicker: this._openSnoozeTimePicker
         });
 
+        InteractionManager.runAfterInteractions(() => {
+            this.setState({ isLoadingTasks: false });
+        });
+        // this.setState({ isLoadingTasks: false });
         AdvSvcOnScreenConstructed("AlarmDetail");
     }
 
@@ -2142,7 +2146,9 @@ class AlarmDetail extends Component {
                                 </View>
                                 {touchableBackdrop}
                                 {/* {taskArea} */}
-                                {sortedTasks.length > 0 ? (
+                                {this.state.isLoadingTasks ? (
+                                    <ActivityIndicator style={{ flex: 1 }} />
+                                ) : (
                                     <TaskList
                                         onPressItem={this._onPressTask}
                                         onPressItemCheckBox={
@@ -2189,8 +2195,6 @@ class AlarmDetail extends Component {
                                         //     paddingHorizontal: scaleByFactor(10, 0.4)
                                         // }}
                                     />
-                                ) : (
-                                    <ActivityIndicator style={{ flex: 1 }} />
                                 )}
 
                                 {isIphoneX() ? (
