@@ -156,6 +156,7 @@ class AlarmItem extends React.PureComponent {
                 Animated.timing(this._ringingScaleAnim, {
                     toValue: 1,
                     duration: 400,
+                    isInteraction: false,
                     useNativeDriver: true
                 })
             ]).start();
@@ -241,11 +242,11 @@ class AlarmItem extends React.PureComponent {
             duration: duration,
             easing: easing,
             useNativeDriver: true
-        }).start(() => {
+        }).start(/* () => {
             if (onAnimFinished && nextAlarmState == ALARM_STATES.SET) {
                 onAnimFinished();
             }
-        });
+        } */);
         // if (notifyParentOfToggle) {
         //     this.props.onToggle(this.props.alarm);
         // }
@@ -625,8 +626,8 @@ class AlarmItem extends React.PureComponent {
                                     this.props.alarm
                                 )}
                             >
-                                {(status == ALARM_STATES.SET ||
-                                    status == ALARM_STATES.SNOOZED) && (
+                                {status > ALARM_STATES.OFF &&
+                                    status < ALARM_STATES.SNOOZED && (
                                     <Pulse color="#ff6060" />
                                 )}
                                 {status > ALARM_STATES.OFF &&
@@ -686,6 +687,11 @@ class AlarmItem extends React.PureComponent {
                                         progress={this.state.animProgress}
                                         resizeMode={"contain"}
                                         style={[StyleSheet.absoluteFill]}
+                                        onAnimationFinished={() => {
+                                            if (this.props.onAnimFinished && this.props.alarm.status == ALARM_STATES.SET) {
+                                                this.props.onAnimFinished();
+                                            }
+                                        }}
                                     />
                                 </Animated.View>
                             </TouchableOpacity>

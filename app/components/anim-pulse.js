@@ -17,16 +17,25 @@ class AnimatedPulse extends Component {
                 Animated.timing(this._animValue, {
                     toValue: 1,
                     duration: 2000,
+                    /* NOTE: isInteraction -> false  causes InteractionManager to ignore this animation. 
+                        i.e. It won't consider this animation to be an interaction, so will therefore not wait 
+                        for the animation to complete before running runAfterInteraction().
+                        This is important for when we navigate into AlarmDetail, and there is currently
+                        an Alarm set (since this animation plays whenever an Alarm is set.)
+                    */
+                    isInteraction: false,
                     useNativeDriver: true
                 }),
                 Animated.timing(this._animValue, {
                     toValue: 1,
                     duration: 1500,
+                    isInteraction: false,
                     useNativeDriver: true
                 }),
                 Animated.timing(this._animValue, {
                     toValue: 0,
                     duration: 0,
+                    isInteraction: false,
                     useNativeDriver: true
                 })
             ])
