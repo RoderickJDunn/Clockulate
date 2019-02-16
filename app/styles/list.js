@@ -126,7 +126,9 @@ export const TaskItemStyle = StyleSheet.create({
     },
     checkbox: {
         flex: 0.08,
-        paddingRight: 4
+        paddingRight: 4,
+        alignSelf: "stretch",
+        justifyContent: "center"
         // alignItems: "flex-start",
         // backgroundColor: "blue"
         // flexShrink: 0.1

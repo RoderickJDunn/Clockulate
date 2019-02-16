@@ -534,7 +534,7 @@ const DrawerRoot = createDrawerNavigator(
                     defaultNavigationOptions: otherDrawerNavOptions("Sleep Log")
                 }
             ),
-            defaultNavigationOptions: {
+            navigationOptions: {
                 drawerLabel: "Sleep Log"
             }
         },

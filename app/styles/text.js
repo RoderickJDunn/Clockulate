@@ -19,6 +19,7 @@ export const TextStyle = StyleSheet.create({
     },
     labelText: {
         fontFamily: "Gurmukhi MN",
+        letterSpacing: 1,
         fontSize: 13,
         color: Colors.labelText
     },

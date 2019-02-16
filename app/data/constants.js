@@ -33,7 +33,7 @@ export const DefaultAlarm = () => {
         mode: "autocalc",
         tasks: [],
         label: "",
-        status: ALARM_STATES.SET,
+        status: ALARM_STATES.OFF,
         visible: true,
         preset: false,
         order: null,
