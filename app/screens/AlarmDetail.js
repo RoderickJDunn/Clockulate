@@ -25,6 +25,8 @@ import EntypoIcon from "react-native-vector-icons/Entypo";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import MaterialComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import FAIcon from "react-native-vector-icons/FontAwesome";
+import * as Animatable from "react-native-animatable";
+
 import MenuItem from "../components/menu-item";
 import StyledRadio from "../components/styled-radio";
 
@@ -202,6 +204,8 @@ class AlarmDetail extends Component {
         super(props);
         console.log("AlarmDetail -- Constructor");
 
+        // console.log("props", props);
+        
         // let av = ArrowView();
         // av.printHello();
         if (isIphoneX()) {
@@ -407,7 +411,6 @@ class AlarmDetail extends Component {
         if (this.keyboardWillHideSub) this.keyboardWillHideSub.remove();
     }
 
-    // OPTIMIZATION: Try moving content of this function to screen didFocus
     componentDidMount() {
         console.debug("AlarmDetail --- ComponentDidMount");
         // console.log("this.state.alarm", this.state.alarm);
@@ -997,7 +1000,31 @@ class AlarmDetail extends Component {
 
         // save calculated wakeUpTime to use for saving to DB when user presses back
         let epochSec = this.state.alarm.arrivalTime - totalTaskDurations;
-
+        // console.log("epochSec", epochSec);
+        // console.log(
+        //     "this._calculatedWakeUpTime",
+        //     this._calculatedWakeUpTime && this._calculatedWakeUpTime.getTime()
+        // );
+        // make sure clockTextRef has been set
+        if (this.clockTextRef) {
+            // only schedule animation if wakeUpTime has changed, or was previously undefined
+            if (
+                this._calculatedWakeUpTime != null &&
+                epochSec != this._calculatedWakeUpTime.getTime()
+            ) {
+                setImmediate(() => {
+                    this.clockTextRef
+                        .rubberBand(500)
+                        .then(endState =>
+                            console.log(
+                                endState.finished
+                                    ? "bounce finished"
+                                    : "bounce cancelled"
+                            )
+                        );
+                });
+            }
+        }
         this._calculatedWakeUpTime = new Date(epochSec);
 
         this._hoursOfSleep = this._calculateHoursOfSleep(
@@ -1495,8 +1522,10 @@ class AlarmDetail extends Component {
         return { x: 0, y: y, width: this.ROW_WIDTH, height: this.ROW_HEIGHT };
     }
 
+    setClockTextRef = elm => (this.clockTextRef = elm);
+
     render() {
-        console.info("AlarmDetail render ");
+        console.info("AlarmDetail render - ");
         // console.debug("AlarmDetail render - this.state: ", this.state);
         // console.log("this._snapPoints");
         // for (let index = 0; index < this._snapPoints.length; index++) {
@@ -1789,7 +1818,11 @@ class AlarmDetail extends Component {
                             }}
                             // hitSlop={{ top: 15, bottom: 15 }}
                         >
-                            <Text style={[styles.timeText]}>
+                            <Animatable.Text
+                                style={[styles.timeText]}
+                                ref={this.setClockTextRef}
+                                useNativeDriver={true}
+                            >
                                 {fWakeUpTime}
                                 <Text
                                     style={[
@@ -1798,7 +1831,7 @@ class AlarmDetail extends Component {
                                 >
                                     {" " + amPmWakeUpTime}
                                 </Text>
-                            </Text>
+                            </Animatable.Text>
                         </TouchableOpacity>
                         <this.AnimatedAlarmLabel
                             placeholder="Enter a label"
