@@ -28,7 +28,7 @@ const Colors = {
     disabledGrey: "#555555",
     labelText: "#6F6F6F",
     black: "#000",
-    darkGreyText: "#191919",
+    darkGreyText: "#292929",
     deleteBtnRed: "#ce0000"
 };
 

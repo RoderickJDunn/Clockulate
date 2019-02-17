@@ -30,16 +30,15 @@ export const TextStyle = StyleSheet.create({
         color: Colors.brandLightGrey
         // opacity: 0.85
     },
-    clockText: {
-        // TODO: Figure out a good font for the main Clock (and probably the large times in Alarms screen)
-        fontFamily: "Baskerville-Bold"
-    },
     timeText: {
         // fontFamily: "Baskerville"
         fontFamily: "Quesha",
         // color: Colors.black,
         color: Colors.brandLightGrey
         // opacity: 0.85
+    },
+    plainText: {
+        fontFamily: "Avenir"
     }
 });
 
