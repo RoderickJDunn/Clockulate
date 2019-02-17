@@ -16,6 +16,8 @@ import Colors from "../styles/colors";
 import FAIcon from "react-native-vector-icons/FontAwesome5";
 import { TextStyle } from "../styles/text";
 
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
 const fontFamily = Platform.OS === "ios" ? "Avenir" : "sans-serif";
 
 // TODO: FIXME: Its very likely that the appID in these links doesn't work. I need to test it once I have an AppStore AppID......
@@ -70,23 +72,6 @@ export default class About extends React.Component {
             header: "",
             rows: [
                 {
-                    title: "Version",
-                    showDisclosureIndicator: false,
-                    renderAccessory: () => {
-                        return (
-                            <Text
-                                style={{
-                                    alignSelf: "center",
-                                    fontSize: 18,
-                                    color: "#999"
-                                }}
-                            >
-                                {VersionNumber.appVersion}
-                            </Text>
-                        );
-                    }
-                },
-                {
                     title: "Support",
                     showDisclosureIndicator: true,
                     onPress: () => {
@@ -106,6 +91,23 @@ export default class About extends React.Component {
                                 "An error occurred. Unable to open Clockulate contact page."
                             );
                         });
+                    }
+                },
+                {
+                    title: "Version",
+                    showDisclosureIndicator: false,
+                    renderAccessory: () => {
+                        return (
+                            <Text
+                                style={{
+                                    alignSelf: "center",
+                                    fontSize: 18,
+                                    color: "#999"
+                                }}
+                            >
+                                {VersionNumber.appVersion}
+                            </Text>
+                        );
                     }
                 }
             ]
@@ -198,11 +200,12 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.backgroundBright
     },
     rateMeCont: {
-        marginTop: 40,
-        marginBottom: 50,
-        paddingVertical: 20,
-        justifyContent: "center",
-        alignItems: "center"
+        // marginTop: 40,
+        // marginBottom: 50,
+        // paddingVertical: 20,
+        // justifyContent: "flex-start",
+        alignItems: "center",
+        marginBottom: 20
         // backgroundColor: 'white',
         // borderTopWidth: StyleSheet.hairlineWidth,
         // borderBottomWidth: StyleSheet.hairlineWidth,
@@ -213,7 +216,8 @@ const styles = StyleSheet.create({
         alignItems: "center"
     },
     ratingTextCont: {
-        margin: 40
+        marginHorizontal: SCREEN_WIDTH * 0.09,
+        marginBottom: SCREEN_HEIGHT * 0.03
     },
     ratingText: {
         textAlign: "center",
@@ -228,14 +232,15 @@ const styles = StyleSheet.create({
         alignContent: "center",
         alignItems: "center",
         justifyContent: "center",
-        width: 280,
-        height: 100,
+        maxWidth: 280,
+        width: SCREEN_WIDTH * 0.75,
+        height: 90,
         shadowOpacity: 0.2,
         shadowRadius: 8,
         shadowColor: "#000",
         elevation: 5,
         backgroundColor: Colors.brandLightPurple,
-        borderRadius: 60,
+        borderRadius: 45,
         flexDirection: "row"
     },
     rateBtnText: {
