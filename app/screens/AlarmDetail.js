@@ -200,6 +200,8 @@ class AlarmDetail extends Component {
 
     startTimesPanRef;
 
+    isAnotherAlarmOn;
+
     constructor(props) {
         super(props);
         console.log("AlarmDetail -- Constructor");
@@ -213,6 +215,9 @@ class AlarmDetail extends Component {
         }
 
         const { params } = props.navigation.state; // same as: " const params = props.navigation.state.params "
+
+        this.isAnotherAlarmOn = params.otherAlarmOn;
+
         if (params.newAlarm) {
             console.log("This is a new alarm");
             let alarmsCount = realm.objects("Alarm").length;
@@ -330,7 +335,6 @@ class AlarmDetail extends Component {
 
         // console.log(this.state);
         // console.log(params);
-        console.log("InteractionManager");
 
         this._onPressAnimHandle = this._onPressAnimHandle.bind(this);
         this._onPressTasksHeader = this._onPressTasksHeader.bind(this);
@@ -670,7 +674,11 @@ class AlarmDetail extends Component {
             // TODO: This should work, but it seems that due to a bug, the Tasks list gets unlinked from the parent Alarm object. It should be fixed soon
             // https://github.com/realm/realm-js/issues/1124
             let { alarm } = this.state;
+            if (this.isAnotherAlarmOn) {
+                alarm.status = ALARM_STATES.OFF;
+            } else {
             alarm.status = ALARM_STATES.SET;
+            }
             if (alarm.mode === "autocalc" && this._calculatedWakeUpTime) {
                 alarm.wakeUpTime = DateUtils.date_to_nextTimeInstance(
                     this._calculatedWakeUpTime

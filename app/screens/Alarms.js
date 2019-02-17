@@ -440,10 +440,20 @@ class Alarms extends Component {
     handleAddAlarm() {
         console.info("Adding alarm");
         if (upgrades.pro == true) {
+            // check if any Alarm is set and pass this info in as a flag to AlarmDetail
+            let { alarms } = this.state;
+            let setAlarms = alarms.filtered("status = 1");
+
+            let otherAlarmOn = false;
+            if (setAlarms.length > 0) {
+                otherAlarmOn = true;
+            }
+
             //NOTE: 1A. IAP-locked Feature - Alarms Limit
             this.props.navigation.navigate("AlarmDetail", {
                 newAlarm: true,
-                reloadAlarms: this.reloadAlarms
+                reloadAlarms: this.reloadAlarms,
+                otherAlarmOn: otherAlarmOn
             });
         } else {
             //TODO: Display CKT-styled upgrade popup
@@ -551,10 +561,23 @@ class Alarms extends Component {
 
     _onPressItem = alarmItem => {
         console.info("AlarmsList - _onPressItem called");
+
+        // check if any Alarm is set (excluding this one), and pass this info in as a flag to AlarmDetail
+        let { alarms } = this.state;
+        let setAlarms = alarms.filtered("status = 1");
+
+        let otherAlarmOn = false;
+        if (setAlarms.length > 0) {
+            if (setAlarms.id != alarmItem.id) {
+                otherAlarmOn = true;
+            }
+        }
+
         if (this._activeRow == null) {
             this.props.navigation.navigate("AlarmDetail", {
                 alarm: alarmItem,
-                reloadAlarms: this.reloadAlarms
+                reloadAlarms: this.reloadAlarms,
+                otherAlarmOn: otherAlarmOn
             });
         } else {
             this._activeRow = null;
