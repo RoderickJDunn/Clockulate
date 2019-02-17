@@ -86,7 +86,7 @@ class TaskItem extends React.Component {
         };
 
         // console.log("this.state", this.state);
-        console.log("task-item constructor");
+        // console.log("task-item constructor");
     }
 
     componentWillMount() {
@@ -446,10 +446,12 @@ class TaskItem extends React.Component {
                         <Text
                             style={[
                                 TaskListStyle.allChildren,
-                                TaskItemStyle.description
-                                // {
-                                //     backgroundColor: "blue"
-                                // }
+                                TaskItemStyle.description,
+                                {
+                                    color: this.props.data.enabled
+                                        ? Colors.brandLightGrey
+                                        : Colors.disabledGrey
+                                }
                             ]}
                             numberOfLines={1}
                             // ellipsizeMode="tail"
@@ -486,6 +488,9 @@ class TaskItem extends React.Component {
                                             alignSelf: "stretch",
                                             // textAlign: "right",
                                             // backgroundColor: "red",
+                                            color: this.props.data.enabled
+                                                ? Colors.brandLightGrey
+                                                : Colors.disabledGrey,
                                             fontSize: 24
                                         }
                                     ]}
