@@ -79,11 +79,26 @@ const TASK_LIST_TL_VIEW_POS_FACTOR = 0.21; // multiply this by SCREEN_HEIGHT to 
 const TASK_LIST_AUTO_VIEW_POS_FACTOR = isSmallScreen ? 0.65 : 0.595; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in Auto view
 
 const SNAP_FACTOR_TL_VIEW = isSmallScreen ? 0.44 : 0.385;
+
+const XTRA_KEYBOARD_HEIGHT = isIphoneX() ? 180 : 0;
+
 // for safe keeping
 //const TASK_LIST_TL_VIEW_POS_FACTOR = 0.21; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in TaskList View
 //const TASK_LIST_AUTO_VIEW_POS_FACTOR = 0.595; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in Auto view
 class AlarmDetail extends Component {
+    static defaultNavParams = {
+        handleBackBtn: null,
+        menuIsOpen: false,
+        setMenuState: null
+    };
+
     static navigationOptions = ({ navigation }) => {
+        // handle case where we haven't yet received params
+        let { params } = navigation.state;
+        if (!params) {
+            params = this.defaultNavParams;
+        }
+
         let menuIsOpen = navigation.state.params.menuIsOpen;
         return {
             title: "Edit Alarm",
@@ -93,7 +108,7 @@ class AlarmDetail extends Component {
             headerLeft: menuIsOpen ? null : (
                 <TouchableOpacity
                     onPress={() => {
-                        navigation.state.params.handleBackBtn();
+                        params.handleBackBtn && params.handleBackBtn();
                     }}
                     hitSlop={{ top: 10, bottom: 10, left: 0, right: 20 }}
                 >
@@ -108,7 +123,7 @@ class AlarmDetail extends Component {
             headerRight: (
                 <TouchableOpacity
                     onPress={() => {
-                        navigation.state.params.setMenuState(!menuIsOpen);
+                        params.setMenuState && params.setMenuState(!menuIsOpen);
                     }}
                     style={{
                         alignSelf: "flex-end",
@@ -207,11 +222,9 @@ class AlarmDetail extends Component {
         console.log("AlarmDetail -- Constructor");
 
         // console.log("props", props);
-        
-        // let av = ArrowView();
-        // av.printHello();
+
         if (isIphoneX()) {
-            this.xtraKeyboardHeight = 180;
+            this.xtraKeyboardHeight = XTRA_KEYBOARD_HEIGHT; // TODO: Remove? Doesn't seem to be used.
         }
 
         const { params } = props.navigation.state; // same as: " const params = props.navigation.state.params "
@@ -244,7 +257,6 @@ class AlarmDetail extends Component {
                     menuIsOpen: false,
                     showSnoozePicker: false,
                     durationsVisible: true,
-                    isLoadingTasks: true,
                     taskAreaFlex: TASK_AREA_AUTO_VIEW_FLEX_FACTOR,
                     taskHeaderFlex: TASK_HEAD_AUTO_VIEW_FLEX_FACTOR,
                     taskListDimensions: this.tskListDimsAutoView
@@ -266,7 +278,6 @@ class AlarmDetail extends Component {
                 menuIsOpen: false,
                 showSnoozePicker: false,
                 durationsVisible: true,
-                isLoadingTasks: true,
                 taskAreaFlex: TASK_AREA_AUTO_VIEW_FLEX_FACTOR,
                 taskHeaderFlex: TASK_HEAD_AUTO_VIEW_FLEX_FACTOR,
                 taskListDimensions: this.tskListDimsAutoView
@@ -423,21 +434,19 @@ class AlarmDetail extends Component {
 
         this._lastMeasuredView = "autocalc"; // set initial lastView to calcmode index
 
-        this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
-        this._taskStartTimes = this._calcStartTimes();
-
-        this.props.navigation.setParams({
-            handleBackBtn: this.handleBackPress,
-            menuIsOpen: false,
-            setMenuState: this._setMenuState,
-            openSnoozeTimePicker: this._openSnoozeTimePicker
-        });
-
         InteractionManager.runAfterInteractions(() => {
-            this.setState({ isLoadingTasks: false });
+            this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
+            this._taskStartTimes = this._calcStartTimes();
+
+            this.props.navigation.setParams({
+                handleBackBtn: this.handleBackPress,
+                menuIsOpen: false,
+                setMenuState: this._setMenuState,
+                isLoadingTasks: false
+            });
         });
-        // this.setState({ isLoadingTasks: false });
-        AdvSvcOnScreenConstructed("AlarmDetail");
+        // AdvSvcOnScreenConstructed("AlarmDetail");
+
     }
 
     _setMenuState(nextMenuState, nextState) {
@@ -597,11 +606,11 @@ class AlarmDetail extends Component {
     startTimesRefs = [];
 
     setStartTimeRef = (el, index) => {
-        console.log("startTimesRef - index", index);
-        console.log("this.startTimesRefs.length", this.startTimesRefs.length);
+        // console.log("startTimesRef - index", index);
+        // console.log("this.startTimesRefs.length", this.startTimesRefs.length);
         // console.log("this.startTimesRefs[index]", this.startTimesRefs[index]);
         if (this.startTimesRefs[index] !== undefined) {
-            console.log("updated startTimesRef for idx (order): ", index);
+            // console.log("updated startTimesRef for idx (order): ", index);
             if (el != null) {
                 this.startTimesRefs[index] = el;
             } /* else {
@@ -609,13 +618,12 @@ class AlarmDetail extends Component {
             } */
         } else {
             this.startTimesRefs.push(el);
-            console.log("added new startTimesRef for idx (order): ", index);
+            // console.log("added new startTimesRef for idx (order): ", index);
             // sanity check
             if (this.startTimesRefs.length != index + 1) {
                 console.warn("SetStartTimeRef not working as expected");
             }
         }
-        console.log("... done.");
     };
 
     keyboardWillShow(event) {
@@ -677,7 +685,7 @@ class AlarmDetail extends Component {
             if (this.isAnotherAlarmOn) {
                 alarm.status = ALARM_STATES.OFF;
             } else {
-            alarm.status = ALARM_STATES.SET;
+                alarm.status = ALARM_STATES.SET;
             }
             if (alarm.mode === "autocalc" && this._calculatedWakeUpTime) {
                 alarm.wakeUpTime = DateUtils.date_to_nextTimeInstance(
@@ -2187,7 +2195,7 @@ class AlarmDetail extends Component {
                                 </View>
                                 {touchableBackdrop}
                                 {/* {taskArea} */}
-                                {this.state.isLoadingTasks ? (
+                                {this.props.navigation.state.params.isLoadingTasks != false ? (
                                     <ActivityIndicator style={{ flex: 1 }} />
                                 ) : (
                                     <TaskList
