@@ -699,11 +699,13 @@ export default class Upgrade extends React.Component {
                                                     translateY: this._scrollY.interpolate(
                                                         {
                                                             inputRange: [
+                                                                -150,
                                                                 0,
                                                                 SCREEN_HEIGHT *
                                                                     0.35
                                                             ],
                                                             outputRange: [
+                                                                0,
                                                                 0,
                                                                 SCREEN_HEIGHT *
                                                                     0.155
@@ -716,11 +718,13 @@ export default class Upgrade extends React.Component {
                                                     scale: this._scrollY.interpolate(
                                                         {
                                                             inputRange: [
+                                                                -150,
                                                                 0,
                                                                 SCREEN_HEIGHT *
                                                                     0.35
                                                             ],
                                                             outputRange: [
+                                                                1.2,
                                                                 1,
                                                                 0.6
                                                             ],
