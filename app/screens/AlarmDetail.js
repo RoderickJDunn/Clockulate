@@ -446,7 +446,6 @@ class AlarmDetail extends Component {
             });
         });
         // AdvSvcOnScreenConstructed("AlarmDetail");
-
     }
 
     _setMenuState(nextMenuState, nextState) {
@@ -676,11 +675,7 @@ class AlarmDetail extends Component {
         // console.debug("Going back to Alarms List");
         // console.debug(this.state);
 
-        // TODO: If activeTask != null, set it back to inactive (snap back to not showing Delete)
-
         realm.write(() => {
-            // TODO: This should work, but it seems that due to a bug, the Tasks list gets unlinked from the parent Alarm object. It should be fixed soon
-            // https://github.com/realm/realm-js/issues/1124
             let { alarm } = this.state;
             if (this.isAnotherAlarmOn) {
                 alarm.status = ALARM_STATES.OFF;
@@ -697,7 +692,6 @@ class AlarmDetail extends Component {
                 );
             }
             realm.create("Alarm", alarm, true);
-            // TODO: end
 
             // For Now, use this workaround //
             // let alarm = realm
@@ -929,7 +923,6 @@ class AlarmDetail extends Component {
 
     onSnap(event) {
         console.info("onSnap");
-
         // let alarmState = this.state.alarm;
     }
 
@@ -1071,7 +1064,10 @@ class AlarmDetail extends Component {
 
     _calcStartTimes(hideDisableTasks) {
         console.log("_calcStartTimes");
-        let additiveMoment = moment(this.state.alarm.wakeUpTime);
+        if (!this._calculatedWakeUpTime) {
+            this._calculatedWakeUpTime = this._calcWakeUpTime();
+        }
+        let additiveMoment = moment(this._calculatedWakeUpTime);
         if (hideDisableTasks == null || hideDisableTasks == undefined) {
             hideDisableTasks = this.state.hideDisabledTasks;
         }
@@ -2195,7 +2191,8 @@ class AlarmDetail extends Component {
                                 </View>
                                 {touchableBackdrop}
                                 {/* {taskArea} */}
-                                {this.props.navigation.state.params.isLoadingTasks != false ? (
+                                {this.props.navigation.state.params
+                                    .isLoadingTasks != false ? (
                                     <ActivityIndicator style={{ flex: 1 }} />
                                 ) : (
                                     <TaskList
