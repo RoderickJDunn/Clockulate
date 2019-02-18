@@ -16,6 +16,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   private let TAG = "AlarmAudioService: "
   
   var recorder: FDSoundActivatedRecorder?
+  var isRecording = false
   var alarmTimer = Timer()
   var refractoryTimer = Timer()
   var auxAnalyzeTimer = Timer()
@@ -88,10 +89,14 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
           if let date = RCTConvert.nsDate(alarmInfo["time"]) {
               let timeTillAlm = date.timeIntervalSinceNow
               self.CKT_LOG("TimeTillAlm: \(timeTillAlm)")
+            
+              self.alarmTimer.invalidate()
               // Audio initialization succeeded... set a timer for the time in alarmInfo, with callback of the function below (alarmDidTrigger). Set userInfo property of timer to sound file name.
               DispatchQueue.main.async(execute: {
                 self.alarmTimer = Timer.scheduledTimer(timeInterval: timeTillAlm, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
               })
+            
+            self.isRecording = true
           }
           else {
               error = "Received invalid date value"
@@ -108,7 +113,11 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   /* Sets up the audio recording functionality
    */
   func beginMonitoringAudio() -> Bool {
-
+    
+    if (self.isRecording) {
+      CKT_LOG("Already recording")
+      return true
+    }
       // Try to start up microphone
       do {
         try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: .mixWithOthers)
@@ -272,6 +281,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
     }
     
     recorder!.abort() // TODO: ?? or a better function
+    self.isRecording = false
       
   }
   
@@ -300,6 +310,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   /// The recording and/or listening ended and no recording was captured
   func soundActivatedRecorderDidAbort(_ recorder: FDSoundActivatedRecorder) {
       print("soundActivatedRecorderDidAbort")
+      self.isRecording = false
+
 //    progressView.progressTintColor = UIColor.blue
 //
 //    if UIApplication.shared.applicationState == .background {

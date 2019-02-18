@@ -513,26 +513,35 @@ class Alarms extends Component {
         // console.debug(this.state);
 
         if (alarmId) {
-            let changedAlarm = this.state.alarms.filtered("id = $0", alarmId);
+            let changedAlarms = this.state.alarms.filtered("id = $0", alarmId);
 
-            if (changedAlarm.length == 1) {
-                console.log("wakeUpTime", changedAlarm.wakeUpTime);
-                console.log("status", changedAlarm.status);
+            if (changedAlarms.length == 1) {
+                let changedAlarm = changedAlarms[0];
+                // console.log("changedAlarm", changedAlarm);
+                // console.log("wakeUpTime", changedAlarm.wakeUpTime);
+                // console.log("status", changedAlarm.status);
 
-                /* Now schedule notification(s) for the changes */
-                // passing in reloadAlarms function for iOS in-app alarm to be able to refresh AlarmsList screen
-                requestAnimationFrame(() => {
-                    scheduleAlarm(
-                        changedAlarm[0],
-                        this.reloadAlarms.bind(this),
-                        this.alarmDidInitialize.bind(
-                            this,
+                // Only schedule an Alarm if the changed Alarm status is SET. If it is not SET, then
+                // another alarm is SET, and we don't want to schedule another.
+                if (changedAlarm.status == ALARM_STATES.SET) {
+                    /* Now schedule notification(s) for the changes */
+                    // passing in reloadAlarms function for iOS in-app alarm to be able to refresh AlarmsList screen
+                    requestAnimationFrame(() => {
+                        scheduleAlarm(
                             changedAlarm,
-                            changedAlarm.status
-                        )
-                    );
-                });
-            } else if (changedAlarm.length > 1) {
+                            this.reloadAlarms.bind(this),
+                            this.alarmDidInitialize.bind(
+                                this,
+                                changedAlarm,
+                                changedAlarm.status
+                            )
+                        );
+                    });
+                }
+                else {
+                    this.reloadAlarms();
+                }
+            } else if (changedAlarms.length > 1) {
                 console.error(
                     `Found more than 1 alarm with alarmId ${alarmId}. This should never happen...`
                 );
@@ -568,7 +577,7 @@ class Alarms extends Component {
 
         let otherAlarmOn = false;
         if (setAlarms.length > 0) {
-            if (setAlarms.id != alarmItem.id) {
+            if (setAlarms[0].id != alarmItem.id) {
                 otherAlarmOn = true;
             }
         }
@@ -741,7 +750,10 @@ class Alarms extends Component {
     };
 
     alarmDidInitialize(alarm, nextAlarmStatus) {
-        console.log("Alarms: alarmDidInitialize");
+        // console.log(
+        //     "Alarms: alarmDidInitialize. NextStatus: ",
+        //     nextAlarmStatus
+        // );
         realm.write(() => {
             alarm.status = nextAlarmStatus;
             this.setState({ isLoading: false });
