@@ -211,87 +211,87 @@ function insertPrepopData() {
         }
 
         /* Create Fake Sleep Disturbances, and LogDates to group them by day */
-        console.log("dummy disturbances");
-        let distForAlarmInst = [];
-        let currTime = moment();
-        for (let index = 0; index < 350; index++) {
-            let almEnd = moment(currTime.subtract(1, "hour"));
-            almEnd.subtract(Math.random() * 60, "minutes");
-            let almStart = moment(
-                currTime.subtract(Math.floor(Math.random() * 12) + 6, "hour")
-            );
+        // console.log("dummy disturbances");
+        // let distForAlarmInst = [];
+        // let currTime = moment();
+        // for (let index = 0; index < 350; index++) {
+        //     let almEnd = moment(currTime.subtract(1, "hour"));
+        //     almEnd.subtract(Math.random() * 60, "minutes");
+        //     let almStart = moment(
+        //         currTime.subtract(Math.floor(Math.random() * 12) + 6, "hour")
+        //     );
 
-            let distTime = moment(currTime);
+        //     let distTime = moment(currTime);
 
-            let timeSinceLastDist = 0;
-            let timeAwakeAcum = 0;
+        //     let timeSinceLastDist = 0;
+        //     let timeAwakeAcum = 0;
 
-            let almInstId = uuid.v1();
-            let almInstPath = RNFS.DocumentDirectoryPath + "/" + almInstId;
+        //     let almInstId = uuid.v1();
+        //     let almInstPath = RNFS.DocumentDirectoryPath + "/" + almInstId;
 
-            // create some disturbances for time range of alarm
-            for (let i = 0; i < index % 3 == 0 ? 25 : index % 3; i++) {
-                distTime.add(2 * i, "minutes");
-                if (distTime.isAfter(almEnd)) {
-                    console.log("Exit early. distTime isAfter almEnd:");
-                    console.log("timeAwakeAcum", timeAwakeAcum);
-                    console.log("timeSinceLastDist", timeSinceLastDist);
-                    // timeAwakeAcum -= timeSinceLastDist;
-                    console.log("distTime", distTime.toDate());
-                    console.log("almEnd", almEnd.toDate());
-                    break;
-                }
+        //     // create some disturbances for time range of alarm
+        //     for (let i = 0; i < index % 3 == 0 ? 25 : index % 3; i++) {
+        //         distTime.add(2 * i, "minutes");
+        //         if (distTime.isAfter(almEnd)) {
+        //             console.log("Exit early. distTime isAfter almEnd:");
+        //             console.log("timeAwakeAcum", timeAwakeAcum);
+        //             console.log("timeSinceLastDist", timeSinceLastDist);
+        //             // timeAwakeAcum -= timeSinceLastDist;
+        //             console.log("distTime", distTime.toDate());
+        //             console.log("almEnd", almEnd.toDate());
+        //             break;
+        //         }
 
-                let rec = i % 3 != 0 ? null : uuid.v1();
+        //         let rec = i % 3 != 0 ? null : uuid.v1();
 
-                let dist = realm.create("SleepDisturbance", {
-                    id: uuid.v1(),
-                    time: distTime.toDate(),
-                    recording: rec
-                });
+        //         let dist = realm.create("SleepDisturbance", {
+        //             id: uuid.v1(),
+        //             time: distTime.toDate(),
+        //             recording: rec
+        //         });
 
-                if (rec) {
-                    // create 'fake' recording (real file, but not an actual recording') -- TODO: Test what happens when trying to playback such a file
-                    RNFS.mkdir(almInstPath)
-                        .then(success => {
-                            console.log("Dir created!");
-                            RNFS.writeFile(
-                                almInstPath + "/" + rec,
-                                "test",
-                                "utf8"
-                            )
-                                .then(success => {
-                                    console.log("FILE WRITTEN!");
-                                })
-                                .catch(err => {
-                                    console.log(err.message);
-                                });
-                        })
-                        .catch(err => {
-                            console.log(err.message);
-                        });
-                }
+        //         if (rec) {
+        //             // create 'fake' recording (real file, but not an actual recording') -- TODO: Test what happens when trying to playback such a file
+        //             RNFS.mkdir(almInstPath)
+        //                 .then(success => {
+        //                     console.log("Dir created!");
+        //                     RNFS.writeFile(
+        //                         almInstPath + "/" + rec,
+        //                         "test",
+        //                         "utf8"
+        //                     )
+        //                         .then(success => {
+        //                             console.log("FILE WRITTEN!");
+        //                         })
+        //                         .catch(err => {
+        //                             console.log(err.message);
+        //                         });
+        //                 })
+        //                 .catch(err => {
+        //                     console.log(err.message);
+        //                 });
+        //         }
 
-                distForAlarmInst.push(dist);
+        //         distForAlarmInst.push(dist);
 
-                timeSinceLastDist = 2 * (i + 1); // minutes till next disturbance
+        //         timeSinceLastDist = 2 * (i + 1); // minutes till next disturbance
 
-                if (timeSinceLastDist < 15) {
-                    timeAwakeAcum += timeSinceLastDist;
-                    console.log("timeSinceLastDist", timeSinceLastDist);
-                    console.log("timeAwakeAcum", timeAwakeAcum);
-                }
-            }
-            realm.create("AlarmInstance", {
-                id: almInstId,
-                start: almStart.toDate(),
-                end: almEnd.toDate(),
-                disturbances: distForAlarmInst,
-                timeAwake: timeAwakeAcum
-            });
-            currTime.subtract(1, "day");
-            distForAlarmInst = [];
-        }
+        //         if (timeSinceLastDist < 15) {
+        //             timeAwakeAcum += timeSinceLastDist;
+        //             console.log("timeSinceLastDist", timeSinceLastDist);
+        //             console.log("timeAwakeAcum", timeAwakeAcum);
+        //         }
+        //     }
+        //     realm.create("AlarmInstance", {
+        //         id: almInstId,
+        //         start: almStart.toDate(),
+        //         end: almEnd.toDate(),
+        //         disturbances: distForAlarmInst,
+        //         timeAwake: timeAwakeAcum
+        //     });
+        //     currTime.subtract(1, "day");
+        //     distForAlarmInst = [];
+        // }
 
         /**** Create AlarmTasks *****/
         // AlarmTasks for alarm1

@@ -555,7 +555,7 @@ export default class SleepLogPage extends React.PureComponent {
                                         fontFamily: "Gurmukhi MN"
                                     }}
                                 >
-                                    No recordings were made for this log
+                                    No disturbances were detected during this Alarm
                                 </Text>
                             </View>
                         }

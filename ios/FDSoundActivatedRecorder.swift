@@ -52,13 +52,13 @@ import AVFoundation
   func soundActivatedRecorderDidFinishRecording(_ recorder: FDSoundActivatedRecorder, _ timestamp: String,  _ duration: Double, andSaved file:URL?)
 }
 
-func print(_ items: Any...) {
-  #if DEBUG
-  items.forEach { item in
-    Swift.print(item)
-  }
-  #endif
-}
+//func print(_ items: Any...) {
+//  #if DEBUG
+//  items.forEach { item in
+//    Swift.print(item)
+//  }
+//  #endif
+//}
 
 @objc public enum FDSoundActivatedRecorderStatus: Int {
     case inactive
@@ -450,7 +450,7 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
             microphoneLevel = 1 + currentLevel / microphoneLevelSilenceThreshold * -1.0
         }
 
-        print("microphoneLevel: \(microphoneLevel)")
+        //print("microphoneLevel: \(microphoneLevel)")
 
         switch status {
         case .recording:

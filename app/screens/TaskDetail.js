@@ -51,6 +51,7 @@ import {
 } from "../util/date_utils";
 import PickerActionSheet from "../components/picker-action-sheet";
 import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
+import ClkAlert from "../components/clk-awesome-alert";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -889,41 +890,21 @@ class TaskDetail extends Component {
                 )}
                 {/* <View style={{ position: "absolute", height: 1, backgroundColor: "black", left: 0, right:0, top: 140 }} /> */}
                 {this.state.showDurationInfo && (
-                    <AwesomeAlert
-                        alertContainerStyle={{
-                            top: 0,
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            width: "auto",
-                            backgroundColor: "rgba(0,0,0,0.8)"
-                        }}
-                        // contentContainerStyle={{}}
-                        show={true}
-                        showProgress={false}
+                    <ClkAlert
                         title="About Default Durations"
-                        message={`Check this box if you want new tasks with this name to be created with this duration (${formatDuration(
-                            durationDisplayed
-                        )}) from now on.`}
-                        // message={`If checked, new tasks with this name will have this duration (${formatDuration(
-                        //     durationDisplayed
-                        // )}). \n\nIf unchecked, new tasks with this name will have the original duration (${formatDuration(
-                        //     this.state.alarmTask.task.defaultDuration
-                        // )})`}
-                        messageStyle={{ textAlign: "center" }}
-                        closeOnTouchOutside={true}
-                        closeOnHardwareBackPress={false}
-                        showConfirmButton={true}
-                        confirmText="Got it!"
-                        confirmButtonColor={Colors.brandGreen}
-                        onConfirmPressed={() => {
+                        onConfirm={() => {
+                            console.log("Confirmed Plugin popup");
                             this.setState({ showDurationInfo: false });
                         }}
                         onDismiss={() => {
-                            if (this.state.showDurationInfo) {
-                                this.setState({ showDurationInfo: false });
-                            }
+                            console.log("Dismissed Plugin popup");
+                            this.setState({ showDurationInfo: false });
                         }}
+                        message={`Check this box to make new tasks with this name start off with this duration (${formatDuration(
+                            durationDisplayed
+                        )})`}
+                        confirmText="Got it!"
+                        type={"text"}
                     />
                 )}
             </ScrollView>

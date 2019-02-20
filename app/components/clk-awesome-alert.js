@@ -22,6 +22,7 @@ export default class ClkAlert extends Component {
         return (
             <AwesomeAlert
                 alertContainerStyle={{
+                    position: "absolute",
                     top: 0,
                     bottom: 0,
                     left: 0,
@@ -47,10 +48,7 @@ export default class ClkAlert extends Component {
                 messageStyle={{ textAlign: "center" }}
                 closeOnTouchOutside={true}
                 closeOnHardwareBackPress={false}
-                // showConfirmButton={true}
-                // showCancelButton={true}
-                // cancelText="Ok"
-                // confirmText="Don't Show Again"
+                // {...other}
                 confirmButtonColor="#54c0ff"
                 onConfirmPressed={() => {
                     // this.setState({ showNoRecAlert: false });
@@ -82,7 +80,7 @@ export default class ClkAlert extends Component {
                                 />
                             )}
                             <View
-                                style={{
+                                style={{    
                                     flexDirection: "row",
                                     marginLeft: 65
                                 }}
@@ -159,8 +157,6 @@ export default class ClkAlert extends Component {
                                 </Text>
                             </TouchableOpacity>
                         </View>
-                        {/* TODO: Image or icon of Plug/Charger with wire, socket etc */}
-                        {/* TODO: Checkbox for "Don't show again" (?) */}
                     </View>
                 }
             />

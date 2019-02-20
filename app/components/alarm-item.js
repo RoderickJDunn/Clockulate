@@ -242,11 +242,15 @@ class AlarmItem extends React.PureComponent {
             duration: duration,
             easing: easing,
             useNativeDriver: true
-        }).start(/* () => {
-            if (onAnimFinished && nextAlarmState == ALARM_STATES.SET) {
-                onAnimFinished();
+        }).start(() => {
+            if (
+                this.props.onAnimFinished &&
+                this.props.alarm.status == ALARM_STATES.SET
+            ) {
+                console.log("calling prop onAnimFinished");
+                this.props.onAnimFinished();
             }
-        } */);
+        });
         // if (notifyParentOfToggle) {
         //     this.props.onToggle(this.props.alarm);
         // }
@@ -628,8 +632,8 @@ class AlarmItem extends React.PureComponent {
                             >
                                 {status > ALARM_STATES.OFF &&
                                     status < ALARM_STATES.SNOOZED && (
-                                    <Pulse color="#ff6060" />
-                                )}
+                                        <Pulse color="#ff6060" />
+                                    )}
                                 {status > ALARM_STATES.OFF &&
                                     status < ALARM_STATES.SNOOZED && (
                                         <View
@@ -642,8 +646,8 @@ class AlarmItem extends React.PureComponent {
                                                 left: 0,
                                                 borderRadius: 10
                                             }}
-                                                />
-                                            )}
+                                        />
+                                    )}
                                 <Animated.View
                                     onLayout={({ nativeEvent }) => {
                                         let {
@@ -687,11 +691,14 @@ class AlarmItem extends React.PureComponent {
                                         progress={this.state.animProgress}
                                         resizeMode={"contain"}
                                         style={[StyleSheet.absoluteFill]}
-                                        onAnimationFinished={() => {
-                                            if (this.props.onAnimFinished && this.props.alarm.status == ALARM_STATES.SET) {
-                                                this.props.onAnimFinished();
-                                            }
-                                        }}
+                                        loop={false}
+                                        // onAnimationFinish={() => {
+                                        //     console.log('onAnimationFinish');
+                                        //     if (this.props.onAnimFinished && this.props.alarm.status == ALARM_STATES.SET) {
+                                        //         console.log('calling prop onAnimFinished');
+                                        //         this.props.onAnimFinished();
+                                        //     }
+                                        // }}
                                     />
                                 </Animated.View>
                             </TouchableOpacity>

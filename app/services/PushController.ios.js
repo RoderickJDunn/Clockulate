@@ -217,12 +217,20 @@ export let scheduleAlarm = (alarm, reloadAlarmsList, alarmDidInitialize) => {
         // TODO: This functionality will be a premium feature
     }
 
+    let allAIs = realm.objects("AlarmInstance").sorted("start"); // sort by most recent first
     let currAlmInst;
-    // create AlarmInstance with start date of now, and empty End date, and empty disturbance list
-    realm.write(() => {
-        currAlmInst = new AlarmInstance();
-        realm.create("AlarmInstance", currAlmInst);
-    });
+
+    if (allAIs.length == 0 || allAIs[allAIs.length - 1].end != null) {
+        // There is no active AlarmInstance.
+        // create new AlarmInstance with start date of now, and empty End date, and empty disturbance list
+        realm.write(() => {
+            currAlmInst = new AlarmInstance();
+            realm.create("AlarmInstance", currAlmInst);
+        });
+    } else {
+        // There is already an AlarmInstance in progress. continue with it.
+        currAlmInst = allAIs[allAIs.length - 1];
+    }
 
     console.log("currAlmInst", currAlmInst);
 
@@ -234,8 +242,6 @@ export let scheduleAlarm = (alarm, reloadAlarmsList, alarmDidInitialize) => {
 
     if (Settings.maxRecs() > -1 && allDists.length > Settings.maxRecs()) {
         console.log("allDists with recordings count", allDists.length);
-
-        let allAIs = realm.objects("AlarmInstance").sorted("start");
 
         let deleteRecsCount = allDists.length - Settings.maxRecs();
         let dirsToDelete = [];
@@ -552,7 +558,6 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
 export let cancelInAppAlarm = alarm => {
     if (alarm && alarm.timeoutId) {
         clearTimeout(alarm.timeoutId);
-        alarm.timeoutId = null;
     }
 };
 

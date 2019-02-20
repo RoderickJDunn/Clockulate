@@ -17,8 +17,8 @@ import {
     StyleSheet,
     View,
     Alert,
-    Text
-    // TouchableOpacity
+    Text,
+    TouchableOpacity
 } from "react-native";
 import moment from "moment";
 import LinearGradient from "react-native-linear-gradient";
@@ -95,7 +95,7 @@ class Alarms extends Component {
             menuVisible: false,
             appState: AppState.currentState,
             isLoading: false,
-            showChargePopup: false
+            showChargePopup: true
         };
 
         console.log("showChargePopup", this.state.showChargePopup);
@@ -109,14 +109,14 @@ class Alarms extends Component {
             // ProximityManager.disable();
         }
 
-        // this._idlePanResponder = PanResponder.create({
-        //     // Ask to be the responder:
-        //     onStartShouldSetPanResponderCapture: () => {
-        //         console.log("onStartShouldSetPanResponderCapture (AlarmsList)");
-        //         this.handleActivity();
-        //         return false;
-        //     }
-        // });
+        this._idlePanResponder = PanResponder.create({
+            // Ask to be the responder:
+            onStartShouldSetPanResponderCapture: () => {
+                console.log("onStartShouldSetPanResponderCapture (AlarmsList)");
+                // this.handleActivity();
+                return false;
+            }
+        });
 
         InteractionManager.runAfterInteractions(() => {
             AdSvcUpdateAppOpenedStats();
@@ -537,8 +537,7 @@ class Alarms extends Component {
                             )
                         );
                     });
-                }
-                else {
+                } else {
                     this.reloadAlarms();
                 }
             } else if (changedAlarms.length > 1) {
@@ -864,7 +863,7 @@ class Alarms extends Component {
                     start={{ x: 0.2, y: 0 }}
                     end={{ x: 1.5, y: 1 }}
                     colors={[Colors.brandMidGrey, Colors.brandDarkGrey]}
-                    // {...this._idlePanResponder.panHandlers}
+                    {...this._idlePanResponder.panHandlers}
                 >
                     <SafeAreaView
                         forceInset={{ bottom: "always" }}
@@ -1021,6 +1020,104 @@ class Alarms extends Component {
                             />
                         </View>
                     )}
+                    {/* <View style={StyleSheet.absoluteFill}>
+                        <View style={[styles.container]}>
+                            <View style={[styles.titleArea, styles.centered]}>
+                                {Platform.OS == "ios" ? (
+                                    <MatComIcon
+                                        name="cellphone-iphone"
+                                        size={scaleByFactor(100)}
+                                        color={Colors.backgroundLightGrey}
+                                    />
+                                ) : (
+                                    <MatComIcon
+                                        name="cellphone-android"
+                                        size={100}
+                                        color={Colors.backgroundLightGrey}
+                                    />
+                                )}
+                                <View
+                                    style={{
+                                        flexDirection: "row",
+                                        marginLeft: 65
+                                    }}
+                                >
+                                    <View
+                                        style={{
+                                            // backgroundColor: "blue",
+                                            transform: [
+                                                {
+                                                    rotateX: "180deg"
+                                                }
+                                            ],
+                                            alignSelf: "flex-start"
+                                        }}
+                                    >
+                                        <EntypoIcon
+                                            name="power-plug"
+                                            size={35}
+                                            color={Colors.backgroundLightGrey}
+                                        />
+                                    </View>
+                                    <View
+                                        style={{
+                                            // backgroundColor: "blue",
+                                            transform: [
+                                                {
+                                                    rotateY: "40deg"
+                                                },
+                                                {
+                                                    skewY: "40deg"
+                                                }
+                                            ],
+                                            marginTop: 5,
+                                            alignSelf: "flex-start"
+                                        }}
+                                    >
+                                        <MatComIcon
+                                            name="power-socket-us"
+                                            size={35}
+                                            color={Colors.backgroundLightGrey}
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                            <View style={[styles.centered, styles.contentArea]}>
+                                <Text style={[styles.titleText]}>
+                                    {this.props.title}
+                                </Text>
+                            </View>
+                            <View style={styles.buttonArea}>
+                                <TouchableOpacity
+                                    onPress={this.props.onDismiss}
+                                    style={[
+                                        styles.button,
+                                        styles.centered,
+                                        {
+                                            backgroundColor:
+                                                Colors.brandMidLightGrey
+                                        }
+                                    ]}
+                                >
+                                    <Text style={[styles.buttonText]}>
+                                        Dismiss
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={this.props.onConfirm}
+                                    style={[
+                                        styles.button,
+                                        styles.centered,
+                                        { backgroundColor: Colors.brandGreen }
+                                    ]}
+                                >
+                                    <Text style={[styles.buttonText]}>
+                                        Don't Show Again
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View> */}
                     {this.state.showChargePopup && (
                         <ClkAlert
                             title="Please Plug in Your Device"
@@ -1033,6 +1130,7 @@ class Alarms extends Component {
                                 console.log("Dismissed Plugin popup");
                                 this.setState({ showChargePopup: false });
                             }}
+                            type={"image"}
                         />
                     )}
                 </LinearGradient>
@@ -1058,6 +1156,55 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         height: 80
+    },
+
+    // TODO: REMOVE
+    container: {
+        // backgroundColor: "red",
+        height: scaleByFactor(300, 1),
+        width: "100%",
+        backgroundColor: Colors.brandLightOpp,
+        overflow: "hidden",
+        borderRadius: 12
+    },
+
+    titleArea: {
+        flex: 0.65,
+        justifyContent: "center",
+        alignItems: "center",
+        alignSelf: "stretch",
+        overflow: "hidden",
+        backgroundColor: Colors.brandLightPurple
+    },
+    titleText: {
+        color: Colors.brandDarkGrey,
+        textAlign: "center",
+        fontSize: scaleByFactor(15, 1),
+        marginTop: 5,
+        fontFamily: "Gurmukhi MN"
+    },
+    contentArea: {
+        flex: 0.2
+    },
+    buttonArea: {
+        flex: 0.15,
+        padding: 10,
+        flexDirection: "row",
+        justifyContent: "space-around"
+    },
+    button: {
+        flex: 0.4,
+        borderRadius: 30,
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 1,
+        shadowColor: "black"
+    },
+    buttonText: {
+        color: Colors.brandLightOpp,
+        textAlign: "center",
+        fontSize: scaleByFactor(12, 0.7),
+        fontFamily: "Avenir-Black"
     }
 });
 

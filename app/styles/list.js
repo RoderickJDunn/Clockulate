@@ -109,7 +109,7 @@ export const TaskItemStyle = StyleSheet.create({
         height: 55,
         alignContent: "stretch",
         borderBottomColor: Colors.brandLightOpp,
-        borderBottomWidth: 0.8
+        borderBottomWidth: StyleSheet.hairlineWidth
         // alignItems: "center",
         // backgroundColor: "green"
         // justifyContent: "space-between"

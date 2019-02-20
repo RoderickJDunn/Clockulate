@@ -64,6 +64,10 @@
 		<string>rubicon-icon-font.ttf</string>
 		<string>Quesha.ttf</string>
 		<string>Feather.ttf</string>
+		<string>AntDesign.ttf</string>
+		<string>FontAwesome5_Brands.ttf</string>
+		<string>FontAwesome5_Regular.ttf</string>
+		<string>FontAwesome5_Solid.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
@@ -85,6 +89,11 @@
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>CKT needs da mic!</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>itms-apps://itunes.apple.com/app/viewContentsUserReviews?id=9SXQK8L2Q6.org.reactjs.native.example.Alarm-AutoSet</string>
+		<string>itms-apps://itunes.apple.com/app/id=9SXQK8L2Q6.org.reactjs.native.example.Alarm-AutoSet</string>
+	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 </dict>
