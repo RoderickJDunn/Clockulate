@@ -29,7 +29,7 @@ class TaskList extends React.Component {
         // console.log("other props", other);
         // console.log("sectionId", sectionId);
         // console.log("rowID", rowID);
-        // console.log("item", item);
+        // console.log("task item", item);
         onSnapTask.bind(item);
         let closed = true;
         if (this.props.activeTask == index) {

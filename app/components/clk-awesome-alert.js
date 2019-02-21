@@ -80,7 +80,7 @@ export default class ClkAlert extends Component {
                                 />
                             )}
                             <View
-                                style={{    
+                                style={{
                                     flexDirection: "row",
                                     marginLeft: 65
                                 }}

@@ -1,7 +1,7 @@
 import React from "react";
 import { AppContainer } from "./app/config/router";
 import { AsyncStorage, View, StatusBar, Dimensions } from "react-native";
-
+import upgrades from "./app/config/upgrades";
 // import ArrowView from "./app/components/arrow-view-native";
 
 import insertPrepopData from "./app/data/data-prepop";
@@ -28,7 +28,6 @@ export default class App extends React.Component {
                         "alreadyLaunched",
                         JSON.stringify(true)
                     );
-                    // this.setState({ firstLaunch: true });
                     insertPrepopData();
                 } else {
                     console.log("Not the first Launch");
@@ -39,6 +38,7 @@ export default class App extends React.Component {
                 `Unable to check if app has already been launched: ${error}`
             );
         }
+        console.log("Pro Upgrade status: ", upgrades.pro);
     }
 
     render() {

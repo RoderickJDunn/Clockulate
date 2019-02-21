@@ -109,14 +109,14 @@ class Alarms extends Component {
             // ProximityManager.disable();
         }
 
-        this._idlePanResponder = PanResponder.create({
-            // Ask to be the responder:
-            onStartShouldSetPanResponderCapture: () => {
-                console.log("onStartShouldSetPanResponderCapture (AlarmsList)");
-                // this.handleActivity();
-                return false;
-            }
-        });
+        // this._idlePanResponder = PanResponder.create({
+        //     // Ask to be the responder:
+        //     onStartShouldSetPanResponderCapture: () => {
+        //         console.log("onStartShouldSetPanResponderCapture (AlarmsList)");
+        //         // this.handleActivity();
+        //         return false;
+        //     }
+        // });
 
         InteractionManager.runAfterInteractions(() => {
             AdSvcUpdateAppOpenedStats();
@@ -863,7 +863,7 @@ class Alarms extends Component {
                     start={{ x: 0.2, y: 0 }}
                     end={{ x: 1.5, y: 1 }}
                     colors={[Colors.brandMidGrey, Colors.brandDarkGrey]}
-                    {...this._idlePanResponder.panHandlers}
+                    // {...this._idlePanResponder.panHandlers}
                 >
                     <SafeAreaView
                         forceInset={{ bottom: "always" }}

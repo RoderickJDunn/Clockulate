@@ -99,7 +99,7 @@ const TransitionConfiguration = () => {
             const { index, route } = scene;
             const params = route.params || {};
             const transition = params.transition || "default";
-            console.log("params", params);
+            // console.log("params", params);
             return {
                 collapseExpand: SlideFromBottom(index, position, height),
                 default: SlideFromRight(index, position, width)
