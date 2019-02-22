@@ -891,7 +891,7 @@ class TaskDetail extends Component {
                 {/* <View style={{ position: "absolute", height: 1, backgroundColor: "black", left: 0, right:0, top: 140 }} /> */}
                 {this.state.showDurationInfo && (
                     <ClkAlert
-                        contHeight={"mid"}
+                        contHeight={"small"}
                         dismissConfig={{
                             onPress: () => {
                                 console.log("Dismissed Plugin popup");

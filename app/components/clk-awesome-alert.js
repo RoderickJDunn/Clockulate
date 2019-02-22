@@ -17,7 +17,7 @@ import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import Colors from "../styles/colors";
 import { scaleByFactor } from "../util/font-scale";
 
-const LARGE_HEIGHT = scaleByFactor(300, 1);
+const LARGE_HEIGHT = scaleByFactor(320, 1);
 const MID_HEIGHT = scaleByFactor(250, 1);
 const SMALL_HEIGHT = scaleByFactor(200, 1);
 
@@ -117,7 +117,8 @@ export default class ClkAlert extends Component {
                                         <Text
                                             style={[
                                                 styles.titleText,
-                                                headerTextStyle
+                                                headerTextStyle,
+                                                { marginBottom: 10 }
                                             ]}
                                         >
                                             {title}
@@ -125,12 +126,22 @@ export default class ClkAlert extends Component {
                                     </View>
                                 )}
                             </View>
-                            <View style={[styles.centered, bodyStyle]}>
+                            <View
+                                style={[
+                                    styles.centered,
+                                    bodyStyle,
+                                    {
+                                        alignSelf: "stretch"
+                                        // backgroundColor: "green"
+                                    }
+                                ]}
+                            >
                                 <Text
                                     style={[
                                         flexibleHeader
                                             ? styles.titleText
                                             : styles.bodyText
+                                        // { backgroundColor: "red" }
                                     ]}
                                 >
                                     {flexibleHeader ? title : bodyText}
@@ -141,12 +152,12 @@ export default class ClkAlert extends Component {
                                     <TouchableOpacity
                                         onPress={dismissConfig.onPress}
                                         style={[
-                                            styles.button,
-                                            styles.centered,
-                                            {
-                                                backgroundColor:
-                                                    Colors.brandMidLightGrey
-                                            }
+                                            styles.buttonDouble,
+                                            styles.centered
+                                            // {
+                                            //     backgroundColor:
+                                            //         Colors.brandMidLightGrey
+                                            // }
                                         ]}
                                     >
                                         <Text style={[styles.buttonText]}>
@@ -156,11 +167,15 @@ export default class ClkAlert extends Component {
                                     <TouchableOpacity
                                         onPress={confirmConfig.onPress}
                                         style={[
-                                            styles.button,
+                                            styles.buttonDouble,
                                             styles.centered,
                                             {
-                                                backgroundColor:
-                                                    Colors.brandGreen
+                                                borderLeftWidth:
+                                                    StyleSheet.hairlineWidth,
+                                                borderLeftColor:
+                                                    Colors.brandLightGrey
+                                                // backgroundColor:
+                                                //     Colors.brandGreen
                                             }
                                         ]}
                                     >
@@ -182,12 +197,7 @@ export default class ClkAlert extends Component {
                                             // }
                                         ]}
                                     >
-                                        <Text
-                                            style={[
-                                                styles.buttonText,
-                                                { color: Colors.brandMidGrey }
-                                            ]}
-                                        >
+                                        <Text style={[styles.buttonText]}>
                                             {dismissConfig.text}
                                         </Text>
                                     </TouchableOpacity>
@@ -260,8 +270,7 @@ const styles = StyleSheet.create({
     centered: {
         alignContent: "center",
         alignItems: "center",
-        justifyContent: "center",
-        paddingHorizontal: 25
+        justifyContent: "center"
     },
     headerAreaLarge: {
         flex: 1,
@@ -284,7 +293,6 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontSize: scaleByFactor(15, 1),
         marginTop: 5,
-        marginBottom: 12,
         justifyContent: "flex-end",
         fontFamily: "Gurmukhi MN"
     },
@@ -296,25 +304,22 @@ const styles = StyleSheet.create({
         fontFamily: "Avenir"
     },
     contentAreaSmall: {
-        height: 70
+        height: 90
     },
     contentAreaLarge: {
-        flex: 1
+        flex: 1,
+        paddingHorizontal: 25
     },
     buttonArea: {
-        height: 70,
+        height: 50,
         flexDirection: "row",
-        justifyContent: "space-around"
+        justifyContent: "space-around",
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: Colors.brandLightGrey
     },
-    button: {
-        flex: 0.4,
-        borderRadius: 30,
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        elevation: 1,
-        shadowColor: "black",
-        marginVertical: 10,
-        marginHorizontal: 0
+    buttonDouble: {
+        flex: 0.5,
+        height: 50
     },
     buttonSingle: {
         flex: 1,
@@ -324,7 +329,7 @@ const styles = StyleSheet.create({
         borderTopColor: Colors.brandLightGrey
     },
     buttonText: {
-        color: Colors.brandLightOpp,
+        color: Colors.darkGreyText,
         textAlign: "center",
         fontSize: scaleByFactor(12, 0.7),
         fontFamily: "Avenir-Black"
