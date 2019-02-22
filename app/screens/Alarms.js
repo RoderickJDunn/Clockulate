@@ -47,6 +47,7 @@ import {
 import AwesomeAlert from "react-native-awesome-alerts";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import FAIcon from "react-native-vector-icons/FontAwesome";
 import ClkAlert from "../components/clk-awesome-alert";
 import upgrades from "../config/upgrades";
 // import ProximityManager from "react-native-proximity-manager";
@@ -95,7 +96,8 @@ class Alarms extends Component {
             menuVisible: false,
             appState: AppState.currentState,
             isLoading: false,
-            showChargePopup: true
+            showChargePopup: false,
+            showUpgradePopup: true
         };
 
         console.log("showChargePopup", this.state.showChargePopup);
@@ -439,26 +441,29 @@ class Alarms extends Component {
 
     handleAddAlarm() {
         console.info("Adding alarm");
-        if (upgrades.pro == true) {
-            // check if any Alarm is set and pass this info in as a flag to AlarmDetail
-            let { alarms } = this.state;
-            let setAlarms = alarms.filtered("status = 1");
-
-            let otherAlarmOn = false;
-            if (setAlarms.length > 0) {
-                otherAlarmOn = true;
+        if (!upgrades.pro) {
+            console.info("FREE version");
+            if (this.state.alarms.length >= 2) {
+                console.info("Alarm count: ", this.state.alarms.length);
+                this.setState({ showUpgradePopup: true });
+                return;
             }
-
-            //NOTE: 1A. IAP-locked Feature - Alarms Limit
-            this.props.navigation.navigate("AlarmDetail", {
-                newAlarm: true,
-                reloadAlarms: this.reloadAlarms,
-                otherAlarmOn: otherAlarmOn
-            });
-        } else {
-            //TODO: Display CKT-styled upgrade popup
-            alert("Not available in free version (Placeholder)");
         }
+        // check if any Alarm is set and pass this info in as a flag to AlarmDetail
+        let { alarms } = this.state;
+        let setAlarms = alarms.filtered("status = 1");
+
+        let otherAlarmOn = false;
+        if (setAlarms.length > 0) {
+            otherAlarmOn = true;
+        }
+
+        //NOTE: 1A. IAP-locked Feature - Alarms Limit
+        this.props.navigation.navigate("AlarmDetail", {
+            newAlarm: true,
+            reloadAlarms: this.reloadAlarms,
+            otherAlarmOn: otherAlarmOn
+        });
     }
 
     /* We only allow 1 alarm to be active (SET) at a time. This function checks if there is
@@ -1020,104 +1025,6 @@ class Alarms extends Component {
                             />
                         </View>
                     )}
-                    {/* <View style={StyleSheet.absoluteFill}>
-                        <View style={[styles.container]}>
-                            <View style={[styles.titleArea, styles.centered]}>
-                                {Platform.OS == "ios" ? (
-                                    <MatComIcon
-                                        name="cellphone-iphone"
-                                        size={scaleByFactor(100)}
-                                        color={Colors.backgroundLightGrey}
-                                    />
-                                ) : (
-                                    <MatComIcon
-                                        name="cellphone-android"
-                                        size={100}
-                                        color={Colors.backgroundLightGrey}
-                                    />
-                                )}
-                                <View
-                                    style={{
-                                        flexDirection: "row",
-                                        marginLeft: 65
-                                    }}
-                                >
-                                    <View
-                                        style={{
-                                            // backgroundColor: "blue",
-                                            transform: [
-                                                {
-                                                    rotateX: "180deg"
-                                                }
-                                            ],
-                                            alignSelf: "flex-start"
-                                        }}
-                                    >
-                                        <EntypoIcon
-                                            name="power-plug"
-                                            size={35}
-                                            color={Colors.backgroundLightGrey}
-                                        />
-                                    </View>
-                                    <View
-                                        style={{
-                                            // backgroundColor: "blue",
-                                            transform: [
-                                                {
-                                                    rotateY: "40deg"
-                                                },
-                                                {
-                                                    skewY: "40deg"
-                                                }
-                                            ],
-                                            marginTop: 5,
-                                            alignSelf: "flex-start"
-                                        }}
-                                    >
-                                        <MatComIcon
-                                            name="power-socket-us"
-                                            size={35}
-                                            color={Colors.backgroundLightGrey}
-                                        />
-                                    </View>
-                                </View>
-                            </View>
-                            <View style={[styles.centered, styles.contentArea]}>
-                                <Text style={[styles.titleText]}>
-                                    {this.props.title}
-                                </Text>
-                            </View>
-                            <View style={styles.buttonArea}>
-                                <TouchableOpacity
-                                    onPress={this.props.onDismiss}
-                                    style={[
-                                        styles.button,
-                                        styles.centered,
-                                        {
-                                            backgroundColor:
-                                                Colors.brandMidLightGrey
-                                        }
-                                    ]}
-                                >
-                                    <Text style={[styles.buttonText]}>
-                                        Dismiss
-                                    </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={this.props.onConfirm}
-                                    style={[
-                                        styles.button,
-                                        styles.centered,
-                                        { backgroundColor: Colors.brandGreen }
-                                    ]}
-                                >
-                                    <Text style={[styles.buttonText]}>
-                                        Don't Show Again
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </View> */}
                     {this.state.showChargePopup && (
                         <ClkAlert
                             flexibleHeader={true}
@@ -1203,6 +1110,41 @@ class Alarms extends Component {
                                     Settings.chargeReminder(false);
                                 },
                                 text: "Don't Show Again"
+                            }}
+                        />
+                    )}
+                    {this.state.showUpgradePopup && (
+                        <ClkAlert
+                            contHeight={"mid"}
+                            headerIcon={
+                                <FAIcon
+                                    name="magic"
+                                    size={33}
+                                    color={Colors.brandLightPurple}
+                                />
+                            }
+                            title="Interested in Going Pro?"
+                            headerTextStyle={{ color: Colors.brandLightOpp }}
+                            bodyText={
+                                "You are using the free version of Clockulate, which is limited to 2 alarms.\n\n" +
+                                "Would you like to go the Upgrades screen to learn more?"
+                            }
+                            dismissConfig={{
+                                onPress: () => {
+                                    console.log("Dismissed Upgrade popup");
+                                    this.setState({ showUpgradePopup: false });
+                                },
+                                text: "Dismiss"
+                            }}
+                            confirmConfig={{
+                                onPress: () => {
+                                    console.log(
+                                        "Confirmed Upgrade popup: Going to Upgrades screen"
+                                    );
+                                    this.setState({ showUpgradePopup: false });
+                                    this.props.navigation.navigate("Upgrade");
+                                },
+                                text: "Go to Upgrades"
                             }}
                         />
                     )}
