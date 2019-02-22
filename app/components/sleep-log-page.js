@@ -539,23 +539,30 @@ export default class SleepLogPage extends React.PureComponent {
                     <FlatList
                         data={almInst && almInst.disturbances}
                         keyExtractor={item => item.id}
+                        contentContainerStyle={
+                            almInst.disturbances.length === 0 &&
+                            styles.centerEmptySet
+                        }
                         ListEmptyComponent={
                             <View
                                 style={{
-                                    alignContent: "stretch",
+                                    // alignContent: "stretch",
                                     justifyContent: "center",
-                                    alignItems: "center",
-                                    flex: 1
+                                    alignItems: "center"
                                 }}
                             >
                                 <Text
                                     style={{
                                         fontSize: 16,
                                         color: Colors.backgroundBright,
-                                        fontFamily: "Gurmukhi MN"
+                                        fontFamily: "Gurmukhi MN",
+                                        textAlign: "center",
+                                        alignSelf: "center",
+                                        maxWidth: SCREEN_WIDTH - 100
                                     }}
                                 >
-                                    No disturbances were detected during this Alarm
+                                    No disturbances were detected during this
+                                    alarm
                                 </Text>
                             </View>
                         }
@@ -749,5 +756,10 @@ const styles = StyleSheet.create({
         width: 10,
         borderRadius: 7,
         backgroundColor: "#989898"
+    },
+    centerEmptySet: {
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100%"
     }
 });
