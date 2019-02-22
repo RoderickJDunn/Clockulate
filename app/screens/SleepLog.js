@@ -36,6 +36,7 @@ import DimmableView from "../components/dimmable-view";
 import MenuItem from "../components/menu-item";
 import TouchableBackdrop from "../components/touchable-backdrop";
 import SleepLogPage from "../components/sleep-log-page";
+import ClkAlert from "../components/clk-awesome-alert";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -871,46 +872,75 @@ export default class SleepLog extends React.Component {
                     />
                 </Animated.View>
                 {this.state.showNoRecAlert && (
-                    <AwesomeAlert
-                        alertContainerStyle={{
-                            top: 0,
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            width: "auto"
-                        }}
-                        contentContainerStyle={{
-                            borderRadius: 20
-                        }}
-                        show={true}
-                        showProgress={false}
+                    <ClkAlert
+                        contHeight={"mid"}
+                        // headerIcon={
+                        //     <FAIcon
+                        //         name="magic"
+                        //         size={33}
+                        //         color={Colors.brandLightPurple}
+                        //     />
+                        // }
                         title="No Recording Available"
-                        message={`No recording was saved for this disturbance, as it occurred too soon after another disturbance. You can increase the number of disturbances that are recorded in the Settings screen.`}
-                        messageStyle={{ textAlign: "center" }}
-                        closeOnTouchOutside={true}
-                        closeOnHardwareBackPress={false}
-                        showConfirmButton={true}
-                        showCancelButton={true}
-                        cancelText="Ok"
-                        confirmText="Go to Settings"
-                        confirmButtonColor={Colors.brandGreen}
-                        cancelButtonColor={Colors.disabledGrey}
-                        onConfirmPressed={() => {
-                            // this.setState({ showNoRecAlert: false });
-                            this.props.navigation.navigate("Settings");
-                            // alert(
-                            //     "not implemented (should navigate to Settings Screen)"
-                            // );
-                        }}
-                        onCancelPressed={() => {
-                            this.setState({ showNoRecAlert: false });
-                        }}
-                        onDismiss={() => {
-                            if (this.state.showDurationInfo) {
+                        headerTextStyle={{ color: Colors.brandLightOpp }}
+                        bodyText={`No recording was saved for this disturbance, as it occurred too soon after another disturbance. You can increase the number of disturbances that are recorded in the Settings screen.`}
+                        dismissConfig={{
+                            onPress: () => {
+                                console.log("Dismissed no-recording popup");
                                 this.setState({ showNoRecAlert: false });
-                            }
+                            },
+                            text: "Dismiss"
+                        }}
+                        confirmConfig={{
+                            onPress: () => {
+                                console.log("Going to Settings screen");
+                                // if (this.state.showDurationInfo) {
+                                this.setState({ showNoRecAlert: false });
+                                this.props.navigation.navigate("Settings");
+                            },
+                            text: "Go to Upgrades"
                         }}
                     />
+                    // <AwesomeAlert
+                    //     alertContainerStyle={{
+                    //         top: 0,
+                    //         bottom: 0,
+                    //         left: 0,
+                    //         right: 0,
+                    //         width: "auto"
+                    //     }}
+                    //     contentContainerStyle={{
+                    //         borderRadius: 20
+                    //     }}
+                    //     show={true}
+                    //     showProgress={false}
+                    //     title="No Recording Available"
+                    //     message={`No recording was saved for this disturbance, as it occurred too soon after another disturbance. You can increase the number of disturbances that are recorded in the Settings screen.`}
+                    //     messageStyle={{ textAlign: "center" }}
+                    //     closeOnTouchOutside={true}
+                    //     closeOnHardwareBackPress={false}
+                    //     showConfirmButton={true}
+                    //     showCancelButton={true}
+                    //     cancelText="Ok"
+                    //     confirmText="Go to Settings"
+                    //     confirmButtonColor={Colors.brandGreen}
+                    //     cancelButtonColor={Colors.disabledGrey}
+                    //     onConfirmPressed={() => {
+                    //         // this.setState({ showNoRecAlert: false });
+                    //         this.props.navigation.navigate("Settings");
+                    //         // alert(
+                    //         //     "not implemented (should navigate to Settings Screen)"
+                    //         // );
+                    //     }}
+                    //     onCancelPressed={() => {
+                    //         this.setState({ showNoRecAlert: false });
+                    //     }}
+                    //     onDismiss={() => {
+                    //         if (this.state.showDurationInfo) {
+                    //             this.setState({ showNoRecAlert: false });
+                    //         }
+                    //     }}
+                    // />
                 )}
             </View>
         );

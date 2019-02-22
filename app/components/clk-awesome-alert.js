@@ -110,15 +110,17 @@ export default class ClkAlert extends Component {
                                         style={{
                                             flex: 1,
                                             alignSelf: "stretch",
-                                            justifyContent: "flex-end"
+                                            justifyContent: headerIcon
+                                                ? "flex-end"
+                                                : "center",
+                                            marginBottom: headerIcon ? 10 : 0
                                             // backgroundColor: "green"
                                         }}
                                     >
                                         <Text
                                             style={[
                                                 styles.titleText,
-                                                headerTextStyle,
-                                                { marginBottom: 10 }
+                                                headerTextStyle
                                             ]}
                                         >
                                             {title}
@@ -308,7 +310,7 @@ const styles = StyleSheet.create({
     },
     contentAreaLarge: {
         flex: 1,
-        paddingHorizontal: 25
+        paddingHorizontal: 20
     },
     buttonArea: {
         height: 50,

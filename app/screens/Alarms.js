@@ -1126,8 +1126,8 @@ class Alarms extends Component {
                             title="Interested in Going Pro?"
                             headerTextStyle={{ color: Colors.brandLightOpp }}
                             bodyText={
-                                "You are using the free version of Clockulate, which is limited to 2 alarms.\n\n" +
-                                "Would you like to go the Upgrades screen to learn more?"
+                                "You are using the free version of Clockulate, which is limited to two alarms. Upgrade to Clockulate Pro for Unlimited Alarms!\n\n" +
+                                "Would you like to learn more?"
                             }
                             dismissConfig={{
                                 onPress: () => {
