@@ -17,8 +17,41 @@ import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import Colors from "../styles/colors";
 import { scaleByFactor } from "../util/font-scale";
 
+const LARGE_HEIGHT = scaleByFactor(300, 1);
+const MID_HEIGHT = scaleByFactor(250, 1);
+const SMALL_HEIGHT = scaleByFactor(200, 1);
+
 export default class ClkAlert extends Component {
     render() {
+        let {
+            flexibleHeader,
+            headerContent,
+            title,
+            headerTextStyle,
+            bodyText,
+            contHeight,
+            dismissConfig,
+            confirmConfig,
+            headerIcon
+        } = this.props;
+
+        let headerStyle, bodyStyle;
+        if (flexibleHeader) {
+            headerStyle = styles.headerAreaLarge;
+            bodyStyle = styles.contentAreaSmall;
+        } else {
+            headerStyle = styles.headerAreaSmall;
+            bodyStyle = styles.contentAreaLarge;
+        }
+
+        if (contHeight == "large") {
+            contHeight = styles.contHeightLarge;
+        } else if (contHeight == "mid") {
+            contHeight = styles.contHeightMid;
+        } else {
+            contHeight = styles.contHeightSmall;
+        }
+
         return (
             <AwesomeAlert
                 alertContainerStyle={{
@@ -64,99 +97,110 @@ export default class ClkAlert extends Component {
                     this.setState({ showChargeWarning: false });
                 }}
                 customView={
-                    <View style={[styles.container]}>
-                        <View style={[styles.titleArea, styles.centered]}>
-                            {Platform.OS == "ios" ? (
-                                <MatComIcon
-                                    name="cellphone-iphone"
-                                    size={scaleByFactor(100)}
-                                    color={Colors.backgroundLightGrey}
-                                />
-                            ) : (
-                                <MatComIcon
-                                    name="cellphone-android"
-                                    size={100}
-                                    color={Colors.backgroundLightGrey}
-                                />
-                            )}
-                            <View
-                                style={{
-                                    flexDirection: "row",
-                                    marginLeft: 65
-                                }}
-                            >
-                                <View
-                                    style={{
-                                        // backgroundColor: "blue",
-                                        transform: [
-                                            {
-                                                rotateX: "180deg"
-                                            }
-                                        ],
-                                        alignSelf: "flex-start"
-                                    }}
+                    <View
+                        style={[
+                            styles.outerWrapper,
+                            { height: contHeight.height + 90 }
+                        ]}
+                    >
+                        <View style={[styles.container, contHeight]}>
+                            <View style={[headerStyle, styles.centered]}>
+                                {headerContent || (
+                                    <View
+                                        style={{
+                                            flex: 1,
+                                            alignSelf: "stretch",
+                                            justifyContent: "flex-end"
+                                            // backgroundColor: "green"
+                                        }}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.titleText,
+                                                headerTextStyle
+                                            ]}
+                                        >
+                                            {title}
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                            <View style={[styles.centered, bodyStyle]}>
+                                <Text
+                                    style={[
+                                        flexibleHeader
+                                            ? styles.titleText
+                                            : styles.bodyText
+                                    ]}
                                 >
-                                    <EntypoIcon
-                                        name="power-plug"
-                                        size={35}
-                                        color={Colors.backgroundLightGrey}
-                                    />
+                                    {flexibleHeader ? title : bodyText}
+                                </Text>
+                            </View>
+                            {dismissConfig && confirmConfig ? (
+                                <View style={styles.buttonArea}>
+                                    <TouchableOpacity
+                                        onPress={dismissConfig.onPress}
+                                        style={[
+                                            styles.button,
+                                            styles.centered,
+                                            {
+                                                backgroundColor:
+                                                    Colors.brandMidLightGrey
+                                            }
+                                        ]}
+                                    >
+                                        <Text style={[styles.buttonText]}>
+                                            {dismissConfig.text}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={confirmConfig.onPress}
+                                        style={[
+                                            styles.button,
+                                            styles.centered,
+                                            {
+                                                backgroundColor:
+                                                    Colors.brandGreen
+                                            }
+                                        ]}
+                                    >
+                                        <Text style={[styles.buttonText]}>
+                                            {confirmConfig.text}
+                                        </Text>
+                                    </TouchableOpacity>
                                 </View>
-                                <View
-                                    style={{
-                                        // backgroundColor: "blue",
-                                        transform: [
-                                            {
-                                                rotateY: "40deg"
-                                            },
-                                            {
-                                                skewY: "40deg"
-                                            }
-                                        ],
-                                        marginTop: 5,
-                                        alignSelf: "flex-start"
-                                    }}
-                                >
-                                    <MatComIcon
-                                        name="power-socket-us"
-                                        size={35}
-                                        color={Colors.backgroundLightGrey}
-                                    />
+                            ) : (
+                                <View style={styles.buttonArea}>
+                                    <TouchableOpacity
+                                        onPress={dismissConfig.onPress}
+                                        style={[
+                                            styles.buttonSingle,
+                                            styles.centered
+                                            // {
+                                            //     backgroundColor:
+                                            //         Colors.brandLightGrey
+                                            // }
+                                        ]}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.buttonText,
+                                                { color: Colors.brandMidGrey }
+                                            ]}
+                                        >
+                                            {dismissConfig.text}
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        </View>
+                        {headerIcon && (
+                            <View style={styles.headerIconContainer}>
+                                <View style={[styles.headerIconInnerWrap]}>
+                                    {headerIcon}
                                 </View>
                             </View>
-                        </View>
-                        <View style={[styles.centered, styles.contentArea]}>
-                            <Text style={[styles.titleText]}>
-                                {this.props.title}
-                            </Text>
-                        </View>
-                        <View style={styles.buttonArea}>
-                            <TouchableOpacity
-                                onPress={this.props.onDismiss}
-                                style={[
-                                    styles.button,
-                                    styles.centered,
-                                    {
-                                        backgroundColor:
-                                            Colors.brandMidLightGrey
-                                    }
-                                ]}
-                            >
-                                <Text style={[styles.buttonText]}>Dismiss</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={this.props.onConfirm}
-                                style={[
-                                    styles.button,
-                                    styles.centered,
-                                    { backgroundColor: Colors.brandGreen }
-                                ]}
-                            >
-                                <Text style={[styles.buttonText]}>
-                                    Don't Show Again
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                        )}
                     </View>
                 }
             />
@@ -165,9 +209,49 @@ export default class ClkAlert extends Component {
 }
 
 const styles = StyleSheet.create({
+    outerWrapper: {
+        width: "100%",
+        backgroundColor: "transparent",
+        overflow: "hidden",
+        borderRadius: 12,
+        justifyContent: "center"
+        // backgroundColor: "blue"
+    },
+    headerIconContainer: {
+        borderRadius: 80,
+        position: "absolute",
+        top: 0,
+        alignSelf: "center",
+        justifyContent: "center",
+        width: 90,
+        height: 90,
+        backgroundColor: Colors.brandLightPurple
+    },
+    /* NOTE: This inner wrap is a work-around whereby I avoid setting a borderWidth on the iconContainer, and instead 
+        use this nested circle to give the appearance of a border. This was necessary because when I used the border properties 
+        and I set the color to match that of Title background, there was a thin white line around the outside of the border. 
+        It looked quite bad. Regardless, this workaround results in a clean appearance of the headerIcon boundaries. */
+    headerIconInnerWrap: {
+        borderRadius: 80,
+        alignSelf: "center",
+        justifyContent: "center",
+        alignItems: "center",
+        width: 76,
+        height: 76,
+        backgroundColor: Colors.brandVeryLightPurple
+    },
+    contHeightLarge: {
+        height: LARGE_HEIGHT
+    },
+    contHeightMid: {
+        height: MID_HEIGHT
+    },
+    contHeightSmall: {
+        height: SMALL_HEIGHT
+    },
     container: {
         // backgroundColor: "red",
-        height: scaleByFactor(300, 1),
+        // height: "auto",
         width: "100%",
         backgroundColor: Colors.brandLightOpp,
         overflow: "hidden",
@@ -176,10 +260,19 @@ const styles = StyleSheet.create({
     centered: {
         alignContent: "center",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        paddingHorizontal: 25
     },
-    titleArea: {
-        flex: 0.65,
+    headerAreaLarge: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        alignSelf: "stretch",
+        overflow: "hidden",
+        backgroundColor: Colors.brandLightPurple
+    },
+    headerAreaSmall: {
+        height: 85,
         justifyContent: "center",
         alignItems: "center",
         alignSelf: "stretch",
@@ -191,14 +284,25 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontSize: scaleByFactor(15, 1),
         marginTop: 5,
+        marginBottom: 12,
+        justifyContent: "flex-end",
         fontFamily: "Gurmukhi MN"
     },
-    contentArea: {
-        flex: 0.2
+    bodyText: {
+        color: Colors.brandDarkGrey,
+        textAlign: "center",
+        fontSize: scaleByFactor(12, 1),
+        marginTop: 5,
+        fontFamily: "Avenir"
+    },
+    contentAreaSmall: {
+        height: 70
+    },
+    contentAreaLarge: {
+        flex: 1
     },
     buttonArea: {
-        flex: 0.15,
-        padding: 10,
+        height: 70,
         flexDirection: "row",
         justifyContent: "space-around"
     },
@@ -208,7 +312,16 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 2,
         elevation: 1,
-        shadowColor: "black"
+        shadowColor: "black",
+        marginVertical: 10,
+        marginHorizontal: 0
+    },
+    buttonSingle: {
+        flex: 1,
+        alignSelf: "flex-end",
+        height: 50,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: Colors.brandLightGrey
     },
     buttonText: {
         color: Colors.brandLightOpp,

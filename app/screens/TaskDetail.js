@@ -891,20 +891,27 @@ class TaskDetail extends Component {
                 {/* <View style={{ position: "absolute", height: 1, backgroundColor: "black", left: 0, right:0, top: 140 }} /> */}
                 {this.state.showDurationInfo && (
                     <ClkAlert
-                        title="About Default Durations"
-                        onConfirm={() => {
-                            console.log("Confirmed Plugin popup");
-                            this.setState({ showDurationInfo: false });
+                        contHeight={"mid"}
+                        dismissConfig={{
+                            onPress: () => {
+                                console.log("Dismissed Plugin popup");
+                                this.setState({ showDurationInfo: false });
+                            },
+                            text: "Got it!"
                         }}
-                        onDismiss={() => {
-                            console.log("Dismissed Plugin popup");
-                            this.setState({ showDurationInfo: false });
-                        }}
-                        message={`Check this box to make new tasks with this name start off with this duration (${formatDuration(
+                        title="Default Durations"
+                        headerTextStyle={{ color: Colors.brandLightOpp }}
+                        bodyText={`Check this box if you would like new tasks with this name to be created with the current duration (${formatDuration(
                             durationDisplayed
                         )})`}
-                        confirmText="Got it!"
-                        type={"text"}
+                        headerIcon={
+                            <EntypoIcon
+                                name="info"
+                                size={33}
+                                // color={Colors.brandLightOpp}
+                                color={Colors.brandLightPurple}
+                            />
+                        }
                     />
                 )}
             </ScrollView>

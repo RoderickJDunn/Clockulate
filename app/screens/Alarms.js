@@ -1120,17 +1120,90 @@ class Alarms extends Component {
                     </View> */}
                     {this.state.showChargePopup && (
                         <ClkAlert
+                            flexibleHeader={true}
+                            contHeight={"large"}
                             title="Please Plug in Your Device"
-                            onConfirm={() => {
-                                console.log("Confirmed Plugin popup");
-                                this.setState({ showChargePopup: false });
-                                Settings.chargeReminder(false);
+                            headerContent={
+                                <View style={{ marginLeft: 12 }}>
+                                    {Platform.OS == "ios" ? (
+                                        <MatComIcon
+                                            name="cellphone-iphone"
+                                            size={scaleByFactor(100)}
+                                            color={Colors.backgroundLightGrey}
+                                        />
+                                    ) : (
+                                        <MatComIcon
+                                            name="cellphone-android"
+                                            size={100}
+                                            color={Colors.backgroundLightGrey}
+                                        />
+                                    )}
+                                    <View
+                                        style={{
+                                            flexDirection: "row",
+                                            marginLeft: 65
+                                        }}
+                                    >
+                                        <View
+                                            style={{
+                                                // backgroundColor: "blue",
+                                                transform: [
+                                                    {
+                                                        rotateX: "180deg"
+                                                    }
+                                                ],
+                                                alignSelf: "flex-start"
+                                            }}
+                                        >
+                                            <EntypoIcon
+                                                name="power-plug"
+                                                size={35}
+                                                color={
+                                                    Colors.backgroundLightGrey
+                                                }
+                                            />
+                                        </View>
+                                        <View
+                                            style={{
+                                                // backgroundColor: "blue",
+                                                transform: [
+                                                    {
+                                                        rotateY: "40deg"
+                                                    },
+                                                    {
+                                                        skewY: "40deg"
+                                                    }
+                                                ],
+                                                marginTop: 5,
+                                                alignSelf: "flex-start"
+                                            }}
+                                        >
+                                            <MatComIcon
+                                                name="power-socket-us"
+                                                size={35}
+                                                color={
+                                                    Colors.backgroundLightGrey
+                                                }
+                                            />
+                                        </View>
+                                    </View>
+                                </View>
+                            }
+                            dismissConfig={{
+                                onPress: () => {
+                                    console.log("Dismissed Plugin popup");
+                                    this.setState({ showChargePopup: false });
+                                },
+                                text: "Dismiss"
                             }}
-                            onDismiss={() => {
-                                console.log("Dismissed Plugin popup");
-                                this.setState({ showChargePopup: false });
+                            confirmConfig={{
+                                onPress: () => {
+                                    console.log("Confirmed Plugin popup");
+                                    this.setState({ showChargePopup: false });
+                                    Settings.chargeReminder(false);
+                                },
+                                text: "Don't Show Again"
                             }}
-                            type={"image"}
                         />
                     )}
                 </LinearGradient>
