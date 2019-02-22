@@ -48,7 +48,7 @@
         "react-native-draggable-flatlist": "^1.1.4",
         "react-native-elements": "beta",
         "react-native-fs": "^2.13.3",
-        "react-native-gesture-handler": "^1.0.7",
+        "react-native-gesture-handler": "^1.0.16",
         "react-native-iap": "^2.4.0-beta13",
         "react-native-interactable": "^0.1.7",
         "react-native-iphone-x-helper": "^1.2.0",
@@ -79,7 +79,7 @@
         "react-native-version-number": "^0.3.4",
         "react-native-walkthrough-tooltip": "^0.3.0",
         "react-native-wheel-picker-android": "^1.1.4",
-        "react-navigation": "^3.0.9",
+        "react-navigation": "^3.3.0",
         "realm": "^2.15.3",
         "url-parse": "^1.4.3"
     },
