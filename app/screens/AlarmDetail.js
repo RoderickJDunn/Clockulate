@@ -57,6 +57,7 @@ import * as DateUtils from "../util/date_utils";
 import { ALARM_STATES } from "../data/constants";
 import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
 import upgrades from "../config/upgrades";
+import ClkAlert from "../components/clk-awesome-alert";
 
 let { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15];
@@ -259,7 +260,9 @@ class AlarmDetail extends Component {
                     durationsVisible: true,
                     taskAreaFlex: TASK_AREA_AUTO_VIEW_FLEX_FACTOR,
                     taskHeaderFlex: TASK_HEAD_AUTO_VIEW_FLEX_FACTOR,
-                    taskListDimensions: this.tskListDimsAutoView
+                    taskListDimensions: this.tskListDimsAutoView,
+                    showTasksUpgradePopup: false,
+                    showStartTimesUpgradePopup: false
                 };
                 // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
@@ -280,7 +283,9 @@ class AlarmDetail extends Component {
                 durationsVisible: true,
                 taskAreaFlex: TASK_AREA_AUTO_VIEW_FLEX_FACTOR,
                 taskHeaderFlex: TASK_HEAD_AUTO_VIEW_FLEX_FACTOR,
-                taskListDimensions: this.tskListDimsAutoView
+                taskListDimensions: this.tskListDimsAutoView,
+                showTasksUpgradePopup: false,
+                showStartTimesUpgradePopup: false
             };
         }
 
@@ -742,10 +747,9 @@ class AlarmDetail extends Component {
     }
 
     _onPressAddTask() {
-        if (upgrades.pro != true) {
+        if (upgrades.pro != true && this.state.alarm.tasks.length >= 4) {
             //NOTE: 2. IAP-locked Feature - Tasks Limit
-            //TODO: Display CKT-styled upgrade popup
-            alert("Not available in free version (Placeholder)");
+            this.setState({ showTasksUpgradePopup: true });
             return;
         }
 
@@ -1489,16 +1493,22 @@ class AlarmDetail extends Component {
     }
 
     _toggleShowStartTimes() {
-        // realm.write(() => {
-        //     let { alarm } = this.state;
-        //     alarm.showHrsOfSleep = !alarm.showHrsOfSleep;
-        // });
-        // this._setMenuState(0);
+        if (upgrades.pro != true) {
+            this._setMenuState(0, { showStartTimesUpgradePopup: true });
+            return;
+        }
+
         let nextState = {
             durationsVisible: !this.state.durationsVisible
         };
         this._setMenuState(0, nextState);
     }
+
+    onPressTaskST = () => {
+        if (!this.state.durationsVisible && upgrades.pro != true) {
+            this.setState({ showStartTimesUpgradePopup: true });
+        }
+    };
 
     _onSelectViewFromMenu(idx) {
         // console.log("Pressed fancy radio: ", idx);
@@ -2235,6 +2245,7 @@ class AlarmDetail extends Component {
                                             this.state.durationsVisible
                                         }
                                         setStartTimeRef={this.setStartTimeRef}
+                                        onPressTaskST={this.onPressTaskST}
                                         // onScroll={this.onScrollTaskList.bind(this)}
                                         // onEndReached={this.onEndReachedTaskList.bind(this)}
                                         // tlContainerStyle={{
@@ -2492,6 +2503,80 @@ class AlarmDetail extends Component {
                         showSeparator={false}
                     />
                 </Animated.View>
+                {this.state.showTasksUpgradePopup && (
+                    <ClkAlert
+                        contHeight={"mid"}
+                        headerIcon={
+                            <FAIcon
+                                name="magic"
+                                size={33}
+                                color={Colors.brandLightPurple}
+                            />
+                        }
+                        title="Interested in Going Pro?"
+                        headerTextStyle={{ color: Colors.brandLightOpp }}
+                        bodyText={
+                            "You are using the free version of Clockulate, which is limited to four tasks per alarm. Upgrade to Clockulate Pro for Unlimited Tasks!\n\n" +
+                            "Would you like to learn more?"
+                        }
+                        dismissConfig={{
+                            onPress: () => {
+                                console.log("Dismissed Upgrade popup");
+                                this.setState({ showTasksUpgradePopup: false });
+                            },
+                            text: "Dismiss"
+                        }}
+                        confirmConfig={{
+                            onPress: () => {
+                                console.log(
+                                    "Confirmed Upgrade popup: Going to Upgrades screen"
+                                );
+                                this.setState({ showTasksUpgradePopup: false });
+                                this.props.navigation.navigate("Upgrade");
+                            },
+                            text: "Go to Upgrades"
+                        }}
+                    />
+                )}
+                {this.state.showStartTimesUpgradePopup && (
+                    <ClkAlert
+                        contHeight={"mid"}
+                        headerIcon={
+                            <FAIcon
+                                name="magic"
+                                size={33}
+                                color={Colors.brandLightPurple}
+                            />
+                        }
+                        title="Interested in Going Pro?"
+                        headerTextStyle={{ color: Colors.brandLightOpp }}
+                        bodyText={
+                            "Upgrade to Clockulate Pro to view Task Start-Times!\n\n" +
+                            "Would you like to learn more?"
+                        }
+                        dismissConfig={{
+                            onPress: () => {
+                                console.log("Dismissed Upgrade popup");
+                                this.setState({
+                                    showStartTimesUpgradePopup: false
+                                });
+                            },
+                            text: "Dismiss"
+                        }}
+                        confirmConfig={{
+                            onPress: () => {
+                                console.log(
+                                    "Confirmed Upgrade popup: Going to Upgrades screen"
+                                );
+                                this.setState({
+                                    showStartTimesUpgradePopup: false
+                                });
+                                this.props.navigation.navigate("Upgrade");
+                            },
+                            text: "Go to Upgrades"
+                        }}
+                    />
+                )}
                 {/* Measuring line -- dev view to measure whether views are aligned properly */}
                 {/* <View
                     style={{

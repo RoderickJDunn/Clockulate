@@ -8,6 +8,7 @@ import {
     Text,
     View,
     TouchableOpacity,
+    TouchableHighlight,
     // TouchableWithoutFeedback,
     // Slider,
     PanResponder,
@@ -548,8 +549,8 @@ class TaskItem extends React.Component {
                                     ]}
                                 />
                                 {/* NOTE: 3. IAP-locked Feature - Task Start Times */}
-                                {!upgrades.pro && (
-                                    <View
+                                {upgrades.pro != true && (
+                                    <TouchableHighlight
                                         style={[
                                             StyleSheet.absoluteFill,
                                             {
@@ -562,14 +563,14 @@ class TaskItem extends React.Component {
                                                 justifyContent: "center"
                                             }
                                         ]}
+                                        onPress={this.props.onPressTaskST}
                                     >
                                         <EvilIcon
                                             name="lock"
                                             size={31}
                                             color={Colors.brandLightOpp}
                                         />
-                                        {/* Lock Icon*/}
-                                    </View>
+                                    </TouchableHighlight>
                                 )}
                             </Animated.View>
                         </View>
