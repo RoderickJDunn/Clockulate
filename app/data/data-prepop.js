@@ -117,7 +117,6 @@ function insertPrepopData() {
             displayName: SOUND_DATA[0].displayName,
             category: SOUND_DATA[0].category,
             order: SOUND_DATA[0].order,
-            enabled: false,
             type: SOUND_DATA[0].type
         });
         for (let i = 1; i < SOUND_DATA.length; i++) {
@@ -127,7 +126,7 @@ function insertPrepopData() {
                 displayName: SOUND_DATA[i].displayName,
                 category: SOUND_DATA[i].category,
                 order: SOUND_DATA[i].order,
-                enabled: false,
+                isPremium: SOUND_DATA[i].isPremium || false,
                 type: SOUND_DATA[i].type
             });
         }

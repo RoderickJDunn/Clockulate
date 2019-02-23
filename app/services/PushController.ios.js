@@ -12,6 +12,7 @@ import { SOUND_TYPES, ALARM_STATES } from "../data/constants";
 import realm from "../data/DataSchemas";
 import { DisturbanceModel, AlarmInstance } from "../data/models";
 import Settings from "../config/settings";
+import Upgrades from "../config/upgrades";
 
 // console.log(NativeModules.AlarmAudioService);
 
@@ -199,14 +200,18 @@ export let scheduleAlarm = (alarm, reloadAlarmsList, alarmDidInitialize) => {
             .objects("Sound")
             .filtered("type = $0", SOUND_TYPES.NORMAL);
 
+        if (Upgrades.pro != true) {
+            allSounds = allSounds.filtered("isPremium = false");
+        }
+
         /* randomly select any 'Sound' that is not "Vibrate Only" and not "Random"  */
         let randomSound =
             allSounds[Math.floor(Math.random() * allSounds.length)];
         shortSoundFile = randomSound.files[0]; // this selects the first file in the file array which should be the short version
         longSoundFile = randomSound.files[randomSound.files.length - 1]; // this selects the last file in the file array which should be the long version (might be the same)
-        realm.write(() => {
-            alarm.alarmSound.sound = randomSound;
-        });
+        // realm.write(() => {
+        //     alarm.alarmSound.sound = randomSound;
+        // });
     } else if (alarm.alarmSound.type == SOUND_TYPES.NORMAL) {
         shortSoundFile = alarm.alarmSound.sound.files[0]; // this selects the first file in the file array which should be the short version
         longSoundFile = alarm.alarmSound.sound.files[filesLen - 1]; // this selects the last file in the file array which should be the long version (might be the same)

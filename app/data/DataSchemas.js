@@ -75,9 +75,9 @@ SoundSchema.schema = {
         files: "string[]",
         displayName: "string",
         category: "string",
+        isPremium: { type: "bool", default: false },
         type: "int",
-        order: "int",
-        enabled: "bool" // this property will never be changed in the DB. It is just here to more easily create a functional array from this DB table
+        order: "int"
     }
 };
 

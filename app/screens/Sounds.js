@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import {
     View,
-    FlatList,
+    SectionList,
     Dimensions,
     Text,
     TouchableOpacity,
@@ -9,6 +9,7 @@ import {
     InteractionManager
 } from "react-native";
 import EntypoIcon from "react-native-vector-icons/Entypo";
+import FAIcon from "react-native-vector-icons/FontAwesome";
 import { SafeAreaView } from "react-navigation";
 import {
     AdMobBanner,
@@ -24,6 +25,14 @@ import Colors from "../styles/colors";
 import realm from "../data/DataSchemas";
 import { SOUND_TYPES } from "../data/constants";
 import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
+import Upgrades from "../config/upgrades";
+import ClkAlert from "../components/clk-awesome-alert";
+
+const PremiumTonesPlaceholder = {
+    title: "",
+    data: [{ id: "placeholder", files: [], displayName: "More Sounds" }]
+};
+
 export default class Sounds extends Component {
     static navigationOptions = () => ({
         title: "Sounds"
@@ -38,22 +47,33 @@ export default class Sounds extends Component {
 
         // console.log(props);
         let { currSound } = props.navigation.state.params;
-        console.log(currSound);
+        // console.log(currSound);
+
+        // TODO: NOTE: any calls to setCategory while recording is active may affect Microphone gain.
+        //             Find other calls to this function and investigate whether this causes any issues.
         Sound.setCategory("Playback", false);
 
-        let dbSounds = Array.from(realm.objects("Sound").sorted("order"));
-        let sounds = dbSounds.map(x => Object.assign({}, x));
+        let dbSounds = realm.objects("Sound").sorted("order");
+
+        let freeSounds = Array.from(
+            dbSounds.filtered("isPremium = false && type <= 1")
+        );
+        let premiumSounds = Array.from(
+            dbSounds.filtered("isPremium = true && type = 1")
+        );
+
+        let randomSounds = Array.from(dbSounds.filtered("type = 2"));
+
+        // if (randomSounds[0].id == currSound.sound.id) {
+        //     randomSounds[0].enabled = true;
+        // }
+
+        // let sounds = dbSounds.map(x => Object.assign({}, x)); // NOTE: Is this necessary?
         this.state = {
-            sounds: sounds.map(sound => {
-                console.log(sound);
-                if (sound.id == currSound.sound.id) {
-                    console.log("Found match for passed in enabled sound");
-                    sound.enabled = true;
-                } else {
-                    console.log("This sound is disabled");
-                }
-                return sound;
-            }),
+            freeSounds: freeSounds,
+            premiumSounds: premiumSounds,
+            randomSounds: randomSounds,
+            selectedSound: currSound.sound,
             activeSound: null
         };
         InteractionManager.runAfterInteractions(() => {
@@ -63,24 +83,20 @@ export default class Sounds extends Component {
 
     componentWillUnmount() {
         this.stopActiveSound();
-        let soundToSave = this.state.sounds.find(elem => elem.enabled == true);
-
-        // set enabled to false for saving to DB
-        soundToSave.enabled = false;
-        this.props.navigation.state.params.saveSound(soundToSave);
+        this.props.navigation.state.params.saveSound(this.state.selectedSound);
     }
 
     _onPressItem(sound) {
         console.log("Clicked sound: ", sound);
-        let enableId = sound.displayName;
-        let soundsTmp = this.state.sounds;
-        soundsTmp.forEach(sound => {
-            sound.enabled = sound.displayName == enableId ? true : false;
-            return sound;
-        });
-        this.setState({ sounds: soundsTmp });
-
-        this.playSound(sound);
+        if (sound.id == "placeholder") {
+            if (Upgrades.pro != true) {
+                this.stopActiveSound();
+                this.setState({ showTonesUpgradePopup: true });
+            }
+        } else {
+            this.setState({ selectedSound: sound });
+            this.playSound(sound);
+        }
     }
 
     stopActiveSound() {
@@ -97,7 +113,7 @@ export default class Sounds extends Component {
 
         if (!sound.files || sound.files.length == 0) return;
 
-        console.log("sound.files[last]", sound.files[sound.files.length - 1]);
+        // console.log("sound.files[last]", sound.files[sound.files.length - 1]);
         var s = new Sound(
             sound.files[sound.files.length - 1], // play Long version for preview
             Sound.MAIN_BUNDLE,
@@ -107,12 +123,12 @@ export default class Sounds extends Component {
                     return;
                 }
                 // loaded successfully
-                console.log(
-                    "duration in seconds: " +
-                        s.getDuration() +
-                        "number of channels: " +
-                        s.getNumberOfChannels()
-                );
+                // console.log(
+                //     "duration in seconds: " +
+                //         s.getDuration() +
+                //         "number of channels: " +
+                //         s.getNumberOfChannels()
+                // );
                 s.setVolume(0.5);
                 s.play(success => {
                     if (success) {
@@ -141,21 +157,22 @@ export default class Sounds extends Component {
                 style={{ flex: 1, backgroundColor: Colors.brandMidGrey }}
             >
                 <View style={[styles.listContainer]}>
-                    <FlatList
-                        data={this.state.sounds}
+                    <SectionList
                         keyExtractor={sound => sound.displayName}
                         renderItem={item => {
                             // console.log("Rendering sound row: ", item);
                             let sound = item.item;
+
                             let checkArea;
 
-                            if (sound.enabled) {
+                            if (sound.id == this.state.selectedSound.id) {
                                 checkArea = (
                                     <EntypoIcon
-                                        style={styles.soundRowContent}
+                                        style={[
+                                            styles.soundRowText,
+                                            { fontSize: 22 }
+                                        ]}
                                         name="check"
-                                        size={22}
-                                        color="#098eee"
                                     />
                                 );
                             }
@@ -167,16 +184,110 @@ export default class Sounds extends Component {
                                         sound
                                     )}
                                 >
-                                    <Text style={styles.soundRowContent}>
-                                        {sound.displayName}
-                                    </Text>
-                                    {checkArea}
+                                    <View style={styles.soundListContent}>
+                                        <Text style={styles.soundRowText}>
+                                            {sound.displayName}
+                                        </Text>
+                                        {checkArea}
+                                    </View>
                                 </TouchableOpacity>
                             );
                         }}
+                        renderSectionHeader={({ section: { title } }) => {
+                            if (title == "Spacer") {
+                                return (
+                                    <View
+                                        style={{
+                                            alignSelf: "stretch",
+                                            height: SCREEN_HEIGHT * 0.35,
+                                            backgroundColor: "transparent"
+                                        }}
+                                    />
+                                );
+                            } else {
+                                return (
+                                    <TouchableOpacity
+                                        style={{
+                                            alignSelf: "stretch",
+                                            height: 35
+                                            // backgroundColor: "green"
+                                        }}
+                                        // onPress={this.onPressUpgrade}
+                                    >
+                                        <Text>{title}</Text>
+                                    </TouchableOpacity>
+                                );
+                            }
+                        }}
+                        sections={[
+                            {
+                                title: "",
+                                data: this.state.randomSounds
+                            },
+                            {
+                                title: "",
+                                data: this.state.freeSounds
+                            },
+                            Upgrades.pro != true
+                                ? PremiumTonesPlaceholder
+                                : {
+                                      title: "Premium Tones",
+                                      data: this.state.premiumSounds
+                                  }
+                        ]}
                         extraData={this.state}
+                        getItemLayout={(data, index) => {
+                            return {
+                                length: 55,
+                                offset: 55 * index,
+                                index
+                            };
+                        }}
+                        ItemSeparatorComponent={() => (
+                            <View style={styles.separator} />
+                        )}
+                        // ListFooterComponent={() => (
+                        //     <View
+                        //         style={{ height: 200, backgroundColor: "red" }}
+                        //     />
+                        // )}
                     />
                 </View>
+                {this.state.showTonesUpgradePopup && (
+                    <ClkAlert
+                        contHeight={"mid"}
+                        headerIcon={
+                            <FAIcon
+                                name="magic"
+                                size={33}
+                                color={Colors.brandLightPurple}
+                            />
+                        }
+                        title="Interested in Going Pro?"
+                        headerTextStyle={{ color: Colors.brandLightOpp }}
+                        bodyText={
+                            "Upgrade to Clockulate Pro to unlock Premium alarm sounds!\n\n" +
+                            "Would you like to learn more?"
+                        }
+                        dismissConfig={{
+                            onPress: () => {
+                                console.log("Dismissed Upgrade popup");
+                                this.setState({ showTonesUpgradePopup: false });
+                            },
+                            text: "Dismiss"
+                        }}
+                        confirmConfig={{
+                            onPress: () => {
+                                console.log(
+                                    "Confirmed Upgrade popup: Going to Upgrades screen"
+                                );
+                                this.setState({ showTonesUpgradePopup: false });
+                                this.props.navigation.navigate("Upgrade");
+                            },
+                            text: "Go to Upgrades"
+                        }}
+                    />
+                )}
                 {false && (
                     <AdWrapper
                         borderPosition="top"
@@ -209,21 +320,28 @@ export default class Sounds extends Component {
 const styles = StyleSheet.create({
     listContainer: {
         flex: 1,
-        paddingHorizontal: 10,
         backgroundColor: Colors.brandMidGrey
+    },
+    separator: {
+        marginLeft: 15,
+        backgroundColor: Colors.disabledGrey,
+        height: StyleSheet.hairlineWidth
     },
     soundListItem: {
         flex: 1,
-        flexDirection: "row",
-        height: scaleByFactor(50),
-        justifyContent: "space-between",
-        borderBottomColor: Colors.disabledGrey,
-        borderBottomWidth: 1
+        height: 55,
+        paddingHorizontal: 15,
+        backgroundColor: Colors.darkGreyText
     },
-    soundRowContent: {
+    soundListContent: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between"
+    },
+    soundRowText: {
         alignSelf: "center",
         fontFamily: "Gurmukhi MN",
-        fontSize: 15,
+        fontSize: 16,
         marginTop: 6,
         color: Colors.brandMidOpp
     }
