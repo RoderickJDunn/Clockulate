@@ -194,28 +194,25 @@ export default class Sounds extends Component {
                             );
                         }}
                         renderSectionHeader={({ section: { title } }) => {
-                            if (title == "Spacer") {
+                            if (title == "Premium Sounds") {
                                 return (
-                                    <View
-                                        style={{
-                                            alignSelf: "stretch",
-                                            height: SCREEN_HEIGHT * 0.35,
-                                            backgroundColor: "transparent"
-                                        }}
-                                    />
+                                    <TouchableOpacity
+                                        style={styles.sectionHeaderCont}
+                                        // onPress={this.onPressUpgrade}
+                                    >
+                                        <Text style={styles.sectionTitleText}>
+                                            {title}
+                                        </Text>
+                                    </TouchableOpacity>
                                 );
                             } else {
                                 return (
-                                    <TouchableOpacity
+                                    <View
                                         style={{
-                                            alignSelf: "stretch",
-                                            height: 35
-                                            // backgroundColor: "green"
+                                            height: 35,
+                                            alignSelf: "stretch"
                                         }}
-                                        // onPress={this.onPressUpgrade}
-                                    >
-                                        <Text>{title}</Text>
-                                    </TouchableOpacity>
+                                    />
                                 );
                             }
                         }}
@@ -231,7 +228,7 @@ export default class Sounds extends Component {
                             Upgrades.pro != true
                                 ? PremiumTonesPlaceholder
                                 : {
-                                      title: "Premium Tones",
+                                      title: "Premium Sounds",
                                       data: this.state.premiumSounds
                                   }
                         ]}
@@ -344,5 +341,18 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginTop: 6,
         color: Colors.brandMidOpp
+    },
+    sectionHeaderCont: {
+        alignSelf: "stretch",
+        paddingHorizontal: 15,
+        paddingVertical: 5,
+        justifyContent: "flex-end",
+        backgroundColor: Colors.brandDarkGrey,
+        height: 60
+    },
+    sectionTitleText: {
+        color: Colors.brandLightGrey,
+        fontFamily: "Quesha",
+        fontSize: 30
     }
 });
