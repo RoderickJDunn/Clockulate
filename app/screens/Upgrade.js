@@ -7,14 +7,19 @@ import {
     StyleSheet,
     Animated,
     StatusBar,
-    Platform
+    Platform,
+    Easing,
+    FlatList,
+    Button
 } from "react-native";
 import * as RNIap from "react-native-iap";
 import LinearGradient from "react-native-linear-gradient";
 import FAIcon from "react-native-vector-icons/FontAwesome";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import EntypoIcon from "react-native-vector-icons/Entypo";
+import EvilIcon from "react-native-vector-icons/EvilIcons";
 import { isIphoneX } from "react-native-iphone-x-helper";
+import { NavigationEvents } from "react-navigation";
 
 // import getFullImgNameForScreenSize from "../img/image_map";
 import Colors from "../styles/colors";
@@ -26,6 +31,8 @@ const PRODUCTS = Platform.select({
     ios: ["ClockulateProMain"],
     android: ["ClockulateProMain"]
 });
+
+let AnimLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -47,27 +54,35 @@ const FULL_HEADER_HEIGHT = 44 + STATUS_BAR_HEIGHT;
 export default class Upgrade extends React.Component {
     static navigationOptions = ({ navigation }) => {
         return {
-            headerStyle: {
-                // Style the header view itself (aka. the nav bar)
-                backgroundColor: "transparent",
-                borderBottomWidth: 0
-            },
-            headerRight: (
-                <FAIcon
-                    name={"magic"}
-                    color={Colors.brandLightGrey}
-                    underlayColor={Colors.brandDarkGrey}
-                    size={24}
-                    onPress={() => {
-                        navigation.state.params.onPressUpgrade();
-                    }}
-                    hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
-                    style={{
-                        paddingLeft: 20,
-                        marginRight: scaleByFactor(8, 0.9)
-                    }}
-                />
-            )
+            header: () => null
+            // headerStyle: {
+            //     // Style the header view itself (aka. the nav bar)
+            //     backgroundColor: "transparent",
+            //     // backgroundColor: Colors.brandDarkGrey,
+            //     borderBottomWidth: 0
+            // },
+            // headerRight:
+            //     upgrades.pro != true ? (
+            //         <TouchableOpacity
+            //             onPress={() => {
+            //                 navigation.state.params.onPressUpgrade();
+            //             }}
+            //             hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
+            //             style={{
+            //                 paddingLeft: 20,
+            //                 marginRight: scaleByFactor(8, 0.9)
+            //             }}
+            //         >
+            //             <Text
+            //                 style={{
+            //                     color: Colors.brandLightGrey,
+            //                     fontSize: scaleByFactor(13)
+            //                 }}
+            //             >
+            //                 Restore
+            //             </Text>
+            //         </TouchableOpacity>
+            //     ) : null
         };
     };
 
@@ -174,6 +189,7 @@ export default class Upgrade extends React.Component {
     _bgdPosition = new Animated.Value(0);
     _interactable = null;
     _idx = 0;
+    _btnShineAnim = new Animated.Value(-1000);
 
     _scrollY = new Animated.Value(0);
 
@@ -194,6 +210,34 @@ export default class Upgrade extends React.Component {
             onPressUpgrade: this.onPressUpgrade
         });
     }
+
+    screenDidFocus = payload => {
+        console.log("screenDidFocus");
+        if (upgrades.pro != true) {
+            console.log("upgrades.pro ", upgrades.pro);
+            Animated.loop(
+                Animated.sequence([
+                    Animated.timing(this._btnShineAnim, {
+                        toValue: 1000,
+                        duration: 7000,
+                        isInteraction: false,
+                        easing: Easing.inOut(Easing.quad),
+                        useNativeDriver: true
+                    }),
+                    Animated.timing(this._btnShineAnim, {
+                        toValue: -1000,
+                        duration: 0,
+                        isInteraction: false,
+                        useNativeDriver: true
+                    })
+                ])
+            ).start();
+        }
+    };
+
+    screenWillBlur = payload => {
+        this._btnShineAnim.stopAnimation();
+    };
 
     /* ********************** */
     /* @Roderick. The following  explanation and function getHeaderInset() 
@@ -239,7 +283,12 @@ export default class Upgrade extends React.Component {
                 end={{ x: 0.5, y: 3.0 }}
                 locations={[0, 0.8, 1]}
                 colors={["#000", "#341576", "#526FCE"]}
-                style={[styles.calcBkgrdContainer]}
+                style={[
+                    styles.calcBkgrdContainer,
+                    {
+                        overflow: "hidden"
+                    }
+                ]}
             >
                 <View
                     style={{
@@ -498,10 +547,12 @@ export default class Upgrade extends React.Component {
 
     onPressUpgrade = () => {
         //TODO: Implement IAP functionality
-        console.log("onPressUpgrade");
+        console.log("onPressUpdlkjgrade");
 
         /* TEST: Simulating user buying the IAP */
         upgrades.setPro(true);
+
+        this.forceUpdate();
         /* ************************************ */
     };
 
@@ -510,7 +561,7 @@ export default class Upgrade extends React.Component {
         console.log("onPressRstrPurchase");
     };
 
-    UpgradeItem({ item }) {
+    upgradeItem({ item }) {
         return (
             <View style={styles.upgradeItem}>
                 <View
@@ -563,190 +614,269 @@ export default class Upgrade extends React.Component {
     render() {
         console.log("Upgrade -- render() ");
 
+        let buttonContainerHeight;
+        if (upgrades.pro != true) {
+            buttonContainerHeight = isIphoneX() ? 140 : 130;
+        } else {
+            buttonContainerHeight = isIphoneX() ? 100 : 90;
+        }
+
         return (
-            <View style={{ flex: 1, backgroundColor: "green" }}>
+            <View
+                style={{ flex: 1, backgroundColor: Colors.brandMidLightGrey }}
+            >
+                <NavigationEvents
+                    onWillFocus={this.screenDidFocus}
+                    onWillBlur={this.screenWillBlur}
+                />
                 {this.renderCalcButtons()}
-                <Animated.SectionList
+                <FlatList
                     style={{
-                        flex: 0.8,
-                        marginTop: -SCREEN_HEIGHT * 0.35 - FULL_HEADER_HEIGHT
+                        flex: 1
+                        // marginTop: -FULL_HEADER_HEIGHT
+                        // marginTop: -SCREEN_HEIGHT * 0.35 - FULL_HEADER_HEIGHT
                     }}
-                    onScroll={Animated.event(
-                        // scrollX = e.nativeEvent.contentOffset.x
-                        [
-                            {
-                                nativeEvent: {
-                                    contentOffset: {
-                                        y: this._scrollY
-                                    }
-                                }
-                            }
-                        ],
-                        { useNativeDriver: true }
-                    )}
-                    ListFooterComponent={() => (
+                    ListFooterComponent={
                         <View
                             style={{
-                                height: 175,
-                                marginBottom: 35,
-                                alignContent: "center",
-                                justifyContent: "center",
-                                // backgroundColor: Colors.brandLightBlue
-                                // backgroundColor: "#666699"
+                                height: 140,
                                 backgroundColor: "transparent"
                             }}
+                        />
+                    }
+                    ListHeaderComponent={
+                        <View
+                            style={{
+                                height: isIphoneX() ? 88 : 64,
+                                // backgroundColor: "blue",
+                                flexDirection: "row",
+                                alignItems: "flex-end",
+                                justifyContent: "space-between"
+                            }}
                         >
-                            <TouchableOpacity
-                                style={[styles.upgradeButton]}
-                                onPress={this.onPressUpgrade}
+                            <View
+                                style={[
+                                    StyleSheet.absoluteFill,
+                                    { justifyContent: "flex-end" }
+                                ]}
                             >
-                                <Text style={[styles.upgradeBtnText]}>
-                                    Upgrade Now
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.rstrPurchaseBtn]}
-                                onPress={this.onPressRstrPurchase}
-                            >
-                                <Text style={[styles.rstrPurchaseText]}>
-                                    Already purchased? Tap to Restore Purchase
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                    renderItem={this.UpgradeItem}
-                    renderSectionHeader={({ section: { title } }) => {
-                        if (title == "Spacer") {
-                            return (
-                                <View
+                                <Text
                                     style={{
-                                        alignSelf: "stretch",
-                                        height: SCREEN_HEIGHT * 0.35,
-                                        backgroundColor: "transparent"
+                                        padding: 10,
+                                        color: Colors.brandLightOpp,
+                                        fontSize: scaleByFactor(14),
+                                        alignSelf: "center",
+                                        textAlign: "right"
+                                    }}
+                                >
+                                    Pro Features
+                                </Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    console.log("Going back hopefully");
+                                    this.props.navigation.goBack();
+
+                                    // console.log(
+                                    //     "navSTate",
+                                    //     this.props.navigation.reset()
+                                    // );
+                                }}
+                                style={{
+                                    padding: 10
+                                }}
+                            >
+                                <EvilIcon
+                                    name="close"
+                                    style={{
+                                        color: Colors.brandLightGrey,
+                                        fontSize: scaleByFactor(20)
                                     }}
                                 />
-                            );
-                        } else {
-                            return (
+                            </TouchableOpacity>
+                            {upgrades.pro != true ? (
                                 <TouchableOpacity
-                                    style={{
-                                        alignSelf: "stretch",
-                                        height:
-                                            SCREEN_HEIGHT * 0.35 +
-                                            FULL_HEADER_HEIGHT,
-                                        justifyContent: "center",
-                                        overflow: "hidden"
-                                        // backgroundColor: "green"
+                                    onPress={() => {
+                                        this.onPressRstrPurchase();
                                     }}
+                                    hitSlop={{
+                                        top: 10,
+                                        bottom: 10,
+                                        left: 20,
+                                        right: 0
+                                    }}
+                                    style={{
+                                        // alignSelf: "flex-end",
+                                        // paddingLeft: 20,
+                                        padding: 10
+                                    }}
+                                >
+                                    <Text
+                                        style={{
+                                            color: Colors.brandLightGrey,
+                                            fontSize: scaleByFactor(13),
+                                            textAlign: "right"
+                                        }}
+                                    >
+                                        Restore
+                                    </Text>
+                                </TouchableOpacity>
+                            ) : (
+                                <Button
+                                    title="downgrade"
+                                    onPress={() => {
+                                        upgrades.setPro(false); // TODO: NOTE: Remove. This is for DEV convenience
+                                        this.forceUpdate();
+                                    }}
+                                />
+                            )}
+                        </View>
+                    }
+                    renderItem={this.upgradeItem}
+                    data={this.upgradeData}
+                />
+                {/* <View
+                    style={{
+                        width: SCREEN_WIDTH,
+                        height: 100,
+                        paddingHorizontal: 10,
+                        paddingBottom: isIphoneX() ? 20 : 0,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        borderTopWidth: 3,
+                        borderTopColor: Colors.brandDarkGrey,
+                        backgroundColor: Colors.brandLightOpp
+                    }}
+                >
+                    <Text
+                        style={{
+                            color: Colors.darkGreyText,
+                            fontFamily: "Gurmukhi MN",
+                            marginTop: 8,
+                            fontSize: 22
+                        }}
+                    >
+                        Clockulate Version
+                    </Text>
+                    <Text
+                        style={{
+                            color: Colors.labelText,
+                            fontFamily: "Gurmukhi MN",
+                            marginTop: 8,
+                            fontSize: 22
+                        }}
+                    >
+                        {upgrades.pro == true ? "PRO" : "FREE"}
+                    </Text>
+                </View> */}
+                <View
+                    style={{
+                        position: "absolute",
+                        bottom: 0,
+                        left: 0,
+                        width: SCREEN_WIDTH,
+                        height: buttonContainerHeight,
+                        alignContent: "center",
+                        justifyContent: "center",
+                        shadowOpacity: 0.9,
+                        shadowRadius: 5,
+                        shadowColor: "#AAA",
+                        elevation: 5
+                        // borderTopWidth: 1,
+                        // borderTopColor: Colors.backgroundLightGrey,
+                    }}
+                >
+                    <View
+                        style={{
+                            flex: 1,
+                            // marginBottom: 35,
+                            alignContent: "center",
+                            justifyContent: "center",
+                            borderTopLeftRadius: 170,
+                            borderTopRightRadius: 170,
+                            overflow: "hidden"
+                            // backgroundColor: "#666699"
+                            // backgroundColor: "transparent"
+                        }}
+                    >
+                        <LinearGradient
+                            start={{ x: 0.0, y: 0 }}
+                            end={{ x: 0.5, y: 1.0 }}
+                            locations={[0, 0.9]}
+                            colors={[Colors.brandLightOpp, Colors.brandMidOpp]}
+                            style={[
+                                StyleSheet.absoluteFill,
+                                {
+                                    alignSelf: "center",
+                                    alignContent: "center",
+                                    alignItems: "center",
+                                    justifyContent: "center"
+                                }
+                            ]}
+                        />
+                        {upgrades.pro != true ? (
+                            <View>
+                                <TouchableOpacity
+                                    style={[styles.upgradeButton]}
                                     onPress={this.onPressUpgrade}
                                 >
-                                    <Animated.View
-                                        style={[
-                                            StyleSheet.absoluteFill,
-                                            {
-                                                backgroundColor:
-                                                    Colors.brandDarkBlue,
-                                                opacity: this._scrollY.interpolate(
-                                                    {
-                                                        inputRange: [
-                                                            0,
-                                                            SCREEN_HEIGHT * 0.1,
-                                                            SCREEN_HEIGHT * 0.2,
-                                                            SCREEN_HEIGHT * 0.3,
-                                                            SCREEN_HEIGHT * 0.35
-                                                        ],
-                                                        outputRange: [
-                                                            0,
-                                                            0.05,
-                                                            0.1,
-                                                            0.5,
-                                                            1
-                                                        ],
-                                                        extrapolate: "clamp"
-                                                    }
-                                                )
-                                            }
-                                        ]}
-                                    />
-                                    {/* <LinearGradient
+                                    <AnimLinearGradient
                                         start={{ x: 0.0, y: 0.25 }}
-                                        end={{ x: 0.5, y: 1.0 }}
-                                        locations={[0, 0.5, 1.4]}
+                                        end={{ x: 1, y: 0.28 }}
+                                        locations={[0.1, 0.4, 0.5, 0.6, 0.9]}
                                         colors={[
-                                            Colors.brandDarkGrey,
-                                            Colors.brandMidLightGrey,
-                                            Colors.brandDarkGrey
+                                            Colors.brandDarkBlue,
+                                            Colors.brandLightBlue,
+                                            Colors.brandVeryLightBlue,
+                                            Colors.brandLightBlue,
+                                            Colors.brandDarkBlue
                                         ]}
                                         style={[
-                                            StyleSheet.absoluteFill,
+                                            styles.animLinearGrad,
                                             {
-                                                opacity: this._scrollY
+                                                transform: [
+                                                    {
+                                                        translateX: this
+                                                            ._btnShineAnim
+                                                    }
+                                                ]
                                             }
                                         ]}
-                                    /> */}
-                                    <Animated.Image
-                                        style={{
-                                            height: 180,
-                                            width: SCREEN_WIDTH * 0.75,
-                                            // top: 30,
-                                            top: "10%",
-                                            alignSelf: "center",
-                                            alignContent: "center",
-                                            // justifyContent: "center",
-                                            // backgroundColor: "red",
-                                            transform: [
-                                                {
-                                                    translateY: this._scrollY.interpolate(
-                                                        {
-                                                            inputRange: [
-                                                                -150,
-                                                                0,
-                                                                SCREEN_HEIGHT *
-                                                                    0.35
-                                                            ],
-                                                            outputRange: [
-                                                                0,
-                                                                0,
-                                                                SCREEN_HEIGHT *
-                                                                    0.155
-                                                            ],
-                                                            extrapolate: "clamp"
-                                                        }
-                                                    )
-                                                },
-                                                {
-                                                    scale: this._scrollY.interpolate(
-                                                        {
-                                                            inputRange: [
-                                                                -150,
-                                                                0,
-                                                                SCREEN_HEIGHT *
-                                                                    0.35
-                                                            ],
-                                                            outputRange: [
-                                                                1.2,
-                                                                1,
-                                                                0.6
-                                                            ],
-                                                            extrapolate: "clamp"
-                                                        }
-                                                    )
-                                                }
-                                            ]
-                                        }}
-                                        resizeMode="contain"
-                                        source={require("../img/UpgradeTitleV1_3.png")}
                                     />
+
+                                    <Text style={[styles.upgradeBtnText]}>
+                                        Upgrade Now
+                                    </Text>
                                 </TouchableOpacity>
-                            );
-                        }
-                    }}
-                    sections={[
-                        { title: "Spacer", data: [] },
-                        { title: "MainList", data: this.upgradeData }
-                    ]}
-                    keyExtractor={(item, index) => item + index}
-                />
+                                <Text style={[styles.butnExplainText]}>
+                                    One-time purchase of $1.99
+                                </Text>
+                            </View>
+                        ) : (
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    justifyContent: "center"
+                                }}
+                            >
+                                <Text
+                                    style={[
+                                        styles.butnExplainText,
+                                        {
+                                            fontSize: 26,
+                                            marginHorizontal: 15,
+                                            marginTop: 0
+                                        }
+                                    ]}
+                                >
+                                    Purchased
+                                </Text>
+                                <FAIcon name="check" size={30} color="green" />
+                            </View>
+                        )}
+                    </View>
+                </View>
             </View>
         );
     }
@@ -755,11 +885,15 @@ export default class Upgrade extends React.Component {
 const styles = StyleSheet.create({
     calcBkgrdContainer: {
         position: "absolute",
-        top: 0,
-        bottom: -150,
-        left: -200,
+        // top: 0,
+        // bottom: -150,
+        // left: -200,
         width: 775,
-        marginTop: -88
+        // marginTop: -88
+        top: 0,
+        bottom: 0,
+        left: -200,
+        right: 0
         // backgroundColor: "red"
     },
     calcDisplay: {
@@ -816,7 +950,7 @@ const styles = StyleSheet.create({
         width: 100
     },
     upgradeItem: {
-        height: 170,
+        height: 130,
         marginVertical: 15,
         marginHorizontal: 10,
         flexDirection: "row",
@@ -840,7 +974,7 @@ const styles = StyleSheet.create({
     },
     upgradeTitleText: {
         fontFamily: "Quesha",
-        fontSize: scaleByFactor(31, 0.8),
+        fontSize: scaleByFactor(22, 0.8),
         letterSpacing: 1,
         color: Colors.brandLightOpp
         // flex: 0.2
@@ -850,7 +984,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.5,
 
         // textAlign: "center",
-        fontSize: scaleByFactor(15, 0.8),
+        fontSize: scaleByFactor(13, 0.8),
         color: Colors.brandLightOpp,
         marginVertical: 2
     },
@@ -863,19 +997,30 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         width: 220,
-        height: 80,
-        shadowOpacity: 0.1,
+        height: 65,
+        shadowOpacity: 0.7,
         shadowRadius: 40,
         shadowColor: "#FFF",
         elevation: 5,
         backgroundColor: Colors.brandDarkBlue,
-        borderRadius: 80
+        // backgroundColor: Colors.brandLightOpp,
+        borderRadius: 30,
+        overflow: "hidden"
     },
     upgradeBtnText: {
         color: Colors.brandLightOpp,
         fontSize: 35,
         fontFamily: "Quesha",
         letterSpacing: 1
+    },
+    butnExplainText: {
+        color: Colors.darkGreyText,
+        marginTop: 8,
+        marginBottom: -8,
+        fontSize: 15,
+        fontFamily: "Gurmukhi MN",
+        alignSelf: "center",
+        letterSpacing: 0.5
     },
     rstrPurchaseBtn: {
         marginTop: 30
@@ -887,5 +1032,15 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontFamily: "Avenir-Black",
         letterSpacing: 1
+    },
+    animLinearGrad: {
+        position: "absolute",
+        left: -800,
+        right: 800,
+        top: 0,
+        bottom: 0,
+        // top: 0,
+        width: 1600
+        // height: 120
     }
 });
