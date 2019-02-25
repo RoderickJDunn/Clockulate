@@ -1478,9 +1478,15 @@ class AlarmDetail extends Component {
     }
 
     _navigateToSounds() {
-        this.props.navigation.navigate("Sounds", {
+        let {
+            navigation: { navigate, state: { params } = {} }
+        } = this.props;
+        let { alarm } = this.state;
+        navigate("Sounds", {
             saveSound: this.saveSound,
-            currSound: this.state.alarm.alarmSound
+            currSound: alarm.alarmSound,
+            // NOTE: Passing in bool indicate whether any alarm is SET/Snoozed/Ringing, so that Sounds screen sets correct Sound category
+            isAnyAlarmOn: params.otherAlarmOn || alarm.status > ALARM_STATES.OFF
         });
     }
 
