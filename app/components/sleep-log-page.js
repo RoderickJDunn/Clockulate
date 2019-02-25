@@ -7,7 +7,9 @@ import {
     StyleSheet,
     FlatList,
     ART,
-    Alert
+    Alert,
+    Slider,
+    ScrollView
 } from "react-native";
 
 const { Group, Shape, Surface, Text: ARTText } = ART;
@@ -20,7 +22,7 @@ import { isIphoneX } from "react-native-iphone-x-helper";
 import Pie from "react-native-pie";
 import _ from "lodash";
 import Sound from "react-native-sound";
-
+import * as Animatable from "react-native-animatable";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const MINUTES_IN_HALFDAY = 60 * 12;
@@ -64,13 +66,15 @@ export default class SleepLogPage extends React.PureComponent {
     clockNums = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
     arcAngle = 30;
     labelRadius = 62;
+    playbackBoxRef = null;
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             wtIdx: null,
             activeSound: null,
-            playingDisturbance: null
+            playingDisturbance: null,
+            playbackVolume: props.isAnyAlarmOn ? 5 : 0.5
         };
     }
 
@@ -83,14 +87,32 @@ export default class SleepLogPage extends React.PureComponent {
 
     _playSound = disturbance => {
         console.log("_playSound");
+
+        let { isAnyAlarmOn } = this.props;
+
         this.stopActiveSound();
 
-        if (this.state.playingDisturbance == disturbance.id) {
-            this.setState({ playingDisturbance: null, activeSound: s });
+        if (
+            this.state.playingDisturbance &&
+            this.state.playingDisturbance.id == disturbance.id
+        ) {
+            if (this.playbackBoxRef) {
+                this.playbackBoxRef.transitionTo({
+                    transform: [{ translateY: 0 }]
+                });
+            }
+            this.setState({ playingDisturbance: null, activeSound: null });
+
             return; // user just pushed stop. Don't restart sound playback.
         }
-        Sound.setCategory("PlayAndRecord", true);
-        // console.log("item.recording", disturbance.recording);
+
+        if (isAnyAlarmOn) {
+            console.log("PlayAndRecord: isAnyAlarmOn", isAnyAlarmOn);
+            Sound.setCategory("PlayAndRecord", true);
+        } else {
+            console.log("Playback: isAnyAlarmOn", isAnyAlarmOn);
+            Sound.setCategory("Playback", false);
+        }
 
         let { almInst } = this.props;
         let soundPath = almInst.id + "/" + disturbance.recording;
@@ -101,6 +123,14 @@ export default class SleepLogPage extends React.PureComponent {
                 this.setState({ playingDisturbance: null, activeSound: null });
                 return;
             }
+
+            if (this.playbackBoxRef) {
+                this.playbackBoxRef.transitionTo({
+                    transform: [{ translateY: -120 }]
+                });
+            }
+
+            this.props.scrollEnabled(false);
             // loaded successfully
             console.log(
                 "duration in seconds: " +
@@ -108,7 +138,7 @@ export default class SleepLogPage extends React.PureComponent {
                     "number of channels: " +
                     s.getNumberOfChannels()
             );
-            s.setVolume(0.5);
+            s.setVolume(this.state.playbackVolume);
             s.play(success => {
                 if (success) {
                     console.log("successfully finished playing");
@@ -118,12 +148,20 @@ export default class SleepLogPage extends React.PureComponent {
                     // this is the only option to recover after an error occured and use the player again
                     s.reset();
                 }
+
+                this.props.scrollEnabled(true);
+
+                if (this.playbackBoxRef) {
+                    this.playbackBoxRef.transitionTo({
+                        transform: [{ translateY: 0 }]
+                    });
+                }
                 this.setState({ playingDisturbance: null, activeSound: null });
                 s.release();
             });
         });
 
-        this.setState({ playingDisturbance: disturbance.id, activeSound: s });
+        this.setState({ playingDisturbance: disturbance, activeSound: s });
     };
 
     x(angle, radius, charCount) {
@@ -150,6 +188,8 @@ export default class SleepLogPage extends React.PureComponent {
     }
 
     _renderDisturbanceItem = ({ item }) => {
+        let isActive = false;
+        let activeStyle;
         let timestamp;
         if (item.time == 0) {
             timestamp = "";
@@ -158,11 +198,18 @@ export default class SleepLogPage extends React.PureComponent {
             timestamp = time.format("h:mm a (MMM-DD)");
         }
 
+        let { playingDisturbance } = this.state;
+
+        if (playingDisturbance && playingDisturbance.id == item.id) {
+            isActive = true;
+            activeStyle = styles.activeDistStyle;
+        }
+
         // console.log("item", item);
         // console.log("playingDisturbance", this.state.playingDisturbance);
         return (
             <TouchableOpacity
-                style={styles.disturbanceItemWrap}
+                style={[styles.disturbanceItemWrap, activeStyle]}
                 onPress={() => {
                     if (item.recording) {
                         this._playSound(item);
@@ -198,7 +245,7 @@ export default class SleepLogPage extends React.PureComponent {
                                 this._playSound(item);
                             }}
                         >
-                            {this.state.playingDisturbance == item.id ? (
+                            {isActive ? (
                                 <MaterialComIcon
                                     name="stop"
                                     size={25}
@@ -501,6 +548,13 @@ export default class SleepLogPage extends React.PureComponent {
 
     render() {
         let { almInst } = this.props;
+        let { playingDisturbance, activeSound } = this.state;
+
+        let timestamp;
+        if (playingDisturbance) {
+            let time = moment(playingDisturbance.time);
+            timestamp = time.format("h:mm a (MMM-DD)");
+        }
 
         let { wtIdx } = this.state;
         return (
@@ -589,30 +643,29 @@ export default class SleepLogPage extends React.PureComponent {
                         />
                     ) : null}
                 </DimmableView>
-                {/* <TouchableOpacity
-                    style={{
-                        height: 70,
-                        width: 100,
-                        backgroundColor: "green"
-                    }}
-                    onPress={() => {
-                        let {
-                            alarmInstGroupIdx: groupIdx,
-                            alarmInstAll
-                        } = this.state;
-                        // let actualIndex = groupIdx + this.pageIdx;
-                        alert(
-                            "group idx: " +
-                                groupIdx +
-                                " | pageIdx: " +
-                                this.pageIdx +
-                                " | total: " +
-                                alarmInstAll.length +
-                                " | actualIndex: " +
-                                this.currAlmInstIdx
-                        );
-                    }}
-                /> */}
+                <Animatable.View
+                    contentInsetAdjustmentBehavior="automatic"
+                    useNativeDriver={true}
+                    ref={elm => (this.playbackBoxRef = elm)}
+                    style={styles.playbackBox}
+                >
+                    <Text style={styles.playbackBoxText}>{"Volume"}</Text>
+                    <Slider
+                        style={{ flex: 1 }}
+                        hitSlop={{ top: 50, bottom: 50 }}
+                        value={this.state.playbackVolume}
+                        minimumValue={0}
+                        maximumValue={10}
+                        onValueChange={value => {
+                            if (activeSound) {
+                                activeSound.setVolume(value);
+                            }
+                        }}
+                        onSlidingComplete={value => {
+                            this.setState({ playbackVolume: value });
+                        }}
+                    />
+                </Animatable.View>
             </View>
         );
     }
@@ -761,5 +814,23 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         height: "100%"
+    },
+    activeDistStyle: {
+        backgroundColor: Colors.brandMidLighterGrey
+    },
+    playbackBox: {
+        position: "absolute",
+        // bottom: 0,
+        bottom: -120,
+        left: 0,
+        padding: 15,
+        backgroundColor: Colors.backgroundBright,
+        height: 120,
+        width: SCREEN_WIDTH
+    },
+    playbackBoxText: {
+        color: Colors.darkGreyText,
+        fontFamily: "Gurmukhi MN",
+        fontSize: 18
     }
 });

@@ -13,7 +13,8 @@ import {
     TextInput,
     ART,
     ImageBackground,
-    Alert
+    Alert,
+    SafeAreaView
 } from "react-native";
 import moment, { max } from "moment";
 
@@ -180,7 +181,9 @@ export default class SleepLog extends React.Component {
             playingDisturbance: null,
             activeSound: null,
             // dayRange: dayRange,
+            isAnyAlarmOn: false,
             showNoRecAlert: false,
+            scrollEnabled: true,
             isLoading: true
         };
 
@@ -199,6 +202,8 @@ export default class SleepLog extends React.Component {
                 .objects("AlarmInstance")
                 .sorted("start", false);
 
+            let onAlarms = realm.objects("Alarm").filtered("status > 0");
+
             if (alarmInstAll.length > 0) {
                 this.currAlmInstIdx = alarmInstAll.length - 1;
                 this.pageIdx = Math.min(9, alarmInstAll.length - 1);
@@ -210,12 +215,14 @@ export default class SleepLog extends React.Component {
                             ? alarmInstAll[this.currAlmInstIdx]
                             : null,
                     alarmInstGroupIdx: alarmInstAll.length - 1,
+                    isAnyAlarmOn: onAlarms.length > 0,
                     isLoading: false
                 });
 
                 this._updateScreenTitle(this.state.alarmInst);
             } else {
                 this.setState({
+                    isAnyAlarmOn: onAlarms.length > 0,
                     isLoading: false
                 });
                 this._updateScreenTitle(null);
@@ -602,8 +609,8 @@ export default class SleepLog extends React.Component {
         // }
 
         return (
-            <View
-                // source={require("../img/paper_texture1.jpg")}
+            <SafeAreaView
+                forceInset={{ bottom: "always" }} // source={require("../img/paper_texture1.jpg")}
                 // style={{ width: "100%", height: "100%", }}
                 style={{ flex: 1, backgroundColor: Colors.brandMidGrey }}
                 // style={{ flex: 1, backgroundColor: "#E1D5CC" }}
@@ -633,6 +640,10 @@ export default class SleepLog extends React.Component {
                             <SleepLogPage
                                 almInst={row.item}
                                 onNoRecordingFound={this.onNoRecordingFound}
+                                isAnyAlarmOn={this.state.isAnyAlarmOn}
+                                scrollEnabled={enabled =>
+                                    this.setState({ scrollEnabled: enabled })
+                                }
                             />
                         )}
                         initialScrollIndex={alarmInstAll.length - 1}
@@ -644,6 +655,7 @@ export default class SleepLog extends React.Component {
                             };
                         }}
                         initialNumToRender={2}
+                        scrollEnabled={this.state.scrollEnabled}
                     />
                 ) : (
                     <View style={{ flex: 1 }}>
@@ -725,7 +737,7 @@ export default class SleepLog extends React.Component {
                             <MaterialComIcon
                                 size={29}
                                 name="timelapse"
-                                color={Colors.brandDarkPurple}
+                                color={Colors.brandUltraDarkPurple}
                             />
                         }
                         center={"Start of Day"}
@@ -749,7 +761,7 @@ export default class SleepLog extends React.Component {
                             <MaterialComIcon
                                 size={29}
                                 name="delete"
-                                color={Colors.brandDarkPurple}
+                                color={Colors.brandUltraDarkPurple}
                             />
                         }
                         centerRight={<Text>Delete this Entry</Text>}
@@ -776,6 +788,12 @@ export default class SleepLog extends React.Component {
 
                             if (!currAlmInst) {
                                 alert("This Sleep Log is a sample.");
+                                this._setMenuState(false);
+                                return;
+                            } else if (currAlmInst.end == null) {
+                                alert(
+                                    "This Sleep Log is still active. First turn off your active alarm, then you will be able to delete this log"
+                                );
                                 this._setMenuState(false);
                                 return;
                             }
@@ -855,8 +873,8 @@ export default class SleepLog extends React.Component {
                         left={
                             <MaterialComIcon
                                 name={"information-variant"}
-                                color={Colors.brandDarkPurple}
-                                underlayColor={Colors.brandDarkPurple}
+                                color={Colors.brandUltraDarkPurple}
+                                underlayColor={Colors.brandUltraDarkPurple}
                                 size={29}
                             />
                         }
@@ -898,7 +916,7 @@ export default class SleepLog extends React.Component {
                                 this.setState({ showNoRecAlert: false });
                                 this.props.navigation.navigate("Settings");
                             },
-                            text: "Go to Upgrades"
+                            text: "Go to Settings"
                         }}
                     />
                     // <AwesomeAlert
@@ -942,7 +960,7 @@ export default class SleepLog extends React.Component {
                     //     }}
                     // />
                 )}
-            </View>
+            </SafeAreaView>
         );
     }
 }
