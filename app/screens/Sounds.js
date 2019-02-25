@@ -46,12 +46,22 @@ export default class Sounds extends Component {
         super(props);
 
         // console.log(props);
-        let { currSound } = props.navigation.state.params;
+        let { currSound, isAnyAlarmOn } = props.navigation.state.params;
         // console.log(currSound);
 
-        // TODO: NOTE: any calls to setCategory while recording is active may affect Microphone gain.
-        //             Find other calls to this function and investigate whether this causes any issues.
-        Sound.setCategory("Playback", false);
+        // NOTE: setCategory("Playback") causes any active Alarm to stop recording (until alarm is re-enabled), so I need
+        //  to only set to "Playback" if no Alarm is currently on. Set to PlayAndRecord if any Alarms are on. The side-effect
+        //  of this is that sound playback is much quieter when category is PlayAndRecord, so I need to adjust the volume
+        //  accordingly.
+        if (isAnyAlarmOn) {
+            // console.log("PlayAndRecord: isAnyAlarmOn", isAnyAlarmOn);
+            Sound.setCategory("PlayAndRecord", true);
+            this._volume = 2;
+        } else {
+            // console.log("Playback: isAnyAlarmOn", isAnyAlarmOn);
+            Sound.setCategory("Playback", false);
+            this._volume = 0.5;
+        }
 
         let dbSounds = realm.objects("Sound").sorted("order");
 
@@ -83,6 +93,7 @@ export default class Sounds extends Component {
 
     componentWillUnmount() {
         this.stopActiveSound();
+        // Sound.setCategory("PlayAndRecord", false);
         this.props.navigation.state.params.saveSound(this.state.selectedSound);
     }
 
@@ -129,7 +140,7 @@ export default class Sounds extends Component {
                 //         "number of channels: " +
                 //         s.getNumberOfChannels()
                 // );
-                s.setVolume(0.5);
+                s.setVolume(this._volume);
                 s.play(success => {
                     if (success) {
                         console.log("successfully finished playing");
@@ -194,7 +205,7 @@ export default class Sounds extends Component {
                             );
                         }}
                         renderSectionHeader={({ section: { title } }) => {
-                            if (title == "Premium Sounds") {
+                            if (title == "PREMIUM SOUNDS") {
                                 return (
                                     <TouchableOpacity
                                         style={styles.sectionHeaderCont}
@@ -228,7 +239,7 @@ export default class Sounds extends Component {
                             Upgrades.pro != true
                                 ? PremiumTonesPlaceholder
                                 : {
-                                      title: "Premium Sounds",
+                                      title: "PREMIUM SOUNDS",
                                       data: this.state.premiumSounds
                                   }
                         ]}
@@ -353,6 +364,6 @@ const styles = StyleSheet.create({
     sectionTitleText: {
         color: Colors.brandLightGrey,
         fontFamily: "Quesha",
-        fontSize: 30
+        fontSize: 27
     }
 });
