@@ -97,7 +97,7 @@ class Alarms extends Component {
             appState: AppState.currentState,
             isLoading: false,
             showChargePopup: false,
-            showUpgradePopup: true
+            showUpgradePopup: false
         };
 
         console.log("showChargePopup", this.state.showChargePopup);
@@ -172,7 +172,6 @@ class Alarms extends Component {
         console.log("Got background notification");
 
         // this.playRingtone("super_ringtone.mp3");
-        // this.playLoadedRintone();
         // logs.push(notification.getCategory());
         // logs.push(notification.getData());
         // logs.push(notification.getType());
@@ -192,60 +191,6 @@ class Alarms extends Component {
         // NotificationsIOS.backgroundTimeRemaining(time => NotificationsIOS.log("remaining background time: " + time));
 
         // NotificationsIOS.cancelLocalNotification(localNotification);
-    }
-
-    playRingtone(soundFile) {
-        RNSound.setCategory("Playback");
-
-        var ringtone = new RNSound(soundFile, RNSound.MAIN_BUNDLE, error => {
-            if (error) {
-                console.log("failed to load the sound", error);
-                return;
-            }
-            // loaded successfully
-            // console.log(
-            //     "duration in seconds: " +
-            //         ringtone.getDuration() +
-            //         "number of channels: " +
-            //         ringtone.getNumberOfChannels()
-            // );
-
-            // Play the sound with an onEnd callback
-            ringtone.play(success => {
-                if (success) {
-                    console.log("successfully finished playing");
-                } else {
-                    console.log("playback failed due to audio decoding errors");
-                    // reset the player to its uninitialized state (android only)
-                    // this is the only option to recover after an error occured and use the player again
-                    ringtone.reset();
-                }
-
-                ringtone.release();
-            });
-
-            ringtone.setVolume(0.5);
-        });
-    }
-
-    playLoadedRintone() {
-        RNSound.setCategory("Playback");
-        if (loadedSound) {
-            // Play the sound with an onEnd callback
-            loadedSound.play(success => {
-                if (success) {
-                    console.log("successfully finished playing");
-                } else {
-                    console.log("playback failed due to audio decoding errors");
-                    // reset the player to its uninitialized state (android only)
-                    // this is the only option to recover after an error occured and use the player again
-                    loadedSound.reset();
-                }
-
-                loadedSound.release();
-            });
-        }
-        // ringtone.setVolume(0.5);
     }
 
     onNotificationOpened(notification) {
@@ -641,11 +586,14 @@ class Alarms extends Component {
     _onPressDuplicate = (item, event) => {
         console.log("_onPressDuplicate");
 
-        if (upgrades.pro != true) {
-            //NOTE: 1B. IAP-locked Feature - Alarms Limit
-            //TODO: Display CKT-styled upgrade popup
-            alert("Not available in free version (Placeholder)");
-            return;
+        if (!upgrades.pro) {
+            console.info("FREE version");
+            if (this.state.alarms.length >= 2) {
+                console.info("Alarm count: ", this.state.alarms.length);
+                this._activeRow = null;
+                this.setState({ showUpgradePopup: true });
+                return;
+            }
         }
 
         let newAlarm = new AlarmModel(this.state.alarms.length);
