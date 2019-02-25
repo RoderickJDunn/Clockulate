@@ -299,17 +299,32 @@ const MainStack = createStackNavigator(
     navigationConfig
 );
 
+const ModalStack = createStackNavigator(
+    {
+        Main: {
+            screen: MainStack
+        },
+        Upgrade: {
+            screen: Upgrade
+        }
+    },
+    {
+        mode: "modal",
+        headerMode: "none"
+    }
+);
 /* This is the only way I could find to disable drawer-opening on certain screens of 
     the stack navigator */
-MainStack.defaultNavigationOptions = ({ navigation }) => {
-    let drawerLockMode = "unlocked";
-    if (navigation.state.index > 0) {
-        drawerLockMode = "locked-closed";
-    }
-    return {
-        drawerLockMode
-    };
-};
+// NOTE: This is no longer working. Instead I've set all of Mainstack to have drawerLockMode of "locked-closed"
+// MainStack.navigationOptions = ({ navigation }) => {
+//     let drawerLockMode = "unlocked";
+//     if (navigation.state.index > 0) {
+//         drawerLockMode = "locked-closed";
+//     }
+//     return {
+//         drawerLockMode
+//     };
+// };
 
 let screenMenuIcons = [
     { type: "MaterialIcon", name: "access-alarm", size: 24 },
@@ -505,11 +520,13 @@ const CustomDrawerContentComponent = props => {
         </LinearGradient>
     );
 };
-
 const DrawerRoot = createDrawerNavigator(
     {
         Alarms: {
-            screen: MainStack
+            screen: ModalStack,
+            navigationOptions: {
+                drawerLockMode: "locked-closed"
+            }
         },
         Upgrade: {
             screen: createStackNavigator(
