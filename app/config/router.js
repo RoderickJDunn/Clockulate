@@ -39,7 +39,7 @@ import TaskDetail from "../screens/TaskDetail";
 import Settings from "../screens/SettingsScreen";
 import About from "../screens/About";
 import Sounds from "../screens/Sounds";
-import Upgrade from "../screens/Upgrade";
+import { UpgradeModal, UpgradeStack } from "../screens/UpgradeContainters";
 import SleepLog from "../screens/SleepLog";
 import TextInputPage from "../screens/TextInputPage";
 import PlainTextScreen from "../screens/PlainTextScreen";
@@ -305,7 +305,7 @@ const ModalStack = createStackNavigator(
             screen: MainStack
         },
         Upgrade: {
-            screen: Upgrade
+            screen: UpgradeModal
         }
     },
     {
@@ -313,6 +313,7 @@ const ModalStack = createStackNavigator(
         headerMode: "none"
     }
 );
+
 /* This is the only way I could find to disable drawer-opening on certain screens of 
     the stack navigator */
 // NOTE: This is no longer working. Instead I've set all of Mainstack to have drawerLockMode of "locked-closed"
@@ -389,12 +390,6 @@ const CustomDrawerContentComponent = props => {
                     // ]}
                 />
             </View>
-            {/* <View
-                style={[
-                    // StyleSheet.absoluteFill,
-                    { backgroundColor: "red", height: 115, top: 0 }
-                ]}
-            /> */}
             <SafeAreaView
                 style={{ flex: 1 }}
                 forceInset={{
@@ -405,6 +400,11 @@ const CustomDrawerContentComponent = props => {
             >
                 <DrawerItems
                     {...props}
+                    // NOTE: This is not required for current needs. But may come in handy, so leaving commented out
+                    // onItemPress={route => {
+                    //     console.log("route", route);
+                    //     props.onItemPress(route);
+                    // }}
                     getLabel={scene => {
                         let { index } = scene;
                         let shade = "transparent";
@@ -520,6 +520,7 @@ const CustomDrawerContentComponent = props => {
         </LinearGradient>
     );
 };
+
 const DrawerRoot = createDrawerNavigator(
     {
         Alarms: {
@@ -528,17 +529,20 @@ const DrawerRoot = createDrawerNavigator(
                 drawerLockMode: "locked-closed"
             }
         },
-        Upgrade: {
+        UpgradeStack: {
             screen: createStackNavigator(
                 {
-                    SettingsScreen: {
-                        screen: Upgrade
+                    UpgradeScreen: {
+                        screen: UpgradeStack
                     }
                 },
                 {
-                    defaultNavigationOptions: otherDrawerNavOptions("")
+                    defaultNavigationOptions: otherDrawerNavOptions("Upgrade")
                 }
-            )
+            ),
+            navigationOptions: {
+                drawerLabel: "Upgrade"
+            }
         },
         SleepLog: {
             screen: createStackNavigator(
@@ -640,7 +644,14 @@ const DrawerRoot = createDrawerNavigator(
             }
         },
         headerMode: "screen",
-        order: ["Alarms", "Upgrade", "SleepLog", "Settings", "Help", "About"],
+        order: [
+            "Alarms",
+            "UpgradeStack",
+            "SleepLog",
+            "Settings",
+            "Help",
+            "About"
+        ],
         contentComponent: CustomDrawerContentComponent,
         useNativeAnimations: true
     }

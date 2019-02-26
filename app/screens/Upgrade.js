@@ -52,40 +52,6 @@ const FULL_HEADER_HEIGHT = 44 + STATUS_BAR_HEIGHT;
 // SCREEN_HEIGHT -= 88; // add 88 since the Nav bar is transparent
 // TODO: In-app purchases
 export default class Upgrade extends React.Component {
-    static navigationOptions = ({ navigation }) => {
-        return {
-            header: () => null
-            // headerStyle: {
-            //     // Style the header view itself (aka. the nav bar)
-            //     backgroundColor: "transparent",
-            //     // backgroundColor: Colors.brandDarkGrey,
-            //     borderBottomWidth: 0
-            // },
-            // headerRight:
-            //     upgrades.pro != true ? (
-            //         <TouchableOpacity
-            //             onPress={() => {
-            //                 navigation.state.params.onPressUpgrade();
-            //             }}
-            //             hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
-            //             style={{
-            //                 paddingLeft: 20,
-            //                 marginRight: scaleByFactor(8, 0.9)
-            //             }}
-            //         >
-            //             <Text
-            //                 style={{
-            //                     color: Colors.brandLightGrey,
-            //                     fontSize: scaleByFactor(13)
-            //                 }}
-            //             >
-            //                 Restore
-            //             </Text>
-            //         </TouchableOpacity>
-            //     ) : null
-        };
-    };
-
     upgradeData = [
         {
             key: "0",
@@ -127,7 +93,7 @@ export default class Upgrade extends React.Component {
             ),
             title: "Unlimited Tasks",
             description: [
-                "Add as many tasks as you like to each alarm.  With this feature your morning planning can be as detailed as you want!"
+                "Add as many tasks as you like to each alarm.  Your morning planning can be as detailed as you want!"
             ]
         },
         {
@@ -184,14 +150,18 @@ export default class Upgrade extends React.Component {
         super(props);
 
         console.log("Upgrade -- constructor ");
+        console.log("props", props);
+
+        this._isModal = this.props.screenType == "modal";
     }
 
     _bgdPosition = new Animated.Value(0);
     _interactable = null;
     _idx = 0;
     _btnShineAnim = new Animated.Value(-1000);
+    _isModal = null;
 
-    _scrollY = new Animated.Value(0);
+    // _scrollY = new Animated.Value(0);
 
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
@@ -205,10 +175,6 @@ export default class Upgrade extends React.Component {
         } catch (err) {
             console.warn(err); // standardized err.code and err.message available
         }
-
-        this.props.navigation.setParams({
-            onPressUpgrade: this.onPressUpgrade
-        });
     }
 
     screenDidFocus = payload => {
@@ -233,6 +199,7 @@ export default class Upgrade extends React.Component {
                 ])
             ).start();
         }
+        this.props.navigation.setParams();
     };
 
     screenWillBlur = payload => {
@@ -552,7 +519,7 @@ export default class Upgrade extends React.Component {
         /* TEST: Simulating user buying the IAP */
         upgrades.setPro(true);
 
-        this.forceUpdate();
+        this.props.navigation.setParams();
         /* ************************************ */
     };
 
@@ -616,9 +583,9 @@ export default class Upgrade extends React.Component {
 
         let buttonContainerHeight;
         if (upgrades.pro != true) {
-            buttonContainerHeight = isIphoneX() ? 140 : 130;
+            buttonContainerHeight = scaleByFactor(110) + (isIphoneX() ? 10 : 0);
         } else {
-            buttonContainerHeight = isIphoneX() ? 100 : 90;
+            buttonContainerHeight = scaleByFactor(80) + (isIphoneX() ? 10 : 0);
         }
 
         return (
@@ -637,100 +604,109 @@ export default class Upgrade extends React.Component {
                         // marginTop: -SCREEN_HEIGHT * 0.35 - FULL_HEADER_HEIGHT
                     }}
                     ListFooterComponent={
-                        <View
-                            style={{
-                                height: 140,
-                                backgroundColor: "transparent"
-                            }}
-                        />
+                        <View>
+                            <Animated.Image
+                                style={{
+                                    height: SCREEN_HEIGHT,
+                                    width: SCREEN_WIDTH * 0.75,
+                                    alignSelf: "center",
+                                    alignContent: "center"
+                                }}
+                                resizeMode="contain"
+                                source={require("../img/UpgradeTitleV1_3.png")}
+                            />
+                            <View
+                                style={{
+                                    height: this._isModal ? 30 : 0,
+                                    backgroundColor: "transparent"
+                                }}
+                            />
+                        </View>
                     }
                     ListHeaderComponent={
-                        <View
-                            style={{
-                                height: isIphoneX() ? 88 : 64,
-                                // backgroundColor: "blue",
-                                flexDirection: "row",
-                                alignItems: "flex-end",
-                                justifyContent: "space-between"
-                            }}
-                        >
+                        this._isModal ? (
                             <View
-                                style={[
-                                    StyleSheet.absoluteFill,
-                                    { justifyContent: "flex-end" }
-                                ]}
-                            >
-                                <Text
-                                    style={{
-                                        padding: 10,
-                                        color: Colors.brandLightOpp,
-                                        fontSize: scaleByFactor(14),
-                                        alignSelf: "center",
-                                        textAlign: "right"
-                                    }}
-                                >
-                                    Pro Features
-                                </Text>
-                            </View>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    console.log("Going back hopefully");
-                                    this.props.navigation.goBack();
-
-                                    // console.log(
-                                    //     "navSTate",
-                                    //     this.props.navigation.reset()
-                                    // );
-                                }}
                                 style={{
-                                    padding: 10
+                                    height: isIphoneX() ? 88 : 64,
+                                    // backgroundColor: "blue",
+                                    flexDirection: "row",
+                                    alignItems: "flex-end",
+                                    justifyContent: "space-between"
                                 }}
                             >
-                                <EvilIcon
-                                    name="close"
-                                    style={{
-                                        color: Colors.brandLightGrey,
-                                        fontSize: scaleByFactor(20)
-                                    }}
-                                />
-                            </TouchableOpacity>
-                            {upgrades.pro != true ? (
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        this.onPressRstrPurchase();
-                                    }}
-                                    hitSlop={{
-                                        top: 10,
-                                        bottom: 10,
-                                        left: 20,
-                                        right: 0
-                                    }}
-                                    style={{
-                                        // alignSelf: "flex-end",
-                                        // paddingLeft: 20,
-                                        padding: 10
-                                    }}
+                                <View
+                                    style={[
+                                        StyleSheet.absoluteFill,
+                                        { justifyContent: "flex-end" }
+                                    ]}
                                 >
                                     <Text
                                         style={{
-                                            color: Colors.brandLightGrey,
-                                            fontSize: scaleByFactor(13),
+                                            padding: 10,
+                                            color: Colors.brandLightOpp,
+                                            fontSize: scaleByFactor(14),
+                                            alignSelf: "center",
                                             textAlign: "right"
                                         }}
                                     >
-                                        Restore
+                                        Pro Features
                                     </Text>
-                                </TouchableOpacity>
-                            ) : (
-                                <Button
-                                    title="downgrade"
+                                </View>
+                                <TouchableOpacity
                                     onPress={() => {
-                                        upgrades.setPro(false); // TODO: NOTE: Remove. This is for DEV convenience
-                                        this.forceUpdate();
+                                        console.log("Going back hopefully");
+                                        this.props.navigation.goBack(null);
                                     }}
-                                />
-                            )}
-                        </View>
+                                    style={{
+                                        padding: 10
+                                    }}
+                                >
+                                    <EvilIcon
+                                        name="close"
+                                        style={{
+                                            color: Colors.brandLightGrey,
+                                            fontSize: scaleByFactor(20)
+                                        }}
+                                    />
+                                </TouchableOpacity>
+                                {upgrades.pro != true ? (
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            this.onPressRstrPurchase();
+                                        }}
+                                        hitSlop={{
+                                            top: 10,
+                                            bottom: 10,
+                                            left: 20,
+                                            right: 0
+                                        }}
+                                        style={{
+                                            // alignSelf: "flex-end",
+                                            // paddingLeft: 20,
+                                            padding: 10
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                color: Colors.brandLightGrey,
+                                                fontSize: scaleByFactor(13),
+                                                textAlign: "right"
+                                            }}
+                                        >
+                                            Restore
+                                        </Text>
+                                    </TouchableOpacity>
+                                ) : (
+                                    <Button
+                                        title="downgrade"
+                                        onPress={() => {
+                                            upgrades.setPro(false); // TODO: NOTE: Remove. This is for DEV convenience
+                                            this.forceUpdate();
+                                        }}
+                                    />
+                                )}
+                            </View>
+                        ) : null
                     }
                     renderItem={this.upgradeItem}
                     data={this.upgradeData}
@@ -864,7 +840,7 @@ export default class Upgrade extends React.Component {
                                     style={[
                                         styles.butnExplainText,
                                         {
-                                            fontSize: 26,
+                                            fontSize: scaleByFactor(22),
                                             marginHorizontal: 15,
                                             marginTop: 0
                                         }
@@ -872,7 +848,11 @@ export default class Upgrade extends React.Component {
                                 >
                                     Purchased
                                 </Text>
-                                <FAIcon name="check" size={30} color="green" />
+                                <FAIcon
+                                    name="check"
+                                    size={scaleByFactor(24)}
+                                    color="green"
+                                />
                             </View>
                         )}
                     </View>
@@ -950,7 +930,7 @@ const styles = StyleSheet.create({
         width: 100
     },
     upgradeItem: {
-        height: 130,
+        height: 120,
         marginVertical: 15,
         marginHorizontal: 10,
         flexDirection: "row",
@@ -996,8 +976,8 @@ const styles = StyleSheet.create({
         alignContent: "center",
         alignItems: "center",
         justifyContent: "center",
-        width: 220,
-        height: 65,
+        width: scaleByFactor(160),
+        height: scaleByFactor(50),
         shadowOpacity: 0.7,
         shadowRadius: 40,
         shadowColor: "#FFF",
@@ -1009,7 +989,7 @@ const styles = StyleSheet.create({
     },
     upgradeBtnText: {
         color: Colors.brandLightOpp,
-        fontSize: 35,
+        fontSize: scaleByFactor(27),
         fontFamily: "Quesha",
         letterSpacing: 1
     },
@@ -1017,7 +997,7 @@ const styles = StyleSheet.create({
         color: Colors.darkGreyText,
         marginTop: 8,
         marginBottom: -8,
-        fontSize: 15,
+        fontSize: scaleByFactor(13),
         fontFamily: "Gurmukhi MN",
         alignSelf: "center",
         letterSpacing: 0.5
