@@ -19,6 +19,7 @@ import {
     InteractionManager
 } from "react-native";
 import EntypoIcon from "react-native-vector-icons/Entypo";
+import FAIcon from "react-native-vector-icons/FontAwesome";
 import IonIcon from "react-native-vector-icons/Ionicons";
 import { NavigationActions, Header } from "react-navigation";
 import Autocomplete from "react-native-autocomplete-input";
@@ -166,7 +167,8 @@ class TaskDetail extends Component {
                 showDurationInfo: false,
                 setAsDefault: false,
                 currNameHasMatch: false,
-                showDurationPicker: false
+                showDurationPicker: false,
+                showProAdUpgradePopup: false
             };
             // console.log(this.state.alarmTask);
         } else {
@@ -872,6 +874,9 @@ class TaskDetail extends Component {
                                     width: SCREEN_WIDTH * 0.8
                                 }
                             }}
+                            onPressProAdv={() =>
+                                this.setState({ showProAdUpgradePopup: true })
+                            }
                             // borderColor={Colors.brandDarkGrey}
                         />
                     )}
@@ -886,6 +891,41 @@ class TaskDetail extends Component {
                         dataSets={[hourRange(), minuteRange()]}
                         dataLabels={["hours", "min"]}
                         title={"Duration"}
+                    />
+                )}
+                {this.state.showProAdUpgradePopup && (
+                    <ClkAlert
+                        contHeight={"mid"}
+                        headerIcon={
+                            <FAIcon
+                                name="magic"
+                                size={33}
+                                color={Colors.brandLightPurple}
+                            />
+                        }
+                        title="Interested in Going Pro?"
+                        headerTextStyle={{ color: Colors.brandLightOpp }}
+                        bodyText={
+                            "Upgrade to Clockulate Pro to unlock more features!\n\n" +
+                            "Would you like to learn more?"
+                        }
+                        dismissConfig={{
+                            onPress: () => {
+                                console.log("Dismissed Upgrade popup");
+                                this.setState({ showProAdUpgradePopup: false });
+                            },
+                            text: "Dismiss"
+                        }}
+                        confirmConfig={{
+                            onPress: () => {
+                                console.log(
+                                    "Confirmed Upgrade popup: Going to Upgrades screen"
+                                );
+                                this.setState({ showProAdUpgradePopup: false });
+                                this.props.navigation.navigate("Upgrade");
+                            },
+                            text: "Go to Upgrades"
+                        }}
                     />
                 )}
                 {/* <View style={{ position: "absolute", height: 1, backgroundColor: "black", left: 0, right:0, top: 140 }} /> */}

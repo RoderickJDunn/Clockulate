@@ -390,7 +390,7 @@ class Alarms extends Component {
             console.info("FREE version");
             if (this.state.alarms.length >= 2) {
                 console.info("Alarm count: ", this.state.alarms.length);
-                this.setState({ showUpgradePopup: true });
+                this.setState({ showUpgradePopup: "long" });
                 return;
             }
         }
@@ -591,7 +591,7 @@ class Alarms extends Component {
             if (this.state.alarms.length >= 2) {
                 console.info("Alarm count: ", this.state.alarms.length);
                 this._activeRow = null;
-                this.setState({ showUpgradePopup: true });
+                this.setState({ showUpgradePopup: "long" });
                 return;
             }
         }
@@ -936,7 +936,7 @@ class Alarms extends Component {
                             this.setState(this.state);
                         }}
                     /> */}
-                        {false && (
+                        {true && (
                             <AdWrapper
                                 // borderPosition="top"
                                 animate={true}
@@ -962,6 +962,9 @@ class Alarms extends Component {
                                         width: this.width
                                     }
                                 }}
+                                onPressProAdv={() =>
+                                    this.setState({ showUpgradePopup: "short" })
+                                }
                             />
                         )}
                     </SafeAreaView>
@@ -1074,7 +1077,10 @@ class Alarms extends Component {
                             title="Interested in Going Pro?"
                             headerTextStyle={{ color: Colors.brandLightOpp }}
                             bodyText={
-                                "You are using the free version of Clockulate, which is limited to two alarms. Upgrade to Clockulate Pro for Unlimited Alarms!\n\n" +
+                                (this.state.showUpgradePopup == "long"
+                                    ? "You are using the free version of Clockulate, which is limited to two alarms. "
+                                    : "") +
+                                "Upgrade to Clockulate Pro for Unlimited Alarms!\n\n" +
                                 "Would you like to learn more?"
                             }
                             dismissConfig={{

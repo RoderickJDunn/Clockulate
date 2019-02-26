@@ -84,7 +84,8 @@ export default class Sounds extends Component {
             premiumSounds: premiumSounds,
             randomSounds: randomSounds,
             selectedSound: currSound.sound,
-            activeSound: null
+            activeSound: null,
+            showTonesUpgradePopup: false
         };
         InteractionManager.runAfterInteractions(() => {
             AdvSvcOnScreenConstructed("Sounds");
@@ -296,7 +297,7 @@ export default class Sounds extends Component {
                         }}
                     />
                 )}
-                {false && (
+                {true && (
                     <AdWrapper
                         borderPosition="top"
                         screen={"Sounds"}
@@ -318,6 +319,9 @@ export default class Sounds extends Component {
                                 width: this.width
                             }
                         }}
+                        onPressProAdv={() =>
+                            this.setState({ showTonesUpgradePopup: true })
+                        }
                     />
                 )}
             </SafeAreaView>

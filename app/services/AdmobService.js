@@ -24,6 +24,7 @@ import { isIphoneX } from "react-native-iphone-x-helper";
 import Colors from "../styles/colors";
 let { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 import getFullImgNameForScreenSize from "../img/image_map";
+
 /* 
     Factors
     - Number of times app has been opened (make sure this includes opening from backgrounded state)
@@ -351,25 +352,7 @@ class ProAdv extends Component {
                             "this.props.navigation",
                             this.props.navigation
                         );
-                        Alert.alert(
-                            "Learn More",
-                            "Would you like to go to the Upgrades screen to learn more?",
-                            [
-                                {
-                                    text: "Go",
-                                    onPress: () => {
-                                        this.props.navigation.navigate(
-                                            "Upgrade"
-                                        );
-                                    }
-                                },
-                                {
-                                    text: "Not right now",
-                                    style: "cancel"
-                                }
-                            ],
-                            { cancelable: false }
-                        );
+                        this.props.onPress();
                     }}
                 >
                     <Image
@@ -429,6 +412,7 @@ export let AdWrapper = props => {
                     }}
                     screen={props.screen}
                     navigation={props.navigation}
+                    onPress={props.onPressProAdv}
                 />
             )}
             {props.hide && (
