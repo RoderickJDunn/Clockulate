@@ -36,22 +36,58 @@ const NoiseDetectionEvents = new NativeEventEmitter(
     NativeModules.AlarmAudioService
 );
 
+const AlarmTriggerEvents = new NativeEventEmitter(
+    NativeModules.AlarmAudioService
+);
+
 let initializeAlarm = (alarm, alarmDidInitialize) => {
-    console.log("sending time: ", alarm.wakeUpTime.toISOString());
+    console.log("sending time: ", alarm.wakeUpTime);
 
     initNativeAlarm(
-        {
-            time: alarm.wakeUpTime.toISOString(),
-            sound: alarm.sound,
-            instId: alarm.instId
-        },
-        { recCooldown: Settings.recCooldown() },
+        alarm,
+        { recCooldown: 0.25 }, // DEV: Setting to 15sec for convenience. Change back to Settings.recCooldown()
+        // { recCooldown: Settings.recCooldown() },
         err => {
             console.log("didInitializeAlarm?: ", err ? false : true);
             alarmDidInitialize();
         }
     );
 };
+
+AlarmTriggerEvents.addListener("onAlarmTriggered", info => {
+    console.log("JS Got ALARM_TRIGGERED EVENT. evtInfo:", info);
+
+    let alarm = info.alarm;
+    /* TODO:
+        1. Cancel backup (non-silent) LocalNotifications (and reschedule all except the imminent one). - OR - just cancel the imminent one if possible.
+        2. Present a SILENT LocalNotification immediately (native AlarmService will be starting to play audio now)
+        3. Present an in-app alert for the Alarm, in case this occurrs in the Foreground.
+    */
+
+    // TODO: Remove any existing notifications from Notification center.
+
+    // Canceling all local notifications
+    console.log("Canceling all local notifications");
+    NotificationsIOS.cancelAllLocalNotifications();
+
+    alarm.time = moment(alarm.time).toDate();
+
+    console.log("alarm after modification", alarm);
+    // let alarm = realm.objectForPrimaryKey(alarm.alarmId);
+
+    _scheduleBackupNotifications(alarm, alarm.sound);
+
+    NotificationsIOS.localNotification({
+        alertBody: alarm.label,
+        alertTitle: "Clockulate",
+        alertAction: "Click here to open",
+        soundName: alarm.sound,
+        category: "ALARM_CATEGORY",
+        userInfo: { alarmId: alarm.id },
+        silent: true
+        // NOTE: no fireDate means fire immediately
+    });
+});
 
 NoiseDetectionEvents.addListener("onNoiseDetected", info => {
     console.log("JS Got NOISE_DETECTED EVT. info:", info);
@@ -101,8 +137,8 @@ let snoozeAction = new NotificationAction(
         identifier: "SNOOZE_ACTION"
     },
     (action, completed) => {
-        NotificationsIOS.log("SNOOZE RECEIVED");
-        NotificationsIOS.log(JSON.stringify(action));
+        console.log("SNOOZE RECEIVED");
+        console.log(JSON.stringify(action));
 
         try {
             let { _data } = action.notification;
@@ -110,10 +146,18 @@ let snoozeAction = new NotificationAction(
             let currAlarm = realm.objectForPrimaryKey("Alarm", _data.alarmId);
             if (currAlarm) {
                 let snoozeTime = currAlarm.snoozeTime;
-                if (__DEV__) {
-                    snoozeTime = 0.25;
-                }
-                snoozeNative(snoozeTime);
+                // if (__DEV__) {
+                //     snoozeTime = 1;
+                // }
+
+                // TODO: Since this is an explicit snooze, I need to inform native AlarmService how
+                //  long it has been since the Alarm triggered (to this snooze action)
+                // Based on current snoozeCount, the wakeUpTime, and currentTime, I can determine
+                // the cummulative offset caused by user-delay of explicit snooze
+
+                let offsetFromUserDelay = _calcOffsetFromUserDelay(currAlarm);
+
+                snoozeNative(snoozeTime, offsetFromUserDelay);
 
                 realm.write(() => {
                     if (currAlarm.snoozeCount == null) {
@@ -124,6 +168,14 @@ let snoozeAction = new NotificationAction(
 
                     currAlarm.status = ALARM_STATES.SNOOZED;
                 });
+
+                // I need to cancel and reschedule backup Notifications here as well,
+                //   since snoozing explicitly adds an offset to snoozeIntervals
+                NotificationsIOS.cancelAllLocalNotifications();
+
+                console.log("alarm: ", currAlarm);
+
+                _scheduleBackupNotifications(currAlarm, currAlarm.sound);
             }
         } catch (e) {
             console.log("Error: ", e);
@@ -179,9 +231,185 @@ export const ALARM_CAT = new NotificationCategory({
     context: "default"
 });
 
+let _calcOffsetFromUserDelay = currAlarm => {
+    let snoozeTime = currAlarm.snoozeTime;
+    let snoozeCnt = currAlarm.snoozeCount == null ? 0 : currAlarm.snoozeCount;
+    let expSecSinceWake = snoozeCnt * (snoozeTime * 60); // # of secs since wakeUpTime if there was no user-delay in explicit snoozing.
+
+    let now = moment();
+    let wakeUpTime = moment(currAlarm.wakeUpTime);
+
+    let actualSecSinceWake = (now - wakeUpTime) / 1000; // actual # of seconds since wakeUpTime.
+
+    return actualSecSinceWake - expSecSinceWake;
+};
+
+let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
+    let wakeUpMoment = moment(alarm.wakeUpTime);
+
+    // For now, use a constant 15 sec as a Snooze Time for testing
+    let snoozeTime = alarm.snoozeTime * 60;
+
+    // NOTE: These are now ALL backup notifications (WITH SOUND). They will all be canceled
+    //  unless the app is terminated/suspended causing the NativeAlarm service to be unable to run.
+    //  This is why they are all scheduled at an offset of 20sec after each Trigger time.
+    //  Silent notifications will be presented immediately at the time of each Trigger in response
+    //  to a Trigger event from native AlarmService.
+
+    let notiCount;
+    let now = moment();
+    console.log("Scheduling backup notifications: ");
+
+    if (wakeUpMoment - now > 0) {
+        console.log("\tAlarm is in the future. Setting all notifications");
+        // wakeUpTime is in the future
+        wakeUpMoment.add(20, "s");
+        notiCount = 10;
+    } else {
+        console.log("\tAlarm wakeUpTime is in the past...");
+        console.log("\t\tSnoozeTime: ", snoozeTime);
+        wakeUpMoment = moment(now);
+        wakeUpMoment.add(20, "s");
+        wakeUpMoment.add(snoozeTime, "s");
+
+        if (alarm.snoozeCount == null) {
+            notiCount = 10;
+        } else {
+            notiCount = alarm.snoozeCount < 10 ? 10 - alarm.snoozeCount : 0;
+        }
+        console.log(
+            `\tSetting ${notiCount} backup snoozeNotifications, the first of which is at ${wakeUpMoment.toDate()}`
+        );
+    }
+
+    // if (__DEV__) {
+    //     snoozeTime = 15;
+    // }
+    for (let i = 0; i < notiCount; i++) {
+        NotificationsIOS.localNotification({
+            alertBody:
+                alarm.label +
+                "(Backup Notification -- should only fire if AlarmService not running)", // DEV: remove extra string
+            alertTitle: "Clockulate",
+            alertAction: "Click here to open",
+            soundName: shortSoundFile,
+            silent: shortSoundFile == "" ? true : false,
+            category: "ALARM_CATEGORY",
+            fireDate: wakeUpMoment.toDate(),
+            // fireDate: new Date(Date.now() + 10 * 1000).toISOString(),
+            userInfo: { alarmId: alarm.id }
+        });
+        wakeUpMoment.add(snoozeTime, "s");
+    }
+};
+
+export let cancelAllNotifications = () => {
+    PushNotificationIOS.cancelAllLocalNotifications();
+};
+
+/**
+ * Called when app comes into the foreground, and has similar functionality to scheduleAlarm().
+ * It is called for Alarm(s) that are SET according to DB, and should therefore already be recording (native) and have in-app timer running.
+ * However, its possible that the provided SET Alarm is not initialized, if either
+ *      1) The app was terminated,
+ *      2) Audio was interupted.
+ * Therefore, this function needs to set in-app timer for the alarm if its not already running, and
+ * call initializeAlarm in the native AlarmService. If the native AlarmService is already running fine (i.e. no app termination
+ * or audio interuption occurred) then it will just ignore this call.
+ * It also needs to get the latest AlarmInstance, which should have .end == null if this function is being called. Pass this AlarmInst
+ * into Native AlarmService initialization.
+ *
+ * Note that it doesn't need to schedule any Notifications (LocalNotifications), since those should be unaffected by app termination / audio interruption.
+ *
+ * @param {*} alarm
+ * @param {*} reloadAlarmsList
+ * @param {*} alarmDidInitialize
+ */
+export let resumeAlarm = (alarm, reloadAlarmsList, alarmDidInitialize) => {
+    console.log("resumeAlarm");
+    // first cancel any in-app timer for this alarm, since we were already doing this anyway in scheduleAlarm, and it wasn't causing problems.
+    // Plus, its best to cancel it right away since if the timer expired during this function there could be a race condition.
+    cancelInAppAlarm(alarm);
+
+    setInAppAlarm(alarm, reloadAlarmsList);
+
+    // Get sound file
+    let shortSoundFile = "";
+    let longSoundFile = "";
+    let filesLen = alarm.alarmSound.sound.files.length;
+    if (alarm.alarmSound.type == SOUND_TYPES.RANDOM) {
+        /* Get all 'normal' Sounds (not Silent or Random) */
+        let allSounds = realm
+            .objects("Sound")
+            .filtered("type = $0", SOUND_TYPES.NORMAL);
+
+        if (Upgrades.pro != true) {
+            allSounds = allSounds.filtered("isPremium = false");
+        }
+
+        /* randomly select any 'Sound' that is not "Vibrate Only" and not "Random"  */
+        let randomSound =
+            allSounds[Math.floor(Math.random() * allSounds.length)];
+        shortSoundFile = randomSound.files[0]; // this selects the first file in the file array which should be the short version
+        longSoundFile = randomSound.files[randomSound.files.length - 1]; // this selects the last file in the file array which should be the long version (might be the same)
+        // realm.write(() => {
+        //     alarm.alarmSound.sound = randomSound;
+        // });
+    } else if (alarm.alarmSound.type == SOUND_TYPES.NORMAL) {
+        shortSoundFile = alarm.alarmSound.sound.files[0]; // this selects the first file in the file array which should be the short version
+        longSoundFile = alarm.alarmSound.sound.files[filesLen - 1]; // this selects the last file in the file array which should be the long version (might be the same)
+    } else if (alarm.alarmSound.type == SOUND_TYPES.SILENT) {
+        shortSoundFile = "";
+        longSoundFile = "";
+    } else if (alarm.alarmSound.type == SOUND_TYPES.RANDOM_SUBSET) {
+        // TODO: This functionality will be a premium feature
+    }
+
+    // Get current AlarmInstance
+    let allAIs = realm.objects("AlarmInstance").sorted("start"); // sort by most recent first
+    let currAlmInst;
+
+    if (allAIs.length == 0 || allAIs[allAIs.length - 1].end != null) {
+        // NOTE: Sanity check: There is no active AlarmInstance. In resumeAlarm(), this should NEVER happen.
+        // create new AlarmInstance with start date of now, and empty End date, and empty disturbance list
+        console.warn(
+            "No active AlarmInstances found while running resumeAlarm. Should never happen."
+        );
+        realm.write(() => {
+            currAlmInst = new AlarmInstance();
+            realm.create("AlarmInstance", currAlmInst);
+        });
+    } else {
+        // There is already an AlarmInstance in progress. continue with it.
+        currAlmInst = allAIs[allAIs.length - 1];
+    }
+
+    initializeAlarm(
+        {
+            id: alarm.id,
+            label: alarm.label,
+            time: alarm.wakeUpTime.toISOString(),
+            sound: longSoundFile.slice(0, -4),
+            snoozeCount: alarm.snoozeCount,
+            snoozeTime: alarm.snoozeTime,
+            instId: currAlmInst.id
+        },
+        alarmDidInitialize
+    );
+};
+
+/**
+ *  Schedules in-app and local notifications for the provided alarm, and initializes the native Alarm service. Called when Alarm is
+ *  first set - either on navigating back from AlarmDetail, or pressing Alarm toggle button.
+ *  This function also creates a new AlarmInstance, or uses the latest one if .end == null (since this schedule could be due to
+ *  an Alarm update)
+ *  The callback alarmDidInitialize when native initialization is finished or failed.
+ * @param {*} alarm
+ * @param {*} reloadAlarmsList
+ * @param {*} alarmDidInitialize
+ */
 export let scheduleAlarm = (alarm, reloadAlarmsList, alarmDidInitialize) => {
     console.log("scheduleAlarm");
-    let wakeUpMoment = moment(alarm.wakeUpTime);
 
     /* Make sure there are no System or In-App notifications already set for this alarm 
         Passing in 'false' as third param to 'clearAlarm' means this function will leave this Alarm set to 'enabled' == SET in DB
@@ -222,9 +450,13 @@ export let scheduleAlarm = (alarm, reloadAlarmsList, alarmDidInitialize) => {
         // TODO: This functionality will be a premium feature
     }
 
+    /***** TODO: Extract the following AlarmInstance code into at least 1 separate function *****/
+
     let allAIs = realm.objects("AlarmInstance").sorted("start"); // sort by most recent first
     let currAlmInst;
 
+    // NOTE: This check is required so that if user updates parameters of an already SET alarm,
+    //         the newly scheduled Alarm is considered to be part of the same AlarmInstance.
     if (allAIs.length == 0 || allAIs[allAIs.length - 1].end != null) {
         // There is no active AlarmInstance.
         // create new AlarmInstance with start date of now, and empty End date, and empty disturbance list
@@ -336,10 +568,16 @@ export let scheduleAlarm = (alarm, reloadAlarmsList, alarmDidInitialize) => {
         console.log("indivRecsToDelete", indivRecsToDelete);
     }
 
+    /***** TODO: Extract END *****/
+
     initializeAlarm(
         {
-            wakeUpTime: alarm.wakeUpTime,
+            id: alarm.id,
+            label: alarm.label,
+            time: alarm.wakeUpTime.toISOString(),
             sound: longSoundFile.slice(0, -4),
+            snoozeCount: alarm.snoozeCount,
+            snoozeTime: alarm.snoozeTime,
             instId: currAlmInst.id
         },
         alarmDidInitialize
@@ -347,30 +585,10 @@ export let scheduleAlarm = (alarm, reloadAlarmsList, alarmDidInitialize) => {
 
     // return;
 
-    setInAppAlarm(alarm, reloadAlarmsList, longSoundFile);
+    setInAppAlarm(alarm, reloadAlarmsList);
 
     // schedule notifications for this Alarm, staggering them by the "SNOOZE Time"
-
-    // For now, use a constant 15 sec as a Snooze Time for testing
-    let snoozeTime = 60;
-    // if (__DEV__) {
-    //     snoozeTime = 15;
-    // }
-    let notiCount = 10;
-    for (let i = 0; i < notiCount; i++) {
-        NotificationsIOS.localNotification({
-            alertBody: alarm.label,
-            alertTitle: "Clockulate",
-            alertAction: "Click here to open",
-            soundName: shortSoundFile,
-            silent: shortSoundFile == "" ? true : false,
-            category: "ALARM_CATEGORY",
-            fireDate: wakeUpMoment.toDate(),
-            // fireDate: new Date(Date.now() + 10 * 1000).toISOString(),
-            userInfo: { alarmId: alarm.id }
-        });
-        wakeUpMoment.add(snoozeTime, "s");
-    }
+    _scheduleBackupNotifications(alarm, shortSoundFile);
 };
 
 /* Cancels Notifications and In-App Notification for this alarm
@@ -401,7 +619,7 @@ export let clearAlarm = (alarm, notificationId, disableAlarm = true) => {
     }
 };
 
-let onInAppSnoozePressed = (alarm, reloadAlarmsList, sound, soundFile) => {
+let onInAppSnoozePressed = (alarm, reloadAlarmsList, sound) => {
     console.log("onInAppSnoozePressed");
 
     if (sound) {
@@ -409,7 +627,9 @@ let onInAppSnoozePressed = (alarm, reloadAlarmsList, sound, soundFile) => {
         sound.release();
     }
 
-    snoozeNative(alarm.snoozeTime);
+    let offsetFromUserDelay = _calcOffsetFromUserDelay(alarm);
+
+    snoozeNative(alarm.snoozeTime, offsetFromUserDelay);
 
     realm.write(() => {
         if (alarm.snoozeCount == null) {
@@ -421,7 +641,7 @@ let onInAppSnoozePressed = (alarm, reloadAlarmsList, sound, soundFile) => {
         alarm.status = ALARM_STATES.SNOOZED;
     });
 
-    setInAppAlarm(alarm, reloadAlarmsList, soundFile);
+    setInAppAlarm(alarm, reloadAlarmsList);
 
     reloadAlarmsList();
 };
@@ -471,11 +691,11 @@ let onInAppTurnOffPressed = (alarm, reloadAlarmsList, sound) => {
 
     clearAlarm(alarm);
 
-    /* TODO: Test that app doesn't crash here if this function isn't called on another screen (not AlarmsList)*/
+    /* TODO: TEST: test that app doesn't crash here if this function isn't called on another screen (not AlarmsList)*/
     reloadAlarmsList();
 };
 
-export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
+export let setInAppAlarm = (alarm, reloadAlarmsList) => {
     console.log("setInAppAlarm");
 
     if (alarm) {
@@ -483,25 +703,22 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
         console.log("snoozeCount", alarm.snoozeCount);
         console.log("status", alarm.status);
     }
-    if (soundFile == null) {
-        let filesLen = alarm.alarmSound.sound.files.length;
-        soundFile = alarm.alarmSound.sound.files[filesLen - 1];
-    }
-    console.log("soundFile", soundFile);
 
     // calculate time until alarm
     let now = new Date();
 
     let msUntilAlarm = alarm.wakeUpTime - now;
-    console.log("msUntilAlarm", msUntilAlarm);
 
     /* if alarm has been snoozed at least once, we need to adjust the in-app alarm time accordingly
-     (also taking into account snooze-time setting)
+        (also taking into account snooze-time setting)
      */
     if (alarm.snoozeCount != null && alarm.snoozeCount > 0) {
-        console.log("This is a snooze...");
-        // For now use 0.25 minutes as the snooze time (15 sec) for dev/testing
-        let minutesToAdd = alarm.snoozeCount * 1; // FIXME: Make this '10' before alpha release. '10' is the hard-coded snooze time for now...
+        console.log(
+            "Setting an inAppAlarm for snooze. Snooze Count: ",
+            alarm.snoozeCount
+        );
+
+        let minutesToAdd = alarm.snoozeCount * alarm.snoozeTime; // DEV: Change '1' to alarm.snoozeTime for release.
         let inAppNotifTime = moment(alarm.wakeUpTime).add(
             minutesToAdd,
             "minute"
@@ -514,7 +731,9 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
         msUntilAlarm = inAppNotifTime.toDate() - now;
     }
 
-    console.log("msUntilAlarm", msUntilAlarm);
+    console.log(
+        `Setting in-app alarm for ${msUntilAlarm / 1000 / 60} minutes from now`
+    );
 
     let timeoutId = setTimeout(() => {
         console.log("Alarm went off while app is open!");
@@ -536,8 +755,7 @@ export let setInAppAlarm = (alarm, reloadAlarmsList, soundFile) => {
                         this,
                         alarm,
                         reloadAlarmsList,
-                        null,
-                        soundFile
+                        null
                     )
                 },
                 {
@@ -581,7 +799,7 @@ export let checkForImplicitSnooze = (alarm, mNow) => {
     }
 
     // let almSnoozeTime = alarm.snoozeTime * 60; // convert snoozeTime to seconds
-    let almSnoozeTime = 1 * 60; // convert snoozeTime to seconds TODO: Change 1 to alarm.snoozeTime
+    let almSnoozeTime = alarm.snoozeTime * 60; // convert snoozeTime to seconds DEV: Change 1 to alarm.snoozeTime
     console.log("almSnoozeTime", almSnoozeTime);
 
     let expectedSnoozeCount = Math.ceil(secondsDiff / almSnoozeTime);
@@ -593,8 +811,22 @@ export let checkForImplicitSnooze = (alarm, mNow) => {
             alarm.snoozeCount = expectedSnoozeCount;
             alarm.status = ALARM_STATES.SNOOZED;
         });
+
+        let minutesToAdd = alarm.snoozeCount * alarm.snoozeTime; // DEV: Change '1' to alarm.snoozeTime for release.
+        let inAppNotifTime = moment(alarm.wakeUpTime).add(
+            minutesToAdd,
+            "minute"
+        );
+        msUntilAlarm = inAppNotifTime.toDate() - mNow.toDate();
+        console.log("Snoozing for " + msUntilAlarm, " ms");
+
+        let offsetFromUserDelay = _calcOffsetFromUserDelay(alarm);
+
+        // TODO: Call snoozeNative to ensure that any native Audio playback stops now that the app is open.
+        snoozeNative(msUntilAlarm / 1000 / 60, offsetFromUserDelay);
     } else if (alarm.snoozeCount == expectedSnoozeCount) {
         console.log("Got expected value for snoozeCount", expectedSnoozeCount);
+        // NOTE: If we are here, I think it means that the app was opened after the user has explicitly snoozed all notifications that were delivered
     } else {
         // sanity check. Should never happen.
         console.error(
