@@ -9,7 +9,15 @@
 import Foundation
 import AVFoundation
 import MediaPlayer
+import UserNotifications
 //import FDSoundActivatedRecorder
+
+enum AlarmStatus: Int {
+  case OFF
+  case SET
+  case RINGING
+  case SNOOZED
+}
 
 @objc(AlarmAudioService)
 class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
@@ -17,15 +25,15 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   
   var recorder: FDSoundActivatedRecorder?
   var isRecording = false
+  var alarmStatus = AlarmStatus.OFF
   var alarmTimer = Timer()
-  var refractoryTimer = Timer()
-  var auxAnalyzeTimer = Timer()
+  var autoSnoozeTimer = Timer() /* Starts when alarm triggers, and if it expires, handler will automatically 'snooze' the Alarm. */
   var player: AVAudioPlayer?
   var volumeView = MPVolumeView()
   let FADE_IN_CB_LIMIT = 75
   let SYS_VOLUME_LIMIT: Float = 0.8
   var fadein_cnt = 0
-  var currAlarm: NSDictionary = [:]
+  var currAlarm: Dictionary<String,Any> = [:]
   var refractoryTime = 300.0
   
   func CKT_LOG(_ msg: String) {
@@ -38,7 +46,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
 
     // return an array of event names that we can listen to
   override func supportedEvents() -> [String]! {
-    return ["onNoiseDetected"]
+    return ["onNoiseDetected", "onAlarmTriggered", "onAutoSnoozed"]
   }
   
   deinit {
@@ -56,15 +64,76 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
         recorder = FDSoundActivatedRecorder()
         CKT_LOG("Created recorder")
     }
-    AVAudioSession.sharedInstance().requestRecordPermission() { [unowned self] allowed in
-      DispatchQueue.main.async {
-        if allowed {
-          self.CKT_LOG("Got permission to record")
-        } else {
-          self.CKT_LOG("Denied permission to record")
-        }
-      }
+    
+    self.setupNotifications()
+  }
+  
+  func setupNotifications() {
+    let notificationCenter = NotificationCenter.default
+    notificationCenter.addObserver(self,
+                                   selector: #selector(audioWasInterupted),
+                                   name: .AVAudioSessionInterruption,
+                                   object: nil)
+    
+    notificationCenter.addObserver(self,
+                                   selector: #selector(appWillTerminate),
+                                   name: .UIApplicationWillTerminate,
+                                   object: nil)
+  }
+  
+  func appWillTerminate() {
+     print("app will terminate")
+    if isRecording {
+    //if UIApplication.shared.applicationState == .background {
+      let content = UNMutableNotificationContent()
+      
+      //adding title, subtitle, body and badge
+      content.title = "Sleep analysis had to exit"
+      //            content.subtitle = "iOS Development is fun"
+      content.body = "Please re-open Clockulate to resume sleep analysis. This will also ensure that your alarm rings even if your phone is on Silent."
+      content.badge = 1
+      content.sound = UNNotificationSound.default()
+      
+      //getting the notification trigger
+      //it will be called after 5 seconds
+      let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+      
+      //getting the notification request
+      let request = UNNotificationRequest(identifier: "Recording Stopped", content: content, trigger: trigger)
+      
+      //adding the notification to notification center
+      UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+   // }
     }
+    self.isRecording = false;
+  }
+  
+  func audioWasInterupted(notification: Notification) {
+    print("audioWasInterupted")
+    if isRecording {
+      //if UIApplication.shared.applicationState == .background {
+      let content = UNMutableNotificationContent()
+      
+      //adding title, subtitle, body and badge
+      content.title = "Sleep analysis had to exit"
+      //            content.subtitle = "iOS Development is fun"
+      content.body = "Please open Clockulate to resume sleep analysis. This will also ensure that your alarm rings even if your phone is on Silent."
+      content.badge = 1
+      content.sound = UNNotificationSound.default()
+      
+      //getting the notification trigger
+      //it will be called after 5 seconds
+      let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+      
+      //getting the notification request
+      let request = UNNotificationRequest(identifier: "Recording Stopped", content: content, trigger: trigger)
+      
+      //adding the notification to notification center
+      UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+      // }
+    }
+    
+    self.isRecording = false;
   }
   
   @objc
@@ -72,12 +141,25 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
       CKT_LOG("starting to listen")
     
       CKT_LOG(alarmInfo.description)
-      currAlarm = alarmInfo
+      currAlarm = alarmInfo as! Dictionary<String,Any>
+    
+    // NOTE: userDelayOffset : This is used when the autoSnooze timer fires to calculate when the next snooze should be scheduled for.
+    //      Theres a good chance that there is a better way to calculate that, but this does seem to work.
+    //      A simpler way may be to just calculate how long the autoSnoozeTimer takes (just use the same formula min(90, snoozeTime - 5)),
+    //        then subtract this from snoozeTime. That should give how much time is left before the next snooze....
+      currAlarm["userDelayOffset"] = 0 as Any
     
       // unpack settings
-      refractoryTime = (settings["recCooldown"] as! Double) * 60
+      if let cooldown = settings["recCooldown"] as? Double {
+          refractoryTime = cooldown * 60
+      }
+      else {
+        CKT_LOG("WARN: recCooldown setting is nil. Assigning 5 minutes by default")
+        refractoryTime = 5 * 60
+
+      }
     
-//      CKT_LOG("Setting refractoryTime to \(refractoryTime)")
+      CKT_LOG("Setting refractoryTime to \(refractoryTime)")
       recorder?.refractoryPeriodLen = refractoryTime
       recorder?.subdirectory = currAlarm["instId"] as! String
     
@@ -85,6 +167,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
       var error: String? = nil
       if (ret) {
           CKT_LOG("setting alarm timer")
+        
+          self.alarmStatus = AlarmStatus.SET
         
           if let date = RCTConvert.nsDate(alarmInfo["time"]) {
               let timeTillAlm = date.timeIntervalSinceNow
@@ -113,13 +197,15 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   /* Sets up the audio recording functionality
    */
   func beginMonitoringAudio() -> Bool {
-    
+    CKT_LOG("checking if we are already recording")
     if (self.isRecording) {
       CKT_LOG("Already recording")
       return true
     }
       // Try to start up microphone
       do {
+        print("Trying to start up mic")
+
         try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: .mixWithOthers)
         print("AVAudioSession Category Playback OK")
         do {
@@ -132,36 +218,6 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
       } catch let error as NSError {
         print(error.localizedDescription)
       }
-    
-//      let documents = URL(fileURLWithPath: NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory, FileManager.SearchPathDomainMask.userDomainMask, true)[0])
-//      print("got docs url")
-//
-//      let url = documents.appendingPathComponent("record.caf") // TODO: Figure out if this is being saved anywhere
-//      print("got recording file url")
-//
-//      let recordSettings: [String: Any] = [
-//        AVFormatIDKey:              kAudioFormatAppleIMA4,
-//        AVSampleRateKey:            44100.0,
-//        AVNumberOfChannelsKey:      2,
-//        AVEncoderBitRateKey:        12800,
-//        AVLinearPCMBitDepthKey:     16,
-//        AVEncoderAudioQualityKey:   AVAudioQuality.max.rawValue
-//      ]
-//      print("created settings")
-//      do {
-//        recorder = try AVAudioRecorder(url: url, settings: recordSettings)
-//        recorder.delegate = self
-//      } catch {
-//        print("Failed to create recorder")
-//        return false
-//      }
-//
-//      print("Preparing to Record")
-//      CKT_LOG("Is already recording? \(recorder.isRecording)")
-//      recorder.prepareToRecord()
-//      recorder.isMeteringEnabled = true
-//      recorder.record()
-//      print("Recording")
     
     
       recorder!.delegate = self
@@ -178,14 +234,42 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   func alarmDidTrigger(_ timer: Timer) {
     // set flag to ignore all noise (so analyzeAudio() doesn't think there is snoring happening)
     recorder!.sarMode = FDSoundActivatedRecorderMode.ignoreAll
+    
+    self.alarmStatus = AlarmStatus.RINGING
 
+    var evtInfo = timer.userInfo as! Dictionary<String, AnyObject>
+    var stateStr = "Unknown"
+    let state = UIApplication.shared.applicationState
+    if (state == .active) {
+      print("App State: active!")
+      stateStr = "active"
+    }
+    else if (state == .inactive) {
+      print("App State: Inactive!")
+      stateStr = "inactive"
+    }
+    else if (state == .background) {
+      print("App State: Background!")
+      stateStr = "background"
+    }
+    else {
+      print("App State: unknownn........")
 
+    }
+    evtInfo["appState"] = stateStr as AnyObject?
+    
+    // Emit Trigger event for JS
+    //      JS will cancel the corresponding backup notifications, and reschedule the rest.
+    //      JS will also immediately present a LocalNotification for this Trigger.
+    sendEvent(withName: "onAlarmTriggered", body: ["alarm": evtInfo])
+    
     // play the alarm sound found in userInfo
     let userInfo = timer.userInfo as! Dictionary<String, AnyObject>
     guard let soundFileName = userInfo["sound"] as! String? else {
       CKT_LOG("ERROR: Failed to find sound in userInfo.")
       return
     }
+    
     CKT_LOG("alarmDidTrigger: Playing \(String(describing: soundFileName))")
     
     // TODO: Play audio
@@ -195,7 +279,6 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
     }
     
     print("Found sound file")
-    
    
     do {
       //                try AVAudioSession.sharedInstance().setActive(true)
@@ -221,9 +304,103 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
 //      MPVolumeView.setVolume(0)
       
       print("AVAudioSession is Active")
+      
+      self.CKT_LOG("Setting playback timeout timer")
+      // TODO: Set audio-loop timer. Audio should loop until this timer expires, at which point
+      //        the alarm will be automatically snoozed.
+      var autoSnoozeTmo = userInfo["snoozeTime"] as! Double
+      autoSnoozeTmo *= 60
+      autoSnoozeTmo = min(90, autoSnoozeTmo - 5)
+      // autoSnoozeTmo = 20 // DEV: setting autoSnooze time to 20sec for DEV.
+      DispatchQueue.main.async(execute: {
+        self.autoSnoozeTimer = Timer.scheduledTimer(timeInterval: autoSnoozeTmo, target: self, selector: #selector(self.automaticSnooze), userInfo: self.currAlarm, repeats: false)
+      })
+      
     } catch {
       print(error.localizedDescription)
     }
+  }
+  
+//  @objc
+//  func automaticSnooze(_ timer: Timer) {
+//    self.CKT_LOG("Setting automaticSnooze")
+//
+//    var alarm = timer.userInfo as! Dictionary<String, AnyObject>
+//
+//    // Emit AutoSnoozed event so JS knows to increment snoozeCount for this alarm
+//    sendEvent(withName: "onAutoSnoozed", body: ["alarm": alarm["id"]])
+//
+//    let snoozeTime = alarm["snoozeTime"] as! Double
+//
+//
+//    // Calculate time until snooze
+//    let autoSnoozeTime = min(90, snoozeTime - 5)
+//    let timeTillSnooze = snoozeTime - autoSnoozeTime
+//
+//    if let wakeUpTime = RCTConvert.nsDate(alarm["time"]) {
+//      let dateOfSnooze = wakeUpTime.addingTimeInterval(offsetAfterWake)
+//      let timeTillSnooze = dateOfSnooze.timeIntervalSinceNow / 60 // Convert to minutes, since I'm passing it to snoozeAlarm()
+//      self.CKT_LOG("Time until Snooze: \(timeTillSnooze)")
+//
+//      self.alarmTimer.invalidate()
+//      // Audio initialization succeeded... set a timer for the time in alarmInfo, with callback of the function below (alarmDidTrigger). Set userInfo property of timer to sound file name.
+//
+//      // the offset due to user-delay in explicit snooze has not changed, since this autoSnooze function triggered.
+//      self.snoozeAlarm(timeTillSnooze, userDelayOffset)
+//
+//      self.isRecording = true
+//    }
+//    else {
+//      self.CKT_LOG("ERROR: Failed to calculate snooze time automatically.")
+//    }
+//
+//
+//  }
+  
+  @objc
+  func automaticSnooze(_ timer: Timer) {
+    self.CKT_LOG("Setting automaticSnooze")
+
+    var alarm = timer.userInfo as! Dictionary<String, AnyObject>
+
+    // Emit AutoSnoozed event so JS knows to increment snoozeCount for this alarm
+    sendEvent(withName: "onAutoSnoozed", body: ["alarm": alarm["id"]])
+
+    let userDelayOffset = alarm["userDelayOffset"] as! Double
+    var snoozeCount = alarm["snoozeCount"] as! Double
+    let snoozeTime = alarm["snoozeTime"] as! Double
+    snoozeCount += 1
+
+    self.CKT_LOG("snoozeCount: \(snoozeCount)")
+    self.CKT_LOG("snoozeTime: \(snoozeTime)")
+    
+    // * Better way to calc: * //
+    let autoSnoozeTime = min(90, snoozeTime - 5)
+    let timeTillSnoozeBetter = snoozeTime - autoSnoozeTime
+    // ** //
+
+    // Calculate time until snooze
+    let offsetAfterWake = 60 * (snoozeCount * snoozeTime) + userDelayOffset // adding offset due to cummulative explicit snooze delay
+
+    if let wakeUpTime = RCTConvert.nsDate(alarm["time"]) {
+      let dateOfSnooze = wakeUpTime.addingTimeInterval(offsetAfterWake)
+      let timeTillSnooze = dateOfSnooze.timeIntervalSinceNow / 60 // Convert to minutes, since I'm passing it to snoozeAlarm()
+      self.CKT_LOG("Time until Snooze: \(timeTillSnooze)")
+      self.CKT_LOG("Time until Snooze better: \(timeTillSnoozeBetter)")
+
+      self.alarmTimer.invalidate()
+      // Audio initialization succeeded... set a timer for the time in alarmInfo, with callback of the function below (alarmDidTrigger). Set userInfo property of timer to sound file name.
+
+      // the offset due to user-delay in explicit snooze has not changed, since this autoSnooze function triggered.
+      self.snoozeAlarm(timeTillSnooze, userDelayOffset)
+
+      self.isRecording = true
+    }
+    else {
+      self.CKT_LOG("ERROR: Failed to calculate snooze time automatically.")
+    }
+
+
   }
   
   @objc
@@ -256,15 +433,54 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   }
   
   @objc
-  func snoozeAlarm(_ minutes : Double) {
-      self.CKT_LOG("Native snoozeAlarm")
-      self.alarmTimer.invalidate()
+  func snoozeAlarm(_ minutes : Double, _ userDelayOffset : Double) {
+    
+
+    // Invalidate timers first.
+    // This is called by JS from explicit (or implicit?) snooze, but autoSnoozeTimer callback also calls this function,
+    //    so that timer must be invalidated right away to avoid a double call to this.
+    self.autoSnoozeTimer.invalidate()
+    
+    // Invalidate this timer to stop fade-in audio timer functionality (since we are stopping audio next anyway).
+    self.alarmTimer.invalidate()
+    
+    if (self.alarmStatus == AlarmStatus.SNOOZED) {
+      CKT_LOG("Alarm is already Snoozed. Ignoring")
+      return
+    }
+    
+    self.alarmStatus = AlarmStatus.SNOOZED
+
+    self.CKT_LOG("Native snoozeAlarm: \(minutes) minutes")
+    
+    self.CKT_LOG("userDelayOffset: \(userDelayOffset) seconds")
+
+    currAlarm["userDelayOffset"] = userDelayOffset as Any
+    
+    var snoozeCount = 0
+
+    // Increment snoozeCount of currAlarm class var.
+    if let sCnt = self.currAlarm["snoozeCount"] as? Int {
+      snoozeCount = sCnt
+    }
+
+    snoozeCount += 1
+    self.CKT_LOG("snoozeCount: \(snoozeCount)")
+    self.currAlarm["snoozeCount"] = snoozeCount as Any
+    
+      if (self.isRecording != true) {
+        self.CKT_LOG("AlarmService is not recording. Not snoozing any alarm..")
+        return;
+      }
+    
+
       fadein_cnt = 0
       guard let player = player else { return }
       player.stop()
     
 
-      self.CKT_LOG("NativeSnooze for: \(minutes) minutes")
+    // NOTE: don't add userDelayOffset here, since snoozeAlarm is called at the time of snooze. So for this timer we simply
+    //  want to set it for the snoozeTime
       let seconds = minutes * 60;
       DispatchQueue.main.async(execute: {
         self.alarmTimer = Timer.scheduledTimer(timeInterval: seconds, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
@@ -282,7 +498,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
     
     recorder!.abort() // TODO: ?? or a better function
     self.isRecording = false
-      
+    self.alarmStatus = AlarmStatus.OFF
   }
   
   /* Delegate Methods */

@@ -33,7 +33,9 @@ import {
     snoozeAlarm,
     cancelInAppAlarm,
     setInAppAlarm,
-    checkForImplicitSnooze
+    resumeAlarm,
+    checkForImplicitSnooze,
+    cancelAllNotifications
 } from "../services/PushController";
 import NotificationsIOS from "react-native-notifications";
 import realm from "../data/DataSchemas";
@@ -89,7 +91,7 @@ class Alarms extends Component {
     constructor() {
         super();
         console.log("AlarmsList -- Constructor");
-        console.log("App was opened from KILLED state");
+        console.log("(App was opened from KILLED state)");
         //console.log("Fetching Alarms...");
         this.state = {
             alarms: realm.objects("Alarm").sorted("order"), //
@@ -119,6 +121,8 @@ class Alarms extends Component {
         //         return false;
         //     }
         // });
+
+        this.verifyAlarmStates();
 
         InteractionManager.runAfterInteractions(() => {
             AdSvcUpdateAppOpenedStats();
@@ -346,27 +350,9 @@ class Alarms extends Component {
             console.log("App has come to the foreground! (ALARMS LIST)");
 
             AdSvcUpdateAppOpenedStats();
-            // Implicit Snoozing and In-App Timers: Check if we need to manually switch any Alarms into 'snooze'. (ie: snooze Count)arent to user)
-            let mNow = moment();
 
-            let alarms = realm
-                .objects("Alarm")
-                .filtered(
-                    "status == $0 OR status == $1",
-                    ALARM_STATES.SET,
-                    ALARM_STATES.SNOOZED
-                );
-            for (let i = 0; i < alarms.length; i++) {
-                if (moment(alarms[i].wakeUpTime) > mNow) {
-                    // alarm is in the future. Set in app alarm. (On Android, the inAppAlarm is a transparent timer)
-                    setInAppAlarm(alarms[i], this.reloadAlarms.bind(this));
-                } else {
-                    // the alarm has already triggered.
-                    // If snoozeCount is null set it to 1. Otherwise, calculate what it should be, and set it accordingly.
-                    checkForImplicitSnooze(alarms[i], mNow);
-                    setInAppAlarm(alarms[i], this.reloadAlarms.bind(this));
-                }
-            }
+            this.verifyAlarmStates();
+
             this.reloadAlarms();
         } else if (nextAppState === "background") {
             console.log("App is going into background");
@@ -383,6 +369,77 @@ class Alarms extends Component {
 
         this.setState({ appState: nextAppState });
     };
+
+    /**
+     * Called when App first starts up, and when it enters the foreground, to verify that any SET alarms are properly enabled, and
+     * that snoozeCount tracking is in sync.
+     */
+    verifyAlarmStates() {
+            // Implicit Snoozing and In-App Timers: Check if we need to manually switch any Alarms into 'snooze'. (ie: snooze Count)arent to user)
+            let mNow = moment();
+
+            let alarms = realm
+                .objects("Alarm")
+                .filtered(
+                "status == $0 OR status == $1 OR status == $2",
+                    ALARM_STATES.SET,
+                ALARM_STATES.RINGING,
+                    ALARM_STATES.SNOOZED
+                );
+
+            for (let i = 0; i < alarms.length; i++) {
+                if (moment(alarms[i].wakeUpTime) > mNow) {
+                console.log("This alarm has NOT yet triggered... resuming.");
+
+                    // alarm is in the future. Set in app alarm. (On Android, the inAppAlarm is a transparent timer)
+                // setInAppAlarm(alarms[i], this.reloadAlarms.bind(this)); // NOTE: (on Android this may still be necessary, so I'm leaving it commented out)
+
+                // If app was terminated, or if Audio was interupted, we need to re-enable native Alarm service (iOS only), and reschedule in-app notification.
+                resumeAlarm(
+                    alarms[i],
+                    this.reloadAlarms.bind(this),
+                    this.alarmDidInitialize.bind(
+                        this,
+                        alarms[i],
+                        alarms[i].status
+                    )
+                );
+                } else {
+                // the alarm has already triggered
+                console.log(
+                    "This alarm has already triggered. Checking for implicit snooze etc."
+                );
+
+                // TODO: Its possible that the app was terminated, or audio was interupted.
+                //          If this is the case, we need to resume Native module functionality without scheduling a timer for wakeUpTime (since it has already passed).
+                //          Instead the native module will need to set the timer for the next snoozeInterval. I guess it should check if wakeUpTime has passed, and if so,
+                //          check the snoozeCount value, and snoozeTime value, and calculate when to set the snooze timer for. Hopefully, instead of calling
+                //          setInAppAlarm after checkForImplicitSnooze, I can just call resumeAlarm.
+
+                    // If snoozeCount is null set it to 1. Otherwise, calculate what it should be, and set it accordingly.
+                    checkForImplicitSnooze(alarms[i], mNow);
+                // setInAppAlarm(alarms[i], this.reloadAlarms.bind(this));
+                }
+            }
+
+        if (alarms.length == 0) {
+            // Make sure there are no notifications scheduled, since no Alarms are enabled or snoozed.
+            cancelAllNotifications();
+        }
+
+        // FIXME: Or remove... I commented this out for now because if there are any SET/SNOOZED/RINGING alarms when clearAlarm is called,
+        //          the native AlarmService stops the active alarm, as turnOffAlarm does not accept any parameters. It just stops whatever alarm is active.
+        // else {
+        //     // ensure there are no timers or notifications scheduled for all OFF Alarms
+        //     let offAlarms = realm
+        //         .objects("Alarm")
+        //         .filtered("status == $0", ALARM_STATES.OFF);
+
+        //     for (let i = 0; i < offAlarms.length; i++) {
+        //         clearAlarm(offAlarms[i]);
+        //     }
+        // }
+    }
 
     handleAddAlarm() {
         console.info("Adding alarm");
@@ -496,6 +553,8 @@ class Alarms extends Component {
                 );
             }
         } else {
+            let alarms = realm.objects("Alarm").sorted("order");
+            // console.log("Alarms after reload: ", alarms);
             // general reload. No specific alarm ID is known to have changed.
             this.setState({ alarms: realm.objects("Alarm").sorted("order") }); // TODO: filter by 'visible'=true
         }
