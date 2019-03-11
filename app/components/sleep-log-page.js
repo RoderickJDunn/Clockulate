@@ -126,7 +126,7 @@ export default class SleepLogPage extends React.PureComponent {
 
             if (this.playbackBoxRef) {
                 this.playbackBoxRef.transitionTo({
-                    transform: [{ translateY: -120 }]
+                    transform: [{ translateY: isIphoneX() ? -160 : -120 }]
                 });
             }
 
@@ -821,7 +821,7 @@ const styles = StyleSheet.create({
     playbackBox: {
         position: "absolute",
         // bottom: 0,
-        bottom: -120,
+        bottom: isIphoneX() ? -160 : -120,
         left: 0,
         padding: 15,
         backgroundColor: Colors.backgroundBright,
