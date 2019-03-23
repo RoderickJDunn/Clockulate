@@ -21,6 +21,7 @@ import * as Animatable from "react-native-animatable";
 import getFullImgNameForScreenSize from "../img/image_map";
 import Colors from "../styles/colors";
 import ClkAlert from "../components/clk-awesome-alert";
+import IntrvHelpPage from "../components/intrv-help-page";
 
 import { scaleByFactor } from "../util/font-scale";
 import { isIphoneX } from "react-native-iphone-x-helper";
@@ -35,7 +36,8 @@ const HELP_SECTIONS = [
                 path: require("../img/help/Screen_Alarms1.png"),
                 style: { paddingVertical: 10 }
             }
-        ]
+        ],
+        snapOffsets: []
     },
     {
         name: "Alarms List",
@@ -57,9 +59,10 @@ const HELP_SECTIONS = [
             },
             {
                 path: require("../img/help/AlarmItem_test5_step4.png"),
-                style: { paddingVertical: SCREEN_HEIGHT * 0.21 }
+                style: { paddingVertical: SCREEN_HEIGHT * 0.23 }
             }
-        ]
+        ],
+        snapOffsets: [SCREEN_HEIGHT * 0.6, SCREEN_HEIGHT]
     },
     {
         name: "Edit Alarm",
@@ -89,7 +92,8 @@ const HELP_SECTIONS = [
                     paddingBottom: SCREEN_HEIGHT * 0.03
                 }
             }
-        ]
+        ],
+        snapOffsets: []
     },
     {
         name: "Edit Alarm",
@@ -114,7 +118,8 @@ const HELP_SECTIONS = [
                     paddingBottom: SCREEN_HEIGHT * 0.07
                 }
             }
-        ]
+        ],
+        snapOffsets: []
     }
 ];
 
@@ -156,7 +161,6 @@ export default class Help extends React.Component {
         this.state = {
             imgHeight: 135,
             sectIdx: 0,
-            subIdx: 0,
             showInfoPopup: true
         };
 
@@ -166,7 +170,6 @@ export default class Help extends React.Component {
     _bgdPosition = new Animated.Value(0);
     _interactable = null;
     _idx = 0;
-    _scrollViewRefs = [];
 
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
@@ -446,252 +449,98 @@ export default class Help extends React.Component {
         );
     }
 
-    nextStep = () => {
-        let { sectIdx, subIdx } = this.state;
-
-        const SECT_INFO = HELP_SECTIONS[sectIdx];
-
-        const images = SECT_INFO.images;
-
-        if (subIdx < images.length - 1) {
-            subIdx++;
-            let config = {
-                duration: 400,
-                update: {
-                    duration: 400,
-                    type: "easeOut"
-                    // springDamping: 0.5
-                    // property: "scaleXY"
-                }
-            };
-            LayoutAnimation.configureNext(config);
-            this.setState({ subIdx: subIdx });
+    goToNextSect = () => {
+        console.log("next section");
+        this._idx++;
+        console.log(this._idx);
+        if (this._idx <= 4) {
+            this._interactable.snapTo({
+                index: this._idx
+            });
+            this.setState({
+                sectIdx: this._idx
+            });
         } else {
-            // this.setState({ subIdx: 0 });
-            // TODO: Move interactableView to next screen? Nah probably not (next help section)
+            this._idx = 4;
+            console.log(this._idx);
+            this._interactable.changePosition({
+                x: -SCREEN_WIDTH * 4 - 50,
+                y: 0
+            });
         }
     };
 
-    renderHelpPage() {
-        return (
-            <View style={styles.helpPage}>
-                <View
-                    style={{
-                        flex: 0.08,
-                        alignSelf: "stretch"
-                        // borderColor: "white",
-                        // borderWidth: 5
-                    }}
-                />
-                <View
-                    style={{
-                        flex: 0.5,
-                        borderColor: "#808080",
-                        borderWidth: 2
-                        // alignContent: "center",
-                        // justifyContent: "center"
-                        // alignItems: "flex-end"
-                    }}
-                >
-                    <Image
-                        style={{
-                            width: SCREEN_WIDTH * 0.7,
-                            flex: 1
-                        }}
-                        source={require("../img/help/Screen_Alarms1.png")}
-                    />
-                </View>
-                <View
-                    style={{
-                        flex: 0.25,
-                        justifyContent: "center"
-                        // backgroundColor: "green",
-                    }}
-                >
-                    <View
-                        style={{
-                            flex: 0.6,
-                            marginHorizontal: 9,
-                            alignItems: "center",
-                            justifyContent: "center",
-                            borderRadius: 35,
-                            shadowOpacity: 0.9,
-                            shadowRadius: 10,
-                            shadowColor: "#000",
-                            elevation: 5,
-                            alignSelf: "center",
-                            // backgroundColor: "#AAAAFF53"
-                            backgroundColor: Colors.brandDarkBlue + "66"
-                        }}
-                    >
-                        <Text style={[styles.upgradeTitleText]}>
-                            Alarms List
-                        </Text>
-                        <Text style={[styles.upgradeBodyText]}>
-                            View all of your saved alarms, and turn them ON or
-                            OFF
-                        </Text>
-                        <Text style={[styles.upgradeBodyText]}>
-                            View additional actions for an alarm, such as
-                            Deleting and Duplicating, by swiping left on it
-                        </Text>
-                        <Text style={[styles.upgradeBodyText]}>
-                            Long-press Alarm and drag up/down to reorder
-                        </Text>
-                    </View>
-                </View>
-            </View>
-        );
-    }
-
-    renderIntvHelpPage(idx) {
-        let { sectIdx, subIdx } = this.state;
-
-        console.log("idx", idx);
-        console.log("sectIdx", sectIdx);
-
-        let images = HELP_SECTIONS[idx].images.slice(0, subIdx + 1);
-
-        console.log("images", images);
-
-        return (
-            <TouchableWithoutFeedback onPress={this.nextStep}>
-                <View
-                    style={styles.helpPage}
-                    // onStartShouldSetResponder={() => true}
-                >
-                    <View
-                        style={{
-                            height: SCREEN_HEIGHT * 0.8,
-                            // backgroundColor: "red",
-                            // flex: 1,
-                            alignItems: "center",
-                            alignContent: "center",
-                            justifyContent: "center"
-                        }}
-                    >
-                        {/* Filler view for full nav Header */}
-                        <View
-                            style={{ width: 1, height: isIphoneX() ? 88 : 44 }}
-                        />
-                        <ScrollView
-                            style={styles.helpPageBox}
-                            ref={ref => (this._scrollViewRefs[idx] = ref)}
-                            contentContainerStyle={[
-                                {
-                                    alignItems: "center",
-                                    alignContent: "center",
-                                    justifyContent: "center",
-                                    flexGrow: 1
-                                    // backgroundColor: "blue"
-                                }
-                            ]}
-                            onContentSizeChange={(
-                                contentWidth,
-                                contentHeight
-                            ) => {
-                                this._scrollViewRefs[idx].scrollToEnd({
-                                    animated: true
-                                });
-                            }}
-                        >
-                            {sectIdx == idx ? (
-                                <View onStartShouldSetResponder={() => true}>
-                                    {images.map((img, idx) => {
-                                        return (
-                                            <TouchableWithoutFeedback
-                                                key={idx}
-                                                onPress={this.nextStep}
-                                            >
-                                                <View style={[img.style]}>
-                                                    <AutoHeightImage
-                                                        width={
-                                                            SCREEN_WIDTH *
-                                                                0.85 -
-                                                            50
-                                                        }
-                                                        source={img.path}
-                                                    />
-                                                </View>
-                                            </TouchableWithoutFeedback>
-                                        );
-                                    })}
-                                    {HELP_SECTIONS[sectIdx].images.length - 1 ==
-                                        subIdx && (
-                                        <Animatable.View
-                                            contentInsetAdjustmentBehavior="automatic"
-                                            useNativeDriver={true}
-                                            animation={"fadeIn"}
-                                            duration={1500}
-                                            delay={2000}
-                                            // style={styles.playbackBox}
-                                        >
-                                            <TouchableOpacity
-                                                style={styles.nextSectBtn}
-                                                onPress={() => {
-                                                    console.log("next");
-                                                    this._idx++;
-                                                    console.log(this._idx);
-                                                    if (this._idx <= 4) {
-                                                        this._interactable.snapTo(
-                                                            {
-                                                                index: this._idx
-                                                            }
-                                                        );
-                                                        this.setState({
-                                                            sectIdx: this._idx,
-                                                            subIdx: 0
-                                                        });
-                                                    } else {
-                                                        this._idx = 4;
-                                                        console.log(this._idx);
-                                                        this._interactable.changePosition(
-                                                            {
-                                                                x:
-                                                                    -SCREEN_WIDTH *
-                                                                        4 -
-                                                                    50,
-                                                                y: 0
-                                                            }
-                                                        );
-                                                    }
-                                                }}
-                                            >
-                                                <Text
-                                                    style={[
-                                                        styles.nextSectBtnText
-                                                    ]}
-                                                >
-                                                    NEXT
-                                                </Text>
-                                            </TouchableOpacity>
-                                        </Animatable.View>
-                                    )}
-                                    <View
-                                        style={{ width: "100%", height: 40 }}
-                                    />
-                                </View>
-                            ) : (
-                                <View
-                                    style={{ width: SCREEN_WIDTH * 0.85 - 50 }}
-                                />
-                            )}
-                        </ScrollView>
-                    </View>
-                    <View style={styles.sectionTitleWrap}>
-                        <Text style={styles.sectionTitle}>
-                            {HELP_SECTIONS[sectIdx].name}
-                        </Text>
-                        {
-                            <Text style={styles.sectSubtitle}>
-                                {HELP_SECTIONS[sectIdx].subtitle}
-                            </Text>
-                        }
-                    </View>
-                </View>
-            </TouchableWithoutFeedback>
-        );
-    }
+    // renderHelpPage() {
+    //     return (
+    //         <View style={styles.helpPage}>
+    //             <View
+    //                 style={{
+    //                     flex: 0.08,
+    //                     alignSelf: "stretch"
+    //                     // borderColor: "white",
+    //                     // borderWidth: 5
+    //                 }}
+    //             />
+    //             <View
+    //                 style={{
+    //                     flex: 0.5,
+    //                     borderColor: "#808080",
+    //                     borderWidth: 2
+    //                     // alignContent: "center",
+    //                     // justifyContent: "center"
+    //                     // alignItems: "flex-end"
+    //                 }}
+    //             >
+    //                 <Image
+    //                     style={{
+    //                         width: SCREEN_WIDTH * 0.7,
+    //                         flex: 1
+    //                     }}
+    //                     source={require("../img/help/Screen_Alarms1.png")}
+    //                 />
+    //             </View>
+    //             <View
+    //                 style={{
+    //                     flex: 0.25,
+    //                     justifyContent: "center"
+    //                     // backgroundColor: "green",
+    //                 }}
+    //             >
+    //                 <View
+    //                     style={{
+    //                         flex: 0.6,
+    //                         marginHorizontal: 9,
+    //                         alignItems: "center",
+    //                         justifyContent: "center",
+    //                         borderRadius: 35,
+    //                         shadowOpacity: 0.9,
+    //                         shadowRadius: 10,
+    //                         shadowColor: "#000",
+    //                         elevation: 5,
+    //                         alignSelf: "center",
+    //                         // backgroundColor: "#AAAAFF53"
+    //                         backgroundColor: Colors.brandDarkBlue + "66"
+    //                     }}
+    //                 >
+    //                     <Text style={[styles.upgradeTitleText]}>
+    //                         Alarms List
+    //                     </Text>
+    //                     <Text style={[styles.upgradeBodyText]}>
+    //                         View all of your saved alarms, and turn them ON or
+    //                         OFF
+    //                     </Text>
+    //                     <Text style={[styles.upgradeBodyText]}>
+    //                         View additional actions for an alarm, such as
+    //                         Deleting and Duplicating, by swiping left on it
+    //                     </Text>
+    //                     <Text style={[styles.upgradeBodyText]}>
+    //                         Long-press Alarm and drag up/down to reorder
+    //                     </Text>
+    //                 </View>
+    //             </View>
+    //         </View>
+    //     );
+    // }
 
     _renderPagingDots = idx => {
         // console.log("idx", idx);
@@ -748,17 +597,37 @@ export default class Help extends React.Component {
                             //     this.props.onSnap(targetSnapPointId);
                             this._idx = parseInt(targetSnapPointId);
                             this.setState({
-                                sectIdx: this._idx,
-                                subIdx: 0
+                                sectIdx: this._idx
                             });
                         }
                     }}
                     initialPosition={{ x: 0 }}
                 >
-                    {this.renderHelpPage()}
-                    {this.renderIntvHelpPage(1)}
-                    {this.renderIntvHelpPage(2)}
-                    {this.renderIntvHelpPage(3)}
+                    {/* {this.renderHelpPage()} */}
+                    <IntrvHelpPage
+                        idx={0}
+                        nextSection={this.goToNextSect}
+                        sectionInfo={HELP_SECTIONS[0]}
+                        currSectIdx={this._idx}
+                    />
+                    <IntrvHelpPage
+                        idx={1}
+                        nextSection={this.goToNextSect}
+                        sectionInfo={HELP_SECTIONS[1]}
+                        currSectIdx={this._idx}
+                    />
+                    <IntrvHelpPage
+                        idx={2}
+                        nextSection={this.goToNextSect}
+                        sectionInfo={HELP_SECTIONS[2]}
+                        currSectIdx={this._idx}
+                    />
+                    <IntrvHelpPage
+                        idx={3}
+                        nextSection={this.goToNextSect}
+                        sectionInfo={HELP_SECTIONS[3]}
+                        currSectIdx={this._idx}
+                    />
                     <View style={styles.helpPage}>
                         <View
                             style={{
@@ -936,37 +805,6 @@ const styles = StyleSheet.create({
         marginRight: 0,
         width: 100
     },
-    helpPage: {
-        width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
-        // height: SCREEN_HEIGHT - 50, // TODO: Change 200 to factor for Title height
-        alignSelf: "center",
-        // alignContent: "center",
-        // justifyContent: "center",
-        alignItems: "center",
-        marginTop: 20
-        // marginTop: -88,
-        // backgroundColor: "yellow"
-    },
-    helpPageBox: {
-        // flex: 0.8,
-        height: SCREEN_HEIGHT * 0.8,
-        // alignItems: "center",
-        // justifyContent: "center",
-        borderRadius: 35,
-        shadowOpacity: 0.9,
-        shadowRadius: 10,
-        padding: 20,
-        paddingBottom: 5,
-        marginTop: 40,
-        shadowColor: "#000",
-        elevation: 5,
-        // width: "85%",
-        alignSelf: "center",
-        // padding: 25,
-        // backgroundColor: "#AAAAFF53"
-        backgroundColor: Colors.brandLightOpp + "BB"
-    },
     pagerButton: {
         margin: 10,
         position: "absolute",
@@ -1003,72 +841,5 @@ const styles = StyleSheet.create({
         width: 10,
         borderRadius: 7,
         backgroundColor: "#989898"
-    },
-    sectionTitleWrap: {
-        // width: "85%",
-        // paddingHorizontal: 10,
-        backgroundColor: Colors.backgroundGrey,
-        // backgroundColor: Colors.brandMidOpp,
-        position: "absolute",
-        // flexDirection: "row",
-        left: 0,
-        right: 0,
-        paddingTop: 5,
-        paddingBottom: isIphoneX() ? 20 : 0,
-        bottom: 0,
-        height: SCREEN_HEIGHT * 0.13,
-        alignSelf: "center",
-        alignItems: "center",
-        alignContent: "center",
-        // borderRadius: 35,
-        // borderTopLeftRadius: 35,
-        // borderTopRightRadius: 35,
-        justifyContent: "center"
-    },
-    sectionTitle: {
-        fontSize: scaleByFactor(20, 0.8),
-        letterSpacing: 2,
-        fontFamily: "Gurmukhi MN",
-        // marginBottom: 10,
-        textAlign: "center",
-        // color: Colors.brandLightOpp
-        color: Colors.darkGreyText
-    },
-    sectSubtitle: {
-        fontSize: scaleByFactor(14, 0.8),
-        letterSpacing: 2,
-        fontFamily: "Gurmukhi MN",
-        color: Colors.disabledGrey,
-        alignSelf: "center",
-        marginLeft: 5
-    },
-    nextSectBtn: {
-        // bottom: 50,
-        // paddingVertical: 10,
-        paddingHorizontal: 40,
-        alignSelf: "center",
-        alignContent: "center",
-        alignItems: "center",
-        justifyContent: "center",
-        // width: "55%",
-        height: scaleByFactor(40),
-        shadowOpacity: 0.3,
-        shadowRadius: 7,
-        shadowColor: "#000",
-        elevation: 5,
-        borderColor: Colors.brandMidGrey,
-        // backgroundColor: Colors.brandLightOpp,
-        borderWidth: StyleSheet.hairlineWidth,
-        // borderColor: "white",
-        backgroundColor: Colors.brandLightPurple,
-        borderRadius: 5
-        // overflow: "hidden"
-    },
-    nextSectBtnText: {
-        // color: Colors.darkGreyText,
-        color: Colors.brandLightOpp,
-        fontSize: scaleByFactor(12),
-        // fontFamily: "Quesha",
-        letterSpacing: 2
     }
 });
