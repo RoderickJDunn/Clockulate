@@ -52,13 +52,14 @@ import AVFoundation
   func soundActivatedRecorderDidFinishRecording(_ recorder: FDSoundActivatedRecorder, _ timestamp: String,  _ duration: Double, andSaved file:URL?)
 }
 
-//func print(_ items: Any...) {
-//  #if DEBUG
-//  items.forEach { item in
-//    Swift.print(item)
-//  }
-//  #endif
-//}
+func print(_ items: Any...) {
+  #if DEBUG
+  items.forEach { item in
+    Swift.print(item, terminator:"")
+  }
+  Swift.print("")
+  #endif
+}
 
 @objc public enum FDSoundActivatedRecorderStatus: Int {
     case inactive
@@ -90,7 +91,7 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
     public var listeningAveragingIntervals = 7
     
     /// Relative signal strength (in dB) to detect triggers versus average listening level
-    public var riseTriggerDb = 18.0 // used to be 13, but seemed to be very sensitive
+    public var riseTriggerDb = 18.0 // used to be 13, but seemed to be very sensitivex`
     
     /// Number of triggers to begin recording
     public var riseTriggerIntervals = 2
@@ -111,7 +112,7 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
     public var savingSamplesPerSecond = 22050
     
     /// Threashold (in Db) which is considered silence for `microphoneLevel`. Does not affect speech detection, only the `microphoneLevel` value.
-    public var microphoneLevelSilenceThreshold = -44.0
+    public var microphoneLevelSilenceThreshold = -36.0
     
     /// Behavior of sound-activated-recorder when triggered. Either notifies+records, or just notifies.
     public var sarMode: FDSoundActivatedRecorderMode = .recordOnTrigger
@@ -148,13 +149,6 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
     }
   
     fileprivate var totalRecDurationThisHour = 0 // tracks the total Recording duration for the current hour
-  
-  
-  
-  
-  
-  
-  
   
     fileprivate var currentHour = 0 // tracks the last known hour (only updated in stopAndSaveRecording()
   
@@ -248,6 +242,18 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         if intervalTimer.isValid {
             intervalTimer.invalidate()
         }
+      
+        print("----- Should set 15-min start ignore timer? -----")
+
+        #if !DEBUG
+          print("Yes! We are in release build!")
+          self.sarMode = .ignoreAll
+          DispatchQueue.main.async {
+            Timer.scheduledTimer(withTimeInterval: 900, repeats: false) { timer in
+              self.sarMode = .recordOnTrigger
+            }
+          }
+        #endif
       
         DispatchQueue.main.async {
           self.intervalTimer = Timer.scheduledTimer(timeInterval: self.intervalSeconds, target: self, selector: #selector(FDSoundActivatedRecorder.interval), userInfo: nil, repeats: true)
@@ -344,7 +350,7 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         let paths = NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.documentDirectory, FileManager.SearchPathDomainMask.userDomainMask, true)
         let trimmedAudioFileURL = NSURL.fileURL(withPathComponents: [paths[0], self.subdirectory, trimmedAudioFileBaseName])!
       
-        print("rec file path: \(trimmedAudioFileURL)")
+        // print("rec file path: \(trimmedAudioFileURL)")
       
         if (trimmedAudioFileURL as NSURL).checkResourceIsReachableAndReturnError(nil) {
             let fileManager = FileManager.default
@@ -385,10 +391,8 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         exportSession.outputFileType = AVFileTypeAppleM4A
         exportSession.timeRange = exportTimeRange
         exportSession.audioMix = exportAudioMix
-        print("6: \(self.audioRecorder.isRecording)")
         exportSession.exportAsynchronously {
             DispatchQueue.main.async {
-                print("8: \(self.audioRecorder.isRecording)")
                 self.listeningIntervals.removeAll()
                 self.recordingIntervals.removeAll()
                 
@@ -409,7 +413,6 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
                 }
             }
         }
-         print("7: \(self.audioRecorder.isRecording)")
     }
     
     /// End any recording or listening and discard any recorded file

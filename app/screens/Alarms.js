@@ -18,7 +18,8 @@ import {
     View,
     Alert,
     Text,
-    TouchableOpacity
+    TouchableOpacity,
+    Button
 } from "react-native";
 import moment from "moment";
 import LinearGradient from "react-native-linear-gradient";
@@ -51,7 +52,7 @@ import EntypoIcon from "react-native-vector-icons/Entypo";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import FAIcon from "react-native-vector-icons/FontAwesome";
 import ClkAlert from "../components/clk-awesome-alert";
-import upgrades from "../config/upgrades";
+import Upgrades from "../config/upgrades";
 // import ProximityManager from "react-native-proximity-manager";
 
 import Colors from "../styles/colors";
@@ -375,23 +376,23 @@ class Alarms extends Component {
      * that snoozeCount tracking is in sync.
      */
     verifyAlarmStates() {
-            // Implicit Snoozing and In-App Timers: Check if we need to manually switch any Alarms into 'snooze'. (ie: snooze Count)arent to user)
-            let mNow = moment();
+        // Implicit Snoozing and In-App Timers: Check if we need to manually switch any Alarms into 'snooze'. (ie: snooze Count)arent to user)
+        let mNow = moment();
 
-            let alarms = realm
-                .objects("Alarm")
-                .filtered(
+        let alarms = realm
+            .objects("Alarm")
+            .filtered(
                 "status == $0 OR status == $1 OR status == $2",
-                    ALARM_STATES.SET,
+                ALARM_STATES.SET,
                 ALARM_STATES.RINGING,
-                    ALARM_STATES.SNOOZED
-                );
+                ALARM_STATES.SNOOZED
+            );
 
-            for (let i = 0; i < alarms.length; i++) {
-                if (moment(alarms[i].wakeUpTime) > mNow) {
+        for (let i = 0; i < alarms.length; i++) {
+            if (moment(alarms[i].wakeUpTime) > mNow) {
                 console.log("This alarm has NOT yet triggered... resuming.");
 
-                    // alarm is in the future. Set in app alarm. (On Android, the inAppAlarm is a transparent timer)
+                // alarm is in the future. Set in app alarm. (On Android, the inAppAlarm is a transparent timer)
                 // setInAppAlarm(alarms[i], this.reloadAlarms.bind(this)); // NOTE: (on Android this may still be necessary, so I'm leaving it commented out)
 
                 // If app was terminated, or if Audio was interupted, we need to re-enable native Alarm service (iOS only), and reschedule in-app notification.
@@ -404,7 +405,7 @@ class Alarms extends Component {
                         alarms[i].status
                     )
                 );
-                } else {
+            } else {
                 // the alarm has already triggered
                 console.log(
                     "This alarm has already triggered. Checking for implicit snooze etc."
@@ -416,11 +417,20 @@ class Alarms extends Component {
                 //          check the snoozeCount value, and snoozeTime value, and calculate when to set the snooze timer for. Hopefully, instead of calling
                 //          setInAppAlarm after checkForImplicitSnooze, I can just call resumeAlarm.
 
-                    // If snoozeCount is null set it to 1. Otherwise, calculate what it should be, and set it accordingly.
-                    checkForImplicitSnooze(alarms[i], mNow);
+                resumeAlarm(
+                    alarms[i],
+                    this.reloadAlarms.bind(this),
+                    this.alarmDidInitialize.bind(
+                        this,
+                        alarms[i],
+                        alarms[i].status
+                    )
+                );
+                // If snoozeCount is null set it to 1. Otherwise, calculate what it should be, and set it accordingly.
+                checkForImplicitSnooze(alarms[i], mNow);
                 // setInAppAlarm(alarms[i], this.reloadAlarms.bind(this));
-                }
             }
+        }
 
         if (alarms.length == 0) {
             // Make sure there are no notifications scheduled, since no Alarms are enabled or snoozed.
@@ -443,7 +453,7 @@ class Alarms extends Component {
 
     handleAddAlarm() {
         console.info("Adding alarm");
-        if (!upgrades.pro) {
+        if (Upgrades.pro != true) {
             console.info("FREE version");
             if (this.state.alarms.length >= 2) {
                 console.info("Alarm count: ", this.state.alarms.length);
@@ -645,7 +655,7 @@ class Alarms extends Component {
     _onPressDuplicate = (item, event) => {
         console.log("_onPressDuplicate");
 
-        if (!upgrades.pro) {
+        if (Upgrades.pro != true) {
             console.info("FREE version");
             if (this.state.alarms.length >= 2) {
                 console.info("Alarm count: ", this.state.alarms.length);
@@ -995,7 +1005,7 @@ class Alarms extends Component {
                             this.setState(this.state);
                         }}
                     /> */}
-                        {true && (
+                        {Upgrades.pro != true && (
                             <AdWrapper
                                 // borderPosition="top"
                                 animate={true}
@@ -1161,6 +1171,19 @@ class Alarms extends Component {
                             }}
                         />
                     )}
+                    {/* <Button
+                        title={"Cancel All Notis"}
+                        style={{
+                            position: "absolute",
+                            bottom: 100,
+                            left: 30,
+                            height: 60,
+                            width: 120
+                        }}
+                        onPress={() => {
+                            NotificationsIOS.cancelAllLocalNotifications();
+                        }}
+                    /> */}
                 </LinearGradient>
             </TouchableWithoutFeedback>
         );

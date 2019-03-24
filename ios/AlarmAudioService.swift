@@ -65,6 +65,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
         CKT_LOG("Created recorder")
     }
     
+    // NOTE: this is to setup NSNotifications, which are internal to program (not related to User Notifications)
     self.setupNotifications()
   }
   
@@ -137,70 +138,84 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   }
   
   @objc
-  func initializeAlarm(_ alarmInfo: NSDictionary, _ settings: NSDictionary, _ onCompletion: RCTResponseSenderBlock) {
+  func initializeAlarm(_ alarmInfo: NSDictionary, _ settings: NSDictionary, _ onCompletion: @escaping RCTResponseSenderBlock) {
+      CKT_LOG("initializeAlarm (Native)")
+    
+    if (alarmStatus != .OFF) {
       CKT_LOG("starting to listen")
-    
-      CKT_LOG(alarmInfo.description)
-      currAlarm = alarmInfo as! Dictionary<String,Any>
-    
-    // NOTE: userDelayOffset : This is used when the autoSnooze timer fires to calculate when the next snooze should be scheduled for.
-    //      Theres a good chance that there is a better way to calculate that, but this does seem to work.
-    //      A simpler way may be to just calculate how long the autoSnoozeTimer takes (just use the same formula min(90, snoozeTime - 5)),
-    //        then subtract this from snoozeTime. That should give how much time is left before the next snooze....
-      currAlarm["userDelayOffset"] = 0 as Any
-    
-      // unpack settings
-      if let cooldown = settings["recCooldown"] as? Double {
-          refractoryTime = cooldown * 60
-      }
-      else {
-        CKT_LOG("WARN: recCooldown setting is nil. Assigning 5 minutes by default")
-        refractoryTime = 5 * 60
+      return;
+    }
 
-      }
-    
-      CKT_LOG("Setting refractoryTime to \(refractoryTime)")
-      recorder?.refractoryPeriodLen = refractoryTime
-      recorder?.subdirectory = currAlarm["instId"] as! String
-    
-      let ret = beginMonitoringAudio()
-      var error: String? = nil
-      if (ret) {
-          CKT_LOG("setting alarm timer")
-        
-          self.alarmStatus = AlarmStatus.SET
-        
-          if let date = RCTConvert.nsDate(alarmInfo["time"]) {
-              let timeTillAlm = date.timeIntervalSinceNow
-              self.CKT_LOG("TimeTillAlm: \(timeTillAlm)")
+    AVAudioSession.sharedInstance().requestRecordPermission() { [unowned self] allowed in
+      DispatchQueue.main.async {
+          self.CKT_LOG("Got permission to record")
+            self.CKT_LOG(alarmInfo.description)
+            self.currAlarm = alarmInfo as! Dictionary<String,Any>
             
-              self.alarmTimer.invalidate()
-              // Audio initialization succeeded... set a timer for the time in alarmInfo, with callback of the function below (alarmDidTrigger). Set userInfo property of timer to sound file name.
-              DispatchQueue.main.async(execute: {
-                self.alarmTimer = Timer.scheduledTimer(timeInterval: timeTillAlm, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
-              })
+            // NOTE: userDelayOffset : This is used when the autoSnooze timer fires to calculate when the next snooze should be scheduled for.
+            //      Theres a good chance that there is a better way to calculate that, but this does seem to work.
+            //      A simpler way may be to just calculate how long the autoSnoozeTimer takes (just use the same formula min(90, snoozeTime - 5)),
+            //        then subtract this from snoozeTime. That should give how much time is left before the next snooze....
+        //      currAlarm["userDelayOffset"] = 0 as Any
             
-            self.isRecording = true
-          }
-          else {
-              error = "Received invalid date value"
-          }
+            // unpack settings
+            if let cooldown = settings["recCooldown"] as? Double {
+                self.refractoryTime = cooldown * 60
+            }
+            else {
+                self.CKT_LOG("WARN: recCooldown setting is nil. Assigning 5 minutes by default")
+                self.refractoryTime = 5 * 60
+            }
+            
+            self.CKT_LOG("Setting refractoryTime to \(self.refractoryTime)")
+            self.recorder?.refractoryPeriodLen = self.refractoryTime
+            self.recorder?.subdirectory = self.currAlarm["instId"] as! String
+        
+            if allowed {
+              self.beginMonitoringAudio()
+            }
+            var error: String? = nil
+            self.CKT_LOG("setting alarm timer")
+        
+            self.alarmStatus = AlarmStatus.SET
+        
+            if let date = RCTConvert.nsDate(alarmInfo["time"]) {
+                let timeTillAlm = date.timeIntervalSinceNow
+                self.CKT_LOG("TimeTillAlm: \(timeTillAlm)")
+              
+              
+                // Only set timer if the time is in the future. Its possible that this is called when app is re-opened, and therefore, the
+                //  alarm time could be in the past.
+                if timeTillAlm > 0 {
+                self.alarmTimer.invalidate()
+                // Audio initialization succeeded... set a timer for the time in alarmInfo, with callback of the function below (alarmDidTrigger). Set userInfo property of timer to sound file name.
+                DispatchQueue.main.async(execute: {
+                    self.alarmTimer = Timer.scheduledTimer(timeInterval: timeTillAlm, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
+                })
+                }
+                self.isRecording = true
+            }
+            else {
+                error = "Received invalid date value"
+            }
+      
+            
+            onCompletion([error as Any]) // execute callback with nil on success, otherwise send error
         }
-        else {
-            error = "Failed to initialize Audio"
-      }
-    
-      onCompletion([error as Any]) // execute callback with nil on success, otherwise send error
+    }
+
+
+
   }
   
  
   /* Sets up the audio recording functionality
    */
-  func beginMonitoringAudio() -> Bool {
+  func beginMonitoringAudio() {
     CKT_LOG("checking if we are already recording")
     if (self.isRecording) {
       CKT_LOG("Already recording")
-      return true
+      return
     }
       // Try to start up microphone
       do {
@@ -225,8 +240,6 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
       recorder!.timeoutSeconds = 0
     recorder!.sarMode = FDSoundActivatedRecorderMode.recordOnTrigger // TODO: depending on IAP ?
       recorder!.startListening()
-    
-      return true
   }
 
   
@@ -310,7 +323,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
       //        the alarm will be automatically snoozed.
       var autoSnoozeTmo = userInfo["snoozeTime"] as! Double
       autoSnoozeTmo *= 60
-      autoSnoozeTmo = min(90, autoSnoozeTmo - 5)
+      autoSnoozeTmo = min(90, autoSnoozeTmo - 5) // NOTE: I need to limit to less than snoozeTime otherwise backup notification may not be canceled in time.
       // autoSnoozeTmo = 20 // DEV: setting autoSnooze time to 20sec for DEV.
       DispatchQueue.main.async(execute: {
         self.autoSnoozeTimer = Timer.scheduledTimer(timeInterval: autoSnoozeTmo, target: self, selector: #selector(self.automaticSnooze), userInfo: self.currAlarm, repeats: false)
@@ -360,45 +373,29 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   @objc
   func automaticSnooze(_ timer: Timer) {
     self.CKT_LOG("Setting automaticSnooze")
+    
+    self.alarmTimer.invalidate() // TODO: Unnecessary?
 
     var alarm = timer.userInfo as! Dictionary<String, AnyObject>
 
     // Emit AutoSnoozed event so JS knows to increment snoozeCount for this alarm
     sendEvent(withName: "onAutoSnoozed", body: ["alarm": alarm["id"]])
-
-    let userDelayOffset = alarm["userDelayOffset"] as! Double
-    var snoozeCount = alarm["snoozeCount"] as! Double
-    let snoozeTime = alarm["snoozeTime"] as! Double
-    snoozeCount += 1
-
-    self.CKT_LOG("snoozeCount: \(snoozeCount)")
-    self.CKT_LOG("snoozeTime: \(snoozeTime)")
     
-    // * Better way to calc: * //
+    let snoozeTime = alarm["snoozeTime"] as! Double
+    
+    // NOTE: I need to schedule the next snooze for the exact snoozeInterval since the last trigger.
+    //      Otherwise, the next trigger will not execute in time to cancel the backup notifications.
     let autoSnoozeTime = min(90, snoozeTime - 5)
-    let timeTillSnoozeBetter = snoozeTime - autoSnoozeTime
+    let timeTillSnooze = (snoozeTime - autoSnoozeTime) / 60
     // ** //
 
+    self.CKT_LOG("snoozeTime: \(timeTillSnooze)")
+  
     // Calculate time until snooze
-    let offsetAfterWake = 60 * (snoozeCount * snoozeTime) + userDelayOffset // adding offset due to cummulative explicit snooze delay
+    self.snoozeAlarm(timeTillSnooze)
 
-    if let wakeUpTime = RCTConvert.nsDate(alarm["time"]) {
-      let dateOfSnooze = wakeUpTime.addingTimeInterval(offsetAfterWake)
-      let timeTillSnooze = dateOfSnooze.timeIntervalSinceNow / 60 // Convert to minutes, since I'm passing it to snoozeAlarm()
-      self.CKT_LOG("Time until Snooze: \(timeTillSnooze)")
-      self.CKT_LOG("Time until Snooze better: \(timeTillSnoozeBetter)")
-
-      self.alarmTimer.invalidate()
-      // Audio initialization succeeded... set a timer for the time in alarmInfo, with callback of the function below (alarmDidTrigger). Set userInfo property of timer to sound file name.
-
-      // the offset due to user-delay in explicit snooze has not changed, since this autoSnooze function triggered.
-      self.snoozeAlarm(timeTillSnooze, userDelayOffset)
-
-      self.isRecording = true
-    }
-    else {
-      self.CKT_LOG("ERROR: Failed to calculate snooze time automatically.")
-    }
+    self.isRecording = true
+ 
 
 
   }
@@ -433,7 +430,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   }
   
   @objc
-  func snoozeAlarm(_ minutes : Double, _ userDelayOffset : Double) {
+  func snoozeAlarm(_ minutes : Double) {
     
 
     // Invalidate timers first.
@@ -450,12 +447,12 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
     }
     
     self.alarmStatus = AlarmStatus.SNOOZED
+    
+    if (self.isRecording == false) {
+      // TODO: Restart recorder?
+    }
 
     self.CKT_LOG("Native snoozeAlarm: \(minutes) minutes")
-    
-    self.CKT_LOG("userDelayOffset: \(userDelayOffset) seconds")
-
-    currAlarm["userDelayOffset"] = userDelayOffset as Any
     
     var snoozeCount = 0
 
@@ -468,29 +465,37 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
     self.CKT_LOG("snoozeCount: \(snoozeCount)")
     self.currAlarm["snoozeCount"] = snoozeCount as Any
     
-      if (self.isRecording != true) {
-        self.CKT_LOG("AlarmService is not recording. Not snoozing any alarm..")
-        return;
-      }
     
+    // NOTE: I don't know why I thought this was necessary. I'm trying without it because of the following scenario:
+    //        App terminates before wakeUpTime. User opens app after wakeUpTime (eg. once backup notification delevered).
+    //        ImplicitSnooze code calls this function, but does not start the snooze timer because isRecording == false,
+    //        since the app just re-opened so audio recording had been stopped.
+//      if (self.isRecording != true) {
+//        self.CKT_LOG("AlarmService is not recording. Not snoozing any alarm..")
+//        return;
+//      }
+    
+    print("1")
 
       fadein_cnt = 0
-      guard let player = player else { return }
-      player.stop()
-    
+      if let player = player {
+        player.stop()
+      }
+    print("2")
 
-    // NOTE: don't add userDelayOffset here, since snoozeAlarm is called at the time of snooze. So for this timer we simply
-    //  want to set it for the snoozeTime
       let seconds = minutes * 60;
       DispatchQueue.main.async(execute: {
         self.alarmTimer = Timer.scheduledTimer(timeInterval: seconds, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
       })
+    
+     print("3")
   }
   
   @objc
   func turnOffAlarm() {
     CKT_LOG("Turning off alarm")
     self.alarmTimer.invalidate()
+    self.autoSnoozeTimer.invalidate()
     fadein_cnt = 0
     if let player = player {
         player.stop()

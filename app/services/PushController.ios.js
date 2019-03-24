@@ -103,7 +103,7 @@ AlarmTriggerEvents.addListener("onAlarmTriggered", info => {
 
     reloadAlarmsList();
 
-    setAlarmInstEnd();
+    // setAlarmInstEnd();
 
     // Only present the alert if Alarm triggered in the foreground
     if (alarmInfo.appState == "active") {
@@ -144,19 +144,21 @@ AlarmTriggerEvents.addListener("onAutoSnoozed", info => {
     // TODO: Increment snoozeCount of Alarm in DB
 
     let alarm = realm.objectForPrimaryKey("Alarm", info.alarm);
+
+    console.log("onAutoSnoozed -- alarm", alarm);
     realm.write(() => {
         alarm.snoozeCount += 1;
     });
+
+    reloadAlarmsList();
 });
 
 NoiseDetectionEvents.addListener("onNoiseDetected", info => {
-    console.log("JS Got NOISE_DETECTED EVT. info:", info);
+    // console.log("JS Got NOISE_DETECTED EVT. info:", info);
 
-    // TODO: Add disturbance/recording in context of current active Alarm instance
-    // TODO: Handle intializing/completing AlarmInstances when Alarms are enabled, triggered/disabled
-    // TODO: Handle deleting AlarmInstances if Alarm span is too short
+    // Add disturbance/recording in context of current active Alarm instance
 
-    /*  TODO:
+    /* 
         1. Fetch currently active AlarmInstance (will only have start property, end will be null)
         2. Create disturbance, then add it to this current AlarmInstance
     */
@@ -175,6 +177,31 @@ NoiseDetectionEvents.addListener("onNoiseDetected", info => {
         return;
     }
 
+    // Update 'timeAwake' property of AlarmInstance
+
+    let dists = currAlmInst.disturbances.sorted("time");
+    let totalTimeAwake = currAlmInst.timeAwake;
+    if (dists.length > 0) {
+        let timeOfPrevDist = moment(dists[dists.length - 1].time);
+        let mNow = moment();
+        let timeSinceLastDist = mNow - timeOfPrevDist;
+        console.log("before adding...");
+        console.log("timeSinceLastDist", timeSinceLastDist);
+        console.log("totalTimeAwake", totalTimeAwake);
+
+        timeSinceLastDist = timeSinceLastDist / 1000 / 60; // convert to minutes
+
+        // Add the time since the previous disturbance to 'timeAwake', if
+        //  it has been less than 15 minutes since the previous one
+        if (timeSinceLastDist < 15 /* DEV: Change 1 to 15 */) {
+            totalTimeAwake += timeSinceLastDist; // convert to minutes before adding to total
+            totalTimeAwake = Math.round(totalTimeAwake * 10) / 10; // round to 1 decimal
+            console.log("after adding...");
+            console.log("timeSinceLastDist", timeSinceLastDist);
+            console.log("totalTimeAwake", totalTimeAwake);
+        }
+    }
+
     // Save disturbance + filepath (if present) to DB
     let newDisturbance = new DisturbanceModel();
     realm.write(() => {
@@ -184,10 +211,12 @@ NoiseDetectionEvents.addListener("onNoiseDetected", info => {
         newDisturbance.duration = info.duration;
         let distDBO = realm.create("SleepDisturbance", newDisturbance);
         currAlmInst.disturbances.push(distDBO);
+        currAlmInst.timeAwake = totalTimeAwake;
     });
 
     console.log("added new disturbance: ");
-    console.log(newDisturbance);
+    // console.log(newDisturbance);
+    console.log("currAlmInst (after adding dist)", currAlmInst);
 });
 
 let snoozeAction = new NotificationAction(
@@ -210,14 +239,7 @@ let snoozeAction = new NotificationAction(
                 //     snoozeTime = 1;
                 // }
 
-                // TODO: Since this is an explicit snooze, I need to inform native AlarmService how
-                //  long it has been since the Alarm triggered (to this snooze action)
-                // Based on current snoozeCount, the wakeUpTime, and currentTime, I can determine
-                // the cummulative offset caused by user-delay of explicit snooze
-
-                let offsetFromUserDelay = _calcOffsetFromUserDelay(currAlarm);
-
-                snoozeNative(snoozeTime, offsetFromUserDelay);
+                snoozeNative(snoozeTime);
 
                 realm.write(() => {
                     if (currAlarm.snoozeCount == null) {
@@ -258,11 +280,8 @@ let disableAction = new NotificationAction(
         turnOffNative();
         try {
             let { _data } = action.notification;
-            console.log(
-                "Got data. Canceling local notifications for this alarm id",
-                _data
-            );
-            PushNotificationIOS.cancelLocalNotifications(_data);
+            console.log("Got data. Canceling all local notifications");
+            NotificationsIOS.cancelAllLocalNotifications();
 
             let currAlarm = realm.objectForPrimaryKey("Alarm", _data.alarmId);
             if (currAlarm) {
@@ -290,24 +309,6 @@ export const ALARM_CAT = new NotificationCategory({
     actions: [snoozeAction, disableAction],
     context: "default"
 });
-
-let _calcOffsetFromUserDelay = currAlarm => {
-    let now = moment();
-    console.log("Time of Snooze:", now.toDate());
-
-    let snoozeTime = currAlarm.snoozeTime;
-    let snoozeCnt = currAlarm.snoozeCount == null ? 0 : currAlarm.snoozeCount;
-    let expSecSinceWake = snoozeCnt * (snoozeTime * 60); // # of secs since wakeUpTime if there was no user-delay in explicit snoozing.
-    console.log("expSecSinceWake", expSecSinceWake);
-
-    let wakeUpTime = moment(currAlarm.wakeUpTime);
-    console.log("wakeUpTime", wakeUpTime.toDate());
-
-    let actualSecSinceWake = (now - wakeUpTime) / 1000; // actual # of seconds since wakeUpTime.
-    console.log("actualSecSinceWake", actualSecSinceWake);
-
-    return actualSecSinceWake - expSecSinceWake;
-};
 
 let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
     let wakeUpMoment = moment(alarm.wakeUpTime);
@@ -391,11 +392,13 @@ export let cancelAllNotifications = () => {
  * @param {*} reloadAlarmsList
  * @param {*} alarmDidInitialize
  */
-export let resumeAlarm = (alarm, alarmDidInitialize) => {
+export let resumeAlarm = (alarm, reload, alarmDidInitialize) => {
     console.log("resumeAlarm");
     // first cancel any in-app timer for this alarm, since we were already doing this anyway in scheduleAlarm, and it wasn't causing problems.
     // Plus, its best to cancel it right away since if the timer expired during this function there could be a race condition.
     cancelInAppAlarm(alarm);
+
+    reloadAlarmsList = reload;
 
     // setInAppAlarm(alarm, reloadAlarmsList);
 
@@ -435,18 +438,32 @@ export let resumeAlarm = (alarm, alarmDidInitialize) => {
     let allAIs = realm.objects("AlarmInstance").sorted("start"); // sort by most recent first
     let currAlmInst;
 
-    if (allAIs.length == 0 || allAIs[allAIs.length - 1].end != null) {
+    // TODO: FIXME: Its likely that this will be called with the most recent AlmInst having .end set (since alarm
+    //          could have just rang, then user opened the app, and then this fn was called.)
+    //          I need to grab the latest alarm even if .end already has a value.
+    if (allAIs.length == 0) {
         // NOTE: Sanity check: There is no active AlarmInstance. In resumeAlarm(), this should NEVER happen.
         // create new AlarmInstance with start date of now, and empty End date, and empty disturbance list
         console.warn(
-            "No active AlarmInstances found while running resumeAlarm. Should never happen."
+            "No AlarmInstances found while running resumeAlarm. Should never happen."
         );
+
         realm.write(() => {
             currAlmInst = new AlarmInstance();
             realm.create("AlarmInstance", currAlmInst);
         });
     } else {
-        // There is already an AlarmInstance in progress. continue with it.
+        if (allAIs[allAIs.length - 1].end == null) {
+            // This will occur when the app is re-opened and alarm is in the SET state. i.e. it has
+            //  not yet reached wakeUpTime.
+            console.info("Most recent alarm instance has no END assigned yet.");
+        } else {
+            // This will occur when the app is re-opened if wakeUpTime for this alarm has already passed,
+            //  and the alarm is in either RINGING, or SNOOZED state.
+            console.info(
+                "Most recent alarm instance has already been assigned an END"
+            );
+        }
         currAlmInst = allAIs[allAIs.length - 1];
     }
 
@@ -525,6 +542,7 @@ export let scheduleAlarm = (alarm, reload, alarmDidInitialize) => {
     // NOTE: This check is required so that if user updates parameters of an already SET alarm,
     //         the newly scheduled Alarm is considered to be part of the same AlarmInstance.
     if (allAIs.length == 0 || allAIs[allAIs.length - 1].end != null) {
+        console.log("Creating new Alarm Instance");
         // There is no active AlarmInstance.
         // create new AlarmInstance with start date of now, and empty End date, and empty disturbance list
         realm.write(() => {
@@ -694,9 +712,7 @@ let onInAppSnoozePressed = (alarm, sound) => {
         sound.release();
     }
 
-    let offsetFromUserDelay = _calcOffsetFromUserDelay(alarm);
-
-    snoozeNative(alarm.snoozeTime, offsetFromUserDelay);
+    snoozeNative(alarm.snoozeTime);
 
     realm.write(() => {
         if (alarm.snoozeCount == null) {
@@ -717,6 +733,8 @@ let onInAppSnoozePressed = (alarm, sound) => {
 };
 
 let setAlarmInstEnd = () => {
+    // TODO: Handle deleting AlarmInstances if Alarm span is too short
+
     // Fetch current AlarmInstance and set its 'end' datetime to now.
     let almInsts = realm.objects("AlarmInstance").sorted("start", true);
     let currAlmInst = almInsts
@@ -726,8 +744,8 @@ let setAlarmInstEnd = () => {
         : null;
 
     if (currAlmInst != null) {
-        // // store running averages of sleep
-        // // Async: totalSleepEver, totalSleepThisYear, totalSleepThisMonth, totalSleepThisWeek
+        // store running averages of sleep
+        // Async: totalSleepEver, totalSleepThisYear, totalSleepThisMonth, totalSleepThisWeek
         // try {
         //     AsyncStorage.getItem("totalSleepEver").then(value => {
         //         console.log("First Launch");
@@ -739,12 +757,43 @@ let setAlarmInstEnd = () => {
         //     );
         // }
 
-        if (realm.isInTransaction) {
-            currAlmInst.end = new Date();
-        } else {
-            realm.write(() => {
-                currAlmInst.end = new Date();
+        let mNow = moment();
+
+        // Delete AlmInst if total length <15 mins
+        if (
+            mNow - moment(currAlmInst.start) <
+            900 * 1000 /*DEV: Change 60 to 900 */
+        ) {
+            console.log("Alm Inst is <15 min long. Deleting");
+
+            let recordings = currAlmInst.disturbances.filtered(
+                "recording != null AND recording != ''"
+            );
+            var path = RNFS.DocumentDirectoryPath + "/" + currAlmInst.id;
+
+            RNFS.unlink(path).then(() => {
+                console.log("Deleted directory" + path);
             });
+
+            if (realm.isInTransaction) {
+                // Delete AlarmInstance, associated disturbances, and any recording files
+                realm.delete(currAlmInst.disturbances);
+                realm.delete(currAlmInst);
+            } else {
+                realm.write(() => {
+                    // Delete AlarmInstance, associated disturbances, and any recording files
+                    realm.delete(currAlmInst.disturbances);
+                    realm.delete(currAlmInst);
+                });
+            }
+        } else {
+            if (realm.isInTransaction) {
+                currAlmInst.end = new Date();
+            } else {
+                realm.write(() => {
+                    currAlmInst.end = new Date();
+                });
+            }
         }
     } else {
         console.error("No active alarm instance found on Alarm trigger");
@@ -874,8 +923,6 @@ export let checkForImplicitSnooze = (alarm, mNow) => {
     console.log("expectedSnoozeCount", expectedSnoozeCount);
 
     if (alarm.snoozeCount == null || alarm.snoozeCount < expectedSnoozeCount) {
-        let offsetFromUserDelay = _calcOffsetFromUserDelay(alarm);
-
         // user did not explicitly snooze for x number of notifications.
         realm.write(() => {
             alarm.snoozeCount = expectedSnoozeCount;
@@ -883,7 +930,7 @@ export let checkForImplicitSnooze = (alarm, mNow) => {
         });
 
         // Call snoozeNative to ensure that any native Audio playback stops now that the app is open.
-        snoozeNative(alarm.snoozeTime, offsetFromUserDelay);
+        snoozeNative(alarm.snoozeTime);
     } else if (alarm.snoozeCount == expectedSnoozeCount) {
         console.log("Got expected value for snoozeCount", expectedSnoozeCount);
         // NOTE: If we are here, I think it means that the app was opened after the user has explicitly snoozed all notifications that were delivered
