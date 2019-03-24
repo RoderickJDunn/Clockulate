@@ -12,6 +12,7 @@ import {
     LayoutAnimation,
     ScrollView
 } from "react-native";
+import { Header } from "react-navigation";
 import LinearGradient from "react-native-linear-gradient";
 import Interactable from "react-native-interactable";
 import FAIcon from "react-native-vector-icons/FontAwesome";
@@ -27,6 +28,10 @@ import { scaleByFactor } from "../util/font-scale";
 import { isIphoneX } from "react-native-iphone-x-helper";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+const HEADER_HEIGHT = Header.HEIGHT; // + STATUS_BAR_HEIGHT;
+
+const HELPPAGE_HEIGHT = SCREEN_HEIGHT - HEADER_HEIGHT;
 
 const HELP_SECTIONS = [
     {
@@ -44,49 +49,43 @@ const HELP_SECTIONS = [
         images: [
             {
                 path: require("../img/help/AlarmItem_test5_step1.png"),
-                style: { paddingTop: SCREEN_HEIGHT * 0.05 }
+                style: { marginBottom: 5 },
+                sharePageWithNext: 1
             },
             {
                 path: require("../img/help/AlarmItem_test5_step2.png"),
-                style: { paddingBottom: 0 }
+                style: { paddingBottom: 0 },
+                sharedWithPrev: true
             },
             {
                 path: require("../img/help/AlarmItem_test5_step3.png"),
-                style: {
-                    paddingTop: SCREEN_HEIGHT * 0.34,
-                    paddingBottom: SCREEN_HEIGHT * 0.25
-                }
+                style: null
             },
             {
-                path: require("../img/help/AlarmItem_test5_step4.png"),
-                style: { paddingVertical: SCREEN_HEIGHT * 0.23 }
+                path: require("../img/help/AlarmItem_final_step4.png"),
+                style: null
             }
         ],
         snapOffsets: [SCREEN_HEIGHT * 0.6, SCREEN_HEIGHT]
     },
     {
         name: "Edit Alarm",
+        subtitle: "How it Works", // "Overview",
         images: [
             {
                 path: require("../img/help/AlarmDetail_test3_step1.png"),
                 style: { paddingVertical: SCREEN_HEIGHT * 0.05 }
             },
             {
-                path: require("../img/help/AlarmDetail_test3_step2.png"),
-                style: {
-                    paddingTop: SCREEN_HEIGHT * 0.28,
-                    paddingBottom: SCREEN_HEIGHT * 0.24
-                }
+                path: require("../img/help/AlarmDetail_final_step2.png"),
+                style: null
             },
             {
                 path: require("../img/help/AlarmDetail_test3_step3.png"),
-                style: {
-                    paddingTop: SCREEN_HEIGHT * 0.12,
-                    paddingBottom: SCREEN_HEIGHT * 0.08
-                }
+                style: null
             },
             {
-                path: require("../img/help/AlarmDetail_test3_step4.png"),
+                path: require("../img/help/AlarmDetail_final_step4.png"),
                 style: {
                     paddingTop: SCREEN_HEIGHT * 0.08,
                     paddingBottom: SCREEN_HEIGHT * 0.03
@@ -97,29 +96,39 @@ const HELP_SECTIONS = [
     },
     {
         name: "Edit Alarm",
-        subtitle: "(continued)",
+        subtitle: "Tasks",
         images: [
             {
-                path: require("../img/help/AlarmDetail_test3_step1.png"),
+                path: require("../img/help/ADTasks_final_step1.png"),
+                style: null
+            },
+            {
+                path: require("../img/help/ADTasks_final_step2.png"),
+                style: null
+            },
+            {
+                path: require("../img/help/ADTasks_final_step3.png"),
+                style: null
+            },
+            {
+                path: require("../img/help/ADTasks_final_step4.png"),
+                style: null
+            }
+        ]
+    },
+    {
+        name: "Edit Alarm",
+        subtitle: "Modes",
+        images: [
+            {
+                path: require("../img/help/ADModes_final_step1.png"),
                 style: { paddingVertical: SCREEN_HEIGHT * 0.14 }
             },
             {
-                path: require("../img/help/AlarmDetail_test3_step2.png"),
+                path: require("../img/help/ADModes_final_step2.png"),
                 style: { paddingVertical: SCREEN_HEIGHT * 0.28 }
-            },
-            {
-                path: require("../img/help/AlarmDetail_test3_step3.png"),
-                style: { paddingVertical: SCREEN_HEIGHT * 0.1 }
-            },
-            {
-                path: require("../img/help/AlarmDetail_test3_step4.png"),
-                style: {
-                    paddingTop: SCREEN_HEIGHT * 0.08,
-                    paddingBottom: SCREEN_HEIGHT * 0.07
-                }
             }
-        ],
-        snapOffsets: []
+        ]
     }
 ];
 
@@ -566,15 +575,20 @@ export default class Help extends React.Component {
         // console.log("Upgrade -- render() ");
         return (
             <View
-                style={{ flex: 1, backgroundColor: Colors.backgroundLightGrey }}
+                style={{
+                    flex: 1,
+                    backgroundColor: Colors.backgroundLightGrey,
+                    alignContent: "stretch"
+                }}
             >
                 {/* {this.renderCalcButtons()} */}
                 <Interactable.View
                     ref={elm => (this._interactable = elm)}
                     style={{
-                        width: SCREEN_WIDTH * 5,
-                        height: SCREEN_HEIGHT,
-                        marginTop: isIphoneX() ? -88 : -64,
+                        flex: 1,
+                        width: SCREEN_WIDTH * 6,
+                        alignSelf: "stretch",
+                        // marginTop: isIphoneX() ? -88 : -64,
                         flexDirection: "row"
                         // backgroundColor: "green"
                     }}
@@ -584,7 +598,8 @@ export default class Help extends React.Component {
                         { x: -SCREEN_WIDTH, id: "1" },
                         { x: -SCREEN_WIDTH * 2, id: "2" },
                         { x: -SCREEN_WIDTH * 3, id: "3" },
-                        { x: -SCREEN_WIDTH * 4, id: "4" }
+                        { x: -SCREEN_WIDTH * 4, id: "4" },
+                        { x: -SCREEN_WIDTH * 5, id: "4" }
                     ]}
                     // dragWithSpring={{ tension: 1000, damping: 0.5 }}
                     animatedNativeDriver={true}
@@ -606,26 +621,32 @@ export default class Help extends React.Component {
                     {/* {this.renderHelpPage()} */}
                     <IntrvHelpPage
                         idx={0}
-                        nextSection={this.goToNextSect}
+                        goToNextSect={this.goToNextSect}
                         sectionInfo={HELP_SECTIONS[0]}
                         currSectIdx={this._idx}
                     />
                     <IntrvHelpPage
                         idx={1}
-                        nextSection={this.goToNextSect}
+                        goToNextSect={this.goToNextSect}
                         sectionInfo={HELP_SECTIONS[1]}
                         currSectIdx={this._idx}
                     />
                     <IntrvHelpPage
                         idx={2}
-                        nextSection={this.goToNextSect}
+                        goToNextSect={this.goToNextSect}
                         sectionInfo={HELP_SECTIONS[2]}
                         currSectIdx={this._idx}
                     />
                     <IntrvHelpPage
                         idx={3}
-                        nextSection={this.goToNextSect}
+                        goToNextSect={this.goToNextSect}
                         sectionInfo={HELP_SECTIONS[3]}
+                        currSectIdx={this._idx}
+                    />
+                    <IntrvHelpPage
+                        idx={4}
+                        goToNextSect={this.goToNextSect}
+                        sectionInfo={HELP_SECTIONS[4]}
                         currSectIdx={this._idx}
                     />
                     <View style={styles.helpPage}>
@@ -820,12 +841,13 @@ const styles = StyleSheet.create({
     },
     pagingDotsCont: {
         position: "absolute",
-        bottom: SCREEN_HEIGHT * 0.12,
+        bottom: HELPPAGE_HEIGHT * 0.165,
         height: 20,
         // height: 30
         flexDirection: "row",
         alignSelf: "center",
         alignContent: "center",
+        // backgroundColor: "blue",
         justifyContent: "center"
     },
     pageDot: {
