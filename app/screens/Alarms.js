@@ -105,8 +105,6 @@ class Alarms extends Component {
 
         console.log("showChargePopup", this.state.showChargePopup);
 
-        console.log("Setting up notifications");
-
         if (Platform.OS === "android") {
             UIManager.setLayoutAnimationEnabledExperimental(true);
         } // setup notifications
@@ -411,6 +409,10 @@ class Alarms extends Component {
                     "This alarm has already triggered. Checking for implicit snooze etc."
                 );
 
+                // If snoozeCount is null set it to 1. Otherwise, calculate what it should be, and set it accordingly.
+                checkForImplicitSnooze(alarms[i], mNow);
+                // setInAppAlarm(alarms[i], this.reloadAlarms.bind(this));
+
                 // TODO: Its possible that the app was terminated, or audio was interupted.
                 //          If this is the case, we need to resume Native module functionality without scheduling a timer for wakeUpTime (since it has already passed).
                 //          Instead the native module will need to set the timer for the next snoozeInterval. I guess it should check if wakeUpTime has passed, and if so,
@@ -426,9 +428,6 @@ class Alarms extends Component {
                         alarms[i].status
                     )
                 );
-                // If snoozeCount is null set it to 1. Otherwise, calculate what it should be, and set it accordingly.
-                checkForImplicitSnooze(alarms[i], mNow);
-                // setInAppAlarm(alarms[i], this.reloadAlarms.bind(this));
             }
         }
 

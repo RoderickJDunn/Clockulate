@@ -141,8 +141,43 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   func initializeAlarm(_ alarmInfo: NSDictionary, _ settings: NSDictionary, _ onCompletion: @escaping RCTResponseSenderBlock) {
       CKT_LOG("initializeAlarm (Native)")
     
-    if (alarmStatus != .OFF) {
-      CKT_LOG("starting to listen")
+    var error: String? = nil
+    
+    if (alarmStatus == .SET) {
+      CKT_LOG("Alarm already SET. Updating parameters")
+      
+      if let date = RCTConvert.nsDate(alarmInfo["time"]) {
+        let timeTillAlm = date.timeIntervalSinceNow
+        self.CKT_LOG("TimeTillAlm: \(timeTillAlm)")
+        
+        
+        // Only set timer if the time is in the future. Its possible that this is called when app is re-opened, and therefore, the
+        //  alarm time could be in the past.
+        if timeTillAlm > 0 {
+          self.alarmTimer.invalidate()
+          // Audio initialization succeeded... set a timer for the time in alarmInfo, with callback of the function below (alarmDidTrigger). Set userInfo property of timer to sound file name.
+          DispatchQueue.main.async(execute: {
+            self.alarmTimer = Timer.scheduledTimer(timeInterval: timeTillAlm, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
+          })
+        }
+        self.isRecording = true
+      }
+      else {
+        error = "Received invalid date value"
+      }
+      
+      onCompletion([error as Any]) // execute callback with nil on success, otherwise send erro
+      return;
+    }
+    else if (alarmStatus == .SNOOZED) {
+      /* This check is vital:
+          When app is re-opened after Alarm triggers, then resumeAlarm is called on the off-chance that this NativeAudio service
+          has stopped running (maybe app was terminated.) If that's the case, alarmStatus would be .OFF, and Alarm would be
+          initialized properly. However, in this case (SNOOZED), we can just ignore the initialize call, since snoozing timer
+          has already been handled.
+       */
+      CKT_LOG("Alarm is already snoozed. Nothing to do here");
+      onCompletion([error as Any])
       return;
     }
 
@@ -174,7 +209,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
             if allowed {
               self.beginMonitoringAudio()
             }
-            var error: String? = nil
+        
             self.CKT_LOG("setting alarm timer")
         
             self.alarmStatus = AlarmStatus.SET
@@ -203,9 +238,6 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
             onCompletion([error as Any]) // execute callback with nil on success, otherwise send error
         }
     }
-
-
-
   }
   
  
@@ -285,7 +317,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
     
     CKT_LOG("alarmDidTrigger: Playing \(String(describing: soundFileName))")
     
-    // TODO: Play audio
+    // Play audio
     guard let url = Bundle.main.url(forResource: soundFileName, withExtension: "mp3") else {
       CKT_LOG("ERROR: Failed to find soundfile: \(soundFileName)")
       return
