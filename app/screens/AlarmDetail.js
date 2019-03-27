@@ -61,11 +61,12 @@ import ClkAlert from "../components/clk-awesome-alert";
 
 let { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15];
+// const snoozeTimeOptions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15]; // DEV: short snooze option
 
 let _menuIconAnim = new Animated.Value(0);
 
 let isSmallScreen = SCREEN_HEIGHT < 650;
-
+//scaleByFactor(50, 0.6) // height of TaskList_Header
 /* Layout factors */
 const NON_CLOCK_HEIGHT_FACTOR = 1.15; // multiply this by SCREEN_HEIGHT to get height of non-clock area
 const TASK_AREA_TL_VIEW_FLEX_FACTOR = 0.91; // flex value for TaskArea (within non-clock area) in TaskList view
@@ -77,11 +78,35 @@ const TASK_LIST_AUTO_VIEW_FLEX_FACTOR = 1 - TASK_HEAD_AUTO_VIEW_FLEX_FACTOR; // 
 const FIELDS_AREA_FLEX_FACTOR = isSmallScreen ? 0.24 : 0.17; // flex value for TaskArea (within non-clock area) in Auto view
 
 const TASK_LIST_TL_VIEW_POS_FACTOR = 0.21; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in TaskList View
-const TASK_LIST_AUTO_VIEW_POS_FACTOR = isSmallScreen ? 0.65 : 0.595; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in Auto view
+const TASK_LIST_AUTO_VIEW_POS_FACTOR = 0.74; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in Auto view
 
 const SNAP_FACTOR_TL_VIEW = isSmallScreen ? 0.44 : 0.385;
 
 const XTRA_KEYBOARD_HEIGHT = isIphoneX() ? 180 : 0;
+
+const CLOCK_AUTO_VIEW_HEIGHT =
+    SCREEN_HEIGHT * 0.3 * 0.9 * TASK_LIST_AUTO_VIEW_POS_FACTOR;
+
+const FIELDS_AREA_FLEX_FACTOR_COMPENSATED = isSmallScreen ? 0.225 : 0.17;
+
+const FIELDS_AUTO_VIEW_HEIGHT =
+    SCREEN_HEIGHT *
+        NON_CLOCK_HEIGHT_FACTOR *
+        (FIELDS_AREA_FLEX_FACTOR_COMPENSATED /
+            (1 + FIELDS_AREA_FLEX_FACTOR_COMPENSATED)) +
+    8 +
+    11;
+// const CLOCK_AUTO_VIEW_HEIGHT =
+//     SCREEN_HEIGHT * 0.3 * TASK_LIST_AUTO_VIEW_POS_FACTOR + 10;
+// const FIELDS_AUTO_VIEW_HEIGHT =
+//     SCREEN_HEIGHT * NON_CLOCK_HEIGHT_FACTOR * FIELDS_AREA_FLEX_FACTOR;
+
+console.log("SCREEN_HEIGHT", SCREEN_HEIGHT);
+
+/// Math problem. How do inversely map screen size to values 0-->10
+/// SmallestScreen: 10 ,  LargestScreen: 0
+// y = -0.025*x + 22.5
+// y = =0.025(896) + 22.5
 
 // for safe keeping
 //const TASK_LIST_TL_VIEW_POS_FACTOR = 0.21; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in TaskList View
@@ -178,22 +203,29 @@ class AlarmDetail extends Component {
         width: SCREEN_WIDTH,
         height:
             SCREEN_HEIGHT *
-            NON_CLOCK_HEIGHT_FACTOR *
-            TASK_AREA_TL_VIEW_FLEX_FACTOR *
-            TASK_LIST_TL_VIEW_FLEX_FACTOR,
+                NON_CLOCK_HEIGHT_FACTOR *
+                TASK_AREA_TL_VIEW_FLEX_FACTOR -
+            scaleByFactor(50, 0.6),
         pageX: 0,
-        pageY: SCREEN_HEIGHT * TASK_LIST_TL_VIEW_POS_FACTOR - ifIphoneX(29, 0)
+        // pageY: SCREEN_HEIGHT * TASK_LIST_TL_VIEW_POS_FACTOR - ifIphoneX(29, 0)
+        pageY: Header.HEIGHT + ifIphoneX(20, 0) + 4 + scaleByFactor(50, 0.6)
     };
 
     tskListDimsAutoView = {
         width: SCREEN_WIDTH,
         height:
             SCREEN_HEIGHT *
-            NON_CLOCK_HEIGHT_FACTOR *
-            TASK_AREA_AUTO_VIEW_FLEX_FACTOR *
-            TASK_LIST_AUTO_VIEW_FLEX_FACTOR,
+                NON_CLOCK_HEIGHT_FACTOR *
+                TASK_AREA_AUTO_VIEW_FLEX_FACTOR -
+            scaleByFactor(50, 0.6),
         pageX: 0,
-        pageY: SCREEN_HEIGHT * TASK_LIST_AUTO_VIEW_POS_FACTOR - ifIphoneX(29, 0)
+        /* Header.HEIGHT + ifIphoneX(29, 0) + CLOCK_HEIGHT + FIELDS_HEIGHT + TASK_HEADER_HEIGHT */
+        pageY:
+            Header.HEIGHT +
+            ifIphoneX(22, 0) +
+            CLOCK_AUTO_VIEW_HEIGHT +
+            FIELDS_AUTO_VIEW_HEIGHT +
+            scaleByFactor(50, 0.6)
     };
 
     AnimatedAlarmLabel = Animated.createAnimatedComponent(TextInput);
@@ -1547,7 +1579,12 @@ class AlarmDetail extends Component {
             clockHeight +
             idx * this.ROW_HEIGHT;
         console.log("y ", y);
-        return { x: 0, y: y, width: this.ROW_WIDTH, height: this.ROW_HEIGHT };
+        return {
+            x: 0,
+            y: y,
+            width: this.ROW_WIDTH,
+            height: this.ROW_HEIGHT
+        };
     }
 
     setClockTextRef = elm => (this.clockTextRef = elm);
@@ -1894,6 +1931,42 @@ class AlarmDetail extends Component {
                             autoResize={false}
                             numberOfLines={1}
                             multiline={false}
+                        />
+                        <View
+                            style={{
+                                position: "absolute",
+                                // use this for a horizontal line
+                                // left: 0,
+                                // right: 0,
+                                // top: 64,
+                                // height: 2,
+
+                                // use this for a vertical line
+                                alignSelf: "center",
+                                width: 5,
+                                left: 0,
+                                top: 0,
+                                bottom: 0,
+                                backgroundColor: "red"
+                            }}
+                        />
+                        <View
+                            style={{
+                                position: "absolute",
+                                // use this for a horizontal line
+                                // left: 0,
+                                // right: 0,
+                                // top: 64,
+                                // height: 2,
+
+                                // use this for a vertical line
+                                alignSelf: "center",
+                                width: 5,
+                                left: 15,
+                                top: 0,
+                                height: 268.8,
+                                backgroundColor: "blue"
+                            }}
                         />
                     </Animated.View>
                     <this.AnimatedHandle
@@ -2528,7 +2601,9 @@ class AlarmDetail extends Component {
                         dismissConfig={{
                             onPress: () => {
                                 console.log("Dismissed Upgrade popup");
-                                this.setState({ showTasksUpgradePopup: false });
+                                this.setState({
+                                    showTasksUpgradePopup: false
+                                });
                             },
                             text: "Dismiss"
                         }}
@@ -2537,13 +2612,39 @@ class AlarmDetail extends Component {
                                 console.log(
                                     "Confirmed Upgrade popup: Going to Upgrades screen"
                                 );
-                                this.setState({ showTasksUpgradePopup: false });
+                                this.setState({
+                                    showTasksUpgradePopup: false
+                                });
                                 this.props.navigation.navigate("Upgrade");
                             },
                             text: "Go to Upgrades"
                         }}
                     />
                 )}
+                <View style={StyleSheet.absoluteFill} pointerEvents={"none"}>
+                    <View
+                        style={{
+                            width: 80,
+                            height: CLOCK_AUTO_VIEW_HEIGHT,
+                            backgroundColor: "yellow"
+                        }}
+                    >
+                        <Text>
+                            ACtual Clock Height: {CLOCK_AUTO_VIEW_HEIGHT}
+                        </Text>
+                    </View>
+                    <View
+                        style={{
+                            width: 80,
+                            height: FIELDS_AUTO_VIEW_HEIGHT,
+                            backgroundColor: "orange"
+                        }}
+                    >
+                        <Text>
+                            ACtual Fields Height: {FIELDS_AUTO_VIEW_HEIGHT}
+                        </Text>
+                    </View>
+                </View>
                 {this.state.showStartTimesUpgradePopup && (
                     <ClkAlert
                         contHeight={"mid"}
@@ -2655,8 +2756,8 @@ const styles = StyleSheet.create({
         backgroundColor: "transparent",
         height: SCREEN_HEIGHT * 0.3,
         width: SCREEN_WIDTH,
-        top: 0
-        // backgroundColor: "#9DD033"
+        top: 0,
+        backgroundColor: "#9DD033"
         // top: 20
     },
     interactableHandle: {
