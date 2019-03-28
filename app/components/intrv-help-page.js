@@ -204,6 +204,7 @@ export default class IntrvHelpPage extends Component {
                                             onPress={this.nextStep}
                                         >
                                             <View
+                                                key={index}
                                                 style={[
                                                     {
                                                         justifyContent:
@@ -241,15 +242,7 @@ export default class IntrvHelpPage extends Component {
                                                             }
                                                         }
                                                     }}
-                                                    style={[
-                                                        // {
-                                                        //     height:
-                                                        //         HELPPAGE_HEIGHT *
-                                                        //             0.73 -
-                                                        //         25
-                                                        // },
-                                                        img.style
-                                                    ]}
+                                                    style={img.style}
                                                 />
                                                 {sharedImgs &&
                                                     sharedImgs.map(
@@ -266,7 +259,6 @@ export default class IntrvHelpPage extends Component {
                                                                     duration={
                                                                         400
                                                                     }
-                                                                    // delay={2000}
                                                                     key={key}
                                                                     width={
                                                                         SCREEN_WIDTH *
@@ -277,9 +269,16 @@ export default class IntrvHelpPage extends Component {
                                                                         uri:
                                                                             sharedImg.path
                                                                     }}
-                                                                    style={
-                                                                        sharedImg.style
-                                                                    }
+                                                                    style={[
+                                                                        sharedImg.style,
+                                                                        {
+                                                                            height:
+                                                                                (SCREEN_WIDTH *
+                                                                                    0.85 -
+                                                                                    50) /
+                                                                                sharedImg.aspectRatio
+                                                                        }
+                                                                    ]}
                                                                 />
                                                             );
                                                         }

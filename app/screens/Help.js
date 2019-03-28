@@ -44,7 +44,11 @@ const HELP_SECTIONS = [
             {
                 path: "AlarmItem_v2_step2",
                 style: { paddingBottom: 0 },
-                sharedWithPrev: true
+                sharedWithPrev: true,
+                // NOTE: Aspect ratio is required when sharedWithPrev=true, since AutoHeightImage
+                //       determines the height of the image asynchronously, so LayoutAnimation
+                //       doesn't work when the image appears
+                aspectRatio: 664 / 454
             },
             {
                 path: "AlarmItem_v2_step3",
@@ -689,7 +693,7 @@ export default class Help extends React.Component {
                 {this._renderPagingDots(this._idx)}
                 {this.state.showInfoPopup && (
                     <ClkAlert
-                        contHeight={"small"}
+                        contHeight={"mid"}
                         headerIcon={
                             <FAIcon
                                 name="info"
