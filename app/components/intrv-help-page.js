@@ -197,7 +197,7 @@ export default class IntrvHelpPage extends Component {
                                             index + img.sharePageWithNext + 1
                                         );
                                     }
-                                    console.log("sharedImgs", sharedImgs);
+                                    // console.log("sharedImgs", sharedImgs);
                                     return (
                                         <TouchableWithoutFeedback
                                             key={index}
@@ -295,11 +295,11 @@ export default class IntrvHelpPage extends Component {
                         <Text style={styles.sectionTitle}>
                             {sectionInfo.name}
                         </Text>
-                        {
+                        {sectionInfo.subtitle && (
                             <Text style={styles.sectSubtitle}>
                                 {sectionInfo.subtitle}
                             </Text>
-                        }
+                        )}
                         {showNextBtn && (
                             <Animatable.View
                                 contentInsetAdjustmentBehavior="automatic"

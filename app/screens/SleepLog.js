@@ -744,7 +744,7 @@ export default class SleepLog extends React.Component {
                                 color={Colors.brandUltraDarkPurple}
                             />
                         }
-                        centerRight={<Text>Delete this Entry</Text>}
+                        centerRight={<Text>Delete this Log Entry</Text>}
                         separatorPosition={SCREEN_WIDTH * 0.15}
                         onPressItem={() => {
                             let {

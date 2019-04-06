@@ -230,17 +230,18 @@ export default class SleepLogPage extends React.PureComponent {
                     <Text style={styles.distItemText}>{timestamp}</Text>
                 </View>
 
-                {item.recording ? (
-                    <View
-                        style={[
-                            styles.distItemSection,
-                            {
-                                flexDirection: "row",
-                                flex: 0.3,
-                                alignItems: "center"
-                            }
-                        ]}
-                    >
+                <View
+                    style={[
+                        styles.distItemSection,
+                        {
+                            flexDirection: "row",
+                            flex: 0.3,
+                            alignItems: "center",
+                            justifyContent: "flex-end"
+                        }
+                    ]}
+                >
+                    {item.recording ? (
                         <TouchableOpacity
                             style={[
                                 {
@@ -267,12 +268,12 @@ export default class SleepLogPage extends React.PureComponent {
                                 />
                             )}
                         </TouchableOpacity>
-                        <Text style={styles.distItemText}>
-                            {item.duration > 0 &&
-                                "0:" + String(item.duration).padStart(2, "0")}
-                        </Text>
-                    </View>
-                ) : null}
+                    ) : null}
+                    <Text style={styles.distItemText}>
+                        {item.duration > 0 &&
+                            "0:" + String(item.duration).padStart(2, "0")}
+                    </Text>
+                </View>
             </TouchableOpacity>
         );
     };
@@ -837,7 +838,7 @@ const styles = StyleSheet.create({
         // bottom: 0,
         // TODO: Playback box needs to start off-screen. As is, if ad is displayed,
         //  the box is visible. UGH.
-        bottom: ifIphoneX(-180, -120),
+        bottom: ifIphoneX(-180, -140),
         left: 0,
         padding: 15,
         backgroundColor: Colors.backgroundGrey,
