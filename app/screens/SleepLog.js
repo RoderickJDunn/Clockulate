@@ -187,6 +187,7 @@ export default class SleepLog extends React.Component {
             isAnyAlarmOn: false,
             showNoRecAlert: false,
             scrollEnabled: true,
+            forceProAdv: false,
             isLoading: true
         };
 
@@ -219,6 +220,7 @@ export default class SleepLog extends React.Component {
                             : null,
                     alarmInstGroupIdx: alarmInstAll.length - 1,
                     isAnyAlarmOn: onAlarms.length > 0,
+                    forceProAdv: false,
                     isLoading: false
                 });
 
@@ -226,6 +228,7 @@ export default class SleepLog extends React.Component {
             } else {
                 this.setState({
                     isAnyAlarmOn: onAlarms.length > 0,
+                    forceProAdv: false,
                     isLoading: false
                 });
                 this._updateScreenTitle(null);
@@ -498,6 +501,12 @@ export default class SleepLog extends React.Component {
                 </DimmableView>
             </View>
         );
+    };
+
+    _bannerError = e => {
+        console.log("_bannerError");
+        console.log(e);
+        this.setState({ forceProAdv: true });
     };
 
     _updateScreenTitle(alrmInst) {
@@ -944,7 +953,7 @@ export default class SleepLog extends React.Component {
                             height: 100,
                             width: SCREEN_WIDTH
                         }}
-                        // forcePro={}
+                        forcePro={this.state.forceProAdv}
                         navigation={this.props.navigation}
                         pubBannerProps={{
                             adSize: "smartBannerPortrait",
@@ -953,6 +962,7 @@ export default class SleepLog extends React.Component {
                             testDevices: [AdMobBanner.simulatorId],
                             onAdFailedToLoad: e => {
                                 console.log("Sleeplog Ad failed to load: ", e);
+                                this._bannerError();
                             },
                             validAdSizes: ["banner", "largeBanner"],
                             onAdLoaded: () => {

@@ -313,6 +313,10 @@ class Alarms extends Component {
             payload => {
                 if (!this.state.hasProVersion && Upgrades.pro == true) {
                     this.forceUpdate();
+                } else {
+                    // Its possible that network was down but now were connected, so we should
+                    //  try to fetch another ad on navigation back to this screen.
+                    this.setState({ forceProAdv: false });
                 }
             }
         );
