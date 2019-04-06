@@ -634,7 +634,7 @@ class AlarmItem extends React.PureComponent {
                                     status < ALARM_STATES.SNOOZED && (
                                         <Pulse color="#ff6060" />
                                     )}
-                                {status > ALARM_STATES.OFF &&
+                                {/* {status > ALARM_STATES.OFF &&
                                     status < ALARM_STATES.SNOOZED && (
                                         <View
                                             style={{
@@ -647,7 +647,7 @@ class AlarmItem extends React.PureComponent {
                                                 borderRadius: 10
                                             }}
                                         />
-                                    )}
+                                    )} */}
                                 <Animated.View
                                     onLayout={({ nativeEvent }) => {
                                         let {
