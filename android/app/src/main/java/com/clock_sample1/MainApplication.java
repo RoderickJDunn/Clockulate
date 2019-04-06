@@ -3,6 +3,7 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import org.devio.rn.splashscreen.SplashScreenReactPackage;
 import com.dooboolab.RNIap.RNIapPackage;
 import com.rnfs.RNFSPackage;
 import com.reactlibrary.RNTooltipsPackage;
@@ -42,6 +43,7 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(new MainReactPackage(),
+            new SplashScreenReactPackage(),
             new RNIapPackage(),
             new RNFSPackage(),
             new RNTooltipsPackage(),

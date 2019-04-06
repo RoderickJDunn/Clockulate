@@ -47,6 +47,7 @@ import {
     PublisherBanner
     // AdMobRewarded
 } from "react-native-admob";
+import SplashScreen from "react-native-splash-screen";
 import AwesomeAlert from "react-native-awesome-alerts";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -312,9 +313,14 @@ class Alarms extends Component {
             payload => {
                 if (!this.state.hasProVersion && Upgrades.pro == true) {
                     this.forceUpdate();
-    }
+                }
             }
         );
+
+        setTimeout(() => {
+            SplashScreen.hide();
+        }, 1000);
+    }
 
     componentWillUnmount() {
         console.info("AlarmsList --- componentWillUnmount");
@@ -336,8 +342,6 @@ class Alarms extends Component {
                 "notificationActionReceived"
             );
         }
-
-        // this.props.navigation.removeListener("didFocus");
         // this.props.navigation.removeListener("didBlur");
 
         this.props.navigation.removeListener("didFocus");
@@ -578,10 +582,10 @@ class Alarms extends Component {
         // console.debug(this.state);
 
         console.log("Reloading alarms...");
-            let alarms = realm.objects("Alarm").sorted("order");
-            // console.log("Alarms after reload: ", alarms);
-            // general reload. No specific alarm ID is known to have changed.
-            this.setState({ alarms: realm.objects("Alarm").sorted("order") }); // TODO: filter by 'visible'=true
+        let alarms = realm.objects("Alarm").sorted("order");
+        // console.log("Alarms after reload: ", alarms);
+        // general reload. No specific alarm ID is known to have changed.
+        this.setState({ alarms: realm.objects("Alarm").sorted("order") }); // TODO: filter by 'visible'=true
     };
 
     /*

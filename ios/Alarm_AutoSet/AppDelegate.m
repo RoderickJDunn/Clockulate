@@ -10,9 +10,11 @@
 #import "AppDelegate.h"
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
+#import "RNSplashScreen.h"
 #import <React/RCTPushNotificationManager.h>
 #import "RNNotifications.h"
 @import GoogleMobileAds;
+
 
 @implementation AppDelegate
 
@@ -52,6 +54,7 @@
   launchScreenView.frame = self.window.bounds;
   rootView.loadingView = launchScreenView;
   
+  [RNSplashScreen show];
   return YES;
 }
 
