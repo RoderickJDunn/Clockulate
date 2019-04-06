@@ -52,7 +52,7 @@ import { AlarmModel } from "../data/models";
 import TouchableBackdrop from "../components/touchable-backdrop";
 // TODO: Remove after we're done choosing fonts
 import { fontPreview } from "../styles/text.js";
-import { scale, scaleByFactor } from "../util/font-scale";
+import { scale, scaleByFactor, scaleByHeightFactor } from "../util/font-scale";
 import * as DateUtils from "../util/date_utils";
 import { ALARM_STATES } from "../data/constants";
 import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
@@ -96,21 +96,7 @@ const FIELDS_AUTO_VIEW_HEIGHT =
             (1 + FIELDS_AREA_FLEX_FACTOR_COMPENSATED)) +
     8 +
     11;
-// const CLOCK_AUTO_VIEW_HEIGHT =
-//     SCREEN_HEIGHT * 0.3 * TASK_LIST_AUTO_VIEW_POS_FACTOR + 10;
-// const FIELDS_AUTO_VIEW_HEIGHT =
-//     SCREEN_HEIGHT * NON_CLOCK_HEIGHT_FACTOR * FIELDS_AREA_FLEX_FACTOR;
 
-console.log("SCREEN_HEIGHT", SCREEN_HEIGHT);
-
-/// Math problem. How do inversely map screen size to values 0-->10
-/// SmallestScreen: 10 ,  LargestScreen: 0
-// y = -0.025*x + 22.5
-// y = =0.025(896) + 22.5
-
-// for safe keeping
-//const TASK_LIST_TL_VIEW_POS_FACTOR = 0.21; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in TaskList View
-//const TASK_LIST_AUTO_VIEW_POS_FACTOR = 0.595; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in Auto view
 class AlarmDetail extends Component {
     static defaultNavParams = {
         handleBackBtn: null,
@@ -207,7 +193,6 @@ class AlarmDetail extends Component {
                 TASK_AREA_TL_VIEW_FLEX_FACTOR -
             scaleByFactor(50, 0.6),
         pageX: 0,
-        // pageY: SCREEN_HEIGHT * TASK_LIST_TL_VIEW_POS_FACTOR - ifIphoneX(29, 0)
         pageY: Header.HEIGHT + ifIphoneX(20, 0) + 4 + scaleByFactor(50, 0.6)
     };
 
@@ -219,7 +204,6 @@ class AlarmDetail extends Component {
                 TASK_AREA_AUTO_VIEW_FLEX_FACTOR -
             scaleByFactor(50, 0.6),
         pageX: 0,
-        /* Header.HEIGHT + ifIphoneX(29, 0) + CLOCK_HEIGHT + FIELDS_HEIGHT + TASK_HEADER_HEIGHT */
         pageY:
             Header.HEIGHT +
             ifIphoneX(22, 0) +
@@ -1761,7 +1745,6 @@ class AlarmDetail extends Component {
                                 justifyContent: "center",
                                 alignItems: "center",
                                 backgroundColor: Colors.brandUltraDarkPurple
-                                // marginTop: -scaleByHeightFactor(28, -3.5)
                             }}
                         >
                             <Text
@@ -2057,42 +2040,6 @@ class AlarmDetail extends Component {
                             autoResize={false}
                             numberOfLines={1}
                             multiline={false}
-                        />
-                        <View
-                            style={{
-                                position: "absolute",
-                                // use this for a horizontal line
-                                // left: 0,
-                                // right: 0,
-                                // top: 64,
-                                // height: 2,
-
-                                // use this for a vertical line
-                                alignSelf: "center",
-                                width: 5,
-                                left: 0,
-                                top: 0,
-                                bottom: 0,
-                                backgroundColor: "red"
-                            }}
-                        />
-                        <View
-                            style={{
-                                position: "absolute",
-                                // use this for a horizontal line
-                                // left: 0,
-                                // right: 0,
-                                // top: 64,
-                                // height: 2,
-
-                                // use this for a vertical line
-                                alignSelf: "center",
-                                width: 5,
-                                left: 15,
-                                top: 0,
-                                height: 268.8,
-                                backgroundColor: "blue"
-                            }}
                         />
                     </Animated.View>
                     <this.AnimatedHandle
@@ -2747,30 +2694,6 @@ class AlarmDetail extends Component {
                         }}
                     />
                 )}
-                <View style={StyleSheet.absoluteFill} pointerEvents={"none"}>
-                    <View
-                        style={{
-                            width: 80,
-                            height: CLOCK_AUTO_VIEW_HEIGHT,
-                            backgroundColor: "yellow"
-                        }}
-                    >
-                        <Text>
-                            ACtual Clock Height: {CLOCK_AUTO_VIEW_HEIGHT}
-                        </Text>
-                    </View>
-                    <View
-                        style={{
-                            width: 80,
-                            height: FIELDS_AUTO_VIEW_HEIGHT,
-                            backgroundColor: "orange"
-                        }}
-                    >
-                        <Text>
-                            ACtual Fields Height: {FIELDS_AUTO_VIEW_HEIGHT}
-                        </Text>
-                    </View>
-                </View>
                 {this.state.showStartTimesUpgradePopup && (
                     <ClkAlert
                         contHeight={"mid"}
@@ -2851,6 +2774,27 @@ class AlarmDetail extends Component {
                         title={"Snooze Time"}
                     />
                 )}
+                {/* NOTE: View for flicking between Placeholder screen and real screen */}
+                {/* <TouchableOpacity
+                    style={{
+                        width: 100,
+                        height: 100,
+                        backgroundColor: "yellow",
+                        position: "absolute",
+                        right: 0
+                    }}
+                    onPress={() => {
+                        let {
+                            notFirstLoad
+                        } = this.props.navigation.state.params;
+                        notFirstLoad = !notFirstLoad;
+                        this.props.navigation.setParams({
+                            notFirstLoad: notFirstLoad
+                        });
+                    }}
+                >
+                    <Text>ToggleView</Text>
+                </TouchableOpacity> */}
             </ScrollView>
         );
     }
@@ -2882,8 +2826,7 @@ const styles = StyleSheet.create({
         backgroundColor: "transparent",
         height: SCREEN_HEIGHT * 0.3,
         width: SCREEN_WIDTH,
-        top: 0,
-        backgroundColor: "#9DD033"
+        top: 0
         // top: 20
     },
     interactableHandle: {
