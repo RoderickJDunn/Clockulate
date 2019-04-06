@@ -788,7 +788,8 @@ class AlarmDetail extends Component {
                 onSaveState: this.onTaskListChanged,
                 willNavigateBack: this._willShowNavScreen,
                 order: nextTaskPosition,
-                transition: "collapseExpand"
+                transition: "collapseExpand",
+                onPressDelete: this._onDeleteTask
             });
         } else {
             // simply snap the active task back to resting position
@@ -835,6 +836,7 @@ class AlarmDetail extends Component {
                 alarmTaskId: task.id,
                 onSaveState: this.onTaskListChanged,
                 willNavigateBack: this._willShowNavScreen,
+                onPressDelete: this._onDeleteTask,
                 transition: "collapseExpand"
             };
 
@@ -1171,18 +1173,15 @@ class AlarmDetail extends Component {
             data.id
         );
 
-        // first update our startTimesRef array
-        this.startTimesRefs.splice(alarmTaskRlmObject.order, 1);
-
         if (alarmTaskRlmObject) {
+            // first update our startTimesRef array
+            this.startTimesRefs.splice(alarmTaskRlmObject.order, 1);
+
             realm.write(() => {
                 realm.delete(alarmTaskRlmObject);
 
                 // Update order of task list
                 let { tasks } = this.state.alarm;
-
-                // TODO: This line should not be necessary. See if commenting out breaks anything.
-                // this._cachedSortedTasks = tasks.sorted("order");
 
                 console.log("sortedTasks", this._cachedSortedTasks);
                 // console.log("Deleted task. --> Now Tasks:", tasks);

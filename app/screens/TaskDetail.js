@@ -161,6 +161,7 @@ class TaskDetail extends Component {
                 onSaveState: params.onSaveState, // called when a task is Saved or Deleted
                 newTask: true,
                 willNavigateBack: params.willNavigateBack,
+                onPressDelete: params.onPressDelete,
                 suggestions: taskSuggestions,
                 filteredSuggestions: [],
                 hideSuggestions: true,
@@ -196,6 +197,7 @@ class TaskDetail extends Component {
                 },
                 onSaveState: params.onSaveState, // called when a task is Saved or Deleted
                 willNavigateBack: params.willNavigateBack,
+                onPressDelete: params.onPressDelete,
                 suggestions: taskSuggestions,
                 filteredSuggestions: null,
                 hideSuggestions: true,
@@ -444,15 +446,7 @@ class TaskDetail extends Component {
                 {
                     text: "Delete",
                     onPress: () => {
-                        let alarmTaskRlmObject = realm.objectForPrimaryKey(
-                            "AlarmTask",
-                            this.state.alarmTask.id
-                        );
-                        if (alarmTaskRlmObject) {
-                            realm.write(() => {
-                                realm.delete(alarmTaskRlmObject);
-                            });
-                        }
+                        this.state.onPressDelete(this.state.alarmTask);
                         this.state.onSaveState();
                         this.state.willNavigateBack();
                         this.props.navigation.dispatch(
