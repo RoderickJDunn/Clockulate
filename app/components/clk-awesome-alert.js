@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import {
     View,
-    FlatList,
     Dimensions,
     Text,
     TouchableOpacity,
@@ -13,9 +12,11 @@ import {
 import AwesomeAlert from "react-native-awesome-alerts";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 import Colors from "../styles/colors";
 import { scaleByFactor } from "../util/font-scale";
+import { isIphoneX } from "react-native-iphone-x-helper";
 
 const LARGE_HEIGHT = scaleByFactor(320, 1);
 const MID_HEIGHT = scaleByFactor(250, 1);
@@ -70,6 +71,11 @@ export default class ClkAlert extends Component {
                     padding: 0,
                     margin: 0,
                     width: "100%"
+                }}
+                overlayStyle={{
+                    height: SCREEN_HEIGHT,
+                    width: SCREEN_WIDTH,
+                    top: isIphoneX() ? -88 : -64
                 }}
                 show={true}
                 showProgress={false}
