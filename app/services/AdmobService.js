@@ -381,10 +381,14 @@ export class AdWrapper extends Component {
         return (
             <Animatable.View
                 ref={elm => (this._mainViewRef = elm)}
+                useNativeDriver={true}
                 style={[styles.adWrapper, marginBottom, props.style]}
             >
                 {SHOW_ADMOB_ADV && props.forcePro != true ? (
-                    <PublisherBanner {...props.pubBannerProps} />
+                    <PublisherBanner
+                        style={{ backgroundColor: Colors.disabledGrey }}
+                        {...props.pubBannerProps}
+                    />
                 ) : (
                     <ProAdv
                         animate={props.animate}
@@ -421,8 +425,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignSelf: "stretch",
         overflow: "hidden",
-        marginTop: 20,
-        backgroundColor: Colors.disabledGrey
+        marginTop: 20
+        // backgroundColor: Colors.disabledGrey
         // backgroundColor: "green"
         // alignSelf: "center"
         // paddingHorizontal: 10

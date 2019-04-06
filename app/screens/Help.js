@@ -16,7 +16,6 @@ import LinearGradient from "react-native-linear-gradient";
 import Interactable from "react-native-interactable";
 import FAIcon from "react-native-vector-icons/FontAwesome";
 import AutoHeightImage from "react-native-auto-height-image";
-import * as Animatable from "react-native-animatable";
 
 import getFullImgNameForScreenSize from "../img/image_map";
 import Colors from "../styles/colors";

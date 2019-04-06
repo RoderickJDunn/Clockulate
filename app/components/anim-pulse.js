@@ -12,6 +12,7 @@ class AnimatedPulse extends Component {
                 animation={"fadeIn"}
                 duration={2000}
                 delay={1500}
+                useNativeDriver={true}
                 style={[styles.pulseCircle]}
             />
         );

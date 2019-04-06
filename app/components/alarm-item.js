@@ -147,19 +147,12 @@ class AlarmItem extends React.PureComponent {
             this._ringingAnimation.stopAnimation();
             this._ringingScaleAnim.stopAnimation();
             this._ringingAnimation.setValue(0);
-            Animated.parallel([
-                // Animated.timing(this._ringingAnimation, {
-                //     toValue: 0,
-                //     duration: 400,
-                //     useNativeDriver: true
-                // }),
-                Animated.timing(this._ringingScaleAnim, {
-                    toValue: 1,
-                    duration: 400,
-                    isInteraction: false,
-                    useNativeDriver: true
-                })
-            ]).start();
+            Animated.timing(this._ringingScaleAnim, {
+                toValue: 1,
+                duration: 400,
+                isInteraction: false,
+                useNativeDriver: true
+            }).start();
         }
     }
 

@@ -70,8 +70,8 @@ class EdgeSwiper extends Component {
                                 translationX: this.props.animValue
                             }
                         }
-                    ]
-                    // { useNativeDriver: true }
+                    ],
+                    { useNativeDriver: true } // TODO: WHY WAS THIS COMMENTED OUT ???????? It seems to be working fine if not better with it.
                 )}
                 shouldCancelWhenOutside={false}
                 onHandlerStateChange={this._onGestureStateChanged}
