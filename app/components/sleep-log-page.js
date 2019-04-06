@@ -18,11 +18,13 @@ import MaterialComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import moment from "moment";
 import DimmableView from "./dimmable-view";
 import Colors from "../styles/colors";
-import { isIphoneX } from "react-native-iphone-x-helper";
+import { isIphoneX, ifIphoneX } from "react-native-iphone-x-helper";
 import Pie from "react-native-pie";
 import _ from "lodash";
 import Sound from "react-native-sound";
 import * as Animatable from "react-native-animatable";
+import Upgrades from "../config/upgrades";
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const MINUTES_IN_HALFDAY = 60 * 12;
@@ -126,7 +128,13 @@ export default class SleepLogPage extends React.PureComponent {
 
             if (this.playbackBoxRef) {
                 this.playbackBoxRef.transitionTo({
-                    transform: [{ translateY: isIphoneX() ? -160 : -120 }]
+                    transform: [
+                        {
+                            translateY:
+                                ifIphoneX(-160, -120) -
+                                (Upgrades.pro != true ? 50 : 0)
+                        }
+                    ]
                 });
             }
 
@@ -561,6 +569,7 @@ export default class SleepLogPage extends React.PureComponent {
             <View
                 style={{
                     flex: 1
+                    // height: SCREEN_HEIGHT - 150
                 }}
             >
                 <DimmableView
@@ -647,7 +656,12 @@ export default class SleepLogPage extends React.PureComponent {
                     contentInsetAdjustmentBehavior="automatic"
                     useNativeDriver={true}
                     ref={elm => (this.playbackBoxRef = elm)}
-                    style={styles.playbackBox}
+                    style={[
+                        styles.playbackBox,
+                        Upgrades.pro != true && {
+                            bottom: styles.playbackBox.bottom - 50
+                        }
+                    ]}
                 >
                     <Text style={styles.playbackBoxText}>{"Volume"}</Text>
                     <Slider
@@ -821,10 +835,12 @@ const styles = StyleSheet.create({
     playbackBox: {
         position: "absolute",
         // bottom: 0,
-        bottom: isIphoneX() ? -160 : -120,
+        // TODO: Playback box needs to start off-screen. As is, if ad is displayed,
+        //  the box is visible. UGH.
+        bottom: ifIphoneX(-180, -120),
         left: 0,
         padding: 15,
-        backgroundColor: Colors.backgroundBright,
+        backgroundColor: Colors.backgroundGrey,
         height: 120,
         width: SCREEN_WIDTH
     },

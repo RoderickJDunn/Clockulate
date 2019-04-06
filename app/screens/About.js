@@ -180,11 +180,14 @@ export default class About extends React.Component {
 
     render() {
         return (
-            <SafeAreaView style={{ flex: 1 }}>
+            <SafeAreaView
+                style={{ flex: 1, backgroundColor: Colors.backgroundGrey }}
+            >
                 <SettingsScreen
                     data={this.data}
                     globalTextStyle={{ fontFamily }}
-                    style={{ backgroundColor: Colors.backgroundBright }}
+                    // style={{ backgroundColor: Colors.backgroundBright }}
+                    style={{ backgroundColor: Colors.backgroundGrey }}
                 />
             </SafeAreaView>
         );

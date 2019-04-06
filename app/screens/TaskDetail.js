@@ -53,6 +53,7 @@ import {
 import PickerActionSheet from "../components/picker-action-sheet";
 import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
 import ClkAlert from "../components/clk-awesome-alert";
+import Upgrades from "../config/upgrades";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -163,12 +164,13 @@ class TaskDetail extends Component {
                 suggestions: taskSuggestions,
                 filteredSuggestions: [],
                 hideSuggestions: true,
-                keyboardHeight: 1, // starting this off != 0, so that Ad doesn't flash when this screen first renders.
+                keyboardHeight: 1, // NOTE: starting this off != 0, so that Ad doesn't flash when this screen first renders.
                 showDurationInfo: false,
                 setAsDefault: false,
                 currNameHasMatch: false,
                 showDurationPicker: false,
-                showProAdUpgradePopup: false
+                showProAdUpgradePopup: false,
+                forcePro: false
             };
             // console.log(this.state.alarmTask);
         } else {
@@ -202,7 +204,8 @@ class TaskDetail extends Component {
                 showDurationInfo: false,
                 setAsDefault: false,
                 currNameHasMatch: true,
-                showDurationPicker: false
+                showDurationPicker: false,
+                forcePro: false
             };
         }
 
@@ -258,7 +261,7 @@ class TaskDetail extends Component {
     };
 
     keyboardWillHide = event => {
-        // console.log("keyboardDidHide");
+        console.log("keyboardDidHide");
         // console.log("this.currName", this.currName);
 
         let exactMatch = [];
@@ -540,10 +543,11 @@ class TaskDetail extends Component {
                     //     this._onBlur(this);
                     //     if (onBlur != null) onBlur(e);
                     // }}
-                    // onFocus={() => {
-                    //     this._onFocus.bind(this);
-                    //     if (onFocus != null) onFocus();
-                    // }}
+                    onFocus={() => {
+                        if (this._adWrapRef) {
+                            this._adWrapRef.fadeOut();
+                        }
+                    }}
                     blurOnSubmit={true}
                     // onContentSizeChange={e =>
                     //     this.updateSize(e.nativeEvent.contentSize.height)
@@ -628,6 +632,7 @@ class TaskDetail extends Component {
     _bannerError = e => {
         console.log("_bannerError");
         console.log(e);
+        this.setState({ forcePro: true });
     };
 
     render() {
@@ -661,7 +666,9 @@ class TaskDetail extends Component {
                         // backgroundColor: "red"
                     }
                 ]}
-                keyboardShouldPersistTaps="handled"
+                // NOTE: Must be 'always' instead of 'handled', otherwise keyboard is sometimes
+                //       dismissed while scrolling Suggestions list
+                keyboardShouldPersistTaps="always"
                 scrollEnabled={false}
             >
                 <View style={{ flex: 1, backgroundColor: Colors.brandMidGrey }}>
@@ -846,20 +853,25 @@ class TaskDetail extends Component {
                                 )}
                         </View>
                     </View>
-                    {true && this.state.keyboardHeight == 0 && (
+                    {Upgrades.pro != true && this.state.keyboardHeight == 0 && (
                         <AdWrapper
                             animate={true}
                             delay={250}
                             screen={"TaskDetail"}
+                            forcePro={this.state.forcePro}
                             style={{
                                 position: "absolute",
                                 top: SCREEN_HEIGHT * 0.25,
                                 alignSelf: "center"
                             }}
+                            proAdvStyle={{
+                                height: SCREEN_WIDTH * 0.8,
+                                width: SCREEN_WIDTH * 0.8
+                            }}
                             hide={this.state.keyboardHeight != 0}
                             navigation={this.props.navigation}
                             pubBannerProps={{
-                                adSize: "smartBannerPortrait",
+                                adSize: "mediumRectangle",
                                 // adUnitID: "ca-app-pub-3940256099942544/6300978111",
                                 adUnitID:
                                     "ca-app-pub-5775007461562122/9954191195",
@@ -877,6 +889,7 @@ class TaskDetail extends Component {
                             onPressProAdv={() =>
                                 this.setState({ showProAdUpgradePopup: true })
                             }
+                            ref={elem => (this._adWrapRef = elem)}
                             // borderColor={Colors.brandDarkGrey}
                         />
                     )}

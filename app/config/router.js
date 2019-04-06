@@ -47,6 +47,7 @@ import Help from "../screens/Help";
 import LinearGradient from "react-native-linear-gradient";
 import { isIphoneX } from "react-native-iphone-x-helper";
 import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
+import Upgrades from "../config/upgrades";
 
 import Colors from "../styles/colors";
 import { scaleByFactor } from "../util/font-scale";
@@ -330,12 +331,17 @@ const ModalStack = createStackNavigator(
 let screenMenuIcons = [
     { type: "MaterialIcon", name: "access-alarm", size: 24 },
     { type: "FontAwesomeIcon", name: "magic", size: 22 },
-    { type: "MaterialComIcon", name: "notebook", size: 26 },
+    { type: "MaterialComIcon", name: "notebook", size: 24 },
     { type: "MaterialIcon", name: "settings", size: 22 },
     { type: "MaterialIcon", name: "help", size: 22 },
     { type: "FontAwesomeIcon", name: "info-circle", size: 22 }
 ];
 // NICE_COLOR: #234853
+
+_bannerError = e => {
+    console.log("_bannerError");
+    console.log(e);
+};
 
 let menuImage = isIphoneX()
     ? require("../img/menu_header_v16_notch.json")
@@ -447,66 +453,7 @@ const CustomDrawerContentComponent = props => {
                         );
                     }}
                 />
-                {true && (
-                    <AdWrapper
-                        // borderPosition="top"
-                        animate={true}
-                        // borderColor={Colors.brandDarkGrey}
-                        screen={"MainMenu"}
-                        style={{
-                            // overflow: "hidden",
-                            alignSelf: "center",
-                            // bottom: 100,
-                            height: 300,
-                            width: 280,
-
-                            transform: [
-                                {
-                                    scale: SCREEN_HEIGHT < 700 ? 0.83 : 0.9
-                                }
-                            ]
-                        }}
-                        // navigation={this.props.navigation}
-                        pubBannerProps={
-                            SCREEN_HEIGHT < 700
-                                ? {
-                                      adSize: "banner",
-                                      // adUnitID: "ca-app-pub-3940256099942544/6300978111",
-                                      adUnitID:
-                                          "ca-app-pub-5775007461562122/1503272954",
-                                      testDevices: [AdMobBanner.simulatorId],
-                                      onAdFailedToLoad: this._bannerError,
-                                      onAdLoaded: () => {
-                                          console.log("adViewDidReceiveAd");
-                                      },
-                                      style: {
-                                          alignSelf: "center",
-                                          height: 100,
-                                          width: 280
-                                      }
-                                  }
-                                : {
-                                      adSize: "mediumRectangle",
-                                      validAdSizes: ["mediumRectangle"],
-                                      // adUnitID: "ca-app-pub-3940256099942544/6300978111",
-                                      adUnitID:
-                                          "ca-app-pub-5775007461562122/1503272954",
-                                      testDevices: [AdMobBanner.simulatorId],
-                                      onAdFailedToLoad: this._bannerError,
-                                      onAdLoaded: () => {
-                                          console.log("adViewDidReceiveAd");
-                                      },
-                                      style: {
-                                          alignSelf: "center",
-                                          height: 300,
-                                          width: 280
-                                      }
-                                  }
-                        }
-                    />
-                )}
             </SafeAreaView>
-
             <Text
                 style={{
                     position: "absolute",
@@ -625,7 +572,7 @@ const DrawerRoot = createDrawerNavigator(
     },
     {
         // drawerWidth: 250,
-        initialRouteName: "Alarms", // change back to 'Alarms'
+        initialRouteName: "Alarms", // DEV: change back to 'Alarms'
         contentOptions: {
             activeBackgroundColor: "transparent",
             activeTintColor: Colors.brandLightPurple,

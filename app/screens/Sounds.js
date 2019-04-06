@@ -85,7 +85,8 @@ export default class Sounds extends Component {
             randomSounds: randomSounds,
             selectedSound: currSound.sound,
             activeSound: null,
-            showTonesUpgradePopup: false
+            showTonesUpgradePopup: false,
+            forcePro: false
         };
         InteractionManager.runAfterInteractions(() => {
             AdvSvcOnScreenConstructed("Sounds");
@@ -160,6 +161,12 @@ export default class Sounds extends Component {
 
         this.setState({ activeSound: s });
     }
+
+    _bannerError = e => {
+        console.log("_bannerError");
+        console.log(e);
+        this.setState({ forcePro: true });
+    };
 
     render() {
         // console.log(this.state);
@@ -297,11 +304,16 @@ export default class Sounds extends Component {
                         }}
                     />
                 )}
-                {true && (
+                {Upgrades.pro != true && (
                     <AdWrapper
                         borderPosition="top"
                         screen={"Sounds"}
                         animate={true}
+                        forcePro={this.state.forcePro}
+                        proAdvStyle={{
+                            height: 100,
+                            width: this.width
+                        }}
                         // borderColor={Colors.brandDarkGrey}
                         navigation={this.props.navigation}
                         pubBannerProps={{
@@ -315,7 +327,7 @@ export default class Sounds extends Component {
                             },
                             style: {
                                 alignSelf: "center",
-                                height: 100,
+                                height: 50,
                                 width: this.width
                             }
                         }}

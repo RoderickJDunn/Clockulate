@@ -100,7 +100,9 @@ class Alarms extends Component {
             appState: AppState.currentState,
             isLoading: false,
             showChargePopup: false,
-            showUpgradePopup: false
+            showUpgradePopup: false,
+            hasProVersion: Upgrades.pro == true,
+            forceProAdv: false
         };
 
         console.log("showChargePopup", this.state.showChargePopup);
@@ -305,14 +307,14 @@ class Alarms extends Component {
         //     }
         // );
 
-        // this._didFocusListener = this.props.navigation.addListener(
-        //     "didFocus",
-        //     payload => {
-        //         this.isCurrentScreen = true;
-        //         this.handleActivity();
-        //     }
-        // );
+        this._didFocusListener = this.props.navigation.addListener(
+            "didFocus",
+            payload => {
+                if (!this.state.hasProVersion && Upgrades.pro == true) {
+                    this.forceUpdate();
     }
+            }
+        );
 
     componentWillUnmount() {
         console.info("AlarmsList --- componentWillUnmount");
@@ -337,6 +339,8 @@ class Alarms extends Component {
 
         // this.props.navigation.removeListener("didFocus");
         // this.props.navigation.removeListener("didBlur");
+
+        this.props.navigation.removeListener("didFocus");
 
         AppState.removeEventListener("change", this._handleAppStateChange);
     }
@@ -856,6 +860,12 @@ class Alarms extends Component {
         }
     };
 
+    _bannerError = e => {
+        console.log("_bannerError");
+        console.log(e);
+        this.setState({ forceProAdv: true });
+    };
+
     render() {
         console.info("AlarmsList - Render");
         // console.debug(this.state);
@@ -1013,20 +1023,26 @@ class Alarms extends Component {
                                 style={{
                                     borderWidth: 0
                                 }}
+                                proAdvStyle={{
+                                    height: 100,
+                                    width: this.width
+                                }}
+                                forcePro={this.state.forceProAdv}
                                 navigation={this.props.navigation}
                                 pubBannerProps={{
                                     adSize: "smartBannerPortrait",
                                     // adUnitID: "ca-app-pub-3940256099942544/6300978111",
                                     adUnitID:
-                                        "ca-app-pub-5775007461562122/9954191195",
+                                        "ca-app-pub-5775007461562122/3906075015",
                                     testDevices: [AdMobBanner.simulatorId],
                                     onAdFailedToLoad: this._bannerError,
+                                    validAdSizes: ["banner", "largeBanner"],
                                     onAdLoaded: () => {
-                                        console.log("adViewDidReceiveAd");
+                                        console.log("adLoaded");
                                     },
                                     style: {
                                         alignSelf: "center",
-                                        height: 100,
+                                        height: 50,
                                         width: this.width
                                     }
                                 }}

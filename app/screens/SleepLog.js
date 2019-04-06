@@ -30,6 +30,7 @@ import DateTimePicker from "react-native-modal-datetime-picker";
 import Pager from "react-native-swiper";
 import SwiperFlatList from "react-native-swiper-flatlist";
 import RNFS from "react-native-fs";
+import { AdMobBanner } from "react-native-admob";
 
 import realm from "../data/DataSchemas";
 import Colors from "../styles/colors";
@@ -38,6 +39,8 @@ import MenuItem from "../components/menu-item";
 import TouchableBackdrop from "../components/touchable-backdrop";
 import SleepLogPage from "../components/sleep-log-page";
 import ClkAlert from "../components/clk-awesome-alert";
+import { AdWrapper } from "../services/AdmobService";
+import Upgrades from "../config/upgrades";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -459,38 +462,6 @@ export default class SleepLog extends React.Component {
         );
     };
 
-    _renderPagingDots = genInfoPage => {
-        // console.log("genInfoPage", genInfoPage);
-        return (
-            <View style={styles.generalInfoFooter}>
-                <View
-                    style={[
-                        styles.pageDot,
-                        genInfoPage == 0 && styles.pageDotActive
-                    ]}
-                />
-                <View
-                    style={[
-                        styles.pageDot,
-                        genInfoPage == 1 && styles.pageDotActive
-                    ]}
-                />
-                <View
-                    style={[
-                        styles.pageDot,
-                        genInfoPage == 2 && styles.pageDotActive
-                    ]}
-                />
-                <View
-                    style={[
-                        styles.pageDot,
-                        genInfoPage == 3 && styles.pageDotActive
-                    ]}
-                />
-            </View>
-        );
-    };
-
     _renderEmptyPage = (isLoading, date) => {
         return (
             <View style={{ flex: 1 }}>
@@ -659,7 +630,7 @@ export default class SleepLog extends React.Component {
                     />
                 ) : (
                     <View style={{ flex: 1 }}>
-                        {/* TODO: Show a sample sleep-log page. Show ClkAlert explaining what's happening (no logs yet etc..) */}
+                        {/* Sample sleep-log page. Show ClkAlert explaining what's happening (no logs yet etc..) */}
                         <SleepLogPage
                             almInst={{
                                 id: "string",
@@ -817,10 +788,10 @@ export default class SleepLog extends React.Component {
                                 "/" +
                                 currAlmInst.id;
 
-                            recordings.forEach(rec => {
-                                RNFS.unlink(path + rec).then(() => {
-                                    console.log("Deleted " + rec);
-                                });
+                            RNFS.unlink(path).then(() => {
+                                console.log(
+                                    "Deleted alarmInst directory" + path
+                                );
                             });
 
                             realm.write(() => {
@@ -960,6 +931,44 @@ export default class SleepLog extends React.Component {
                     //     }}
                     // />
                 )}
+                {Upgrades.pro != true && (
+                    <AdWrapper
+                        // borderPosition="top"
+                        animate={true}
+                        // borderColor={Colors.brandDarkGrey}
+                        screen={"Alarms"}
+                        style={{
+                            borderWidth: 0
+                        }}
+                        proAdvStyle={{
+                            height: 100,
+                            width: SCREEN_WIDTH
+                        }}
+                        // forcePro={}
+                        navigation={this.props.navigation}
+                        pubBannerProps={{
+                            adSize: "smartBannerPortrait",
+                            // adUnitID: "ca-app-pub-3940256099942544/6300978111",
+                            adUnitID: "ca-app-pub-5775007461562122/3906075015",
+                            testDevices: [AdMobBanner.simulatorId],
+                            onAdFailedToLoad: e => {
+                                console.log("Sleeplog Ad failed to load: ", e);
+                            },
+                            validAdSizes: ["banner", "largeBanner"],
+                            onAdLoaded: () => {
+                                console.log("adLoaded");
+                            },
+                            style: {
+                                alignSelf: "center",
+                                height: 50,
+                                width: SCREEN_WIDTH
+                            }
+                        }}
+                        onPressProAdv={() =>
+                            this.setState({ showUpgradePopup: "short" })
+                        }
+                    />
+                )}
             </SafeAreaView>
         );
     }
@@ -1089,19 +1098,5 @@ const styles = StyleSheet.create({
         alignSelf: "stretch",
         alignContent: "center",
         justifyContent: "center"
-    },
-    pageDot: {
-        height: 7,
-        width: 7,
-        borderRadius: 7,
-        alignSelf: "center",
-        backgroundColor: "#BABABA",
-        marginHorizontal: 5
-    },
-    pageDotActive: {
-        height: 10,
-        width: 10,
-        borderRadius: 7,
-        backgroundColor: "#989898"
     }
 });

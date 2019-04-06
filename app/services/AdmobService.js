@@ -18,6 +18,8 @@ import {
     // AdMobRewarded
 } from "react-native-admob";
 
+import * as Animatable from "react-native-animatable";
+
 import realm from "../data/DataSchemas";
 import { ADV_STAT_TYPES } from "../data/constants";
 import { isIphoneX } from "react-native-iphone-x-helper";
@@ -297,53 +299,19 @@ let MAP_SCREEN_TO_ADV_IMG = {
 };
 
 class ProAdv extends Component {
-    advAnimValue = new Animated.Value(0);
-
-    componentDidMount() {
-        let delay = this.props.delay || 1500;
-        if (this.props.animate) {
-            Animated.sequence([
-                Animated.delay(delay),
-                Animated.spring(this.advAnimValue, {
-                    toValue: 1,
-                    bounciness: 17,
-                    speed: 4
-                })
-            ]).start();
-        } else {
-            this.advAnimValue.setValue(1);
-        }
-    }
-
     render() {
         // console.log("before imgBaseName");
         // console.log("this.props.screen", this.props.screen);
         let imgBaseName = MAP_SCREEN_TO_ADV_IMG[this.props.screen];
         // console.log("imgBaseName", imgBaseName);
 
-        let tfm =
-            this.props.screen != "TaskDetail"
-                ? [
-                      {
-                          translateX: this.advAnimValue.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [-SCREEN_WIDTH, 0]
-                          })
-                      }
-                  ]
-                : [
-                      {
-                          scale: this.advAnimValue.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [0, 1]
-                          })
-                      }
-                  ];
         return (
-            <Animated.View
-                style={{
-                    transform: tfm
-                }}
+            <Animatable.View
+                contentInsetAdjustmentBehavior="automatic"
+                useNativeDriver={true}
+                animation={"fadeIn"}
+                duration={2000}
+                delay={400}
             >
                 <TouchableOpacity
                     onPress={() => {
@@ -372,12 +340,12 @@ class ProAdv extends Component {
                         ]}
                     />
                 </TouchableOpacity>
-            </Animated.View>
+            </Animatable.View>
         );
     }
 }
 
-let SHOW_ADMOB_ADV = false;
+let SHOW_ADMOB_ADV = true;
 
 /* Wrapper requirements for aesthetics of bottom banner 
     AlarmsList / AlarmDetail / TaskDetail / Sounds
@@ -387,55 +355,74 @@ let SHOW_ADMOB_ADV = false;
         - if SCREEN_WIDTH > 320 
             => marginBottom: 20, marginTop: 20
 */
-export let AdWrapper = props => {
+
+export class AdWrapper extends Component {
     // console.log("props.borderPosition", props.borderPosition);
     // console.log("props.hide", props.hide);
     // console.log("props.screen", props.screen);
-    let border;
-    let marginBottom = {};
-    if (SCREEN_WIDTH <= 320 || isIphoneX()) {
-        marginBottom = { marginBottom: 0 };
-    }
 
-    // console.log("border", border);
-    return (
-        <View style={[styles.adWrapper, marginBottom, props.style]}>
-            {SHOW_ADMOB_ADV ? (
-                <PublisherBanner {...props.pubBannerProps} />
-            ) : (
-                <ProAdv
-                    animate={props.animate}
-                    delay={props.delay}
-                    imgDims={{
-                        width: props.pubBannerProps.style.width,
-                        height: props.pubBannerProps.style.height
-                    }}
-                    screen={props.screen}
-                    navigation={props.navigation}
-                    onPress={props.onPressProAdv}
-                />
-            )}
-            {props.hide && (
-                <View
-                    style={{
-                        // flex: 1,
-                        position: "absolute",
-                        width: props.pubBannerProps.style.width,
-                        height: props.pubBannerProps.style.height,
-                        backgroundColor: Colors.brandMidGrey
-                    }}
-                />
-            )}
-        </View>
-    );
-};
+    fadeOut = () => {
+        if (this._mainViewRef) {
+            this._mainViewRef.fadeOut(100);
+        }
+    };
+
+    render() {
+        let border;
+        let marginBottom = {};
+        if (SCREEN_WIDTH <= 320 || isIphoneX()) {
+            marginBottom = { marginBottom: 0 };
+        }
+
+        let props = this.props;
+
+        // console.log("border", border);
+        console.log("pubBannerProps", props.pubBannerProps);
+        return (
+            <Animatable.View
+                ref={elm => (this._mainViewRef = elm)}
+                style={[styles.adWrapper, marginBottom, props.style]}
+            >
+                {SHOW_ADMOB_ADV && props.forcePro != true ? (
+                    <PublisherBanner {...props.pubBannerProps} />
+                ) : (
+                    <ProAdv
+                        animate={props.animate}
+                        delay={props.delay}
+                        imgDims={{
+                            width: props.proAdvStyle.width,
+                            height: props.proAdvStyle.height
+                        }}
+                        screen={props.screen}
+                        navigation={props.navigation}
+                        onPress={props.onPressProAdv}
+                    />
+                )}
+                {props.hide && (
+                    <View
+                        style={{
+                            // flex: 1,
+                            position: "absolute",
+                            width: props.pubBannerProps.style.width,
+                            height: props.pubBannerProps.style.height,
+                            backgroundColor: Colors.brandMidGrey
+                        }}
+                    />
+                )}
+            </Animatable.View>
+        );
+    }
+}
 
 const styles = StyleSheet.create({
     adWrapper: {
         // width: 320,
+        alignContent: "center",
+        justifyContent: "center",
         alignSelf: "stretch",
         overflow: "hidden",
-        marginTop: 20
+        marginTop: 20,
+        backgroundColor: Colors.disabledGrey
         // backgroundColor: "green"
         // alignSelf: "center"
         // paddingHorizontal: 10
