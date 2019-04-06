@@ -22,6 +22,7 @@ import getFullImgNameForScreenSize from "../img/image_map";
 import Colors from "../styles/colors";
 import ClkAlert from "../components/clk-awesome-alert";
 import IntrvHelpPage from "../components/intrv-help-page";
+import MiscStorage from "../config/misc_storage";
 
 import { scaleByFactor } from "../util/font-scale";
 import { isIphoneX } from "react-native-iphone-x-helper";
@@ -167,11 +168,11 @@ export default class Help extends React.Component {
         this.state = {
             imgHeight: 135,
             sectIdx: 0,
-            showInfoPopup: true,
+            showInfoPopup: false,
             isFocused: true
         };
 
-        console.log("Upgrade -- constructor ");
+        console.log("Help -- constructor ");
     }
 
     _bgdPosition = new Animated.Value(0);
@@ -185,6 +186,10 @@ export default class Help extends React.Component {
         this.props.navigation.setParams({
             toggleInfoPopup: this.toggleInfoPopup
         });
+        if (MiscStorage.visitedHelp !== true) {
+            MiscStorage.setVistedHelp(true);
+            setTimeout(this.toggleInfoPopup, 500);
+        }
     }
 
     toggleInfoPopup = () => {
