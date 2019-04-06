@@ -10,7 +10,8 @@ import {
     Platform,
     Easing,
     FlatList,
-    Button
+    Button,
+    ActivityIndicator
 } from "react-native";
 import * as RNIap from "react-native-iap";
 import LinearGradient from "react-native-linear-gradient";
@@ -49,8 +50,6 @@ if (Platform.OS == "ios") {
 
 const FULL_HEADER_HEIGHT = 44 + STATUS_BAR_HEIGHT;
 
-// SCREEN_HEIGHT -= 88; // add 88 since the Nav bar is transparent
-// TODO: In-app purchases
 export default class Upgrade extends React.Component {
     upgradeData = [
         {
@@ -152,6 +151,10 @@ export default class Upgrade extends React.Component {
         console.log("Upgrade -- constructor ");
         console.log("props", props);
 
+        this.state = {
+            isLoading: false
+        };
+
         this._isModal = this.props.screenType == "modal";
     }
 
@@ -161,20 +164,28 @@ export default class Upgrade extends React.Component {
     _btnShineAnim = new Animated.Value(-1000);
     _isModal = null;
 
-    // _scrollY = new Animated.Value(0);
+    _scrollY = new Animated.Value(0);
 
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
 
     async componentDidMount() {
         console.log("Upgrade: ComponentDidMount");
+
+        this.props.navigation.setParams({
+            onPressRestore: this.onPressRstrPurchase
+        });
         try {
             const products = await RNIap.getProducts(PRODUCTS);
             console.log("products", products);
-            // this.setState({ products });
+            this.setState({ products });
         } catch (err) {
             console.warn(err); // standardized err.code and err.message available
         }
+    }
+
+    componentWillUnmount() {
+        RNIap.endConnection();
     }
 
     screenDidFocus = payload => {
@@ -512,20 +523,88 @@ export default class Upgrade extends React.Component {
         );
     }
 
-    onPressUpgrade = () => {
-        //TODO: Implement IAP functionality
-        console.log("onPressUpdlkjgrade");
+    onPressUpgrade = async () => {
+        // IAP functionality
+        console.log("onPressUpgrade");
 
-        /* TEST: Simulating user buying the IAP */
-        upgrades.setPro(true);
+        this.setState({ isLoading: true });
+        await RNIap.clearTransaction();
 
-        this.props.navigation.setParams();
+        try {
+            try {
+                products = await RNIap.getProducts(PRODUCTS);
+                console.log("products", products);
+                this.setState({ products });
+            } catch (err) {
+                console.warn(
+                    "Failed to get products.. no network connection? : ",
+                    err
+                ); // standardized err.code and err.message available
+                this.setState({ isLoading: false });
+                alert(
+                    "Unable to connect to App Store. Please make sure you have a Wi-Fi or Data connection."
+                );
+                return;
+            }
+
+            // Will return a purchase object with a receipt which can be used to validate on your server.
+            const purchase = await RNIap.buyProduct(products[0].productId);
+            upgrades.setPro(true);
+            this.setState({
+                receipt: purchase.transactionReceipt, // save the receipt if you need it, whether locally, or to your server.
+                isLoading: false
+            });
+            this.props.navigation.setParams();
+        } catch (err) {
+            // standardized err.code and err.message available
+            console.warn("Caught error trying RNIap.buyProduct:");
+            console.warn(err.code, err.message);
+            this.setState({ isLoading: false });
+            const subscription = RNIap.addAdditionalSuccessPurchaseListenerIOS(
+                async purchase => {
+                    subscription.remove();
+                    upgrades.setPro(true);
+                    this.setState({
+                        receipt: purchase.transactionReceipt,
+                        isLoading: false
+                    });
+                    this.props.navigation.setParams();
+                }
+            );
+        }
+
+        /* DEV: Simulates user buying the IAP */
+        // upgrades.setPro(true);
+        // this.props.navigation.setParams();
+        /* END-DEV */
+
         /* ************************************ */
     };
 
-    onPressRstrPurchase = () => {
-        //TODO: Implement IAP functionality
+    onPressRstrPurchase = async () => {
+        //TODO: Implement IAP functionality. NEEDS TESTING WITH SANDBOX
         console.log("onPressRstrPurchase");
+        this.setState({ isLoading: true });
+
+        try {
+            let purchases = await RNIap.getAvailablePurchases();
+            this.setState({ isLoading: false });
+
+            if (purchases.length == 0) {
+                // User has not made any purchases that we know of.
+                alert("No previous purchase found...");
+            } else {
+                upgrades.setPro(true);
+                alert("Purchases succesfully restored!");
+                console.log(purchases);
+                this.props.navigation.setParams();
+            }
+        } catch (err) {
+            alert(
+                "Unable to connect to App Store. Please make sure you have a Wi-Fi or Data connection."
+            );
+            this.setState({ isLoading: false });
+        }
     };
 
     upgradeItem({ item }) {
@@ -588,6 +667,10 @@ export default class Upgrade extends React.Component {
             buttonContainerHeight = scaleByFactor(80) + (isIphoneX() ? 10 : 0);
         }
 
+        let { products } = this.state;
+
+        let validProduct = products && products.length == 1;
+
         return (
             <View
                 style={{ flex: 1, backgroundColor: Colors.brandMidLightGrey }}
@@ -597,24 +680,65 @@ export default class Upgrade extends React.Component {
                     onWillBlur={this.screenWillBlur}
                 />
                 {this.renderCalcButtons()}
-                <FlatList
+                <View style={[StyleSheet.absoluteFill]} pointerEvents="none">
+                    <Animated.Image
+                        style={{
+                            height: SCREEN_WIDTH * 0.75 * 0.473,
+                            width: SCREEN_WIDTH * 0.75,
+                            alignSelf: "center",
+                            alignContent: "center",
+                            transform: [
+                                {
+                                    translateY: this._scrollY.interpolate({
+                                        inputRange: [
+                                            0,
+                                            120 * 6 + SCREEN_HEIGHT
+                                            // SCREEN_HEIGHT * 1
+                                            // SCREEN_HEIGHT * 1.5
+                                        ],
+                                        outputRange: [SCREEN_HEIGHT, 0],
+                                        extrapolate: "clamp"
+                                    })
+                                }
+                            ]
+                        }}
+                        resizeMode="contain"
+                        source={require("../img/UpgradeTitleV1_3.png")}
+                    />
+                    <View
+                        style={{
+                            height: this._isModal ? 30 : 0,
+                            backgroundColor: "transparent"
+                        }}
+                    />
+                </View>
+                <Animated.FlatList
+                    scrollEventThrottle={10}
+                    onScroll={Animated.event(
+                        // scrollX = e.nativeEvent.contentOffset.x
+                        [
+                            {
+                                nativeEvent: {
+                                    contentOffset: {
+                                        y: this._scrollY
+                                    }
+                                }
+                            }
+                        ],
+                        { useNativeDriver: true }
+                    )}
                     style={{
                         flex: 1
                         // marginTop: -FULL_HEADER_HEIGHT
                         // marginTop: -SCREEN_HEIGHT * 0.35 - FULL_HEADER_HEIGHT
                     }}
                     ListFooterComponent={
-                        <View>
-                            <Animated.Image
-                                style={{
-                                    height: SCREEN_HEIGHT,
-                                    width: SCREEN_WIDTH * 0.75,
-                                    alignSelf: "center",
-                                    alignContent: "center"
-                                }}
-                                resizeMode="contain"
-                                source={require("../img/UpgradeTitleV1_3.png")}
-                            />
+                        <View
+                            style={{
+                                height: SCREEN_HEIGHT,
+                                width: SCREEN_WIDTH
+                            }}
+                        >
                             <View
                                 style={{
                                     height: this._isModal ? 30 : 0,
@@ -669,7 +793,7 @@ export default class Upgrade extends React.Component {
                                         }}
                                     />
                                 </TouchableOpacity>
-                                {upgrades.pro != true ? (
+                                {upgrades.pro != true && (
                                     <TouchableOpacity
                                         onPress={() => {
                                             this.onPressRstrPurchase();
@@ -696,14 +820,6 @@ export default class Upgrade extends React.Component {
                                             Restore
                                         </Text>
                                     </TouchableOpacity>
-                                ) : (
-                                    <Button
-                                        title="downgrade"
-                                        onPress={() => {
-                                            upgrades.setPro(false); // TODO: NOTE: Remove. This is for DEV convenience
-                                            this.forceUpdate();
-                                        }}
-                                    />
                                 )}
                             </View>
                         ) : null
@@ -711,6 +827,7 @@ export default class Upgrade extends React.Component {
                     renderItem={this.upgradeItem}
                     data={this.upgradeData}
                 />
+
                 {/* <View
                     style={{
                         width: SCREEN_WIDTH,
@@ -826,7 +943,11 @@ export default class Upgrade extends React.Component {
                                     </Text>
                                 </TouchableOpacity>
                                 <Text style={[styles.butnExplainText]}>
-                                    One-time purchase of $1.99
+                                    {validProduct
+                                        ? `One-time purchase of ${
+                                              products[0].localizedPrice
+                                          }`
+                                        : ""}
                                 </Text>
                             </View>
                         ) : (
@@ -857,6 +978,14 @@ export default class Upgrade extends React.Component {
                         )}
                     </View>
                 </View>
+                {this.state.isLoading && (
+                    <View style={styles.actIndWrapper}>
+                        <ActivityIndicator
+                            size="large"
+                            style={StyleSheet.absoluteFill}
+                        />
+                    </View>
+                )}
             </View>
         );
     }
@@ -934,7 +1063,6 @@ const styles = StyleSheet.create({
         marginVertical: 15,
         marginHorizontal: 10,
         flexDirection: "row",
-        // height: SCREEN_HEIGHT - 200 - 50, // TODO: Change 200 to factor for Title height
         alignSelf: "stretch",
         alignItems: "center",
         justifyContent: "center",
@@ -1022,5 +1150,15 @@ const styles = StyleSheet.create({
         // top: 0,
         width: 1600
         // height: 120
+    },
+    actIndWrapper: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#000000AA"
     }
 });

@@ -30,7 +30,7 @@ export class UpgradeStack extends React.Component {
                 upgrades.pro != true ? (
                     <TouchableOpacity
                         onPress={() => {
-                            navigation.state.params.onPressUpgrade();
+                            navigation.state.params.onPressRestore();
                         }}
                         hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
                         style={{
@@ -47,15 +47,7 @@ export class UpgradeStack extends React.Component {
                             Restore
                         </Text>
                     </TouchableOpacity>
-                ) : (
-                    <Button
-                        title="downgrade"
-                        onPress={() => {
-                            upgrades.setPro(false); // TODO: NOTE: Remove. This is for DEV convenience
-                            // this.forceUpdate();
-                        }}
-                    />
-                )
+                ) : null
         };
     };
 
