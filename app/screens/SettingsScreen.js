@@ -13,8 +13,11 @@ import { NavigationEvents } from "react-navigation";
 import { SettingsScreen, SettingsData } from "react-native-settings-screen";
 import Permissions from "react-native-permissions";
 import EntypoIcon from "react-native-vector-icons/Entypo";
+import FAIcon from "react-native-vector-icons/FontAwesome";
+
 import VersionNumber from "react-native-version-number";
 
+import ClkAlert from "../components/clk-awesome-alert";
 import Colors from "../styles/colors";
 // import PickerActionSheet from "../components/picker-action-sheet";
 import Settings from "../config/settings";
@@ -148,6 +151,7 @@ export default class SettingsScreenCkt extends React.Component {
                         return (
                             <Switch
                                 value={settings.chargeReminder}
+                                trackColor={{ false: "white" }}
                                 onValueChange={newVal => {
                                     console.log(
                                         "didSet Charge Reminder",
@@ -159,6 +163,9 @@ export default class SettingsScreenCkt extends React.Component {
                                 }}
                             />
                         );
+                    },
+                    onPress: () => {
+                        this.setState({ showChargeTip: true });
                     }
                 },
                 {
@@ -169,6 +176,7 @@ export default class SettingsScreenCkt extends React.Component {
                         return (
                             <Switch
                                 value={settings.defaultShowHrsSleep}
+                                trackColor={{ false: "white" }}
                                 onValueChange={newVal => {
                                     console.log(
                                         "didSet defaultShowHrsSleep",
@@ -180,6 +188,9 @@ export default class SettingsScreenCkt extends React.Component {
                                 }}
                             />
                         );
+                    },
+                    onPress: () => {
+                        this.setState({ showHrsOfSleepTip: true });
                     }
                 }
                 // { title: "A non-tappable row" },
@@ -452,6 +463,70 @@ export default class SettingsScreenCkt extends React.Component {
                     // style={{ backgroundColor: Colors.backgroundBright }}
                     style={{ backgroundColor: Colors.backgroundGrey }}
                 />
+                {this.state.showChargeTip && (
+                    <ClkAlert
+                        contHeight={"mid"}
+                        headerIcon={
+                            <FAIcon
+                                name="info"
+                                size={33}
+                                color={Colors.brandLightPurple}
+                            />
+                        }
+                        title="Charge Reminder"
+                        headerTextStyle={{ color: Colors.brandLightOpp }}
+                        bodyText={`Remind me to plugin in my device whenever I enable an alarm.`}
+                        dismissConfig={{
+                            onPress: () => {
+                                console.log("Dismissed Info popup");
+                                this.setState({ showChargeTip: false });
+                            },
+                            text: "Got it!"
+                        }}
+                        // confirmConfig={{
+                        //     onPress: () => {
+                        //         console.log(
+                        //             "Confirmed Upgrade popup: Going to Upgrades screen"
+                        //         );
+                        //         this.setState({ showUpgradePopup: false });
+                        //         this.props.navigation.navigate("Upgrade");
+                        //     },
+                        //     text: "Go to Upgrades"
+                        // }}
+                    />
+                )}
+                {this.state.showHrsOfSleepTip && (
+                    <ClkAlert
+                        contHeight={"mid"}
+                        headerIcon={
+                            <FAIcon
+                                name="info"
+                                size={33}
+                                color={Colors.brandLightPurple}
+                            />
+                        }
+                        title="Show Hours of Sleep"
+                        headerTextStyle={{ color: Colors.brandLightOpp }}
+                        bodyText={`While editing an alarm, display how many hours of sleep I would get if I would fall asleep at that moment.`}
+                        dismissConfig={{
+                            onPress: () => {
+                                console.log("Dismissed Info popup");
+                                this.setState({ showHrsOfSleepTip: false });
+                            },
+                            text: "Got it!"
+                        }}
+                        // confirmConfig={{
+                        //     onPress: () => {
+                        //         console.log(
+                        //             "Confirmed Upgrade popup: Going to Upgrades screen"
+                        //         );
+                        //         this.setState({ showUpgradePopup: false });
+                        //         this.props.navigation.navigate("Upgrade");
+                        //     },
+                        //     text: "Go to Upgrades"
+                        // }}
+                    />
+                )}
             </View>
         );
     }
