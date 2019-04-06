@@ -155,6 +155,13 @@ class TaskList extends React.Component {
                                 </Text>
                             </View>
                         }
+                        getItemLayout={(data, index) => {
+                            return {
+                                length: 55,
+                                offset: 55 * index,
+                                index
+                            };
+                        }}
                         // rowDimensions={this.props.taskRowDimensions}
                         // renderRowsInclude={this.props.renderRowsInclude}
                         // onScroll={this.props.onScroll}

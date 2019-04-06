@@ -102,6 +102,39 @@ class TaskItem extends React.Component {
             outputRange: ["360deg", "180deg"],
             extrapolate: "clamp"
         });
+
+        this.frontFlipAnimStyle = {
+            transform: [
+                { rotateY: this.flipFrontToBack },
+                { perspective: 1000 }
+            ],
+            opacity:
+                Platform.OS == "android"
+                    ? this.props.startTimesAnim.interpolate({
+                          inputRange: [-230, -125, -90, 0],
+                          outputRange: [0, 0, 0.5, 1],
+                          extrapolate: "clamp"
+                      })
+                    : 1
+        };
+        this.backFlipAnimStyle = {
+            transform: [
+                { rotateY: this.flipBackToFront },
+                { perspective: 1000 }
+            ],
+            // opacity: this.props.startTimesAnim.interpolate({
+            //     inputRange: [-230, -115, 0],
+            //     outputRange: [1, 0, 1]
+            // }),
+            opacity:
+                Platform.OS == "android"
+                    ? this.props.startTimesAnim.interpolate({
+                          inputRange: [-230, -125, -90, 0],
+                          outputRange: [1, 0.5, 0, 0],
+                          extrapolate: "clamp"
+                      })
+                    : 1
+        };
     }
 
     // componentWillUnmount() {
@@ -238,126 +271,21 @@ class TaskItem extends React.Component {
         return true;
     }
 
-    render() {
-        console.debug("render task-item");
-        // console.debug("render task-item props", this.props);
-        // console.debug(
-        //     "render task-item durationsVisible",
-        //     this.props.durationsVisible
-        // );
-        // console.debug("render task-item state", this.state);
-        // console.log("\n");
-        // console.log("this.state.tempDuration", this.state.tempDuration);
-
-        const frontFlipAnimStyle = {
-            transform: [
-                { rotateY: this.flipFrontToBack },
-                { perspective: 1000 }
-            ],
-            opacity:
-                Platform.OS == "android"
-                    ? this.props.startTimesAnim.interpolate({
-                          inputRange: [-230, -125, -90, 0],
-                          outputRange: [0, 0, 0.5, 1],
-                          extrapolate: "clamp"
-                      })
-                    : 1
-        };
-        const backFlipAnimStyle = {
-            transform: [
-                { rotateY: this.flipBackToFront },
-                { perspective: 1000 }
-            ],
-            // opacity: this.props.startTimesAnim.interpolate({
-            //     inputRange: [-230, -115, 0],
-            //     outputRange: [1, 0, 1]
-            // }),
-            opacity:
-                Platform.OS == "android"
-                    ? this.props.startTimesAnim.interpolate({
-                          inputRange: [-230, -125, -90, 0],
-                          outputRange: [1, 0.5, 0, 0],
-                          extrapolate: "clamp"
-                      })
-                    : 1
-        };
-
-        /* Statement Explanation: 
-            - Use tempDuration if not null (this means the slider is showing)
-            - Otherwise, check if there is a user-set duration for this AlarmTask, if there is, use it
-            - Otherwise, use the default duration for this Task
-        */
-        let duration =
-            this._tempDuration ||
-            (this.props.data.duration != null
-                ? this.props.data.duration
-                : this.props.data.task.defaultDuration);
-
-        // console.log("duration", duration);
-
-        // console.log(
-        //     "Checking whether to setTimeout. close : " + this.props.closed
-        // );
-
-        let touchableBackdrop = null;
-
-        if (this.props.activeTask != null) {
-            touchableBackdrop = (
-                <TouchableBackdrop
-                    style={[
-                        // TaskItemStyle.taskInfoWrap,
-                        { backgroundColor: "transparent" }
-                    ]}
-                    onPress={() => {
-                        this.props.closeTaskRows();
-                    }}
-                />
-            );
-        }
-
-        let sortHandlers = this.props.sortHandlers;
-
-        let movingStyle;
-        let borderBottomColor = Colors.disabledGrey;
-        if (this.props.isMoving) {
-            movingStyle = styles.movingStyle;
-            borderBottomColor = "transparent";
-        }
-
-        // console.debug("... actual render");
+    renderMovingItem = duration => {
         return (
-            <Interactable.View
+            <View
                 style={[
                     TaskListStyle.taskRow,
                     {
                         alignContent: "flex-start"
                     }
                 ]}
-                ref={this.setInteractableRef}
-                horizontalOnly={true}
-                snapPoints={[{ x: 0, id: "closed" }, { x: -90, id: "active" }]}
-                dragWithSpring={{ tension: 500, damping: 0.5 }}
-                animatedNativeDriver={true}
-                // onSnap={e => {
-                //     // console.log("Snapping");
-                //     this.props.onSnapTask(e.nativeEvent.id);
-                // }}
-                onDrag={event => {
-                    // console.log("Snapping");
-                    let { state, y, targetSnapPointId } = event.nativeEvent;
-                    if (state == "end") {
-                        this.props.onSnapTask(targetSnapPointId);
-                    }
-                }}
-                /* Disable "Swipe-to-show DELETE" if slider is showing. Otherwise we get
-                    premature panResonder termination, especially on iOS */
-                dragEnabled={this._tempDuration == null}
             >
                 <View
                     style={[
                         TaskItemStyle.taskInfoWrap,
                         {
-                            borderBottomColor: borderBottomColor
+                            borderBottomColor: "transparent"
                             // backgroundColor: "blue"
                         }
                     ]}
@@ -365,7 +293,7 @@ class TaskItem extends React.Component {
                     <TouchableOpacity
                         style={[
                             TaskItemStyle.taskInfoTouchable,
-                            movingStyle
+                            styles.movingStyle
                             // { backgroundColor: "blue" }
                         ]}
                         ref={touchable => (this._touchable = touchable)}
@@ -416,7 +344,7 @@ class TaskItem extends React.Component {
                             }
                             this._isMoving = false;
                         }}
-                        {...sortHandlers}
+                        // {...sortHandlers}
                     >
                         <TouchableOpacity
                             style={TaskItemStyle.checkbox}
@@ -473,8 +401,8 @@ class TaskItem extends React.Component {
                                 style={[
                                     styles.flipCard,
                                     this.state.taskDurVisible
-                                        ? frontFlipAnimStyle
-                                        : backFlipAnimStyle
+                                        ? this.frontFlipAnimStyle
+                                        : this.backFlipAnimStyle
                                     // frontFlipAnimStyle
                                 ]}
                             >
@@ -502,8 +430,8 @@ class TaskItem extends React.Component {
                                     styles.flipCard,
                                     styles.flipCardBack,
                                     this.state.taskDurVisible
-                                        ? backFlipAnimStyle
-                                        : frontFlipAnimStyle
+                                        ? this.backFlipAnimStyle
+                                        : this.frontFlipAnimStyle
                                     // backFlipAnimStyle
                                 ]}
                             >
@@ -576,15 +504,337 @@ class TaskItem extends React.Component {
                         </View>
                     </TouchableOpacity>
                 </View>
-                {touchableBackdrop}
-                <TouchableOpacity
-                    style={[TaskItemStyle.deleteBtn]}
-                    onPress={this._onPressDelete}
-                >
-                    <Text style={TaskItemStyle.deleteBtnText}>DELETE</Text>
-                </TouchableOpacity>
-            </Interactable.View>
+            </View>
         );
+    };
+
+    // renderTest() {
+    //     return (
+    //         <View>
+    //             {this.props.isMoving}
+    //         </View>
+    //     );
+    // }
+
+    render() {
+        console.debug("render task-item");
+        // console.debug("render task-item props", this.props);
+        // console.debug(
+        //     "render task-item durationsVisible",
+        //     this.props.durationsVisible
+        // );
+        // console.debug("render task-item state", this.state);
+        // console.log("\n");
+        // console.log("this.state.tempDuration", this.state.tempDuration);
+
+        /* Statement Explanation: 
+            - Use tempDuration if not null (this means the slider is showing)
+            - Otherwise, check if there is a user-set duration for this AlarmTask, if there is, use it
+            - Otherwise, use the default duration for this Task
+        */
+        let duration =
+            this._tempDuration ||
+            (this.props.data.duration != null
+                ? this.props.data.duration
+                : this.props.data.task.defaultDuration);
+
+        // console.log("duration", duration);
+
+        // console.log(
+        //     "Checking whether to setTimeout. close : " + this.props.closed
+        // );
+
+        let touchableBackdrop = null;
+
+        if (this.props.activeTask != null) {
+            touchableBackdrop = (
+                <TouchableBackdrop
+                    style={[
+                        // TaskItemStyle.taskInfoWrap,
+                        { backgroundColor: "transparent" }
+                    ]}
+                    onPress={() => {
+                        this.props.closeTaskRows();
+                    }}
+                />
+            );
+        }
+
+        let sortHandlers = this.props.sortHandlers;
+
+        let movingStyle;
+        let borderBottomColor = Colors.disabledGrey;
+        if (this.props.isMoving) {
+            movingStyle = styles.movingStyle;
+            borderBottomColor = "transparent";
+            return this.renderMovingItem(duration);
+        } else {
+            // console.debug("... actual render");
+            return (
+                <Interactable.View
+                    style={[
+                        TaskListStyle.taskRow,
+                        {
+                            alignContent: "flex-start"
+                        }
+                    ]}
+                    ref={this.setInteractableRef}
+                    horizontalOnly={true}
+                    snapPoints={[
+                        { x: 0, id: "closed" },
+                        { x: -90, id: "active" }
+                    ]}
+                    dragWithSpring={{ tension: 500, damping: 0.5 }}
+                    animatedNativeDriver={true}
+                    // onSnap={e => {
+                    //     // console.log("Snapping");
+                    //     this.props.onSnapTask(e.nativeEvent.id);
+                    // }}
+                    onDrag={event => {
+                        // console.log("Snapping");
+                        let { state, y, targetSnapPointId } = event.nativeEvent;
+                        if (state == "end") {
+                            this.props.onSnapTask(targetSnapPointId);
+                        }
+                    }}
+                    /* Disable "Swipe-to-show DELETE" if slider is showing. Otherwise we get
+                    premature panResonder termination, especially on iOS */
+                    dragEnabled={this._tempDuration == null}
+                >
+                    <View
+                        style={[
+                            TaskItemStyle.taskInfoWrap,
+                            {
+                                borderBottomColor: borderBottomColor
+                                // backgroundColor: "blue"
+                            }
+                        ]}
+                    >
+                        <TouchableOpacity
+                            style={[
+                                TaskItemStyle.taskInfoTouchable,
+                                movingStyle
+                                // { backgroundColor: "blue" }
+                            ]}
+                            ref={touchable => (this._touchable = touchable)}
+                            onPress={this._onPress.bind(this)}
+                            onLongPress={this._onLongPress.bind(this)}
+                            onPressOut={e => {
+                                // console.log("----------- onPressOut ----------");
+
+                                // console.log("event", e.nativeEvent);
+
+                                /* Example of event.nativeEvent when user has started to slide */
+                                // 'event', { target: 287,
+                                //     pageX: 94.33332824707031,
+                                //     timestamp: 1694309947.8481343,
+                                //     locationX: 47.999994913736984,
+                                //     pageY: 525,
+                                //     force: 0,
+                                //     locationY: 22.3333333333332,
+                                //     identifier: 1,
+                                //     changedTouches: [ [Circular] ],
+                                //     touches: [ [Circular] ] }  ********
+
+                                /* Example of event.nativeEvent when releasing touch if user did NOT slide */
+                                // 'event', { target: 178,
+                                //     pageX: 122.66665649414062,
+                                //     timestamp: 1694283005.7050912,
+                                //     locationX: 76.3333231608073,
+                                //     pageY: 507.3333282470703,
+                                //     force: 0,
+                                //     locationY: 4.666661580403513,
+                                //     identifier: 1,
+                                //     changedTouches: [ [Circular] ],
+                                //     touches: [] }  ********
+
+                                /* The only different between the events is the 'touches' array. */
+                                if (
+                                    e.nativeEvent.touches &&
+                                    e.nativeEvent.touches.length == 0 &&
+                                    this._isMoving == true
+                                ) {
+                                    // console.log(
+                                    //     "Touches arr is empty. Released without sliding!"
+                                    // );
+                                    this._tempDuration = null;
+                                    // this.setState({ isSlidingTask: false });
+                                    this.props.shouldEndMove();
+                                    this.props.didEndMove();
+                                }
+                                this._isMoving = false;
+                            }}
+                            {...sortHandlers}
+                        >
+                            <TouchableOpacity
+                                style={TaskItemStyle.checkbox}
+                                onPress={this._onTapCheckBox}
+                            >
+                                <View
+                                    style={{
+                                        backgroundColor:
+                                            Colors.brandLightPurple,
+                                        borderColor: "transparent",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        left: 0,
+                                        borderRadius: 4,
+                                        width: 25,
+                                        height: 25
+                                    }}
+                                >
+                                    {this.props.data.enabled && (
+                                        <EntypoIcon
+                                            name="check"
+                                            size={18}
+                                            color={Colors.brandLightOpp}
+                                            style={{ marginTop: 2 }}
+                                        />
+                                    )}
+                                </View>
+                            </TouchableOpacity>
+                            <Text
+                                style={[
+                                    TaskListStyle.allChildren,
+                                    TaskItemStyle.description,
+                                    {
+                                        color: this.props.data.enabled
+                                            ? Colors.brandLightGrey
+                                            : Colors.disabledGrey
+                                    }
+                                ]}
+                                numberOfLines={1}
+                                // ellipsizeMode="tail"
+                                selectable={false}
+                            >
+                                {this.props.data.task.name}
+                            </Text>
+                            <View
+                                style={[
+                                    {
+                                        flex: DURATION_AREA_FLEX_FACTOR,
+                                        alignSelf: "stretch",
+                                        alignItems: "center"
+                                    }
+                                ]}
+                            >
+                                <Animated.View
+                                    style={[
+                                        styles.flipCard,
+                                        this.state.taskDurVisible
+                                            ? this.frontFlipAnimStyle
+                                            : this.backFlipAnimStyle
+                                        // frontFlipAnimStyle
+                                    ]}
+                                >
+                                    <DurationText
+                                        duration={duration}
+                                        short={true}
+                                        style={[
+                                            TaskItemStyle.duration,
+                                            TaskListStyle.allChildren,
+                                            TextStyle.timeText,
+                                            {
+                                                alignSelf: "stretch",
+                                                // textAlign: "right",
+                                                // backgroundColor: "red",
+                                                color: this.props.data.enabled
+                                                    ? Colors.brandLightGrey
+                                                    : Colors.disabledGrey,
+                                                fontSize: 24
+                                            }
+                                        ]}
+                                    />
+                                </Animated.View>
+                                <Animated.View
+                                    style={[
+                                        styles.flipCard,
+                                        styles.flipCardBack,
+                                        this.state.taskDurVisible
+                                            ? this.backFlipAnimStyle
+                                            : this.frontFlipAnimStyle
+                                        // backFlipAnimStyle
+                                    ]}
+                                >
+                                    <TextInput
+                                        editable={false}
+                                        defaultValue={this.props.data.startTime}
+                                        numberOfLines={1}
+                                        ref={elem => {
+                                            // console.log("Sending data for ref");
+                                            // console.log(
+                                            //     "this.props.data",
+                                            //     this.props.data
+                                            // );
+                                            if (
+                                                this.props.data &&
+                                                !this.props.isMoving
+                                            ) {
+                                                // console.log("ok sending ref");
+                                                try {
+                                                    this.props.setStartTimeRef(
+                                                        elem,
+                                                        this.props.data.order
+                                                    );
+                                                } catch (e) {
+                                                    // console.warn(
+                                                    //     "Failed to set ref for nonexistent realm object"
+                                                    // );
+                                                }
+                                            }
+                                        }}
+                                        style={[
+                                            TaskItemStyle.duration,
+                                            TaskListStyle.allChildren,
+                                            TextStyle.timeText,
+                                            {
+                                                // backgroundColor: "blue",
+                                                alignSelf: "stretch",
+                                                textAlign: "right",
+                                                fontSize: 24,
+                                                height: 30,
+                                                marginTop: 8
+                                            }
+                                        ]}
+                                    />
+                                    {/* NOTE: 3. IAP-locked Feature - Task Start Times */}
+                                    {upgrades.pro != true && (
+                                        <TouchableHighlight
+                                            style={[
+                                                StyleSheet.absoluteFill,
+                                                {
+                                                    margin: 1,
+                                                    position: "absolute",
+                                                    backgroundColor:
+                                                        Colors.brandMidGrey,
+                                                    alignContent: "center",
+                                                    alignItems: "center",
+                                                    justifyContent: "center"
+                                                }
+                                            ]}
+                                            onPress={this.props.onPressTaskST}
+                                        >
+                                            <EvilIcon
+                                                name="lock"
+                                                size={31}
+                                                color={Colors.brandLightOpp}
+                                            />
+                                        </TouchableHighlight>
+                                    )}
+                                </Animated.View>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                    {touchableBackdrop}
+                    <TouchableOpacity
+                        style={[TaskItemStyle.deleteBtn]}
+                        onPress={this._onPressDelete}
+                    >
+                        <Text style={TaskItemStyle.deleteBtnText}>DELETE</Text>
+                    </TouchableOpacity>
+                </Interactable.View>
+            );
+        }
     }
 }
 
