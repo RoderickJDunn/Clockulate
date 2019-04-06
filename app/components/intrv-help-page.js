@@ -452,10 +452,6 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         shadowColor: "#000",
         elevation: 5,
-        borderColor: Colors.brandMidGrey,
-        // backgroundColor: Colors.brandLightOpp,
-        borderWidth: StyleSheet.hairlineWidth,
-        // borderColor: "white",
         backgroundColor: Colors.brandLightPurple,
         borderRadius: 40
         // overflow: "hidden"

@@ -4,6 +4,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 // based on iphone 5s's scale
 const SCALE = SCREEN_WIDTH / 320;
+const SCALE_HEIGHT = SCREEN_HEIGHT / 568;
 
 export function scale(size) {
     // console.log("Normalizing... ");
@@ -24,7 +25,7 @@ export function scale(size) {
 }
 
 export function scaleByFactor(size, bluntFactor = 1) {
-    bluntFactor = bluntFactor > 0 ? bluntFactor : 1;
+    // bluntFactor = bluntFactor > 0 ? bluntFactor : 1;
     if (Platform.OS === "ios") {
         return Math.round(
             // PixelRatio.roundToNearestPixel(size) * (scale / bluntFactor)
@@ -34,6 +35,38 @@ export function scaleByFactor(size, bluntFactor = 1) {
         // scale * bluntfactor does not work, it seems.
         // I need to find a way to make the bluntFactor bring the (scale) term closer to 1
         return Math.round(size + (scale(size) - size) * bluntFactor); // - 2;
+    }
+}
+
+export function scaleHeight(size) {
+    // console.log("Normalizing... ");
+    // console.log("size: " + size);
+    // console.log("SCREEN_WIDTH", SCREEN_WIDTH);
+    // console.log("scale", SCALE);
+
+    if (Platform.OS === "ios") {
+        let ret = Math.round(
+            // PixelRatio.roundToNearestPixel(size) * (SCALE / bluntFactor)
+            size * SCALE_HEIGHT
+        );
+        return ret;
+    } else {
+        let ret = Math.round(size * SCALE_HEIGHT); // - 2;
+        return ret;
+    }
+}
+
+export function scaleByHeightFactor(size, bluntFactor = 1) {
+    // bluntFactor = bluntFactor > 0 ? bluntFactor : 1;
+    if (Platform.OS === "ios") {
+        return Math.round(
+            // PixelRatio.roundToNearestPixel(size) * (scale / bluntFactor)
+            size + (scaleHeight(size) - size) * bluntFactor
+        );
+    } else {
+        // scale * bluntfactor does not work, it seems.
+        // I need to find a way to make the bluntFactor bring the (scale) term closer to 1
+        return Math.round(size + (scaleHeight(size) - size) * bluntFactor); // - 2;
     }
 }
 

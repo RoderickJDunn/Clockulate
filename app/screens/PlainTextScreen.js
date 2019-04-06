@@ -23,7 +23,13 @@ export default class PlainTextScreen extends React.Component {
 
     render() {
         return (
-            <ScrollView style={{ flex: 1 /* , justifyContent: "center" */ }}>
+            <ScrollView
+                style={{
+                    flex: 1,
+                    backgroundColor:
+                        Colors.backgroundGrey /* , justifyContent: "center" */
+                }}
+            >
                 <SafeAreaView>
                     {/* <Text style={styles.descriptionText}>{this.state.text}</Text> */}
                     {this.state.text()}

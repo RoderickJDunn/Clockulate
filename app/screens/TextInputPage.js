@@ -68,7 +68,13 @@ export default class TextInputPage extends React.Component {
         let pickerWidthR = hasMultipleDatasets ? this.width * 0.25 : 0;
 
         return (
-            <View style={{ flex: 1 /* , justifyContent: "center" */ }}>
+            <View
+                style={{
+                    flex: 1,
+                    backgroundColor:
+                        Colors.backgroundGrey /* , justifyContent: "center" */
+                }}
+            >
                 <View
                     style={{
                         marginTop: 45,
@@ -78,7 +84,7 @@ export default class TextInputPage extends React.Component {
                         borderBottomWidth: 0.4,
                         // flex: 0.,
                         justifyContent: "center",
-                        backgroundColor: Colors.backgroundBright
+                        backgroundColor: Colors.backgroundLightGrey
                     }}
                 >
                     {/* <Text style={styles.titleText}>{params.title}</Text> */}

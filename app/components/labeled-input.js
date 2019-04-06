@@ -9,7 +9,7 @@ import {
     TextInput,
     TouchableWithoutFeedback
 } from "react-native";
-import Colors, { randomColor } from "../styles/colors";
+import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { scale, scaleByFactor } from "../util/font-scale";
 

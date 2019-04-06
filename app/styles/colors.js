@@ -32,11 +32,10 @@ const Colors = {
     labelText: "#6F6F6F",
     black: "#000",
     darkGreyText: "#292929",
-    deleteBtnRed: "#ce0000"
-};
-
-export const randomColor = () => {
-    return "#" + ((Math.random() * 0xffffff) << 0).toString(16);
+    deleteBtnRed: "#ce0000",
+    random: () => {
+        return "#" + ((Math.random() * 0xffffff) << 0).toString(16);
+    }
 };
 
 export default Colors;

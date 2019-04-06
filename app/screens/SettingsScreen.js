@@ -369,67 +369,8 @@ export default class SettingsScreenCkt extends React.Component {
                         }
                     }
                 }
-                //         {
-                //             title: "Dolor Nullam",
-                //             showDisclosureIndicator: true
-                //         },
-                //         {
-                //             title: "Nulla vitae elit libero",
-                //             renderAccessory: () => (
-                //                 <Text
-                //                     style={{
-                //                         color: "#999",
-                //                         marginRight: 6,
-                //                         fontSize: 18
-                //                     }}
-                //                 >
-                //                     Dapibus
-                //                 </Text>
-                //             )
-                //         },
-                //         {
-                //             title: "Ipsum Lorem Venenatis",
-                //             subtitle: "Vestibulum Inceptos Fusce Justo",
-                //             renderAccessory: () => (
-                //                 <Text
-                //                     style={{
-                //                         color: "#999",
-                //                         marginRight: 6,
-                //                         fontSize: 18
-                //                     }}
-                //                 >
-                //                     Yes
-                //                 </Text>
-                //             ),
-                //             showDisclosureIndicator: true
-                //         },
-                //         {
-                //             title: "Cras Euismod",
-                //             renderAccessory: () => (
-                //                 <Icon
-                //                     style={{ marginTop: 3, marginRight: 6 }}
-                //                     name="colours"
-                //                     size={32}
-                //                     color="black"
-                //                 />
-                //             ),
-                //             showDisclosureIndicator: true
-                //         }
             ]
         },
-        // {
-        //     type: "SECTION",
-        //     header: "My Third Section".toUpperCase(),
-        //     rows: [
-        //         {
-        //             title: "Different title style",
-        //             showDisclosureIndicator: true,
-        //             titleStyle: {
-        //                 color: "red"
-        //             }
-        //         }
-        //     ]
-        // },
         {
             type: "CUSTOM_VIEW",
             render: () => (
@@ -508,7 +449,8 @@ export default class SettingsScreenCkt extends React.Component {
                 <SettingsScreen
                     data={this.data}
                     globalTextStyle={{ fontFamily }}
-                    style={{ backgroundColor: Colors.backgroundBright }}
+                    // style={{ backgroundColor: Colors.backgroundBright }}
+                    style={{ backgroundColor: Colors.backgroundGrey }}
                 />
             </View>
         );
@@ -521,6 +463,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         paddingTop: 10,
-        backgroundColor: Colors.backgroundBright
+        backgroundColor: Colors.backgroundGrey
     }
 });

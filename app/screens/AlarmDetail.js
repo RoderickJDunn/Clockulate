@@ -60,7 +60,7 @@ import upgrades from "../config/upgrades";
 import ClkAlert from "../components/clk-awesome-alert";
 
 let { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15];
+const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20];
 // const snoozeTimeOptions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15]; // DEV: short snooze option
 
 let _menuIconAnim = new Animated.Value(0);
@@ -1916,7 +1916,7 @@ class AlarmDetail extends Component {
                     boundaries={{
                         top: -SCREEN_HEIGHT * 0.45, // 0.7 before
                         bottom: this.snapNormal * NON_CLOCK_HEIGHT_FACTOR,
-                        bounce: 0.3
+                        bounce: 0.0
                     }}
                     dragWithSpring={
                         mode == "normal"
@@ -2275,7 +2275,8 @@ class AlarmDetail extends Component {
                                             // backgroundColor: "green",
                                             borderBottomColor:
                                                 Colors.brandLightOpp,
-                                            borderBottomWidth: 0.8
+                                            borderBottomWidth:
+                                                StyleSheet.hairlineWidth
                                         }
                                     ]}
                                 >
