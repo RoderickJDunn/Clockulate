@@ -476,10 +476,15 @@ class Alarms extends Component {
         //NOTE: 1A. IAP-locked Feature - Alarms Limit
         this.props.navigation.navigate("AlarmDetail", {
             newAlarm: true,
-            reloadAlarms: this.reloadAlarms,
-            otherAlarmOn: otherAlarmOn
+            updateOrSetAlarm: this.updateOrSetAlarm,
+            otherAlarmOn: otherAlarmOn,
+            willNavBackToAlarms: this.willNavigateBack
         });
     }
+
+    willNavigateBack = () => {
+        this.setState({ isLoading: true });
+    };
 
     /* We only allow 1 alarm to be active (SET) at a time. This function checks if there is
         already an active alarm. If not, returns true. If there is an alarm already active,
@@ -522,15 +527,11 @@ class Alarms extends Component {
         }
     }
 
-    reloadAlarms = alarmId => {
+    updateOrSetAlarm = (alarmId, nextStatus) => {
         console.info(
             "AlarmsList - reloading alarms list. Specific alarm to schedule: " +
                 alarmId
         );
-        // console.log("this: ", this.constructor.name); /* This is how you check a class's name (here i'm checking 'this') */
-        // console.debug(this.state);
-        // console.debug("Called set state from reloadAlarms");
-        // console.debug(this.state);
 
         if (alarmId) {
             let changedAlarms = this.state.alarms.filtered("id = $0", alarmId);
@@ -543,7 +544,7 @@ class Alarms extends Component {
 
                 // Only schedule an Alarm if the changed Alarm status is SET. If it is not SET, then
                 // another alarm is SET, and we don't want to schedule another.
-                if (changedAlarm.status == ALARM_STATES.SET) {
+                if (nextStatus == ALARM_STATES.SET) {
                     /* Now schedule notification(s) for the changes */
                     // passing in reloadAlarms function for iOS in-app alarm to be able to refresh AlarmsList screen
                     requestAnimationFrame(() => {
@@ -553,7 +554,7 @@ class Alarms extends Component {
                             this.alarmDidInitialize.bind(
                                 this,
                                 changedAlarm,
-                                changedAlarm.status
+                                nextStatus
                             )
                         );
                     });
@@ -566,11 +567,21 @@ class Alarms extends Component {
                 );
             }
         } else {
+            console.warn("Unable to find alarm to update/set.");
+        }
+    };
+
+    reloadAlarms = () => {
+        // console.log("this: ", this.constructor.name); /* This is how you check a class's name (here i'm checking 'this') */
+        // console.debug(this.state);
+        // console.debug("Called set state from reloadAlarms");
+        // console.debug(this.state);
+
+        console.log("Reloading alarms...");
             let alarms = realm.objects("Alarm").sorted("order");
             // console.log("Alarms after reload: ", alarms);
             // general reload. No specific alarm ID is known to have changed.
             this.setState({ alarms: realm.objects("Alarm").sorted("order") }); // TODO: filter by 'visible'=true
-        }
     };
 
     /*
@@ -606,8 +617,9 @@ class Alarms extends Component {
         if (this._activeRow == null) {
             this.props.navigation.navigate("AlarmDetail", {
                 alarm: alarmItem,
-                reloadAlarms: this.reloadAlarms,
-                otherAlarmOn: otherAlarmOn
+                updateOrSetAlarm: this.updateOrSetAlarm,
+                otherAlarmOn: otherAlarmOn,
+                willNavBackToAlarms: this.willNavigateBack
             });
         } else {
             this._activeRow = null;

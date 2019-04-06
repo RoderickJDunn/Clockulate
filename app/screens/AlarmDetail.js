@@ -712,12 +712,13 @@ class AlarmDetail extends Component {
         // console.debug("Going back to Alarms List");
         // console.debug(this.state);
 
+        let nextAlarmStatus;
         realm.write(() => {
             let { alarm } = this.state;
             if (this.isAnotherAlarmOn) {
-                alarm.status = ALARM_STATES.OFF;
+                nextAlarmStatus = ALARM_STATES.OFF;
             } else {
-                alarm.status = ALARM_STATES.SET;
+                nextAlarmStatus = ALARM_STATES.SET;
             }
             if (alarm.mode === "autocalc" && this._calculatedWakeUpTime) {
                 alarm.wakeUpTime = DateUtils.date_to_nextTimeInstance(
@@ -762,8 +763,15 @@ class AlarmDetail extends Component {
         });
         // this.props.navigation.setParams({ shouldReload: true });
 
-        this.props.navigation.goBack();
-        this.props.navigation.state.params.reloadAlarms(this.state.alarm.id);
+        let { navigation } = this.props;
+        navigation.state.params.willNavBackToAlarms();
+        navigation.goBack();
+        InteractionManager.runAfterInteractions(() => {
+            navigation.state.params.updateOrSetAlarm(
+                this.state.alarm.id,
+                nextAlarmStatus
+            );
+        });
         // setTimeout(() => {
         //     this.props.navigation.goBack();
         // }, 500);
