@@ -438,6 +438,19 @@ class AlarmDetail extends Component {
         this._setMenuState = this._setMenuState.bind(this);
         this.removeKeyboardListeners = this.removeKeyboardListeners.bind(this);
         this.addKeyboardListeners = this.addKeyboardListeners.bind(this);
+
+        InteractionManager.runAfterInteractions(() => {
+            this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
+            this._taskStartTimes = this._calcStartTimes();
+
+            this.props.navigation.setParams({
+                handleBackBtn: this.handleBackPress,
+                menuIsOpen: false,
+                setMenuState: this._setMenuState,
+                isLoadingTasks: false,
+                notFirstLoad: true
+            });
+        });
     }
 
     componentWillUnmount() {
@@ -463,27 +476,9 @@ class AlarmDetail extends Component {
         if (this.keyboardWillHideSub) this.keyboardWillHideSub.remove();
     }
 
-    componentDidMount() {
-        console.debug("AlarmDetail --- ComponentDidMount");
-        // console.log("this.state.alarm", this.state.alarm);
-
-        this.addKeyboardListeners();
-
-        this._lastMeasuredView = "autocalc"; // set initial lastView to calcmode index
-
-        InteractionManager.runAfterInteractions(() => {
-            this._cachedSortedTasks = this.state.alarm.tasks.sorted("order");
-            this._taskStartTimes = this._calcStartTimes();
-
-            this.props.navigation.setParams({
-                handleBackBtn: this.handleBackPress,
-                menuIsOpen: false,
-                setMenuState: this._setMenuState,
-                isLoadingTasks: false
-            });
-        });
-        // AdvSvcOnScreenConstructed("AlarmDetail");
-    }
+    // componentDidMount() {
+    //     console.debug("AlarmDetail --- ComponentDidMount");
+    // }
 
     _setMenuState(nextMenuState, nextState) {
         if (nextMenuState == this.state.menuIsOpen) return;
@@ -1742,6 +1737,129 @@ class AlarmDetail extends Component {
         let labelForceVisible = null;
 
         let mode = this.state.alarm.mode;
+
+        if (!this.props.navigation.state.params.notFirstLoad) {
+            // if (true) {
+
+            let flexClock =
+                0.225 - (SCREEN_HEIGHT / 568 - 1) * 0.02 + ifIphoneX(0.009, 0);
+            let flexNonClock = 1 - flexClock;
+            return (
+                <View
+                    style={[
+                        styles.screenContainer,
+                        { backgroundColor: Colors.brandUltraDarkPurple }
+                    ]}
+                >
+                    {this._viewIdx == 0 ? (
+                        <View
+                            style={{
+                                width: SCREEN_WIDTH,
+                                flex: 1,
+                                alignSelf: "stretch",
+                                alignContent: "center",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                backgroundColor: Colors.brandUltraDarkPurple
+                                // marginTop: -scaleByHeightFactor(28, -3.5)
+                            }}
+                        >
+                            <Text
+                                style={[
+                                    styles.timeText,
+                                    {
+                                        alignItems: "center",
+                                        marginTop:
+                                            -scaleByHeightFactor(52, 2.3) +
+                                            ifIphoneX(25, 0)
+                                        // backgroundColor: "blue"
+                                    }
+                                    // flex: 0.5,
+                                ]}
+                            >
+                                {fWakeUpTime}
+                                <Text
+                                    style={[
+                                        { fontSize: scaleByFactor(53, 0.7) }
+                                    ]}
+                                >
+                                    {" " + amPmWakeUpTime}
+                                </Text>
+                            </Text>
+                        </View>
+                    ) : (
+                        <>
+                            <View
+                                style={{
+                                    width: SCREEN_WIDTH,
+                                    flex: flexClock,
+                                    alignSelf: "stretch",
+                                    alignContent: "center",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    backgroundColor: Colors.brandUltraDarkPurple
+                                }}
+                            >
+                                <Text
+                                    style={[
+                                        styles.timeText,
+                                        {
+                                            fontSize: scaleByFactor(95, 0.7),
+                                            alignItems: "center",
+                                            marginTop: scaleByFactor(3, 0.5)
+                                            // backgroundColor: "blue"
+                                        }
+                                    ]}
+                                >
+                                    {fWakeUpTime}
+                                    <Text
+                                        style={[
+                                            { fontSize: scaleByFactor(47, 0.7) }
+                                        ]}
+                                    >
+                                        {" " + amPmWakeUpTime}
+                                    </Text>
+                                </Text>
+                            </View>
+                            <View
+                                style={{
+                                    width: SCREEN_WIDTH,
+                                    flex: flexNonClock,
+                                    borderTopLeftRadius: 25,
+                                    borderTopRightRadius: 25,
+                                    justifyContent: "center",
+                                    backgroundColor: Colors.brandDarkGrey
+                                }}
+                            >
+                                <ActivityIndicator />
+                            </View>
+                        </>
+                    )}
+
+                    {/* NOTE: View for flicking between Placeholder screen and real screen */}
+                    {/* <TouchableOpacity
+                        style={{
+                            width: 100,
+                            height: 100,
+                            backgroundColor: "yellow",
+                            position: "absolute",
+                            right: 0
+                        }}
+                        onPress={() => {
+                            let {
+                                notFirstLoad
+                            } = this.props.navigation.state.params;
+                            notFirstLoad = !notFirstLoad;
+                            this.props.navigation.setParams({
+                                notFirstLoad: notFirstLoad
+                            });
+                        }}
+                    >
+                        <Text>ToggleView</Text>
+                    </TouchableOpacity> */}
+                </View>
+            );
+        }
 
         return (
             <ScrollView
