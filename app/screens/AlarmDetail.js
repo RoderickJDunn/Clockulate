@@ -229,6 +229,7 @@ class AlarmDetail extends Component {
 
     _snapPoints;
     _ALL_SNAP_POINTS;
+    _ALL_SPS_AND_KEYBOARD;
 
     startTimesPanRef;
 
@@ -324,6 +325,13 @@ class AlarmDetail extends Component {
 
         this._ALL_SNAP_POINTS = [
             { y: this.snapNormal, id: "normal" },
+            { y: this.snapAuto, id: "autocalc" },
+            { y: this.snapTaskList, id: "tasklist" }
+        ];
+
+        this._ALL_SPS_AND_KEYBOARD = [
+            { y: this.snapNormal, id: "normal" },
+            { y: this.snapNormal - 200, id: "keyboard" },
             { y: this.snapAuto, id: "autocalc" },
             { y: this.snapTaskList, id: "tasklist" }
         ];
@@ -876,21 +884,32 @@ class AlarmDetail extends Component {
         // using manually cached alarmLabel Text, since Android doesn't send 'Text' to onBlur...
 
         let tempAlarm = this.state.alarm;
+        this._snapPoints = this._ALL_SNAP_POINTS.slice(0, 2);
+        this._viewIdx = 0;
         if (
             this.alarmLabelCache != null &&
             typeof this.alarmLabelCache != "undefined"
         ) {
             realm.write(() => {
                 tempAlarm.label = this.alarmLabelCache;
+                tempAlarm.mode = "normal";
             });
         }
-        this.setState({ alarm: tempAlarm });
+        this.setState({ alarm: tempAlarm }, () => {
+            this.interactiveRef.snapTo({ index: 0 });
+        });
     }
 
     onLabelInputFocus() {
         console.info("Focusing label input");
         if (this.state.alarm.mode == "normal") {
-            this.setState({ isEditingLabel: true });
+            this._snapPoints = this._ALL_SPS_AND_KEYBOARD;
+
+            // this.setState({ isEditingLabel: true });
+            this.forceUpdate(() => {
+                this.interactiveRef.snapTo({ index: 1 });
+            });
+            // this.interactiveRef.changePosition({ x: 0, y: SCREEN_HEIGHT - 300 });
         }
     }
 
@@ -2012,6 +2031,7 @@ class AlarmDetail extends Component {
                             defaultValue={
                                 this.alarmLabelCache || this.state.alarm.label
                             }
+                            editable={this.state.alarm.mode == "normal"}
                             onChangeText={this.onChangeLabel}
                             onBlur={this.onLabelInputBlur}
                             onFocus={this.onLabelInputFocus}
