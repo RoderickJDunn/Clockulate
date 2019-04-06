@@ -207,7 +207,8 @@ export default class SleepLog extends React.Component {
                 .sorted("start", false);
 
             let onAlarms = realm.objects("Alarm").filtered("status > 0");
-
+            // console.log("SleepLog: ScreenDidFocus");
+            // console.log("alarmInstAll", alarmInstAll);
             if (alarmInstAll.length > 0) {
                 this.currAlmInstIdx = alarmInstAll.length - 1;
                 this.pageIdx = Math.min(9, alarmInstAll.length - 1);
@@ -227,6 +228,7 @@ export default class SleepLog extends React.Component {
                 this._updateScreenTitle(this.state.alarmInst);
             } else {
                 this.setState({
+                    alarmInstAll: [],
                     isAnyAlarmOn: onAlarms.length > 0,
                     forceProAdv: false,
                     isLoading: false
@@ -376,73 +378,6 @@ export default class SleepLog extends React.Component {
     //         genInfoPage: rangeTypeIdx
     //     });
     // }
-
-    _playIntro = () => {
-        console.log("_playIntro");
-        let { walkthroughIdx: wtIdx } = this.state;
-        if (wtIdx == null) {
-            wtIdx = 0;
-        } else {
-            if (
-                ttNameToIdx[wtIdx] == null ||
-                tooltipMap[ttNameToIdx[wtIdx]].ref == null
-            ) {
-                wtIdx = null;
-                return;
-            }
-            RNTooltips.Dismiss(tooltipMap[ttNameToIdx[wtIdx]].ref);
-            wtIdx++;
-            if (wtIdx > 2) {
-                wtIdx = null;
-            }
-        }
-
-        if (wtIdx != null) {
-            console.log("wtIdx != null", wtIdx != null);
-            // guard
-            if (tooltipMap[ttNameToIdx[wtIdx]].ref == null) {
-                console.log("Ref is null for wtIdx", wtIdx);
-                return;
-            }
-
-            this.setState({ walkthroughIdx: wtIdx });
-
-            console.log("Setting immediate for Show Tooltip");
-            setTimeout(() => {
-                console.log("inside setImmediate");
-                console.log(
-                    "tooltipMap[ttNameToIdx[wtIdx]].text",
-                    tooltipMap[ttNameToIdx[wtIdx]].text
-                );
-                RNTooltips.Show(
-                    tooltipMap[ttNameToIdx[wtIdx]].ref,
-                    this.refScreenContainer,
-                    {
-                        text: tooltipMap[ttNameToIdx[wtIdx]].text,
-                        autoHide: false,
-                        // onHide: () => {
-                        //     console.log("On Hide");
-                        //     // let { walkthroughIdx } = this.state;
-                        //     // walkthroughIdx++;
-                        //     // if (walkthroughIdx > 2) {
-                        //     //     walkthroughIdx = null;
-                        //     // }
-                        //     // this.setState({ walkthroughIdx: walkthroughIdx });
-                        // },
-                        clickToHide: true,
-                        textSize: 18,
-                        corner: 10,
-                        gravity: 3,
-                        align: 0,
-                        position: 4
-                    }
-                );
-            }, 500);
-        } else {
-            console.log("wtIdx != null", wtIdx != null);
-            this.setState({ walkthroughIdx: wtIdx });
-        }
-    };
 
     _renderTextStatRow = (label, value) => {
         return (
@@ -789,9 +724,6 @@ export default class SleepLog extends React.Component {
                             //     // currAlmInst.start
                             // );
 
-                            let recordings = currAlmInst.disturbances.filtered(
-                                "recording != null AND recording != ''"
-                            );
                             var path =
                                 RNFS.DocumentDirectoryPath +
                                 "/" +
@@ -858,14 +790,79 @@ export default class SleepLog extends React.Component {
                                 size={29}
                             />
                         }
-                        centerRight={<Text>Help</Text>}
-                        // right={
-                        //     <Text>{`${this.state.alarm.snoozeTime} min`}</Text>
-                        // }
+                        centerRight={<Text>Delete Recordings</Text>}
                         separatorPosition={SCREEN_WIDTH * 0.15}
                         onPressItem={() => {
                             this._setMenuState(false);
-                            this._playIntro();
+
+                            let {
+                                alarmInstGroupIdx: groupIdx,
+                                alarmInstAll
+                            } = this.state;
+
+                            let actualIndex = groupIdx - this.pageIdx;
+                            // alert(
+                            //     "group idx: " +
+                            //         groupIdx +
+                            //         " | pageIdx: " +
+                            //         this.pageIdx +
+                            //         " | total: " +
+                            //         alarmInstAll.length +
+                            //         " | actualIndex: " +
+                            //         this.currAlmInstIdx
+                            // );
+
+                            let currAlmInst = alarmInstAll[this.currAlmInstIdx];
+                            console.log("currAlmInst", currAlmInst);
+
+                            if (!currAlmInst) {
+                                alert("This Sleep Log is a sample.");
+                                this._setMenuState(false);
+                                return;
+                            } else if (currAlmInst.end == null) {
+                                alert(
+                                    "This Sleep Log is still active. First turn off your active alarm, then you will be able to delete this log"
+                                );
+                                this._setMenuState(false);
+                                return;
+                            }
+
+                            // console.log(
+                            //     "this.currAlmInstIdx",
+                            //     this.currAlmInstIdx
+                            // );
+                            // alert(
+                            //     "not fully implemented. Delete almInst with index " +
+                            //         this.currAlmInstIdx +
+                            //         ", and start-date: "
+                            //     // currAlmInst.start
+                            // );
+
+                            let recordings = currAlmInst.disturbances.filtered(
+                                "recording != null AND recording != ''"
+                            );
+                            var path =
+                                RNFS.DocumentDirectoryPath +
+                                "/" +
+                                currAlmInst.id;
+
+                            RNFS.unlink(path).then(() => {
+                                console.log(
+                                    "Deleted alarmInst directory" + path
+                                );
+                            });
+
+                            realm.write(() => {
+                                // Delete AlarmInstance, associated disturbances, and any recording files
+                                let disturbances = currAlmInst.disturbances;
+                                disturbances.forEach(d => {
+                                    d.recording = "";
+                                });
+                            });
+
+                            this._setMenuState(false, {
+                                alarmInstAll: alarmInstAll
+                            });
                         }}
                     />
                 </Animated.View>
@@ -940,7 +937,7 @@ export default class SleepLog extends React.Component {
                     //     }}
                     // />
                 )}
-                {Upgrades.pro != true && (
+                {this.state.isLoading != true && Upgrades.pro != true && (
                     <AdWrapper
                         // borderPosition="top"
                         animate={true}
