@@ -37,6 +37,10 @@ const HELP_SECTIONS = [
         name: "Alarms List",
         images: [
             {
+                path: "AlarmItem_v2_step0",
+                style: { marginBottom: 5 }
+            },
+            {
                 path: "AlarmItem_v2_step1",
                 style: { marginBottom: 5 },
                 sharePageWithNext: 1
