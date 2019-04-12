@@ -213,7 +213,7 @@ function insertPrepopData() {
         // console.log("dummy disturbances");
         // let distForAlarmInst = [];
         // let currTime = moment();
-        // for (let index = 0; index < 350; index++) {
+        // for (let index = 0; index < 10; index++) {
         //     let almEnd = moment(currTime.subtract(1, "hour"));
         //     almEnd.subtract(Math.random() * 60, "minutes");
         //     let almStart = moment(
@@ -250,7 +250,7 @@ function insertPrepopData() {
         //         });
 
         //         if (rec) {
-        //             // create 'fake' recording (real file, but not an actual recording') -- TODO: Test what happens when trying to playback such a file
+        //             // create 'fake' recording (real file, but not an actual recording')
         //             RNFS.mkdir(almInstPath)
         //                 .then(success => {
         //                     console.log("Dir created!");

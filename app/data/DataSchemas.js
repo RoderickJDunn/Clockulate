@@ -22,7 +22,7 @@ AlarmSchema.schema = {
         order: "int", // used to re-arrange the Alarms list. When an alarm is added, it always gets the highest order (bottom of the list)
         alarmSound: { type: "object", objectType: "AlarmSound" },
         snoozeTime: {
-            type: "int", // TODO: not settable by user yet. For now it will default to 10 minutes
+            type: "int",
             default: 10
         },
         showHrsOfSleep: { type: "bool", default: true },
@@ -124,7 +124,7 @@ SleepDisturbanceSchema.schema = {
         id: "string",
         time: "date",
         recording: "string?",
-        duration: { type: "int", default: 0 },
+        duration: { type: "int", default: 0 }
     }
 };
 
@@ -137,7 +137,8 @@ AlarmInstanceSchema.schema = {
         start: "date",
         end: { type: "date", optional: true },
         disturbances: { type: "list", objectType: "SleepDisturbance" },
-        timeAwake: {type: "int", default: 0}
+        // NOTE: the first 15mins of every Alarm will be considered 'awake time'
+        timeAwake: { type: "float", default: 15 }
     }
 };
 

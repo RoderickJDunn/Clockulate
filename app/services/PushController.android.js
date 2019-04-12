@@ -100,6 +100,9 @@ export let clearAlarm = (alarm, notificationID, reloadAlarmsList) => {
     }
 };
 
+export let resumeAlarm = () => {};
+export let cancelAllNotifications = () => {};
+
 export let scheduleAlarm = (alarm, reloadAlarmsList) => {
     console.log(
         "scheduleAlarm for (rn-push-notification lib): " + alarm.wakeUpTime
@@ -135,11 +138,10 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
         // TODO: This functionality will be a premium feature
     }
 
-    let snoozeTime = 600 * 1000;
-    if (__DEV__) {
-        snoozeTime = 60 * 1000;
-    }
-
+    let snoozeTime = alarm.snoozeTime * 1000;
+    // if (__DEV__) {
+    //     snoozeTime = 60 * 1000;
+    // }
     setInAppAlarm(alarm, reloadAlarmsList);
     // console.log("notifId", notifId);
 

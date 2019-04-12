@@ -20,6 +20,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const fontFamily = Platform.OS === "ios" ? "Avenir" : "sans-serif";
 
+// TEST:
 // TODO: FIXME: Its very likely that the appID in these links doesn't work. I need to test it once I have an AppStore AppID......
 // TODO: If the links turn out to be wrong, make sure to add the corrected links in Info.plist under LSApplicationQueriesSchemes
 const link =

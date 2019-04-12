@@ -194,6 +194,7 @@ class TaskItem extends React.Component {
                 enabled: nextProps.data.enabled,
                 task: nextProps.data.task,
                 startTime: nextProps.data.startTime
+                // order: nextProps.data.order // NOTE: Not used, but leaving in for convenience in case I want to display order for debugging
             },
             isSlidingTask:
                 this._tempDuration != null && nextProps.isSlidingTask,
@@ -220,6 +221,7 @@ class TaskItem extends React.Component {
             isSlidingTask,
             closed,
             taskDurVisible
+            // order // // NOTE: Not used, but leaving in for convenience in case I want to display order for debugging
         } = this.state;
 
         let {
@@ -227,6 +229,7 @@ class TaskItem extends React.Component {
             task: nTask,
             duration: nDuration
             // startTime: nStartTime
+            // order: nOrder // NOTE: Not used, but leaving in for convenience in case I want to display order for debugging
         } = nextProps.data;
         let {
             isEditingTasks: nIsEditingTasks,
@@ -245,6 +248,7 @@ class TaskItem extends React.Component {
             nIsSlidingTask == isSlidingTask &&
             nClosed == closed &&
             durationsVisible == taskDurVisible
+            // nOrder == order // NOTE: Not used, but leaving in for convenience in case I want to display order for debugging
         ) {
             // console.log("Not rendering task-item");
             return false;
