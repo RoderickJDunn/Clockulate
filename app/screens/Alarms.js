@@ -474,18 +474,18 @@ class Alarms extends Component {
         }
         // check if any Alarm is set and pass this info in as a flag to AlarmDetail
         let { alarms } = this.state;
-        let setAlarms = alarms.filtered("status = 1");
+        let activeAlarms = alarms.filtered("status > 0");
 
-        let otherAlarmOn = false;
-        if (setAlarms.length > 0) {
-            otherAlarmOn = true;
+        let otherAlarmIsOn = false;
+        if (activeAlarms.length > 0) {
+            otherAlarmIsOn = true;
         }
 
         //NOTE: 1A. IAP-locked Feature - Alarms Limit
         this.props.navigation.navigate("AlarmDetail", {
             newAlarm: true,
             updateOrSetAlarm: this.updateOrSetAlarm,
-            otherAlarmOn: otherAlarmOn,
+            otherAlarmOn: otherAlarmIsOn,
             willNavBackToAlarms: this.willNavigateBack
         });
     }
@@ -576,6 +576,7 @@ class Alarms extends Component {
             }
         } else {
             console.warn("Unable to find alarm to update/set.");
+            this.setState({isLoading: false});
         }
     };
 
@@ -589,7 +590,7 @@ class Alarms extends Component {
         let alarms = realm.objects("Alarm").sorted("order");
         // console.log("Alarms after reload: ", alarms);
         // general reload. No specific alarm ID is known to have changed.
-        this.setState({ alarms: realm.objects("Alarm").sorted("order") }); // TODO: filter by 'visible'=true
+        this.setState({ alarms: realm.objects("Alarm").sorted("order"), isLoading: false }); // TODO: filter by 'visible'=true
     };
 
     /*
@@ -613,7 +614,7 @@ class Alarms extends Component {
 
         // check if any Alarm is set (excluding this one), and pass this info in as a flag to AlarmDetail
         let { alarms } = this.state;
-        let setAlarms = alarms.filtered("status = 1");
+        let setAlarms = alarms.filtered("status > 0");
 
         let otherAlarmOn = false;
         if (setAlarms.length > 0) {

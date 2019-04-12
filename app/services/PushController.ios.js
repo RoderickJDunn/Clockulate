@@ -762,7 +762,7 @@ let setAlarmInstEnd = () => {
         // Delete AlmInst if total length <15 mins
         if (
             mNow - moment(currAlmInst.start) <
-            900 * 1000 /*DEV: Change 60 to 900 */
+            900 * 1000 /*DEV: Change first value to 900 (15min) for production */
         ) {
             console.log("Alm Inst is <15 min long. Deleting");
 
@@ -796,7 +796,10 @@ let setAlarmInstEnd = () => {
             }
         }
     } else {
-        console.error("No active alarm instance found on Alarm trigger");
+        // This will happen whenever an inactive Alarm is deleted. If it happens
+        //  when an Alarm is triggered or disabled, thats an issue, but I'm not
+        //  sure there is anything easy to do to recover from it.
+        console.info("No active alarm instance found");
     }
 };
 
