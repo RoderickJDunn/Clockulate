@@ -63,12 +63,10 @@ export default class IntrvHelpPage extends Component {
 
             stepIdx++;
             let config = {
-                duration: 400,
+                duration: 250,
                 update: {
-                    duration: 400,
+                    duration: 250,
                     type: "easeOut"
-                    // springDamping: 0.5
-                    // property: "scaleXY"
                 }
             };
             LayoutAnimation.configureNext(config);
@@ -122,7 +120,8 @@ export default class IntrvHelpPage extends Component {
                 >
                     <View
                         style={{
-                            height: HELPPAGE_HEIGHT * 0.73
+                            height: HELPPAGE_HEIGHT * 0.73,
+                            // margin: 10
                             // backgroundColor: "blue"
                             // top: 90,
                             // flex: 1,
@@ -131,10 +130,6 @@ export default class IntrvHelpPage extends Component {
                             // justifyContent: "center"
                         }}
                     >
-                        {/* Filler view for full nav Header */}
-                        {/* <View
-                            style={{ width: 1, height: HEADER_HEIGHT }}
-                        /> */}
                         <ScrollView
                             style={styles.helpPageBox}
                             ref={ref => (this._scrollViewRef = ref)}
@@ -386,16 +381,14 @@ const styles = StyleSheet.create({
         // height: SCREEN_HEIGHT * 0.5,
         // alignItems: "center",
         // justifyContent: "center",
+        alignSelf: "center",
         borderRadius: 35,
+        paddingHorizontal: 20,
         shadowOpacity: 0.9,
         shadowRadius: 10,
-        paddingHorizontal: 20,
-        // paddingBottom: 5,
-        // marginTop: 40,
         shadowColor: "#000",
         elevation: 5,
         // width: "85%",
-        alignSelf: "center",
         // padding: 25,
         // backgroundColor: "#AAAAFF53"
         backgroundColor: Colors.brandLightOpp + "BB"

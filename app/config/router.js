@@ -147,7 +147,6 @@ const navigationConfig = {
         headerTintColor: Colors.brandLightGrey, // this sets color for 'Back' icon and text
         gesturesEnabled: false
     },
-    useNativeAnimations: true,
     // this hides the white top-padding in place of header for child screens that are animating
     // in from bottom
     cardStyle: { backgroundColor: "transparent" },
@@ -355,14 +354,10 @@ const CustomDrawerContentComponent = props => {
         ? props.activeTintColor
         : props.inactiveTintColor;
 
-    let spacer = <View style={{ minWidth: 15 }} />;
-
     return (
         <LinearGradient
             start={{ x: 0.8, y: 0 }}
             end={{ x: 0.6, y: 1.96 }}
-            // colors={["rgba(255, 255, 0, 1)", "rgba(255, 255, 150, 1)"]}
-            // colors={[Colors.brandLightPurple, "#FFFFFF"]}
             colors={[Colors.brandMidPurple, "#000"]}
             style={[
                 {
@@ -376,7 +371,7 @@ const CustomDrawerContentComponent = props => {
                     // height: 95,
                     height: isIphoneX() ? 140 : 110,
                     alignSelf: "stretch",
-                    // backgroundColor: "red",
+                    backgroundColor: Colors.brandMidPurple,
                     shadowOpacity: 0.7,
                     shadowRadius: 5,
                     shadowColor: "black",
@@ -438,7 +433,7 @@ const CustomDrawerContentComponent = props => {
                                 >
                                     {renderMenuIcon(screenMenuIcons[index])}
                                 </View>
-                                {spacer}
+                                <View style={{ minWidth: 15 }} />
                                 <Text
                                     style={[
                                         { color },
@@ -577,7 +572,8 @@ const DrawerRoot = createDrawerNavigator(
             activeBackgroundColor: "transparent",
             activeTintColor: Colors.brandLightPurple,
             itemsContainerStyle: {
-                marginVertical: 0
+                marginVertical: 0,
+                backgroundColor: Colors.brandDarkPurple
             },
             iconContainerStyle: {
                 opacity: 1
@@ -590,6 +586,10 @@ const DrawerRoot = createDrawerNavigator(
                 color: Colors.brandVeryLightPurple
             }
         },
+        /* NOTE: While the backgroundColor will theoretically not be shown since I'm using a custom 
+            contentComponent, if I don't set this I see a white flickering on the drawer's edge
+          during the drawer animation - only confirmed on real iPhone XR. */
+        drawerBackgroundColor: Colors.brandDarkPurple,
         headerMode: "screen",
         order: [
             "Alarms",
@@ -599,8 +599,7 @@ const DrawerRoot = createDrawerNavigator(
             "Help",
             "About"
         ],
-        contentComponent: CustomDrawerContentComponent,
-        useNativeAnimations: true
+        contentComponent: CustomDrawerContentComponent
     }
 );
 

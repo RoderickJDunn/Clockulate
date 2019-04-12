@@ -19,7 +19,6 @@ import VersionNumber from "react-native-version-number";
 
 import ClkAlert from "../components/clk-awesome-alert";
 import Colors from "../styles/colors";
-// import PickerActionSheet from "../components/picker-action-sheet";
 import Settings from "../config/settings";
 
 const fontFamily = Platform.OS === "ios" ? "Avenir" : "sans-serif";
@@ -461,11 +460,14 @@ export default class SettingsScreenCkt extends React.Component {
                     data={this.data}
                     globalTextStyle={{ fontFamily }}
                     // style={{ backgroundColor: Colors.backgroundBright }}
-                    style={{ backgroundColor: Colors.backgroundGrey }}
+                    style={{
+                        backgroundColor: Colors.backgroundGrey,
+                        paddingTop: 10
+                    }}
                 />
                 {this.state.showChargeTip && (
                     <ClkAlert
-                        contHeight={"mid"}
+                        // contHeight={"mid"}
                         headerIcon={
                             <FAIcon
                                 name="info"
@@ -497,7 +499,7 @@ export default class SettingsScreenCkt extends React.Component {
                 )}
                 {this.state.showHrsOfSleepTip && (
                     <ClkAlert
-                        contHeight={"mid"}
+                        // contHeight={"mid"}
                         headerIcon={
                             <FAIcon
                                 name="info"
@@ -537,7 +539,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        paddingTop: 10,
         backgroundColor: Colors.backgroundGrey
     }
 });

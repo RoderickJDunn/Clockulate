@@ -784,7 +784,7 @@ export default class SleepLog extends React.Component {
                     <MenuItem
                         left={
                             <MaterialComIcon
-                                name={"information-variant"}
+                                name={"delete-circle"}
                                 color={Colors.brandUltraDarkPurple}
                                 underlayColor={Colors.brandUltraDarkPurple}
                                 size={29}

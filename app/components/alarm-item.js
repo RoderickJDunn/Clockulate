@@ -547,6 +547,7 @@ class AlarmItem extends React.PureComponent {
                         { x: 0, id: "closed" },
                         { x: -200, id: "active" }
                     ]}
+                    boundaries={{ right: 0, bounce: 0 }}
                     dragWithSpring={{ tension: 1000, damping: 0.5 }}
                     animatedNativeDriver={true}
                     animatedValueX={this._position}
