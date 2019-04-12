@@ -156,6 +156,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-notifications')
     compile project(':react-native-splash-screen')
     compile project(':react-native-iap')
     compile project(':react-native-fs')
@@ -169,7 +170,6 @@ dependencies {
     compile project(':react-native-version-number')
     compile project(':react-native-alarm-notification')
     compile project(':react-native-linear-gradient')
-    compile project(':react-native-notifications')
     compile project(':react-native-sound')
     compile(project(':react-native-sound')) {
         exclude group: "com.android.support"
