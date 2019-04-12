@@ -5,29 +5,19 @@ import upgrades from "./app/config/upgrades";
 // import ArrowView from "./app/components/arrow-view-native";
 
 import insertPrepopData from "./app/data/data-prepop";
+import MiscStorage from "./app/config/misc_storage";
 
 // configure();
 export default class App extends React.Component {
-    constructor() {
-        super();
-
-        console.info("App - constructor");
-        this.state = {
-            firstLaunch: null
-        };
-    }
 
     componentDidMount() {
         console.log("App: componentDidMount");
 
         try {
-            AsyncStorage.getItem("alreadyLaunched").then(value => {
+            AsyncStorage.getItem("notFirstLaunch").then(value => {
                 if (value === null) {
                     console.log("First Launch");
-                    AsyncStorage.setItem(
-                        "alreadyLaunched",
-                        JSON.stringify(true)
-                    );
+                    MiscStorage.setNotFirstLaunch(true);
                     insertPrepopData();
                 } else {
                     console.log("Not the first Launch");
