@@ -348,6 +348,8 @@ class AlarmDetail extends Component {
             this._snapPoints = this._ALL_SNAP_POINTS;
         }
 
+        // TODO: Figure out if this addition is necessary anymore. I think I bypassed having to do this
+        //          by my other means of avoiding the keyboard. (i.e. _ALL_SPS_AND_KEYBOARD)
         this.normModeCLTranslation = Animated.add(
             this._clockTransform,
             this._animKeyboardHeight.interpolate({
@@ -886,20 +888,23 @@ class AlarmDetail extends Component {
         // using manually cached alarmLabel Text, since Android doesn't send 'Text' to onBlur...
 
         let tempAlarm = this.state.alarm;
-        this._snapPoints = this._ALL_SNAP_POINTS.slice(0, 2);
-        this._viewIdx = 0;
         if (
             this.alarmLabelCache != null &&
             typeof this.alarmLabelCache != "undefined"
         ) {
             realm.write(() => {
                 tempAlarm.label = this.alarmLabelCache;
-                tempAlarm.mode = "normal";
             });
         }
-        this.setState({ alarm: tempAlarm }, () => {
-            this.interactiveRef.snapTo({ index: 0 });
-        });
+
+        if (this.state.alarm.mode == "normal") {
+            this._snapPoints = this._ALL_SNAP_POINTS.slice(0, 2);
+            this.setState({ alarm: tempAlarm }, () => {
+                this.interactiveRef.snapTo({ index: 0 });
+            });
+        } else {
+            this.setState({ alarm: tempAlarm });
+        }
     }
 
     onLabelInputFocus() {
@@ -1607,138 +1612,16 @@ class AlarmDetail extends Component {
         //                 the start of each render, use the map to get the ENUM numerical value of the
         //                 current mode.
 
-        let imageHeight = SCREEN_HEIGHT + 30;
-        /* clockAndLabelTranslation:
-            This is complicated. There are 2 Animated values that can effect the translateY value of
-            the Clock+Label view:
-                1) this._clockTransform -- tracks the vertical position of the Interactable.View
-                2) this._animKeyboardHeight -- follows the height of the keyboard with equal duration to that of keyboard appearance/disappearance
-            If we are in normal mode, we need the Clock+Label view to move out of the way for the keyboard (especially in small SE screen). So we 
-            use Animated.add to add the 2 animated values together. AnimKeyboardHeight is first interpolated since it doesn't need to move the full
-            keyboard height up (since there was already a decent size gap to begin with). The addition of the animKeyboardHeight interpolation and
-            the current clockTransform value, is then interpolated again mapping 'snap points' to screen height, so that the Clock+Label view movement
-            is lessened compared to the dragging gesture of the Interactable.View.
-        */
-        let clockAndLabelTranslation;
-        if (this.state.alarm.mode == "normal") {
-            console.info("NORMAL MODE ");
-            clockAndLabelTranslation = this.normModeCLTranslation;
-        } else {
-            console.info("CALC MODE");
-            clockAndLabelTranslation = this.calcModeCLTranslation;
-        }
-
-        let sortedTasks = this._cachedSortedTasks;
-
-        console.log("AlarmDetail: this._viewIdx", this._viewIdx);
-
-        // let taskArea = null;
-        // if (sortedTasks.length == 0) {
-        //     taskArea = (
-        //         <TouchableOpacity
-        //             style={{
-        //                 flex: 1
-        //             }}
-        //             onPress={this._onPressAddTask}
-        //         >
-        //             <View
-        //                 style={{
-        //                     flex: 1,
-        //                     flexDirection: "column",
-        //                     justifyContent: "center"
-        //                 }}
-        //             >
-        //                 <View
-        //                     style={{
-        //                         alignSelf: "center",
-        //                         justifyContent: "center",
-        //                         position: "absolute",
-        //                         top: SCREEN_HEIGHT * 0.12,
-        //                         // borderColor: "black",
-        //                         // borderWidth: 0.5,
-        //                         backgroundColor: "#191966",
-        //                         padding: 12,
-        //                         borderRadius: 7,
-        //                         shadowOffset: {
-        //                             height: 2,
-        //                             width: 0
-        //                         },
-        //                         shadowOpacity: 0.5,
-        //                         shadowRadius: 2,
-        //                         elevation: 3,
-        //                         shadowColor: "black",
-        //                         zIndex: 999
-        //                     }}
-        //                 >
-        //                     <Text style={{ color: "#FFFFFF" }}>ADD TASKS</Text>
-        //                 </View>
-        //             </View>
-        //         </TouchableOpacity>
-        //     );
-        // } else {
-        // console.log("Passing new list of tasks to TaskList");
-        let forceRemeasure = this._taskListNeedsRemeasure;
-        this._taskListNeedsRemeasure = false;
-
-        // console.log("forceRemeasure?", forceRemeasure);
-
         let wakeUpTime = this.state.alarm.wakeUpTime;
         // console.log("this.state.alarm.mode", this.state.alarm.mode);
-        // if (this.state.alarm.mode == "autocalc") {
-        //     wakeUpTime = this._calcWakeUpTime();
-        // } else {
-        //     wakeUpTime = this.state.alarm.wakeUpTime;
-        // }
 
         // OPTIMIZATION: Don't format these on every render. Save them in State along with the Alarm
         //                 whenever relevant parameters change.
         let wakeTimeMoment = moment.utc(wakeUpTime).local();
         let fWakeUpTime = wakeTimeMoment.format("h:mm");
         let amPmWakeUpTime = wakeTimeMoment.format("A");
-
-        // let interactableRef
-
-        let touchableBackdrop,
-            fullScreenTouchableBackdrop = null;
-        // console.log("this.props.navigation", this.props.navigation);
-
-        if (this.state.activeTask != null) {
-            touchableBackdrop = (
-                <TouchableBackdrop
-                    style={{
-                        width: SCREEN_WIDTH,
-                        height: SCREEN_HEIGHT
-                    }}
-                    onPress={this._closeTaskRows}
-                />
-            );
-        } else if (this.state.menuIsOpen || this.state.showSnoozePicker) {
-            fullScreenTouchableBackdrop = (
-                <TouchableBackdrop
-                    style={{
-                        position: "absolute",
-                        top: 0, // - (isIphoneX() ? 15 : 0),
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        backgroundColor: "rgba(0, 0, 0, 0.4)"
-                    }}
-                    onPress={() => {
-                        // console.log(
-                        //     "Pressed touchable without feedback"
-                        // );
-                        // let nextMenuIsOpen = !isMenuOpen;
-
-                        this._setMenuState(false);
-                        this._closeSnoozeTimePicker();
-                    }}
-                />
-            );
-        }
-
-        let labelForceVisible = null;
-
         let mode = this.state.alarm.mode;
+        let imageHeight = SCREEN_HEIGHT + 30;
 
         if (!this.props.navigation.state.params.notFirstLoad) {
             // if (true) {
@@ -1753,6 +1636,23 @@ class AlarmDetail extends Component {
                         { backgroundColor: Colors.brandUltraDarkPurple }
                     ]}
                 >
+                    <Image
+                        style={[
+                            styles.clockBackground,
+                            {
+                                height: imageHeight,
+                                transform: [
+                                    // TODO: instead of transform, just set 'top'
+                                    {
+                                        translateY: SCREEN_HEIGHT * 0.0335
+                                    }
+                                ]
+                            }
+                        ]}
+                        source={{
+                            uri: "clockbgd_v8_iphone_se5678"
+                        }}
+                    />
                     {this._viewIdx == 0 ? (
                         <View
                             style={{
@@ -1761,8 +1661,8 @@ class AlarmDetail extends Component {
                                 alignSelf: "stretch",
                                 alignContent: "center",
                                 justifyContent: "center",
-                                alignItems: "center",
-                                backgroundColor: Colors.brandUltraDarkPurple
+                                alignItems: "center"
+                                // backgroundColor: Colors.brandUltraDarkPurple
                             }}
                         >
                             <Text
@@ -1801,6 +1701,24 @@ class AlarmDetail extends Component {
                                     backgroundColor: Colors.brandUltraDarkPurple
                                 }}
                             >
+                                <Image
+                                    style={[
+                                        styles.clockBackground,
+                                        {
+                                            height: imageHeight,
+                                            transform: [
+                                                // TODO: instead of transform, just set 'top'
+                                                {
+                                                    translateY:
+                                                        SCREEN_HEIGHT * 0.0167
+                                                }
+                                            ]
+                                        }
+                                    ]}
+                                    source={{
+                                        uri: "clockbgd_v8_iphone_se5678"
+                                    }}
+                                />
                                 <Text
                                     style={[
                                         styles.timeText,
@@ -1837,7 +1755,7 @@ class AlarmDetail extends Component {
                         </>
                     )}
 
-                    {/* NOTE: View for flicking between Placeholder screen and real screen */}
+                    {/* NOTE: DEV: View for flicking between Placeholder screen and real screen */}
                     {/* <TouchableOpacity
                         style={{
                             width: 100,
@@ -1861,6 +1779,74 @@ class AlarmDetail extends Component {
                 </View>
             );
         }
+
+        /* clockAndLabelTranslation:
+            This is complicated. There are 2 Animated values that can effect the translateY value of
+            the Clock+Label view:
+                1) this._clockTransform -- tracks the vertical position of the Interactable.View
+                2) this._animKeyboardHeight -- follows the height of the keyboard with equal duration to that of keyboard appearance/disappearance
+            If we are in normal mode, we need the Clock+Label view to move out of the way for the keyboard (especially in small SE screen). So we 
+            use Animated.add to add the 2 animated values together. AnimKeyboardHeight is first interpolated since it doesn't need to move the full
+            keyboard height up (since there was already a decent size gap to begin with). The addition of the animKeyboardHeight interpolation and
+            the current clockTransform value, is then interpolated again mapping 'snap points' to screen height, so that the Clock+Label view movement
+            is lessened compared to the dragging gesture of the Interactable.View.
+        */
+        let clockAndLabelTranslation;
+        if (this.state.alarm.mode == "normal") {
+            console.info("NORMAL MODE ");
+            clockAndLabelTranslation = this.normModeCLTranslation;
+        } else {
+            console.info("CALC MODE");
+            clockAndLabelTranslation = this.calcModeCLTranslation;
+        }
+
+        let sortedTasks = this._cachedSortedTasks;
+
+        console.log("AlarmDetail: this._viewIdx", this._viewIdx);
+
+        let forceRemeasure = this._taskListNeedsRemeasure;
+        this._taskListNeedsRemeasure = false;
+
+        // console.log("forceRemeasure?", forceRemeasure);
+
+        let touchableBackdrop,
+            fullScreenTouchableBackdrop = null;
+
+        if (this.state.activeTask != null) {
+            touchableBackdrop = (
+                <TouchableBackdrop
+                    style={{
+                        width: SCREEN_WIDTH,
+                        height: SCREEN_HEIGHT
+                    }}
+                    onPress={this._closeTaskRows}
+                />
+            );
+        } else if (this.state.menuIsOpen || this.state.showSnoozePicker) {
+            fullScreenTouchableBackdrop = (
+                <TouchableBackdrop
+                    style={{
+                        position: "absolute",
+                        top: 0, // - (isIphoneX() ? 15 : 0),
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        backgroundColor: "rgba(0, 0, 0, 0.4)"
+                    }}
+                    onPress={() => {
+                        // console.log(
+                        //     "Pressed touchable without feedback"
+                        // );
+                        // let nextMenuIsOpen = !isMenuOpen;
+
+                        this._setMenuState(false);
+                        this._closeSnoozeTimePicker();
+                    }}
+                />
+            );
+        }
+
+        let labelForceVisible = null;
 
         return (
             <ScrollView
@@ -2794,7 +2780,7 @@ class AlarmDetail extends Component {
                         title={"Snooze Time"}
                     />
                 )}
-                {/* NOTE: View for flicking between Placeholder screen and real screen */}
+                {/* NOTE: DEV: View for flicking between Placeholder screen and real screen */}
                 {/* <TouchableOpacity
                     style={{
                         width: 100,
