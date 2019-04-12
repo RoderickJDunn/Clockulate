@@ -44,7 +44,7 @@
 		</dict>
 	</dict>
 	<key>NSCalendarsUsageDescription</key>
-	<string>Please allow clockulate to set alarms in the background</string>
+	<string/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string/>
 	<key>UIAppFonts</key>
@@ -68,6 +68,7 @@
 		<string>FontAwesome5_Brands.ttf</string>
 		<string>FontAwesome5_Regular.ttf</string>
 		<string>FontAwesome5_Solid.ttf</string>
+		<string>ckt_test3.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
@@ -88,7 +89,7 @@
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>CKT needs da mic!</string>
+	<string>Clockulate uses the microphone to monitor your sleep and ensure Alarm audio playback.</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>itms-apps://itunes.apple.com/app/viewContentsUserReviews?id=9SXQK8L2Q6.org.reactjs.native.example.Alarm-AutoSet</string>
@@ -96,5 +97,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>AppLovinSdkKey</key>
+	<string>--wyFpzJDvtfM-TcP-sC6B1TuxCdU_ady9OvsChl6xIgH0mAluRM4xEKinVhh2CtcUM7tbc3ILw5CVNJqcubVb</string>
 </dict>
 </plist>
