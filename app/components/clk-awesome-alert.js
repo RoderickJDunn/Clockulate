@@ -110,7 +110,7 @@ export default class ClkAlert extends Component {
                         ]}
                     >
                         <View style={[styles.container, contHeight]}>
-                            <View style={[headerStyle, styles.centered]}>
+                            <View style={[headerStyle, styles.centered, this.props.headerStyle]}>
                                 {headerContent || (
                                     <View
                                         style={{
@@ -214,7 +214,7 @@ export default class ClkAlert extends Component {
                         </View>
                         {headerIcon && (
                             <View style={styles.headerIconContainer}>
-                                <View style={[styles.headerIconInnerWrap]}>
+                                <View style={[styles.headerIconInnerWrap, this.props.headerIconStyle]}>
                                     {headerIcon}
                                 </View>
                             </View>
@@ -230,7 +230,6 @@ const styles = StyleSheet.create({
     outerWrapper: {
         width: "100%",
         backgroundColor: "transparent",
-        overflow: "hidden",
         borderRadius: 12,
         justifyContent: "center"
         // backgroundColor: "blue"
@@ -240,6 +239,8 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: 0,
         alignSelf: "center",
+        alignContent: "center",
+        alignItems: "center",
         justifyContent: "center",
         width: 90,
         height: 90,
