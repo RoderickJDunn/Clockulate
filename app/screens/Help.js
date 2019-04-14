@@ -462,7 +462,7 @@ export default class Help extends React.Component {
                         flexDirection: "row",
                         alignSelf: "stretch",
                         width: "100%",
-                        height: 20,
+                        height: 45,
                         paddingHorizontal: 20,
                         bottom: ifIphoneX(35, 20),
                         backgroundColor: "transparent",
@@ -472,11 +472,23 @@ export default class Help extends React.Component {
                     // style={styles.playbackBox}
                 >
                     {this._isModal && this._idx == 0 ? (
-                        <TouchableOpacity onPress={this._exitHelp}>
+                        <TouchableOpacity
+                            style={{
+                                flex: 1,
+                                justifyContent: "center"
+                            }}
+                            onPress={this._exitHelp}
+                        >
                             <Text style={styles.btnText}>Skip</Text>
                         </TouchableOpacity>
                     ) : (
-                        <TouchableOpacity onPress={this._prevStep}>
+                        <TouchableOpacity
+                            style={{
+                                flex: 1,
+                                justifyContent: "center"
+                            }}
+                            onPress={this._prevStep}
+                        >
                             <Text
                                 style={[
                                     styles.btnText,
@@ -490,7 +502,14 @@ export default class Help extends React.Component {
                         </TouchableOpacity>
                     )}
                     {this._renderPagingDots(this._idx)}
-                    <TouchableOpacity onPress={this._nextStep}>
+                    <TouchableOpacity
+                        style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "flex-end"
+                        }}
+                        onPress={this._nextStep}
+                    >
                         <Text
                             style={[
                                 styles.btnText,

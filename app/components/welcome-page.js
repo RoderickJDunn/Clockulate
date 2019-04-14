@@ -40,7 +40,7 @@ export default class WelcomePage extends Component {
     }
 
     _logoAnim = new Animated.Value(0);
-    _imgWidthFactor = 0.90;
+    _imgWidthFactor = 0.9;
     _svCurrHeight = 150;
     _scrollPos = 0;
 
@@ -52,12 +52,12 @@ export default class WelcomePage extends Component {
                 easing: Easing.inOut(Easing.ease),
                 useNativeDriver: true
             }).start();
-            this.setState({showWelcome: true});
+            this.setState({ showWelcome: true });
         }, 3000);
     }
 
     nextStep = () => {
-       return false;
+        return false;
     };
 
     render() {
@@ -75,53 +75,56 @@ export default class WelcomePage extends Component {
         console.log("SCREEN_HEIGHT", SCREEN_HEIGHT);
 
         return (
-                <View
-                    style={styles.helpPage}
-                >
-                    <Animated.Image 
-                        style={{
-                            alignSelf: "center", 
-                            height: SCREEN_WIDTH * 0.55 * 0.832, 
-                            width: SCREEN_WIDTH * 0.55,
-                            marginBottom: 90,
-                            transform: [
-                                {
-                                    translateY: this._logoAnim.interpolate({
-                                        inputRange: [0, 1],
-                                        outputRange: [0, -SCREEN_HEIGHT*0.27],
-                                    })
-                                }
-                            ]
-                        }} 
-                        source={{uri: "WelcomeScreen_logo_v1"}}
-                    />
-                   {this.state.showWelcome && 
+            <View style={styles.helpPage}>
+                <Animated.Image
+                    style={{
+                        alignSelf: "center",
+                        height: SCREEN_WIDTH * 0.55 * 0.832,
+                        width: SCREEN_WIDTH * 0.55,
+                        marginBottom: scaleByFactor(40, 1),
+                        transform: [
+                            {
+                                translateY: this._logoAnim.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [0, -SCREEN_HEIGHT * 0.27]
+                                })
+                            }
+                        ]
+                    }}
+                    source={{ uri: "WelcomeScreen_logo_v1" }}
+                />
+                {this.state.showWelcome && (
                     <Animatable.View
-                            contentInsetAdjustmentBehavior="automatic"
-                            useNativeDriver={true}
-                            animation={"fadeIn"}
-                            delay={1000}
-                            duration={1500}
-                            style={{height: SCREEN_HEIGHT*0.5, width: SCREEN_WIDTH, position: "absolute", bottom: 0}}
-                    > 
-                            <Text
-                                style={{
-                                    position: "absolute",
-                                    justifyContent: "center",
-                                    alignSelf: "stretch",
-                                    textAlign: "center",
-                                    width: "100%",
-                                    color: Colors.brandLightOpp,
-                                    fontFamily: "Gurmukhi MN",
-                                    fontSize: 30
-                                }}
-                            >
-                                Welcome
-                            </Text>
-                        </Animatable.View>
-                    }
-                    {/* Measuring line */}
-                    {/* <View
+                        contentInsetAdjustmentBehavior="automatic"
+                        useNativeDriver={true}
+                        animation={"fadeIn"}
+                        delay={1000}
+                        duration={1500}
+                        style={{
+                            height: SCREEN_HEIGHT * 0.5,
+                            width: SCREEN_WIDTH,
+                            position: "absolute",
+                            bottom: 0
+                        }}
+                    >
+                        <Text
+                            style={{
+                                position: "absolute",
+                                justifyContent: "center",
+                                alignSelf: "stretch",
+                                textAlign: "center",
+                                width: "100%",
+                                color: Colors.brandLightOpp,
+                                fontFamily: "Gurmukhi MN",
+                                fontSize: 30
+                            }}
+                        >
+                            Welcome
+                        </Text>
+                    </Animatable.View>
+                )}
+                {/* Measuring line */}
+                {/* <View
                         style={{
                             position: "absolute",
                             // use this for a horizontal line
@@ -142,7 +145,7 @@ export default class WelcomePage extends Component {
                             // marginTop: 40
                         }}
                     /> */}
-                </View>
+            </View>
         );
     }
 }

@@ -350,8 +350,6 @@ let menuImage = isIphoneX()
     ? require("../img/menu_header_v16_notch.json")
     : require("../img/menu_header_v13_notchless.json");
 
-// menuImage = require("../img/gradient_sleepy_loader.json");
-
 const CustomDrawerContentComponent = props => {
     // console.log("props", props);
     const color = props.focused
@@ -373,7 +371,7 @@ const CustomDrawerContentComponent = props => {
             <View
                 style={{
                     // height: 95,
-                    height: isIphoneX() ? 140 : 110,
+                    height: isIphoneX() ? 140 : 100,
                     alignSelf: "stretch",
                     backgroundColor: Colors.brandMidPurple,
                     shadowOpacity: 0.7,
