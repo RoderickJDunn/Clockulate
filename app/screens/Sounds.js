@@ -269,6 +269,38 @@ export default class Sounds extends Component {
                         // )}
                     />
                 </View>
+                {Upgrades.pro != true && (
+                    <AdWrapper
+                        borderPosition="top"
+                        screen={"Sounds"}
+                        animate={true}
+                        forcePro={this.state.forcePro}
+                        proAdvStyle={{
+                            height: 100,
+                            width: this.width
+                        }}
+                        // borderColor={Colors.brandDarkGrey}
+                        navigation={this.props.navigation}
+                        pubBannerProps={{
+                            adSize: "smartBannerPortrait",
+                            // adUnitID: "ca-app-pub-3940256099942544/6300978111",
+                            adUnitID: "ca-app-pub-5775007461562122/9954191195",
+                            testDevices: [AdMobBanner.simulatorId],
+                            onAdFailedToLoad: this._bannerError,
+                            onAdLoaded: () => {
+                                console.log("adViewDidReceiveAd");
+                            },
+                            style: {
+                                alignSelf: "center",
+                                height: 50,
+                                width: this.width
+                            }
+                        }}
+                        onPressProAdv={() =>
+                            this.setState({ showTonesUpgradePopup: true })
+                        }
+                    />
+                )}
                 {this.state.showTonesUpgradePopup && (
                     <ClkAlert
                         contHeight={"mid"}
@@ -302,38 +334,6 @@ export default class Sounds extends Component {
                             },
                             text: "Go to Upgrades"
                         }}
-                    />
-                )}
-                {Upgrades.pro != true && (
-                    <AdWrapper
-                        borderPosition="top"
-                        screen={"Sounds"}
-                        animate={true}
-                        forcePro={this.state.forcePro}
-                        proAdvStyle={{
-                            height: 100,
-                            width: this.width
-                        }}
-                        // borderColor={Colors.brandDarkGrey}
-                        navigation={this.props.navigation}
-                        pubBannerProps={{
-                            adSize: "smartBannerPortrait",
-                            // adUnitID: "ca-app-pub-3940256099942544/6300978111",
-                            adUnitID: "ca-app-pub-5775007461562122/9954191195",
-                            testDevices: [AdMobBanner.simulatorId],
-                            onAdFailedToLoad: this._bannerError,
-                            onAdLoaded: () => {
-                                console.log("adViewDidReceiveAd");
-                            },
-                            style: {
-                                alignSelf: "center",
-                                height: 50,
-                                width: this.width
-                            }
-                        }}
-                        onPressProAdv={() =>
-                            this.setState({ showTonesUpgradePopup: true })
-                        }
                     />
                 )}
             </SafeAreaView>
