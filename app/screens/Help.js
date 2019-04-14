@@ -16,15 +16,17 @@ import LinearGradient from "react-native-linear-gradient";
 import Interactable from "react-native-interactable";
 import FAIcon from "react-native-vector-icons/FontAwesome";
 import AutoHeightImage from "react-native-auto-height-image";
+import * as Animatable from "react-native-animatable";
 
 import getFullImgNameForScreenSize from "../img/image_map";
 import Colors from "../styles/colors";
 import ClkAlert from "../components/clk-awesome-alert";
 import IntrvHelpPage from "../components/intrv-help-page";
 import MiscStorage from "../config/misc_storage";
+import WelcomePage from "../components/welcome-page";
 
 import { scaleByFactor } from "../util/font-scale";
-import { isIphoneX } from "react-native-iphone-x-helper";
+import { isIphoneX, ifIphoneX } from "react-native-iphone-x-helper";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -32,7 +34,7 @@ const HEADER_HEIGHT = Header.HEIGHT; // + STATUS_BAR_HEIGHT;
 
 const HELPPAGE_HEIGHT = SCREEN_HEIGHT - HEADER_HEIGHT;
 
-const HELP_SECTIONS = [
+let HELP_SECTIONS = [
     {
         name: "Alarms List",
         images: [
@@ -125,39 +127,14 @@ const HELP_SECTIONS = [
                 path: "ADModes_v2_step2",
                 style: { paddingVertical: SCREEN_HEIGHT * 0.28 }
             }
-        ]
+        ],
+        isFinalSect: true
     }
 ];
 
 // SCREEN_HEIGHT -= 88; // add 88 since the Nav bar is transparent
 // TODO: In-app purchases
 export default class Help extends React.Component {
-    static navigationOptions = ({ navigation }) => {
-        return {
-            headerStyle: {
-                // Style the header view itself (aka. the nav bar)
-                backgroundColor: Colors.brandDarkGrey,
-                borderBottomWidth: 0
-            },
-            headerRight: (
-                <FAIcon
-                    name={"info"}
-                    color={Colors.brandLightGrey}
-                    underlayColor={Colors.brandDarkGrey}
-                    size={24}
-                    onPress={() => {
-                        // ClKAlert -- how to use Help
-                        navigation.state.params.toggleInfoPopup();
-                    }}
-                    hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
-                    style={{
-                        paddingLeft: 20,
-                        marginRight: scaleByFactor(12, 0.9)
-                    }}
-                />
-            )
-        };
-    };
     /*
     Props: 
      */
@@ -168,15 +145,32 @@ export default class Help extends React.Component {
             imgHeight: 135,
             sectIdx: 0,
             showInfoPopup: false,
+            isFirstStep: this.props.screenType != "modal",
             isFocused: true
         };
 
-        console.log("Help -- constructor ");
+        this._snapPoints = [
+            { x: 0, id: "0" },
+            { x: -SCREEN_WIDTH, id: "1" },
+            { x: -SCREEN_WIDTH * 2, id: "2" },
+            { x: -SCREEN_WIDTH * 3, id: "3" }
+        ];
+
+        if (this.props.screenType == "modal") {
+            this._isModal = true;
+            this._welcomeOffset = 1;
+            this._snapPoints.push({ x: -SCREEN_WIDTH * 4, id: "4" });
+            this._pageRefs.push(null);
+        }
+
+        console.log("Help -- constructor ", this.props.screenType);
     }
 
     _bgdPosition = new Animated.Value(0);
     _interactable = null;
     _idx = 0;
+    _welcomeOffset = 0;
+    _pageRefs = [null, null, null, null];
 
     width = Dimensions.get("window").width; //full width
     height = Dimensions.get("window").height; //full height
@@ -187,7 +181,7 @@ export default class Help extends React.Component {
         });
         if (MiscStorage.visitedHelp !== true) {
             MiscStorage.setVistedHelp(true);
-            setTimeout(this.toggleInfoPopup, 500);
+            // setTimeout(this.toggleInfoPopup, 500);
         }
     }
 
@@ -196,275 +190,41 @@ export default class Help extends React.Component {
         this.setState({ showInfoPopup: !showInfoPopup });
     };
 
-    renderCalcButtons() {
-        return (
-            <LinearGradient
-                start={{ x: 0.0, y: -1.0 }}
-                end={{ x: 0.5, y: 3.0 }}
-                locations={[0, 0.8, 1]}
-                colors={["#000", "#341576", "#526FCE"]}
-                style={[styles.calcBkgrdContainer]}
-            >
-                <View
-                    style={{
-                        transform: [
-                            {
-                                skewX: "-10deg"
-                            },
-                            {
-                                skewY: "-10deg"
-                            }
-                        ]
-                    }}
-                >
-                    <Animated.View
-                        style={{
-                            transform: [
-                                {
-                                    rotate: "20deg"
-                                },
-                                {
-                                    translateX: this._bgdPosition.interpolate({
-                                        inputRange: [0, SCREEN_WIDTH * 4],
-                                        outputRange: [0, 150]
-                                        // extrapolate: "clamp"
-                                    })
-                                }
-                            ],
-                            borderWidth: 30,
-                            borderColor: "rgba(255,255,255,0.1)",
-                            padding: 15
-                        }}
-                    >
-                        <View style={[styles.calcBtn, styles.calcDisplay]} />
-                        <View
-                            style={[
-                                styles.calcRow,
-                                {
-                                    marginBottom: 10
-                                    // justifyContent: "space-around"
-                                }
-                            ]}
-                        >
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSpecial]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSpecial]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSpecial]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSpecial]}
-                            />
-                            <View
-                                style={[
-                                    styles.calcBtn,
-                                    { backgroundColor: "transparent", flex: 1 }
-                                ]}
-                            />
-                            <View
-                                style={[
-                                    styles.calcRow,
-                                    styles.calcBtn,
-                                    {
-                                        margin: 0,
-                                        backgroundColor: "#FFFFFF0D",
-                                        paddingHorizontal: 5,
-                                        alignSelf: "flex-end"
-                                    }
-                                ]}
-                            >
-                                <View
-                                    style={[
-                                        styles.calcBtn,
-                                        styles.calcBtnSpecial,
-                                        { marginHorizontal: 5 }
-                                    ]}
-                                />
-                                <View
-                                    style={[
-                                        styles.calcBtn,
-                                        styles.calcBtnSpecial,
-                                        { marginHorizontal: 5 }
-                                    ]}
-                                />
-                            </View>
-                        </View>
+    _nextStep = () => {
+        if (
+            this._pageRefs &&
+            this._pageRefs.length == 4 + this._welcomeOffset
+        ) {
+            let currPageRef = this._pageRefs[this._idx];
+            if (!currPageRef.nextStep()) {
+                this.goToNextSect();
+            }
+        } else {
+            console.warn("Pagerefs not working correctly.");
+            console.log("Pageref length: ", this._pageRefs.length);
+        }
+    };
 
-                        <View style={[styles.calcRow]}>
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                        </View>
-                        <View style={[styles.calcRow]}>
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[
-                                    styles.calcBtn,
-                                    styles.calcBtnSquare,
-                                    styles.calcTopHalfBtn
-                                ]}
-                            />
-                            <View
-                                style={[
-                                    styles.calcBtn,
-                                    styles.calcBtnSquare,
-                                    styles.calcTopHalfBtn
-                                ]}
-                            />
-                        </View>
-                        <View style={[styles.calcRow]}>
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[
-                                    styles.calcBtn,
-                                    styles.calcBtnSquare,
-                                    styles.calcBottomHalfBtn
-                                ]}
-                            />
-                            <View
-                                style={[
-                                    styles.calcBtn,
-                                    styles.calcBtnSquare,
-                                    styles.calcBottomHalfBtn
-                                ]}
-                            />
-                        </View>
-                        <View style={[styles.calcRow]}>
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[
-                                    styles.calcBtn,
-                                    styles.calcBtnSquare,
-                                    styles.calcTopHalfBtn
-                                ]}
-                            />
-                            <View
-                                style={[
-                                    styles.calcBtn,
-                                    styles.calcBtnSquare,
-                                    styles.calcTopHalfBtn
-                                ]}
-                            />
-                        </View>
-                        <View style={[styles.calcRow]}>
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[
-                                    styles.calcBtn,
-                                    styles.calcBtnSquare,
-                                    styles.calcBottomHalfBtn
-                                ]}
-                            />
-                            <View
-                                style={[
-                                    styles.calcBtn,
-                                    styles.calcBtnSquare,
-                                    styles.calcBottomHalfBtn
-                                ]}
-                            />
-                        </View>
-                        <View style={[styles.calcRow]}>
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-                            <View
-                                style={[styles.calcBtn, styles.calcBtnSquare]}
-                            />
-
-                            <View
-                                style={[
-                                    styles.calcBtn,
-                                    styles.calcBtnSquare,
-                                    styles.calcLeftHalfBtn
-                                ]}
-                            />
-                            <View
-                                style={[
-                                    styles.calcBtn,
-                                    styles.calcBtnSquare,
-                                    styles.calcRightHalfBtn
-                                ]}
-                            />
-                        </View>
-                    </Animated.View>
-                </View>
-            </LinearGradient>
-        );
-    }
+    _prevStep = () => {
+        if (
+            this._pageRefs &&
+            this._pageRefs.length == 4 + this._welcomeOffset
+        ) {
+            let currPageRef = this._pageRefs[this._idx];
+            if (!currPageRef.prevStep()) {
+                this.goToPrevSect();
+            }
+        } else {
+            console.warn("Pagerefs not working correctly.");
+            console.log("Pageref length: ", this._pageRefs.length);
+        }
+    };
 
     goToNextSect = () => {
         console.log("next section");
         this._idx++;
         console.log(this._idx);
-        if (this._idx <= 3) {
+        if (this._idx <= 3 + this._welcomeOffset) {
             this._interactable.snapTo({
                 index: this._idx
             });
@@ -472,7 +232,13 @@ export default class Help extends React.Component {
                 sectIdx: this._idx
             });
         } else {
-            this._idx = 2;
+            this._idx = 3 + this._welcomeOffset;
+        }
+    };
+
+    goToPrevSect = () => {
+        this._idx = Math.max(0, this._idx - 1);
+        if (this._idx >= 0) {
             console.log(this._idx);
             this._interactable.snapTo({
                 index: this._idx
@@ -483,77 +249,22 @@ export default class Help extends React.Component {
         }
     };
 
-    // renderHelpPage() {
-    //     return (
-    //         <View style={styles.helpPage}>
-    //             <View
-    //                 style={{
-    //                     flex: 0.08,
-    //                     alignSelf: "stretch"
-    //                     // borderColor: "white",
-    //                     // borderWidth: 5
-    //                 }}
-    //             />
-    //             <View
-    //                 style={{
-    //                     flex: 0.5,
-    //                     borderColor: "#808080",
-    //                     borderWidth: 2
-    //                     // alignContent: "center",
-    //                     // justifyContent: "center"
-    //                     // alignItems: "flex-end"
-    //                 }}
-    //             >
-    //                 <Image
-    //                     style={{
-    //                         width: SCREEN_WIDTH * 0.7,
-    //                         flex: 1
-    //                     }}
-    //                     source={require("../img/help/Screen_Alarms1"}
-    //                 />
-    //             </View>
-    //             <View
-    //                 style={{
-    //                     flex: 0.25,
-    //                     justifyContent: "center"
-    //                     // backgroundColor: "green",
-    //                 }}
-    //             >
-    //                 <View
-    //                     style={{
-    //                         flex: 0.6,
-    //                         marginHorizontal: 9,
-    //                         alignItems: "center",
-    //                         justifyContent: "center",
-    //                         borderRadius: 35,
-    //                         shadowOpacity: 0.9,
-    //                         shadowRadius: 10,
-    //                         shadowColor: "#000",
-    //                         elevation: 5,
-    //                         alignSelf: "center",
-    //                         // backgroundColor: "#AAAAFF53"
-    //                         backgroundColor: Colors.brandDarkBlue + "66"
-    //                     }}
-    //                 >
-    //                     <Text style={[styles.upgradeTitleText]}>
-    //                         Alarms List
-    //                     </Text>
-    //                     <Text style={[styles.upgradeBodyText]}>
-    //                         View all of your saved alarms, and turn them ON or
-    //                         OFF
-    //                     </Text>
-    //                     <Text style={[styles.upgradeBodyText]}>
-    //                         View additional actions for an alarm, such as
-    //                         Deleting and Duplicating, by swiping left on it
-    //                     </Text>
-    //                     <Text style={[styles.upgradeBodyText]}>
-    //                         Long-press Alarm and drag up/down to reorder
-    //                     </Text>
-    //                 </View>
-    //             </View>
-    //         </View>
-    //     );
-    // }
+    setBoundaryFlag = ({ lastStep, firstStep }) => {
+        if (lastStep && this._idx == 3 + this._welcomeOffset) {
+            // only set FinalStep to true if this is the last step, AND the last Page
+            this.setState({ isFinalStep: true, isFirstStep: false });
+        } else if (firstStep && this._idx == 0) {
+            this.setState({ isFinalStep: false, isFirstStep: true });
+        } else {
+            if (this.state.isFinalStep || this.state.isFirstStep) {
+                this.setState({ isFinalStep: false, isFirstStep: false });
+            }
+        }
+    };
+
+    _exitHelp = () => {
+        this.props.navigation.goBack();
+    };
 
     _renderPagingDots = idx => {
         // console.log("idx", idx);
@@ -571,6 +282,14 @@ export default class Help extends React.Component {
                 <View
                     style={[styles.pageDot, idx == 3 && styles.pageDotActive]}
                 />
+                {this._isModal && (
+                    <View
+                        style={[
+                            styles.pageDot,
+                            idx == 4 && styles.pageDotActive
+                        ]}
+                    />
+                )}
             </View>
         );
     };
@@ -578,10 +297,14 @@ export default class Help extends React.Component {
     render() {
         // console.log("Upgrade -- render() ");
         return (
-            <View
+            <LinearGradient
+                start={{ x: 0.0, y: 0.25 }}
+                end={{ x: 0.0, y: 1.25 }}
+                locations={[0, 1.05]}
+                colors={["#110331", "#4B1F7A"]}
                 style={{
                     flex: 1,
-                    backgroundColor: Colors.backgroundLightGrey,
+                    // backgroundColor: Colors.backgroundLightGrey,
                     alignContent: "stretch"
                 }}
             >
@@ -598,19 +321,14 @@ export default class Help extends React.Component {
                     ref={elm => (this._interactable = elm)}
                     style={{
                         flex: 1,
-                        width: SCREEN_WIDTH * 4,
+                        width: SCREEN_WIDTH * (4 + this._welcomeOffset),
                         alignSelf: "stretch",
                         // marginTop: isIphoneX() ? -88 : -64,
                         flexDirection: "row"
                         // backgroundColor: "green"
                     }}
                     horizontalOnly={true}
-                    snapPoints={[
-                        { x: 0, id: "0" },
-                        { x: -SCREEN_WIDTH, id: "1" },
-                        { x: -SCREEN_WIDTH * 2, id: "2" },
-                        { x: -SCREEN_WIDTH * 3, id: "3" }
-                    ]}
+                    snapPoints={this._snapPoints}
                     // dragWithSpring={{ tension: 1000, damping: 0.5 }}
                     animatedNativeDriver={true}
                     animatedValueX={this._bgdPosition}
@@ -621,6 +339,21 @@ export default class Help extends React.Component {
                             console.log("onDrag end");
                             //     this.props.onSnap(targetSnapPointId);
                             this._idx = parseInt(targetSnapPointId);
+
+                            if (
+                                this._pageRefs &&
+                                this._pageRefs.length == 4 + this._welcomeOffset
+                            ) {
+                                let currPageRef = this._pageRefs[this._idx];
+                                currPageRef.updateBoundaryFlags();
+                            } else {
+                                console.warn("Pagerefs not working correctly.");
+                                console.log(
+                                    "Pageref length: ",
+                                    this._pageRefs.length
+                                );
+                            }
+
                             this.setState({
                                 sectIdx: this._idx
                             });
@@ -628,77 +361,144 @@ export default class Help extends React.Component {
                     }}
                     initialPosition={{ x: 0 }}
                 >
+                    {this.state.isFocused && this._isModal && (
+                        <WelcomePage
+                            goToNextSect={this.goToNextSect}
+                            ref={elm => (this._pageRefs[0] = elm)}
+                        />
+                    )}
                     {this.state.isFocused &&
                         HELP_SECTIONS.map((section, idx) => {
                             return (
                                 <IntrvHelpPage
-                                    key={idx}
-                                    idx={idx}
-                                    goToNextSect={this.goToNextSect}
+                                    ref={elm =>
+                                        (this._pageRefs[
+                                            idx + this._welcomeOffset
+                                        ] = elm)
+                                    } /// TODO: add each to an array of page references, so I can imperitively call 'nextStep' on the current page.
+                                    key={idx + this._welcomeOffset}
+                                    idx={idx + this._welcomeOffset}
                                     sectionInfo={section}
                                     currSectIdx={this._idx}
+                                    setBoundaryFlag={this.setBoundaryFlag}
                                 />
                             );
                         })}
                 </Interactable.View>
-                {/* <TouchableOpacity
-                    style={[
-                        styles.pagerButton,
-                        {
-                            left: 0
-                        }
-                    ]}
-                    onPress={() => {
-                        console.log("previous");
-                        this._idx--;
-                        if (this._idx >= 0) {
-                            this._interactable.snapTo({ index: this._idx });
-                            this.setState({
-                                sectIdx: this._idx,
-                                subIdx: 0
-                            });
-                        } else {
-                            this._idx = 0;
-                            this._interactable.changePosition({ x: 50 });
-                        }
+                {this._isModal && this._idx > 0 && (
+                    <Animatable.View
+                        contentInsetAdjustmentBehavior="automatic"
+                        useNativeDriver={true}
+                        animation={"fadeIn"}
+                        duration={300}
+                        delay={500}
+                        style={{
+                            position: "absolute",
+                            height: ifIphoneX(88, 64),
+                            width: "100%",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "flex-end",
+                            paddingBottom: 10,
+                            // backgroundColor: "blue"
+                            backgroundColor: "transparent"
+                        }}
+                    >
+                        <FAIcon
+                            name={"close"}
+                            color={Colors.brandLightGrey}
+                            underlayColor={Colors.brandDarkGrey}
+                            size={24}
+                            onPress={() => {
+                                // ClKAlert -- how to use Help
+                                this._exitHelp();
+                            }}
+                            hitSlop={{
+                                top: 10,
+                                bottom: 10,
+                                left: 20,
+                                right: 0
+                            }}
+                            style={{
+                                paddingLeft: 20,
+                                marginRight: scaleByFactor(12, 0.9)
+                            }}
+                        />
+                        <FAIcon
+                            name={"info"}
+                            color={Colors.brandLightGrey}
+                            underlayColor={Colors.brandDarkGrey}
+                            size={24}
+                            onPress={() => {
+                                // ClKAlert -- how to use Help
+                                this.toggleInfoPopup();
+                            }}
+                            hitSlop={{
+                                top: 10,
+                                bottom: 10,
+                                left: 20,
+                                right: 0
+                            }}
+                            style={{
+                                paddingRight: 20,
+                                marginLeft: scaleByFactor(12, 0.9)
+                            }}
+                        />
+                    </Animatable.View>
+                )}
+                <Animatable.View
+                    contentInsetAdjustmentBehavior="automatic"
+                    useNativeDriver={true}
+                    animation={"fadeIn"}
+                    duration={this._isModal ? 1500 : 0}
+                    delay={this._isModal ? 4000 : 0}
+                    style={{
+                        position: "absolute",
+                        justifyContent: "space-between",
+                        flexDirection: "row",
+                        alignSelf: "stretch",
+                        width: "100%",
+                        height: 20,
+                        paddingHorizontal: 20,
+                        bottom: ifIphoneX(35, 20),
+                        backgroundColor: "transparent",
+                        fontFamily: "Gurmukhi MN",
+                        fontSize: 30
                     }}
+                    // style={styles.playbackBox}
                 >
-                    <FAIcon
-                        name="chevron-left"
-                        size={35}
-                        // color={"#AAAAFF"}
-                        color={"#B5B5B533"}
-                    />
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.pagerButton, { right: 0 }]}
-                    onPress={() => {
-                        console.log("next");
-                        this._idx++;
-                        console.log(this._idx);
-                        if (this._idx <= 4) {
-                            this._interactable.snapTo({ index: this._idx });
-                            this.setState({
-                                sectIdx: this._idx,
-                                subIdx: 0
-                            });
-                        } else {
-                            this._idx = 4;
-                            console.log(this._idx);
-                            this._interactable.changePosition({
-                                x: -SCREEN_WIDTH * 4 - 50,
-                                y: 0
-                            });
-                        }
-                    }}
-                >
-                    <FAIcon
-                        name="chevron-right"
-                        size={35}
-                        color={"#B5B5B533"}
-                    />
-                </TouchableOpacity> */}
-                {this._renderPagingDots(this._idx)}
+                    {this._isModal && this._idx == 0 ? (
+                        <TouchableOpacity onPress={this._exitHelp}>
+                            <Text style={styles.btnText}>Skip</Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity onPress={this._prevStep}>
+                            <Text
+                                style={[
+                                    styles.btnText,
+                                    {
+                                        opacity: this.state.isFirstStep ? 0 : 1
+                                    }
+                                ]}
+                            >
+                                Back
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+                    {this._renderPagingDots(this._idx)}
+                    <TouchableOpacity onPress={this._nextStep}>
+                        <Text
+                            style={[
+                                styles.btnText,
+                                {
+                                    opacity: this.state.isFinalStep ? 0 : 1
+                                }
+                            ]}
+                        >
+                            Next
+                        </Text>
+                    </TouchableOpacity>
+                </Animatable.View>
                 {this.state.showInfoPopup && (
                     <ClkAlert
                         contHeight={"mid"}
@@ -731,7 +531,7 @@ export default class Help extends React.Component {
                         // }}
                     />
                 )}
-            </View>
+            </LinearGradient>
         );
     }
 }
@@ -813,8 +613,8 @@ const styles = StyleSheet.create({
         ]
     },
     pagingDotsCont: {
-        position: "absolute",
-        bottom: HELPPAGE_HEIGHT * 0.165,
+        // position: "absolute",
+        // bottom: 20, // TODO: iPhonex offset
         height: 20,
         // height: 30
         flexDirection: "row",
@@ -828,13 +628,16 @@ const styles = StyleSheet.create({
         width: 7,
         borderRadius: 7,
         alignSelf: "center",
-        backgroundColor: "#BABABA",
+        backgroundColor: "#989898",
         marginHorizontal: 5
     },
     pageDotActive: {
         height: 10,
         width: 10,
         borderRadius: 7,
-        backgroundColor: "#989898"
+        backgroundColor: "#BABABA"
+    },
+    btnText: {
+        color: Colors.brandLightOpp
     }
 });

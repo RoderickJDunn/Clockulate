@@ -19,7 +19,9 @@ import {
     Alert,
     Text,
     TouchableOpacity,
-    Button
+    Button,
+    AsyncStorage,
+    Modal
 } from "react-native";
 import moment from "moment";
 import LinearGradient from "react-native-linear-gradient";
@@ -52,6 +54,11 @@ import AwesomeAlert from "react-native-awesome-alerts";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import FAIcon from "react-native-vector-icons/FontAwesome";
+import { createIconSetFromFontello } from "react-native-vector-icons";
+// import cktFlatIconConf from '../../assets/config/CktFlatIcConfig.json';
+import cktFlatIconConf from "../../assets/config/config_test3.json";
+const CktFlatIcon = createIconSetFromFontello(cktFlatIconConf);
+
 import ClkAlert from "../components/clk-awesome-alert";
 import Upgrades from "../config/upgrades";
 // import ProximityManager from "react-native-proximity-manager";
@@ -74,6 +81,7 @@ import {
 import { populateDummyAlarms } from "../data/data-prepop";
 import { ALARM_STATES } from "../data/constants";
 import Settings from "../config/settings";
+import MiscStorage from "../config/misc_storage";
 
 var loadedSound = null;
 
@@ -112,7 +120,27 @@ class Alarms extends Component {
             UIManager.setLayoutAnimationEnabledExperimental(true);
         } // setup notifications
         else {
+            //NotificationsIOS.requestPermissions([ALARM_CAT]);
             // ProximityManager.disable();
+        }
+
+        try {
+            AsyncStorage.getItem("notFirstLaunch").then(value => {
+                // this.props.navigation.navigate("Help"); // DEV: Remove
+                // setTimeout(() => SplashScreen.hide(), 1000); // DEV: Remove
+
+                if (value === null) {
+                    console.log("First Launch");
+                    this.props.navigation.navigate("Help");
+                    setTimeout(() => SplashScreen.hide(), 1000);
+                } else {
+                    SplashScreen.hide();
+                }
+            });
+        } catch (error) {
+            console.error(
+                `Unable to check if app has already been launched: ${error}`
+            );
         }
 
         // this._idlePanResponder = PanResponder.create({
@@ -172,9 +200,9 @@ class Alarms extends Component {
     }
 
     onNotificationReceivedBackground(notification) {
-        NotificationsIOS.log(
-            "Notification Received Background: " + JSON.stringify(notification)
-        );
+        // NotificationsIOS.log(
+        //     "Notification Received Background: " + JSON.stringify(notification)
+        // );
         console.log("Got background notification");
 
         // this.playRingtone("super_ringtone.mp3");
@@ -320,10 +348,6 @@ class Alarms extends Component {
                 }
             }
         );
-
-        setTimeout(() => {
-            SplashScreen.hide();
-        }, 1000);
     }
 
     componentWillUnmount() {
@@ -359,11 +383,8 @@ class Alarms extends Component {
             nextAppState === "active"
         ) {
             console.log("App has come to the foreground! (ALARMS LIST)");
-
             AdSvcUpdateAppOpenedStats();
-
             this.verifyAlarmStates();
-
             this.reloadAlarms();
         } else if (nextAppState === "background") {
             console.log("App is going into background");
@@ -576,7 +597,7 @@ class Alarms extends Component {
             }
         } else {
             console.warn("Unable to find alarm to update/set.");
-            this.setState({isLoading: false});
+            this.setState({ isLoading: false });
         }
     };
 
@@ -590,7 +611,10 @@ class Alarms extends Component {
         let alarms = realm.objects("Alarm").sorted("order");
         // console.log("Alarms after reload: ", alarms);
         // general reload. No specific alarm ID is known to have changed.
-        this.setState({ alarms: realm.objects("Alarm").sorted("order"), isLoading: false }); // TODO: filter by 'visible'=true
+        this.setState({
+            alarms: realm.objects("Alarm").sorted("order"),
+            isLoading: false
+        }); // TODO: filter by 'visible'=true
     };
 
     /*

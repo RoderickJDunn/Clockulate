@@ -40,6 +40,7 @@ import Settings from "../screens/SettingsScreen";
 import About from "../screens/About";
 import Sounds from "../screens/Sounds";
 import { UpgradeModal, UpgradeStack } from "../screens/UpgradeContainters";
+import { HelpModal, HelpStack } from "../screens/HelpContainers";
 import SleepLog from "../screens/SleepLog";
 import TextInputPage from "../screens/TextInputPage";
 import PlainTextScreen from "../screens/PlainTextScreen";
@@ -306,6 +307,9 @@ const ModalStack = createStackNavigator(
         },
         Upgrade: {
             screen: UpgradeModal
+        },
+        Help: {
+            screen: HelpModal
         }
     },
     {
@@ -524,17 +528,20 @@ const DrawerRoot = createDrawerNavigator(
                 }
             })
         },
-        Help: {
+        HelpStack: {
             screen: createStackNavigator(
                 {
                     HelpScreen: {
-                        screen: Help
+                        screen: HelpStack
                     }
                 },
                 {
                     defaultNavigationOptions: otherDrawerNavOptions("Help")
                 }
-            )
+            ),
+            navigationOptions: {
+                drawerLabel: "Help"
+            }
         },
         About: {
             screen: createStackNavigator(
@@ -596,7 +603,7 @@ const DrawerRoot = createDrawerNavigator(
             "UpgradeStack",
             "SleepLog",
             "Settings",
-            "Help",
+            "HelpStack",
             "About"
         ],
         contentComponent: CustomDrawerContentComponent
