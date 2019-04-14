@@ -39,16 +39,16 @@ let HELP_SECTIONS = [
         name: "Alarms List",
         images: [
             {
-                path: "AlarmItem_v2_step0",
+                path: "AlarmItem_final_step0",
                 style: { marginBottom: 5 }
             },
             {
-                path: "AlarmItem_v2_step1",
+                path: "AlarmItem_final_step1",
                 style: { marginBottom: 5 },
                 sharePageWithNext: 1
             },
             {
-                path: "AlarmItem_v2_step2",
+                path: "AlarmItem_final_step2",
                 style: { paddingBottom: 0 },
                 sharedWithPrev: true,
                 // NOTE: Aspect ratio is required when sharedWithPrev=true, since AutoHeightImage
@@ -57,11 +57,11 @@ let HELP_SECTIONS = [
                 aspectRatio: 664 / 454
             },
             {
-                path: "AlarmItem_v2_step3",
+                path: "AlarmItem_final_step3",
                 style: null
             },
             {
-                path: "AlarmItem_v2_step4",
+                path: "AlarmItem_final_step4",
                 style: null
             }
         ],
@@ -72,19 +72,19 @@ let HELP_SECTIONS = [
         subtitle: "How it Works", // "Overview",
         images: [
             {
-                path: "AlarmDetail_v2_step1",
+                path: "AlarmDetail_final_step1",
                 style: { paddingVertical: SCREEN_HEIGHT * 0.05 }
             },
             {
-                path: "AlarmDetail_v2_step2",
+                path: "AlarmDetail_final_step2",
                 style: null
             },
             {
-                path: "AlarmDetail_v2_step3",
+                path: "AlarmDetail_final_step3",
                 style: null
             },
             {
-                path: "AlarmDetail_v2_step4",
+                path: "AlarmDetail_final_step4",
                 style: {
                     paddingTop: SCREEN_HEIGHT * 0.08,
                     paddingBottom: SCREEN_HEIGHT * 0.03
@@ -98,19 +98,19 @@ let HELP_SECTIONS = [
         subtitle: "Tasks",
         images: [
             {
-                path: "ADTasks_v2_step1",
+                path: "ADTasks_final_step1",
                 style: null
             },
             {
-                path: "ADTasks_v2_step2",
+                path: "ADTasks_final_step2",
                 style: null
             },
             {
-                path: "ADTasks_v2_step3",
+                path: "ADTasks_final_step3",
                 style: null
             },
             {
-                path: "ADTasks_v2_step4",
+                path: "ADTasks_final_step4",
                 style: null
             }
         ]
@@ -120,11 +120,11 @@ let HELP_SECTIONS = [
         subtitle: "Modes",
         images: [
             {
-                path: "ADModes_v2_step1",
+                path: "ADModes_final_step1",
                 style: { paddingVertical: SCREEN_HEIGHT * 0.14 }
             },
             {
-                path: "ADModes_v2_step2",
+                path: "ADModes_final_step2",
                 style: { paddingVertical: SCREEN_HEIGHT * 0.28 }
             }
         ],
