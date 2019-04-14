@@ -131,7 +131,10 @@ class Alarms extends Component {
 
                 if (value === null) {
                     console.log("First Launch");
-                    this.props.navigation.navigate("Help");
+                    this.props.navigation.navigate("Help", {
+                        willExitHelp: () =>
+                            NotificationsIOS.requestPermissions([ALARM_CAT])
+                    });
                     setTimeout(() => SplashScreen.hide(), 1000);
                 } else {
                     SplashScreen.hide();

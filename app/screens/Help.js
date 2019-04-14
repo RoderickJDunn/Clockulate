@@ -263,7 +263,11 @@ export default class Help extends React.Component {
     };
 
     _exitHelp = () => {
-        this.props.navigation.goBack();
+        let { navigation } = this.props;
+        navigation.goBack();
+        if (navigation.state.params && navigation.state.params.willExitHelp) {
+            navigation.state.params.willExitHelp();
+        }
     };
 
     _renderPagingDots = idx => {
