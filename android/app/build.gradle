@@ -166,9 +166,7 @@ dependencies {
     compile 'com.android.support:support-v4:27.1.0'
     compile project(':lottie-react-native')
     compile project(':react-native-gesture-handler')
-    compile project(':react-native-radial-gradient')
     compile project(':react-native-version-number')
-    compile project(':react-native-alarm-notification')
     compile project(':react-native-linear-gradient')
     compile project(':react-native-sound')
     compile(project(':react-native-sound')) {
@@ -176,8 +174,6 @@ dependencies {
     }
     compile project(':react-native-interactable')
     compile project(':react-native-push-notification')
-    compile project(':react-native-calendar-events')
-    compile project(':react-native-svg')
     compile project(':react-native-vector-icons')
     compile project(':realm')
     compile fileTree(include: ['*.jar'], dir: 'libs')

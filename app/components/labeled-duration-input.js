@@ -6,7 +6,6 @@ import React, { Component } from "react";
 import { Text, View, TouchableOpacity, StyleSheet } from "react-native";
 
 import DurationText from "./duration-text";
-// import TimePicker from 'react-native-timepicker';
 import { TextStyle } from "../styles/text";
 
 class LabeledDurationInput extends Component {

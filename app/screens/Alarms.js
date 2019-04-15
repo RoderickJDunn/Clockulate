@@ -25,7 +25,6 @@ import {
 } from "react-native";
 import moment from "moment";
 import LinearGradient from "react-native-linear-gradient";
-// import RadialGradient from "react-native-radial-gradient";
 import { SafeAreaView } from "react-navigation";
 
 import PushNotificationAndroid from "react-native-push-notification";

@@ -1,5 +1,3 @@
-// import ReactNativeAN from "react-native-alarm-notification";
-
 import PushNotification from "react-native-push-notification";
 import Colors from "../styles/colors";
 import realm from "../data/DataSchemas";

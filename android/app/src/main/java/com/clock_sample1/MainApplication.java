@@ -20,8 +20,6 @@ import com.zmxv.RNSound.RNSoundPackage;
 import com.facebook.react.uimanager.ViewManager;
 import com.wix.interactable.Interactable;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
-import com.calendarevents.CalendarEventsPackage;
-import com.horcrux.svg.SvgPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
