@@ -44,6 +44,7 @@ pod 'ReactNativePermissions', :path => '../node_modules/react-native-permissions
 pod 'GoogleMobileAdsMediationAppLovin'
 pod 'GoogleMobileAdsMediationInMobi'
 pod 'Google-Mobile-Ads-SDK'
+pod 'AdFalconSDK'
 
 end
 

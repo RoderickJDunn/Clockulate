@@ -1,4 +1,5 @@
 PODS:
+  - AdFalconSDK (4.2.0)
   - AppLovinSDK (6.2.0)
   - boost-for-react-native (1.63.0)
   - DoubleConversion (1.1.6)
@@ -68,6 +69,7 @@ PODS:
   - yoga (0.57.7.React)
 
 DEPENDENCIES:
+  - AdFalconSDK
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
@@ -110,6 +112,7 @@ EXTERNAL SOURCES:
     :path: ../node_modules/react-native/ReactCommon/yoga
 
 SPEC CHECKSUMS:
+  AdFalconSDK: 3074457eab6bfd3d5f72757bd3a5a955cc1dfa92
   AppLovinSDK: b960ee5305e0cd8437bb0e97c9fe0be7d5cca57c
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   DoubleConversion: bb338842f62ab1d708ceb63ec3d999f0f3d98ecd
@@ -125,6 +128,6 @@ SPEC CHECKSUMS:
   RNIap: 2db09372724c1dd049c3e03883e9af16c8e8315c
   yoga: 192d724e53380b783e09b7d687a55cd8ed5188be
 
-PODFILE CHECKSUM: d701236a5b3f2e40823365a1b197b7986a4d9097
+PODFILE CHECKSUM: 7c852e589df5557c01e24190117b43f4192f9588
 
 COCOAPODS: 1.3.1

@@ -14,6 +14,17 @@
 		</dict>
 		<dict>
 			<key>FooterText</key>
+			<string>Copyright (C) AdFalcon. All Right Reserved.
+</string>
+			<key>License</key>
+			<string>proprietary</string>
+			<key>Title</key>
+			<string>AdFalconSDK</string>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+		</dict>
+		<dict>
+			<key>FooterText</key>
 			<string>
 Copyright 2019 AppLovin Corp. All rights reserved.
 

@@ -1,6 +1,11 @@
 # Acknowledgements
 This application makes use of the following third party libraries:
 
+## AdFalconSDK
+
+Copyright (C) AdFalcon. All Right Reserved.
+
+
 ## AppLovinSDK
 
 
