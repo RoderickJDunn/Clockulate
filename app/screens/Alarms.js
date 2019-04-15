@@ -54,15 +54,9 @@ import AwesomeAlert from "react-native-awesome-alerts";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import FAIcon from "react-native-vector-icons/FontAwesome";
-import { createIconSetFromFontello } from "react-native-vector-icons";
-// import cktFlatIconConf from '../../assets/config/CktFlatIcConfig.json';
-import cktFlatIconConf from "../../assets/config/config_test3.json";
-const CktFlatIcon = createIconSetFromFontello(cktFlatIconConf);
 
 import ClkAlert from "../components/clk-awesome-alert";
 import Upgrades from "../config/upgrades";
-// import ProximityManager from "react-native-proximity-manager";
-
 import Colors from "../styles/colors";
 import { ListStyle } from "../styles/list";
 import AlarmItem from "../components/alarm-item";
@@ -81,7 +75,6 @@ import {
 import { populateDummyAlarms } from "../data/data-prepop";
 import { ALARM_STATES } from "../data/constants";
 import Settings from "../config/settings";
-import MiscStorage from "../config/misc_storage";
 
 var loadedSound = null;
 
@@ -256,8 +249,6 @@ class Alarms extends Component {
         });
 
         if (Platform.OS === "ios") {
-            NotificationsIOS.requestPermissions([ALARM_CAT]);
-
             NotificationsIOS.consumeBackgroundQueue();
 
             // NotificationsIOS.addEventListener(
@@ -266,18 +257,18 @@ class Alarms extends Component {
             // );
             // NotificationsIOS.registerPushKit();
 
-            NotificationsIOS.addEventListener(
-                "notificationReceivedForeground",
-                this.onNotificationReceivedForeground.bind(this)
-            );
-            NotificationsIOS.addEventListener(
-                "notificationReceivedBackground",
-                this.onNotificationReceivedBackground.bind(this)
-            );
-            NotificationsIOS.addEventListener(
-                "notificationOpened",
-                this.onNotificationOpened.bind(this)
-            );
+            // NotificationsIOS.addEventListener(
+            //     "notificationReceivedForeground",
+            //     this.onNotificationReceivedForeground.bind(this)
+            // );
+            // NotificationsIOS.addEventListener(
+            //     "notificationReceivedBackground",
+            //     this.onNotificationReceivedBackground.bind(this)
+            // );
+            // NotificationsIOS.addEventListener(
+            //     "notificationOpened",
+            //     this.onNotificationOpened.bind(this)
+            // );
         } else {
             // PushNotificationAndroid.cancelAllLocalNotifications();
 

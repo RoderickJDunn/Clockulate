@@ -74,8 +74,8 @@ export default class ClkAlert extends Component {
                 }}
                 overlayStyle={{
                     height: SCREEN_HEIGHT,
-                    width: SCREEN_WIDTH,
-                    top: isIphoneX() ? -88 : -64
+                    width: SCREEN_WIDTH
+                    // top: isIphoneX() ? -88 : -64
                 }}
                 show={true}
                 showProgress={false}
@@ -110,7 +110,13 @@ export default class ClkAlert extends Component {
                         ]}
                     >
                         <View style={[styles.container, contHeight]}>
-                            <View style={[headerStyle, styles.centered, this.props.headerStyle]}>
+                            <View
+                                style={[
+                                    headerStyle,
+                                    styles.centered,
+                                    this.props.headerStyle
+                                ]}
+                            >
                                 {headerContent || (
                                     <View
                                         style={{
@@ -214,7 +220,12 @@ export default class ClkAlert extends Component {
                         </View>
                         {headerIcon && (
                             <View style={styles.headerIconContainer}>
-                                <View style={[styles.headerIconInnerWrap, this.props.headerIconStyle]}>
+                                <View
+                                    style={[
+                                        styles.headerIconInnerWrap,
+                                        this.props.headerIconStyle
+                                    ]}
+                                >
                                     {headerIcon}
                                 </View>
                             </View>
