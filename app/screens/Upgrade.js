@@ -527,6 +527,9 @@ export default class Upgrade extends React.Component {
         // IAP functionality
         console.log("onPressUpgrade");
 
+        // upgrades.setPro(true);
+        // return;
+
         this.setState({ isLoading: true });
         await RNIap.clearTransaction();
 
@@ -683,8 +686,8 @@ export default class Upgrade extends React.Component {
                 <View style={[StyleSheet.absoluteFill]} pointerEvents="none">
                     <Animated.Image
                         style={{
-                            height: SCREEN_WIDTH * 0.75 * 0.473,
-                            width: SCREEN_WIDTH * 0.75,
+                            height: SCREEN_WIDTH * 0.832,
+                            width: SCREEN_WIDTH,
                             alignSelf: "center",
                             alignContent: "center",
                             transform: [
@@ -696,14 +699,17 @@ export default class Upgrade extends React.Component {
                                             // SCREEN_HEIGHT * 1
                                             // SCREEN_HEIGHT * 1.5
                                         ],
-                                        outputRange: [SCREEN_HEIGHT, 0],
+                                        outputRange: [
+                                            SCREEN_HEIGHT,
+                                            -(SCREEN_WIDTH * 0.416)
+                                        ],
                                         extrapolate: "clamp"
                                     })
                                 }
                             ]
                         }}
                         resizeMode="contain"
-                        source={require("../img/UpgradeTitleV1_3.png")}
+                        source={{ uri: "UpgradeScreen_logo_v2" }}
                     />
                     <View
                         style={{

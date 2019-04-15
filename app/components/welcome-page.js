@@ -91,7 +91,7 @@ export default class WelcomePage extends Component {
                             }
                         ]
                     }}
-                    source={{ uri: "WelcomeScreen_logo_v1" }}
+                    source={{ uri: "WelcomeScreen_logo_v2" }}
                 />
                 {this.state.showWelcome && (
                     <Animatable.View
