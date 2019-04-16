@@ -49,7 +49,6 @@ import {
     // AdMobRewarded
 } from "react-native-admob";
 import SplashScreen from "react-native-splash-screen";
-import AwesomeAlert from "react-native-awesome-alerts";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import FAIcon from "react-native-vector-icons/FontAwesome";

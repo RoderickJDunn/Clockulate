@@ -9,10 +9,11 @@ import {
     Platform
 } from "react-native";
 
-import AwesomeAlert from "react-native-awesome-alerts";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+import AwesomeAlert from "../components/rn-awesome-alerts/AwesomeAlert";
 
 import Colors from "../styles/colors";
 import { scaleByFactor } from "../util/font-scale";

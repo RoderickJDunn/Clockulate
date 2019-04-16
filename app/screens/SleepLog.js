@@ -21,7 +21,6 @@ import moment, { max } from "moment";
 import { isIphoneX } from "react-native-iphone-x-helper";
 import Interactable from "react-native-interactable";
 import MaterialComIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import AwesomeAlert from "react-native-awesome-alerts";
 // import RNTooltips from "react-native-tooltips";
 import { Header } from "react-navigation";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
