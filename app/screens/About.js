@@ -20,14 +20,12 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const fontFamily = Platform.OS === "ios" ? "Avenir" : "sans-serif";
 
-// TEST:
-// TODO: FIXME: Its very likely that the appID in these links doesn't work. I need to test it once I have an AppStore AppID......
-// TODO: If the links turn out to be wrong, make sure to add the corrected links in Info.plist under LSApplicationQueriesSchemes
-const link =
-    "itms-apps://itunes.apple.com/app/viewContentsUserReviews?id=9SXQK8L2Q6.org.reactjs.native.example.Alarm-AutoSet";
-const backupLink =
-    "itms-apps://itunes.apple.com/app/id=9SXQK8L2Q6.org.reactjs.native.example.Alarm-AutoSet";
+const APP_ID = "1452117998";
 
+// NOTE: Its possible that the appID in these links doesn't work. I need to test it once I have an AppStore AppID......
+//       If the links turn out to be wrong, make sure to add the corrected links in Info.plist under LSApplicationQueriesSchemes
+const rateAppLink = `itms-apps://itunes.apple.com/app/viewContentsUserReviews?id=${APP_ID}`; // (Option 2) Open App Review Tab
+const backupLink = `itms-apps://itunes.apple.com/app/id${APP_ID}`;
 const contactLink = "http://www.clockulate.ca/contact";
 const supportLink = "http://www.clockulate.ca/support";
 
@@ -153,7 +151,7 @@ export default class About extends React.Component {
                 <TouchableOpacity
                     style={styles.btn}
                     onPress={() => {
-                        this.launchAppStoreWithLink(link, err => {
+                        this.launchAppStoreWithLink(rateAppLink, err => {
                             console.log("err", err);
                             this.launchAppStoreWithLink(backupLink, err => {
                                 console.log("err", err);
