@@ -9,7 +9,8 @@ import {
     ART,
     Alert,
     Slider,
-    ScrollView
+    ScrollView,
+    Animated
 } from "react-native";
 
 const { Group, Shape, Surface, Text: ARTText } = ART;
@@ -24,6 +25,7 @@ import _ from "lodash";
 import Sound from "react-native-sound";
 import * as Animatable from "react-native-animatable";
 import Upgrades from "../config/upgrades";
+import AnimatedPulse from "./anim-pulse";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -69,6 +71,7 @@ export default class SleepLogPage extends React.PureComponent {
     arcAngle = 30;
     labelRadius = 62;
     playbackBoxRef = null;
+    _audioProg = new Animated.Value(0);
 
     constructor(props) {
         super(props);
@@ -94,6 +97,9 @@ export default class SleepLogPage extends React.PureComponent {
         let { isAnyAlarmOn } = this.props;
 
         this.stopActiveSound();
+        this._audioProg.stopAnimation();
+
+        this._audioProg.setValue(0);
 
         if (
             this.state.playingDisturbance &&
@@ -105,7 +111,6 @@ export default class SleepLogPage extends React.PureComponent {
                 });
             }
             this.setState({ playingDisturbance: null, activeSound: null });
-
             return; // user just pushed stop. Don't restart sound playback.
         }
 
@@ -142,10 +147,18 @@ export default class SleepLogPage extends React.PureComponent {
             // loaded successfully
             console.log(
                 "duration in seconds: " +
-                    s.getDuration() +
+                    Math.round(s.getDuration()) +
                     "number of channels: " +
                     s.getNumberOfChannels()
             );
+
+            Animated.timing(this._audioProg, {
+                toValue: SCREEN_WIDTH - 30,
+                // toValue: Math.round(s.getDuration()),
+                duration: Math.round(s.getDuration()) * 1000,
+                useNativeDriver: true
+            }).start();
+
             s.setVolume(this.state.playbackVolume);
             s.play(success => {
                 if (success) {
@@ -664,8 +677,33 @@ export default class SleepLogPage extends React.PureComponent {
                     ]}
                 >
                     <Text style={styles.playbackBoxText}>{"Volume"}</Text>
+                    <View style={styles.audioProgressContainer}>
+                        <Text />
+                        <View style={styles.audioProgressTrack} />
+                        <Animated.View
+                            style={[
+                                styles.audioProgressHandle,
+                                {
+                                    transform: [
+                                        {
+                                            translateX: this._audioProg
+                                            // translateX: this._audioProg.interpolate(
+                                            //     {
+                                            //         inputRange: [0, 1],
+                                            //         outputRange: [
+                                            //             0,
+                                            //             SCREEN_WIDTH - 30
+                                            //         ]
+                                            //     }
+                                            // )
+                                        }
+                                    ]
+                                }
+                            ]}
+                        />
+                    </View>
                     <Slider
-                        style={{ flex: 1 }}
+                        style={styles.volumeSlider}
                         hitSlop={{ top: 50, bottom: 50 }}
                         value={this.state.playbackVolume}
                         minimumValue={0}
@@ -848,5 +886,28 @@ const styles = StyleSheet.create({
         color: Colors.darkGreyText,
         fontFamily: "Gurmukhi MN",
         fontSize: 18
+    },
+    audioProgressContainer: {
+        flex: 1,
+        alignContent: "center",
+        justifyContent: "center"
+    },
+    audioProgressTrack: {
+        height: 2,
+        width: "100%",
+        backgroundColor: Colors.brandDarkGrey
+    },
+    audioProgressHandle: {
+        height: 13,
+        width: 13,
+        borderRadius: 13,
+        position: "absolute",
+        backgroundColor: "blue"
+    },
+    volumeSlider: {
+        position: "absolute",
+        right: 6,
+        top: 6,
+        width: SCREEN_WIDTH * 0.25
     }
 });
