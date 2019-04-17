@@ -496,11 +496,13 @@ export default class SleepLog extends React.Component {
     render() {
         let wtIdx = this.state.walkthroughIdx;
         let { alarmInstAll, alarmInstGroupIdx } = this.state;
-        let eightHrsAgo;
+        let sampleSleepStart;
 
         if (alarmInstAll.length == 0) {
-            eightHrsAgo = new Date();
-            eightHrsAgo.setMinutes(eightHrsAgo.getMinutes() - 8.5 * 60);
+            sampleSleepStart = moment();
+            sampleSleepStart.subtract(1, "day");
+            sampleSleepStart.hour(23);
+            // eightHrsAgo.setMinutes(eightHrsAgo.getMinutes() - 8.5 * 60);
         }
 
         // console.log(
@@ -581,12 +583,32 @@ export default class SleepLog extends React.Component {
                         <SleepLogPage
                             almInst={{
                                 id: "string",
-                                start: eightHrsAgo,
-                                end: new Date(),
+                                start: sampleSleepStart.toDate(),
+                                end: moment(sampleSleepStart)
+                                    .add(8.5, "hours")
+                                    .toDate(),
                                 disturbances: [
-                                    { id: "10" },
-                                    { id: "11" },
-                                    { id: "12" }
+                                    {
+                                        id: "10",
+                                        time: moment(sampleSleepStart)
+                                            .add(30, "minutes")
+                                            .toDate(),
+                                        duration: 15
+                                    },
+                                    {
+                                        id: "11",
+                                        time: moment(sampleSleepStart)
+                                            .add(57, "minutes")
+                                            .toDate(),
+                                        duration: 7
+                                    },
+                                    {
+                                        id: "12",
+                                        time: moment(sampleSleepStart)
+                                            .add(63, "minutes")
+                                            .toDate(),
+                                        duration: 3
+                                    }
                                 ],
                                 timeAwake: 92
                             }}
@@ -899,46 +921,6 @@ export default class SleepLog extends React.Component {
                             text: "Go to Settings"
                         }}
                     />
-                    // <AwesomeAlert
-                    //     alertContainerStyle={{
-                    //         top: 0,
-                    //         bottom: 0,
-                    //         left: 0,
-                    //         right: 0,
-                    //         width: "auto"
-                    //     }}
-                    //     contentContainerStyle={{
-                    //         borderRadius: 20
-                    //     }}
-                    //     show={true}
-                    //     showProgress={false}
-                    //     title="No Recording Available"
-                    //     message={`No recording was saved for this disturbance, as it occurred too soon after another disturbance. You can increase the number of disturbances that are recorded in the Settings screen.`}
-                    //     messageStyle={{ textAlign: "center" }}
-                    //     closeOnTouchOutside={true}
-                    //     closeOnHardwareBackPress={false}
-                    //     showConfirmButton={true}
-                    //     showCancelButton={true}
-                    //     cancelText="Ok"
-                    //     confirmText="Go to Settings"
-                    //     confirmButtonColor={Colors.brandGreen}
-                    //     cancelButtonColor={Colors.disabledGrey}
-                    //     onConfirmPressed={() => {
-                    //         // this.setState({ showNoRecAlert: false });
-                    //         this.props.navigation.navigate("Settings");
-                    //         // alert(
-                    //         //     "not implemented (should navigate to Settings Screen)"
-                    //         // );
-                    //     }}
-                    //     onCancelPressed={() => {
-                    //         this.setState({ showNoRecAlert: false });
-                    //     }}
-                    //     onDismiss={() => {
-                    //         if (this.state.showDurationInfo) {
-                    //             this.setState({ showNoRecAlert: false });
-                    //         }
-                    //     }}
-                    // />
                 )}
                 {this.state.isLoading != true && Upgrades.pro != true && (
                     <AdWrapper
