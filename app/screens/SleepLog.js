@@ -185,6 +185,7 @@ export default class SleepLog extends React.Component {
             showNoRecAlert: false,
             scrollEnabled: true,
             forceProAdv: false,
+            adHeight: Upgrades.pro == true ? 0 : 50,
             isLoading: true
         };
 
@@ -420,7 +421,7 @@ export default class SleepLog extends React.Component {
                         {this._renderGeneralInfoPage(0, {})}
                     </View>
                 </DimmableView>
-                <DimmableView style={{ flex: 1 }} isDimmed={false}>
+                {/* <DimmableView style={{ flex: 1 }} isDimmed={false}>
                     <ActivityIndicator size={"large"} />
                     {isIphoneX() ? (
                         <View
@@ -430,7 +431,7 @@ export default class SleepLog extends React.Component {
                             }}
                         />
                     ) : null}
-                </DimmableView>
+                </DimmableView> */}
             </View>
         );
     };
@@ -524,7 +525,11 @@ export default class SleepLog extends React.Component {
             <SafeAreaView
                 forceInset={{ bottom: "always" }} // source={require("../img/paper_texture1.jpg")}
                 // style={{ width: "100%", height: "100%", }}
-                style={{ flex: 1, backgroundColor: Colors.brandMidGrey }}
+                style={{
+                    flex: 1,
+                    overflow: "hidden",
+                    backgroundColor: Colors.brandMidGrey
+                }}
                 // style={{ flex: 1, backgroundColor: "#E1D5CC" }}
                 ref={target => {
                     this.refScreenContainer = target;
@@ -556,6 +561,7 @@ export default class SleepLog extends React.Component {
                                 scrollEnabled={enabled =>
                                     this.setState({ scrollEnabled: enabled })
                                 }
+                                adHeight={this.state.adHeight}
                             />
                         )}
                         initialScrollIndex={alarmInstAll.length - 1}

@@ -76,7 +76,8 @@ export default class SleepLogPage extends React.PureComponent {
             wtIdx: null,
             activeSound: null,
             playingDisturbance: null,
-            playbackVolume: props.isAnyAlarmOn ? 5 : 0.5
+            playbackVolume: props.isAnyAlarmOn ? 5 : 0.5,
+            adHeight: 0
         };
     }
 
@@ -130,9 +131,8 @@ export default class SleepLogPage extends React.PureComponent {
                 this.playbackBoxRef.transitionTo({
                     transform: [
                         {
-                            translateY:
-                                ifIphoneX(-160, -120) -
-                                (Upgrades.pro != true ? 50 : 0)
+                            // translate extra depending on what type of ad is showing, or 0 if no ad.
+                            translateY: -120
                         }
                     ]
                 });
@@ -644,14 +644,12 @@ export default class SleepLogPage extends React.PureComponent {
                             };
                         }}
                     />
-                    {isIphoneX() ? (
-                        <View
-                            style={{
-                                height: 34 // height of bottom safe area in Portrait mode
-                                // backgroundColor: "green"
-                            }}
-                        />
-                    ) : null}
+                    <View
+                        style={{
+                            height: 20 // padding from bottom (in addition to safe area)
+                            // backgroundColor: "green"
+                        }}
+                    />
                 </DimmableView>
                 <Animatable.View
                     contentInsetAdjustmentBehavior="automatic"
@@ -659,8 +657,9 @@ export default class SleepLogPage extends React.PureComponent {
                     ref={elm => (this.playbackBoxRef = elm)}
                     style={[
                         styles.playbackBox,
-                        Upgrades.pro != true && {
-                            bottom: styles.playbackBox.bottom - 50
+                        {
+                            bottom:
+                                styles.playbackBox.bottom - this.state.adHeight
                         }
                     ]}
                 >
@@ -802,7 +801,10 @@ const styles = StyleSheet.create({
         fontSize: 13
     },
     distItemText: {
-        color: Colors.brandLightGrey
+        color: Colors.brandLightGrey,
+        fontSize: 17,
+        marginTop: 3,
+        fontFamily: "Gurmukhi MN"
     },
     generalInfoFooter: {
         height: 30,
@@ -835,10 +837,7 @@ const styles = StyleSheet.create({
     },
     playbackBox: {
         position: "absolute",
-        // bottom: 0,
-        // TODO: Playback box needs to start off-screen. As is, if ad is displayed,
-        //  the box is visible. UGH.
-        bottom: ifIphoneX(-180, -140),
+        bottom: -120,
         left: 0,
         padding: 15,
         backgroundColor: Colors.backgroundGrey,
