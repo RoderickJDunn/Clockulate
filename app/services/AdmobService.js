@@ -370,9 +370,6 @@ export class AdWrapper extends Component {
     render() {
         let border;
         let marginBottom = {};
-        if (SCREEN_WIDTH <= 320 || isIphoneX()) {
-            marginBottom = { marginBottom: 0 };
-        }
 
         let props = this.props;
 
@@ -419,13 +416,12 @@ export class AdWrapper extends Component {
 }
 
 const styles = StyleSheet.create({
-    adWrapper: {
+    adwrapper: {
         // width: 320,
         alignContent: "center",
         justifyContent: "center",
         alignSelf: "stretch",
-        overflow: "hidden",
-        marginTop: 20
+        overflow: "hidden"
         // backgroundColor: Colors.disabledGrey
         // backgroundColor: "green"
         // alignSelf: "center"

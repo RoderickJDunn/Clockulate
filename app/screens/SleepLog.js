@@ -439,7 +439,7 @@ export default class SleepLog extends React.Component {
     _bannerError = e => {
         console.log("_bannerError");
         console.log(e);
-        this.setState({ forceProAdv: true });
+        this.setState({ forceProAdv: true, adHeight: 100 });
     };
 
     _updateScreenTitle(alrmInst) {
