@@ -1030,11 +1030,13 @@ const Styles = StyleSheet.create({
         backgroundColor: Colors.brandMidGrey
     },
     suggestionDurationText: {
-        fontSize: 18
+        fontSize: 16,
+        fontFamily: "Gurmukhi MN"
     },
     suggestionText: {
         textAlign: "center",
         textAlignVertical: "center",
+        fontFamily: "Gurmukhi MN",
         color: Colors.brandLightOpp
     }
 });

@@ -456,6 +456,7 @@ const CustomDrawerContentComponent = props => {
                     position: "absolute",
                     alignSelf: "center",
                     bottom: isIphoneX() ? 34 : 15,
+                    fontFamily: "Avenir-Black",
                     color: Colors.brandVeryLightPurple
                 }}
             >

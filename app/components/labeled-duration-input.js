@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
         paddingTop: 10
     },
     fieldLabelText: {
-        fontFamily: "Verdana",
+        // fontFamily: "Avenir-Black",
         fontSize: 12 // paddingBottom: 4
     }
 });
