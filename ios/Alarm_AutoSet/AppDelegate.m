@@ -36,7 +36,7 @@
                                                initialProperties:nil
                                                    launchOptions:launchOptions];
   
-  [GADMobileAds configureWithApplicationID:@"ca-app-pub-5775007461562122~1333890178"];
+  [[GADMobileAds sharedInstance] startWithCompletionHandler:nil];
 
 //  NSLog(@"Testing my own log in AppDelegate -------- ******************** ---------------");
 //  NSLog(@"%@", jsCodeLocation.absoluteString);
@@ -70,10 +70,9 @@
 
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler
 {
-  if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive) { // In iOS 10 if app is in foreground do nothing.
+  if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive) { // In iOS 10+ if app is in foreground do nothing. The in-app alert will show
     completionHandler(0);
   } else { // If app is not active you can show banner, sound and badge.
-    // completionHandler([.alert, .badge, .sound])
     [[RNNRouter sharedInstance] userNotificationCenter:center willPresentNotification:notification withCompletionHandler:completionHandler];
   }
   

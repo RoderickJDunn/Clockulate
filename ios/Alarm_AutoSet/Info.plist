@@ -99,5 +99,7 @@
 	<false/>
 	<key>AppLovinSdkKey</key>
 	<string>--wyFpzJDvtfM-TcP-sC6B1TuxCdU_ady9OvsChl6xIgH0mAluRM4xEKinVhh2CtcUM7tbc3ILw5CVNJqcubVb</string>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-5775007461562122~1333890178</string>
 </dict>
 </plist>
