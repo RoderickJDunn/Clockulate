@@ -15,7 +15,9 @@ import {
 
 const { Group, Shape, Surface, Text: ARTText } = ART;
 
+import { PanGestureHandler, State } from "react-native-gesture-handler";
 import MaterialComIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import EntypoIcon from "react-native-vector-icons/Entypo";
 import moment from "moment";
 import DimmableView from "./dimmable-view";
 import Colors from "../styles/colors";
@@ -65,6 +67,8 @@ const GEN_INFO_PAGES = {
 
 const radians = 0.0174532925;
 const startAngle = 0;
+const PLAYBACK_CONT_WIDTH = SCREEN_WIDTH - 2 * 15;
+const PLAYBACK_TRACK_WIDTH = PLAYBACK_CONT_WIDTH - 10;
 
 export default class SleepLogPage extends React.PureComponent {
     clockNums = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
@@ -72,6 +76,9 @@ export default class SleepLogPage extends React.PureComponent {
     labelRadius = 62;
     playbackBoxRef = null;
     _audioProg = new Animated.Value(0);
+    _panValue = new Animated.Value(0);
+    _fingerOffset = 0;
+    _pbTimeTimer = null;
 
     constructor(props) {
         super(props);
@@ -80,16 +87,170 @@ export default class SleepLogPage extends React.PureComponent {
             activeSound: null,
             playingDisturbance: null,
             playbackVolume: props.isAnyAlarmOn ? 5 : 0.5,
+            playbackTime: 0,
             adHeight: 0
         };
     }
+
+    _updatePBTime = () => {
+        let { playbackTime } = this.state;
+        playbackTime++;
+        this.setState({ playbackTime });
+    };
 
     stopActiveSound() {
         if (this.state.activeSound) {
             this.state.activeSound.stop();
             this.state.activeSound.release();
         }
+        clearTimeout(this._pbTimeTimer);
+        this.setState({ activeSound: null, playbackTime: 0 });
     }
+
+    _pauseActiveSound() {
+        clearTimeout(this._pbTimeTimer);
+        if (this.state.activeSound) {
+            this.state.activeSound.pause();
+        }
+    }
+
+    _onSoundFinishedPlaying = success => {
+        let { activeSound } = this.state;
+        if (success) {
+            console.log("successfully finished playing");
+        } else {
+            console.log("playback failed due to audio decoding errors");
+            // reset the player to its uninitialized state (android only)
+            // this is the only option to recover after an error occured and use the player again
+            if (activeSound) {
+                activeSound.reset();
+            }
+        }
+
+        this.props.scrollEnabled(true);
+
+        if (this.playbackBoxRef) {
+            this.playbackBoxRef.transitionTo({
+                transform: [{ translateY: 0 }]
+            });
+        }
+        this.setState({
+            playingDisturbance: null,
+            activeSound: null,
+            playbackTime: 0
+        });
+
+        clearTimeout(this._pbTimeTimer);
+
+        if (activeSound) {
+            activeSound.release();
+        }
+    };
+
+    _resumeActiveSound(newPosition) {
+        let { activeSound } = this.state;
+        if (activeSound) {
+            let totalDur = activeSound.getDuration();
+            // let lastKnownPos =
+            //     (lastKnownTime / totalDur) * PLAYBACK_TRACK_WIDTH;
+
+            // console.log("lastKnownTime", lastKnownTime);
+            // console.log("lastKnownPos", lastKnownPos);
+
+            console.log("newPosition", newPosition);
+            newPosition = newPosition - this._fingerOffset + 15;
+            newPosition = Math.max(newPosition, 0);
+            newPosition = Math.min(newPosition, PLAYBACK_TRACK_WIDTH);
+            console.log("newPosition (compensated)", newPosition);
+
+            let time = Math.min(
+                (newPosition / PLAYBACK_TRACK_WIDTH) * totalDur,
+                totalDur - 0.5
+            );
+
+            console.log("Resuming at time: ", time);
+
+            this._panValue.setValue(0);
+            this._audioProg.setValue(newPosition);
+
+            this.state.activeSound.setCurrentTime(time);
+
+            this.state.activeSound.play(this._onSoundFinishedPlaying);
+
+            let leftoverTime = totalDur - time;
+
+            Animated.timing(this._audioProg, {
+                toValue: PLAYBACK_TRACK_WIDTH,
+                duration: leftoverTime * 1000,
+                useNativeDriver: true
+            }).start();
+
+            this.setState({ playbackTime: Math.round(time) }, () => {
+                this._pbTimeTimer = setInterval(this._updatePBTime, 1000);
+            });
+
+            // this._audioProg = new Animated.Value(newPosition);
+            // this._playbackProgRef.changePosition({ x: 1 });
+
+            // this.forceUpdate(() => {
+            //     Animated.timing(this._audioProg, {
+            //         toValue: PLAYBACK_TRACK_WIDTH,
+            //         duration: Math.round(leftoverTime) * 1000,
+            //         useNativeDriver: true
+            //     }).start();
+            // });
+        }
+    }
+
+    // _resumeActiveSound(offset) {
+    //     let { activeSound } = this.state;
+    //     if (activeSound) {
+    //         let totalDur = activeSound.getDuration();
+    //         activeSound.getCurrentTime(lastKnownTime => {
+    //             let lastKnownPos =
+    //                 (lastKnownTime / totalDur) * PLAYBACK_TRACK_WIDTH;
+
+    //             console.log("lastKnownTime", lastKnownTime);
+    //             console.log("lastKnownPos", lastKnownPos);
+
+    //             let newPosition = lastKnownPos + offset;
+    //             console.log("newPosition", newPosition);
+
+    //             let time = (newPosition / PLAYBACK_TRACK_WIDTH) * totalDur;
+    //             console.log("new time", time);
+
+    //             console.log("Resuming at time: ", time);
+
+    //             // this._audioProg.setOffset(offset);
+    //             this._panValue.setValue(0);
+    //             this._audioProg.setValue(newPosition);
+    //             // this._playbackProgRef.changePosition({ x: 0 });
+
+    //             this.state.activeSound.setCurrentTime(time);
+
+    //             this.state.activeSound.play(this._onSoundFinishedPlaying);
+
+    //             let leftoverTime = totalDur - time;
+
+    //             Animated.timing(this._audioProg, {
+    //                 toValue: PLAYBACK_TRACK_WIDTH,
+    //                 duration: Math.round(leftoverTime) * 1000,
+    //                 useNativeDriver: true
+    //             }).start();
+
+    //             // this._audioProg = new Animated.Value(newPosition);
+    //             // this._playbackProgRef.changePosition({ x: 1 });
+
+    //             // this.forceUpdate(() => {
+    //             //     Animated.timing(this._audioProg, {
+    //             //         toValue: PLAYBACK_TRACK_WIDTH,
+    //             //         duration: Math.round(leftoverTime) * 1000,
+    //             //         useNativeDriver: true
+    //             //     }).start();
+    //             // });
+    //         });
+    //     }
+    // }
 
     _playSound = disturbance => {
         console.log("_playSound");
@@ -100,6 +261,7 @@ export default class SleepLogPage extends React.PureComponent {
         this._audioProg.stopAnimation();
 
         this._audioProg.setValue(0);
+        this._panValue.setValue(0);
 
         if (
             this.state.playingDisturbance &&
@@ -153,37 +315,24 @@ export default class SleepLogPage extends React.PureComponent {
             );
 
             Animated.timing(this._audioProg, {
-                toValue: SCREEN_WIDTH - 30,
+                toValue: PLAYBACK_TRACK_WIDTH,
                 // toValue: Math.round(s.getDuration()),
-                duration: Math.round(s.getDuration()) * 1000,
+                duration: s.getDuration() * 1000,
                 useNativeDriver: true
             }).start();
 
+            this._pbTimeTimer = setInterval(this._updatePBTime, 1000);
+
             s.setVolume(this.state.playbackVolume);
-            s.play(success => {
-                if (success) {
-                    console.log("successfully finished playing");
-                } else {
-                    console.log("playback failed due to audio decoding errors");
-                    // reset the player to its uninitialized state (android only)
-                    // this is the only option to recover after an error occured and use the player again
-                    s.reset();
-                }
-
-                this.props.scrollEnabled(true);
-
-                if (this.playbackBoxRef) {
-                    this.playbackBoxRef.transitionTo({
-                        transform: [{ translateY: 0 }]
-                    });
-                }
-                this.setState({ playingDisturbance: null, activeSound: null });
-                s.release();
-            });
+            s.play(this._onSoundFinishedPlaying);
         });
 
         this.setState({ playingDisturbance: disturbance, activeSound: s });
     };
+
+    formatTime(seconds) {
+        return "0:" + String(seconds).padStart(2, "0");
+    }
 
     x(angle, radius, charCount) {
         // change to clockwise
@@ -676,47 +825,108 @@ export default class SleepLogPage extends React.PureComponent {
                         }
                     ]}
                 >
-                    <Text style={styles.playbackBoxText}>{"Volume"}</Text>
-                    <View style={styles.audioProgressContainer}>
-                        <Text />
-                        <View style={styles.audioProgressTrack} />
+                    <Text style={styles.playbackBoxText}>{timestamp}</Text>
+                    <View style={styles.audioProgressTrack} />
+                    <PanGestureHandler
+                        style={styles.audioProgressContainer}
+                        // ref={el => (this.startTimesPanRef = el)}
+                        onGestureEvent={Animated.event(
+                            [
+                                {
+                                    nativeEvent: {
+                                        translationX: this._panValue
+                                    }
+                                }
+                            ],
+                            { useNativeDriver: true } // TODO: WHY WAS THIS COMMENTED OUT ???????? It seems to be working fine if not better with it.
+                        )}
+                        shouldCancelWhenOutside={false}
+                        onHandlerStateChange={({ nativeEvent }) => {
+                            // console.log("nativeEvent.state", nativeEvent.state);
+                            if (nativeEvent.state == State.BEGAN) {
+                                this._audioProg.stopAnimation();
+                                this._pauseActiveSound();
+
+                                this._fingerOffset = nativeEvent.x;
+                                // this._audioProg.setOffset(
+                                //     nativeEvent.absoluteX
+                                // );
+                                // this._audioProg.setValue(0);
+                            } else if (nativeEvent.state == State.END) {
+                                // this._audioProg.flattenOffset();
+                                this._resumeActiveSound(nativeEvent.absoluteX);
+                                // this._resumeActiveSound(
+                                //     nativeEvent.translationX
+                                // );
+                            }
+                        }}
+                        minDist={1}
+                        enabled={true}
+                    >
                         <Animated.View
                             style={[
-                                styles.audioProgressHandle,
+                                styles.audioProgHandleWrap,
                                 {
                                     transform: [
                                         {
-                                            translateX: this._audioProg
-                                            // translateX: this._audioProg.interpolate(
-                                            //     {
-                                            //         inputRange: [0, 1],
-                                            //         outputRange: [
-                                            //             0,
-                                            //             SCREEN_WIDTH - 30
-                                            //         ]
-                                            //     }
-                                            // )
+                                            // translateX: this._panValue
+                                            translateX: Animated.add(
+                                                this._audioProg,
+                                                this._panValue
+                                            ).interpolate({
+                                                inputRange: [
+                                                    0,
+                                                    PLAYBACK_TRACK_WIDTH
+                                                ],
+                                                outputRange: [
+                                                    5,
+                                                    PLAYBACK_TRACK_WIDTH
+                                                ],
+                                                extrapolate: "clamp"
+                                            })
                                         }
                                     ]
                                 }
                             ]}
+                        >
+                            <View style={styles.audioProgressHandle} />
+                        </Animated.View>
+                    </PanGestureHandler>
+                    <View style={styles.playbackTimeCont}>
+                        <Text style={styles.playbackBoxText}>
+                            {playingDisturbance &&
+                                this.formatTime(this.state.playbackTime) +
+                                    " / " +
+                                    this.formatTime(
+                                        playingDisturbance.duration
+                                    )}
+                        </Text>
+                    </View>
+                    <View style={styles.volumeSlider}>
+                        <View
+                            style={{
+                                marginRight: 12,
+                                justifyContent: "center"
+                            }}
+                        >
+                            <EntypoIcon size={25} name="controller-volume" />
+                        </View>
+                        <Slider
+                            style={{ flex: 5 }}
+                            hitSlop={{ top: 50, bottom: 50 }}
+                            value={this.state.playbackVolume}
+                            minimumValue={0}
+                            maximumValue={10}
+                            onValueChange={value => {
+                                if (activeSound) {
+                                    activeSound.setVolume(value);
+                                }
+                            }}
+                            onSlidingComplete={value => {
+                                this.setState({ playbackVolume: value });
+                            }}
                         />
                     </View>
-                    <Slider
-                        style={styles.volumeSlider}
-                        hitSlop={{ top: 50, bottom: 50 }}
-                        value={this.state.playbackVolume}
-                        minimumValue={0}
-                        maximumValue={10}
-                        onValueChange={value => {
-                            if (activeSound) {
-                                activeSound.setVolume(value);
-                            }
-                        }}
-                        onSlidingComplete={value => {
-                            this.setState({ playbackVolume: value });
-                        }}
-                    />
                 </Animatable.View>
             </View>
         );
@@ -888,26 +1098,62 @@ const styles = StyleSheet.create({
         fontSize: 18
     },
     audioProgressContainer: {
-        flex: 1,
-        alignContent: "center",
-        justifyContent: "center"
+        flex: 1, // NOTE: Width should be SCREEN_HEIGHT - 2*15
+        width: PLAYBACK_TRACK_WIDTH,
+        // alignContent: "center",
+        justifyContent: "center",
+        backgroundColor: "white"
+    },
+    measuringView: {
+        height: 1,
+        width: PLAYBACK_TRACK_WIDTH,
+        alignSelf: "center",
+        backgroundColor: "black",
+        position: "absolute",
+        top: 0
+    },
+    measuringNotch: {
+        height: 10,
+        width: 1,
+        position: "absolute",
+        backgroundColor: "black"
     },
     audioProgressTrack: {
         height: 2,
-        width: "100%",
-        backgroundColor: Colors.brandDarkGrey
+        width: PLAYBACK_TRACK_WIDTH,
+        alignSelf: "center",
+        backgroundColor: Colors.brandDarkGrey,
+        position: "absolute",
+        top: 70
+    },
+    audioProgHandleWrap: {
+        height: 60,
+        width: 60,
+        // position: "absolute",
+        left: -30,
+        justifyContent: "center",
+        alignContent: "center"
+        // backgroundColor: "green"
     },
     audioProgressHandle: {
-        height: 13,
-        width: 13,
-        borderRadius: 13,
-        position: "absolute",
-        backgroundColor: "blue"
+        height: 30,
+        width: 12,
+        borderRadius: 15,
+        alignSelf: "center",
+        backgroundColor: Colors.brandVeryLightPurple
     },
     volumeSlider: {
         position: "absolute",
-        right: 6,
-        top: 6,
-        width: SCREEN_WIDTH * 0.25
+        right: 15,
+        top: 10,
+        width: SCREEN_WIDTH * 0.35,
+        flexDirection: "row",
+        alignContent: "center",
+        justifyContent: "flex-end"
+    },
+    playbackTimeCont: {
+        position: "absolute",
+        bottom: 0,
+        alignSelf: "center"
     }
 });
