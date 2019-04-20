@@ -5,6 +5,7 @@
 	};
 	objectVersion = 46;
 	objects = {
+
 /* Begin PBXBuildFile section */
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
@@ -84,8 +85,6 @@
 		77731CE6216B8E0100093969 /* libLottie.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77731CE5216B8BC200093969 /* libLottie.a */; };
 		77731DDC216C182600093969 /* Lottie.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 77731CDF216B8BC200093969 /* Lottie.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		77731E19216E6B2900093969 /* clockulate_images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 77731E18216E6B2800093969 /* clockulate_images.xcassets */; };
-		7782412A201BEE6D0077CF2F /* ArrowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77824129201BEE6D0077CF2F /* ArrowView.swift */; };
-		77824157201BF0D50077CF2F /* ArrowViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 77824156201BF0D50077CF2F /* ArrowViewManager.m */; };
 		7783E73D20608433006F43AD /* sci-fi-alarm.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7783E71220608432006F43AD /* sci-fi-alarm.mp3 */; };
 		7788F81C2252D44F00DC5317 /* libSplashScreen.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7788F8172252D41E00DC5317 /* libSplashScreen.a */; };
 		7788F8EC225A6A5B00DC5317 /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77829B121F846B9D00705E6A /* libRCTPushNotification.a */; };
@@ -667,8 +666,6 @@
 		77731CCB216B852E00093969 /* LottieReactNative.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LottieReactNative.xcodeproj; path = "../node_modules/lottie-react-native/src/ios/LottieReactNative.xcodeproj"; sourceTree = "<group>"; };
 		77731CD7216B8BC100093969 /* Lottie.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Lottie.xcodeproj; path = "../node_modules/lottie-ios/Lottie.xcodeproj"; sourceTree = "<group>"; };
 		77731E18216E6B2800093969 /* clockulate_images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = clockulate_images.xcassets; sourceTree = "<group>"; };
-		77824129201BEE6D0077CF2F /* ArrowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrowView.swift; sourceTree = "<group>"; };
-		77824156201BF0D50077CF2F /* ArrowViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ArrowViewManager.m; sourceTree = "<group>"; };
 		77824158201BF2FD0077CF2F /* Alarm_AutoSet-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Alarm_AutoSet-Bridging-Header.h"; sourceTree = "<group>"; };
 		77829B011F846B9D00705E6A /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		7783E71220608432006F43AD /* sci-fi-alarm.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "sci-fi-alarm.mp3"; sourceTree = "<group>"; };
@@ -885,9 +882,7 @@
 				778B4A4C1F96D91000AB5DCA /* LaunchScreen.xib */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
-				77824129201BEE6D0077CF2F /* ArrowView.swift */,
 				77824158201BF2FD0077CF2F /* Alarm_AutoSet-Bridging-Header.h */,
-				77824156201BF0D50077CF2F /* ArrowViewManager.m */,
 				77BFE8A82194E8D800A5F73B /* AlarmAudioService.swift */,
 				77BFE8AA2194E94A00A5F73B /* AlarmAudioService.m */,
 				7716A3DD21A39B1A00A2D4B4 /* FDSoundActivatedRecorder.h */,
@@ -1060,8 +1055,6 @@
 				4E0283941A034496A2B01129 /* libRealmReact.a */,
 				309B42D098724AEE9B9C1B8B /* libRNVectorIcons.a */,
 				B1B0273ACACE44F5AD5876F1 /* libRCTActionSheet.a */,
-				95E00286B0724F7DA477CD70 /* libRNSVG.a */,
-				248C0C1389684C9F8A6F2E4B /* libRNCalendarEvents.a */,
 				632EC84740294E07AD09DD7E /* libInteractable.a */,
 				E94FAD80866E47C8B9474B7D /* libLottie.a */,
 				AB2ECF35F550404C9990407C /* libRNSound.a */,
@@ -1070,7 +1063,6 @@
 				5251F8E7127E45AAB3862C22 /* libRNProximity.a */,
 				F7908E24BEB34341883C6224 /* libRNProximityManager.a */,
 				4C94E5C2151F489780D1C787 /* libRNVersionNumber.a */,
-				C888C441C33D4F72BD47758C /* libSRSRadialGradient.a */,
 				F12A9C1E1FFA40CEA57C4848 /* libRNGestureHandler.a */,
 				D14D68326E6D41D7B7D3E8ED /* libCJActionSheetPicker.a */,
 				1EE81D7FCE224DEC84C3CB27 /* libRNAdMobManager.a */,
@@ -1400,6 +1392,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -1797,13 +1790,6 @@
 			remoteRef = 77731CE4216B8BC200093969 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		777C5D17214DB07800D51AB5 /* libSRSRadialGradien-tvOS.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libSRSRadialGradien-tvOS.a";
-			remoteRef = 777C5D16214DB07800D51AB5 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		77829B121F846B9D00705E6A /* libRCTPushNotification.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1851,13 +1837,6 @@
 			fileType = archive.ar;
 			path = libRNNotifications.a;
 			remoteRef = 779A8881225A743D00337EDC /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		779E03F61F76B2D800BF19D2 /* libRNSVG-tvOS.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libRNSVG-tvOS.a";
-			remoteRef = 779E03F51F76B2D800BF19D2 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		77B0242D206EBC2D006A6525 /* libRNSound.a */ = {
@@ -2157,10 +2136,8 @@
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				7716A3DC21A39B1200A2D4B4 /* FDSoundActivatedRecorder.swift in Sources */,
-				7782412A201BEE6D0077CF2F /* ArrowView.swift in Sources */,
 				77BFE8A92194E8D800A5F73B /* AlarmAudioService.swift in Sources */,
 				77BFE8AB2194E94A00A5F73B /* AlarmAudioService.m in Sources */,
-				77824157201BF0D50077CF2F /* ArrowViewManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2347,7 +2324,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Alarm_AutoSet-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -2411,7 +2388,7 @@
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Alarm_AutoSet-Bridging-Header.h";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};

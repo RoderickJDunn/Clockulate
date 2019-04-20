@@ -93,7 +93,7 @@
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>itms-apps://itunes.apple.com/app/viewContentsUserReviews?id1452117998</string>
-		<string>itms-apps://itunes.apple.com/app/id=9SXQK8L2Q6.org.reactjs.native.example.Alarm-AutoSet</string>
+		<string>itms-apps://itunes.apple.com/app/id1452117998</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>

@@ -762,7 +762,7 @@ let setAlarmInstEnd = () => {
         // Delete AlmInst if total length <15 mins
         if (
             mNow - moment(currAlmInst.start) <
-            900 * 1000 /*DEV: Change first value to 900 (15min) for production */
+            30 * 1000 /*DEV: Change first value to 900 (15min) for production */
         ) {
             console.log("Alm Inst is <15 min long. Deleting");
 
