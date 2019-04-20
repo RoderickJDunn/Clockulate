@@ -731,7 +731,8 @@ export default class SleepLogPage extends React.PureComponent {
         return (
             <View
                 style={{
-                    flex: 1
+                    flex: 1,
+                    overflow: "hidden"
                     // height: SCREEN_HEIGHT - 150
                 }}
             >
