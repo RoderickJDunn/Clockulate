@@ -353,6 +353,8 @@ let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
     // }
     console.log("shortSoundFile", shortSoundFile);
     for (let i = 0; i < notiCount; i++) {
+        console.log("Wakeup time: ", wakeUpMoment.toDate());
+
         NotificationsIOS.localNotification({
             alertBody:
                 alarm.label +
@@ -362,8 +364,7 @@ let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
             soundName: shortSoundFile,
             silent: shortSoundFile == "" ? true : false,
             category: "ALARM_CATEGORY",
-            fireDate: wakeUpMoment.toDate(),
-            // fireDate: new Date(Date.now() + 10 * 1000).toISOString(),
+            fireDate: wakeUpMoment.format("YYYY-MM-DDTHH:mm:ss.SSSZ"),
             userInfo: { alarmId: alarm.id }
         });
         wakeUpMoment.add(snoozeTime, "s");
@@ -653,7 +654,7 @@ export let scheduleAlarm = (alarm, reload, alarmDidInitialize) => {
         console.log("indivRecsToDelete", indivRecsToDelete);
     }
 
-    /***** TODO: Extract END *****/
+    /***** TODO: END of Extract *****/
 
     initializeAlarm(
         {
@@ -667,10 +668,6 @@ export let scheduleAlarm = (alarm, reload, alarmDidInitialize) => {
         },
         alarmDidInitialize
     );
-
-    // return;
-
-    // setInAppAlarm(alarm, reloadAlarmsList);
 
     // schedule notifications for this Alarm, staggering them by the "SNOOZE Time"
     _scheduleBackupNotifications(alarm, shortSoundFile);
