@@ -73,15 +73,16 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
     let notificationCenter = NotificationCenter.default
     notificationCenter.addObserver(self,
                                    selector: #selector(audioWasInterupted),
-                                   name: .AVAudioSessionInterruption,
+                                   name: AVAudioSession.interruptionNotification,
                                    object: nil)
     
     notificationCenter.addObserver(self,
                                    selector: #selector(appWillTerminate),
-                                   name: .UIApplicationWillTerminate,
+                                   name: UIApplication.willTerminateNotification,
                                    object: nil)
   }
   
+  @objc
   func appWillTerminate() {
      print("app will terminate")
     if isRecording {
@@ -93,7 +94,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
       //            content.subtitle = "iOS Development is fun"
       content.body = "Please re-open Clockulate to resume sleep analysis. This will also ensure that your alarm rings even if your phone is on Silent."
       content.badge = 1
-      content.sound = UNNotificationSound.default()
+      content.sound = UNNotificationSound.default
       
       //getting the notification trigger
       //it will be called after 5 seconds
@@ -109,6 +110,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
     self.isRecording = false;
   }
   
+  @objc
   func audioWasInterupted(notification: Notification) {
     print("audioWasInterupted")
     if isRecording {
@@ -120,7 +122,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
       //            content.subtitle = "iOS Development is fun"
       content.body = "Please open Clockulate to resume sleep analysis. This will also ensure that your alarm rings even if your phone is on Silent."
       content.badge = 1
-      content.sound = UNNotificationSound.default()
+      content.sound = UNNotificationSound.default
       
       //getting the notification trigger
       //it will be called after 5 seconds
@@ -253,7 +255,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
       do {
         print("Trying to start up mic")
 
-        try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: .mixWithOthers)
+        try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playAndRecord, options: AVAudioSession.CategoryOptions.duckOthers)
         print("AVAudioSession Category Playback OK")
         do {
           try AVAudioSession.sharedInstance().setActive(true)
@@ -327,12 +329,12 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
    
     do {
       //                try AVAudioSession.sharedInstance().setActive(true)
-      try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, with: .duckOthers)
-    print("AVAudioSession Category PlayAndRecord OK")
+      try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, options: AVAudioSession.CategoryOptions.duckOthers)
+      print("AVAudioSession Category PlayAndRecord OK")
 
       //player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileType.mp3.rawValue)
       /* iOS 10 and earlier require the following line: */
-      player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileTypeMPEGLayer3)
+      player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileType.mp3.rawValue)
       
       guard let player = player else { return }
       print("AVAudioSession Category Playback OK")

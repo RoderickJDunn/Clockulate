@@ -272,7 +272,7 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         //let timeSamples = max(0.0, audioRecorder.currentTime - Double(intervalSeconds) * Double(riseTriggerIntervals)) * Double(savingSamplesPerSecond)
         // @Roderick -- changed to <0.5> instead of <intervalSeconds> (0.05), so that we get more of the audio before the trigger
         let timeSamples = max(0.0, audioRecorder.currentTime - 0.5 * Double(riseTriggerIntervals)) * Double(savingSamplesPerSecond)
-        recordingBeginTime = CMTimeMake(Int64(timeSamples), Int32(savingSamplesPerSecond))
+        recordingBeginTime = CMTimeMake(value: Int64(timeSamples), timescale: Int32(savingSamplesPerSecond))
         timestamp = Date()
         print("starting recording: \(recordingBeginTime.seconds)")
     }
@@ -287,7 +287,7 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         status = .processingRecording
         self.microphoneLevel = 0.0
         let timeSamples = audioRecorder.currentTime * Double(savingSamplesPerSecond)
-        recordingEndTime = CMTimeMake(Int64(timeSamples), Int32(savingSamplesPerSecond))
+        recordingEndTime = CMTimeMake(value: Int64(timeSamples), timescale: Int32(savingSamplesPerSecond))
 
         guard self.sarMode == .recordOnTrigger else {
             // sarMode is not set to record. (its set to notifyOnlyOnTrigger)
@@ -360,15 +360,15 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         print("recordingEndTime: \(recordingEndTime)")
       
         // Create time ranges for trimming and fading
-        let fadeInDoneTime = CMTimeAdd(recordingBeginTime, CMTimeMake(Int64(Double(riseTriggerIntervals) * Double(intervalSeconds) * Double(savingSamplesPerSecond)), Int32(savingSamplesPerSecond)))
-        let fadeOutStartTime = CMTimeSubtract(recordingEndTime, CMTimeMake(Int64(Double(fallTriggerIntervals) * Double(intervalSeconds) * Double(savingSamplesPerSecond)), Int32(savingSamplesPerSecond)))
-        let exportTimeRange = CMTimeRangeFromTimeToTime(recordingBeginTime, recordingEndTime)
-        let fadeInTimeRange = CMTimeRangeFromTimeToTime(recordingBeginTime, fadeInDoneTime)
-        let fadeOutTimeRange = CMTimeRangeFromTimeToTime(fadeOutStartTime, recordingEndTime)
+      let fadeInDoneTime = CMTimeAdd(recordingBeginTime, CMTimeMake(value: Int64(Double(riseTriggerIntervals) * Double(intervalSeconds) * Double(savingSamplesPerSecond)), timescale: Int32(savingSamplesPerSecond)))
+      let fadeOutStartTime = CMTimeSubtract(recordingEndTime, CMTimeMake(value: Int64(Double(fallTriggerIntervals) * Double(intervalSeconds) * Double(savingSamplesPerSecond)), timescale: Int32(savingSamplesPerSecond)))
+      let exportTimeRange = CMTimeRangeFromTimeToTime(start: recordingBeginTime, end: recordingEndTime)
+      let fadeInTimeRange = CMTimeRangeFromTimeToTime(start: recordingBeginTime, end: fadeInDoneTime)
+      let fadeOutTimeRange = CMTimeRangeFromTimeToTime(start: fadeOutStartTime, end: recordingEndTime)
 
         // Set up the AVMutableAudioMix which does fading
         let avAsset = AVAsset(url: self.audioRecorder.url)
-        var tracks = avAsset.tracks(withMediaType: AVMediaTypeAudio)
+      var tracks = avAsset.tracks(withMediaType: AVMediaType.audio)
         
         guard tracks.count > 0 else {
             print("ERROR: Failed to export audio. No tracks found...")
@@ -388,7 +388,7 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         // Configure AVAssetExportSession which sets audio format
         let exportSession = AVAssetExportSession(asset: avAsset, presetName: AVAssetExportPresetAppleM4A)!
         exportSession.outputURL = trimmedAudioFileURL
-        exportSession.outputFileType = AVFileTypeAppleM4A
+        exportSession.outputFileType = AVFileType.m4a
         exportSession.timeRange = exportTimeRange
         exportSession.audioMix = exportAudioMix
         exportSession.exportAsynchronously {
