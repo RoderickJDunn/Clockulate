@@ -827,6 +827,16 @@ class TaskItem extends React.Component {
                                     )}
                                 </Animated.View>
                             </View>
+                            <View
+                                style={{
+                                    position: "absolute",
+                                    bottom: 0,
+                                    width: "100%",
+                                    height: StyleSheet.hairlineWidth,
+                                    backgroundColor:
+                                        Colors.brandLightGrey + "55"
+                                }}
+                            />
                         </TouchableOpacity>
                     </View>
                     {touchableBackdrop}

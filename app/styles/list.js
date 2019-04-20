@@ -101,18 +101,10 @@ export const TaskListStyle = StyleSheet.create({
 
 export const TaskItemStyle = StyleSheet.create({
     taskInfoWrap: {
-        // flex: 1,
         flexDirection: "row",
-        // paddingTop: 10,
-        // paddingBottom: 10,
         width: SCREEN_WIDTH - scaleByFactor(20, 0.4) + 10, // SIDE_PADDING = 10 * 2.  PAD_DURATION_DELETE = 5
         height: 55,
-        alignContent: "stretch",
-        borderBottomColor: Colors.brandLightOpp,
-        borderBottomWidth: StyleSheet.hairlineWidth
-        // alignItems: "center",
-        // backgroundColor: "green"
-        // justifyContent: "space-between"
+        alignContent: "stretch"
     },
     taskInfoTouchable: {
         flex: 1,

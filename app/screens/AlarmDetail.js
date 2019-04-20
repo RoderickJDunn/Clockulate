@@ -2254,14 +2254,9 @@ class AlarmDetail extends Component {
                                     style={[
                                         styles.taskListHeader,
                                         {
-                                            // flex: this.state.taskHeaderFlex, // == (SCREEN_HEIGHT * NON_CLOCK_HEIGHT_FACTOR) * this.state.taskAreaFlex * this.state.taskHeaderFlex
                                             height: scaleByFactor(50, 0.6), // needs to be scaled to screen height
-                                            backgroundColor: "transparent",
+                                            backgroundColor: "transparent"
                                             // backgroundColor: "green",
-                                            borderBottomColor:
-                                                Colors.brandLightOpp,
-                                            borderBottomWidth:
-                                                StyleSheet.hairlineWidth
                                         }
                                     ]}
                                 >
@@ -2356,6 +2351,16 @@ class AlarmDetail extends Component {
                                             />
                                         )}
                                     </TouchableOpacity>
+                                    <View
+                                        style={{
+                                            position: "absolute",
+                                            bottom: 0,
+                                            width: "100%",
+                                            height: StyleSheet.hairlineWidth,
+                                            backgroundColor:
+                                                Colors.brandLightOpp
+                                        }}
+                                    />
                                 </View>
                                 {touchableBackdrop}
                                 {/* {taskArea} */}
