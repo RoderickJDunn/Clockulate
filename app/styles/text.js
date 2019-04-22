@@ -21,6 +21,7 @@ export const TextStyle = StyleSheet.create({
         fontFamily: "Gurmukhi MN",
         letterSpacing: 1,
         fontSize: 13,
+        textAlignVertical: "bottom",
         color: Colors.labelText
     },
     editableText: {

@@ -100,7 +100,7 @@ class LabeledTimeInput extends Component {
                     style={[
                         TextStyle.labelText,
                         {
-                            paddingBottom: this.props.separation || 2,
+                            // paddingBottom: this.props.separation,
                             textAlign:
                                 this.props.textAlign == null
                                     ? "left"

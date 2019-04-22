@@ -2119,7 +2119,7 @@ class AlarmDetail extends Component {
                                 onTextInputBlur={this.onLabelInputBlur}
                                 separation={0}
                                 textInputStyle={{
-                                    fontSize: scaleByFactor(32, 0.5),
+                                    fontSize: scaleByFactor(28, 1.3),
                                     color: Colors.brandLightGrey
                                 }}
                                 flex={0.5}
@@ -2147,13 +2147,11 @@ class AlarmDetail extends Component {
                                     </TouchableOpacity>
                                 }
                             />
-                            {/* <View style={{ height: scale(3) }} /> */}
-                            {/* <View
-                                    style={{
-                                        height: 1,
-                                        backgroundColor: "#E0E0E0"
-                                    }}
-                                /> */}
+                            <View
+                                style={{
+                                    minHeight: 15 / scaleByHeightFactor(1, 20)
+                                }}
+                            />
                             <View
                                 style={{
                                     flex: 0.5,
@@ -2178,11 +2176,10 @@ class AlarmDetail extends Component {
                                         this._onArrivalTimePicked
                                     }
                                     timePickerPrompt="What time do you need to arrive?"
-                                    inputFontSize={scaleByFactor(33, 0.5)}
-                                    separation={scaleByFactor(5, 0.3)}
+                                    inputFontSize={scaleByFactor(28, 1.3)}
+                                    // separation={scaleByFactor(5, 0.3)}
                                     onOpenModal={Keyboard.dismiss}
                                 />
-
                                 <LabeledTimeInput
                                     labelText="Hrs of Sleep"
                                     fieldText={this._hoursOfSleep}
@@ -2192,8 +2189,8 @@ class AlarmDetail extends Component {
                                         height: "auto"
                                         // backgroundColor: "green",
                                     }}
-                                    inputFontSize={scaleByFactor(33, 0.5)}
-                                    separation={scaleByFactor(5, 0.3)}
+                                    inputFontSize={scaleByFactor(28, 1.3)}
+                                    // separation={scaleByFactor(5, 0.3)}
                                     behavior={"hider"}
                                     textAlign={"right"}
                                     disabled={this.state.alarm.showHrsOfSleep}
