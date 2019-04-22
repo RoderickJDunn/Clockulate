@@ -329,7 +329,7 @@ class AlarmItem extends React.PureComponent {
     }
 
     render() {
-        console.log("AlarmItem", "- render");
+        // console.log("AlarmItem", "- render");
         // console.info("alarm-item props", this.props);
         // console.debug(
         //     `wakeTime: ${this.props.alarm.wakeUpTime} | enabled: ${
@@ -401,7 +401,7 @@ class AlarmItem extends React.PureComponent {
 
         let movingStyle = {};
         if (this.props.isActive) {
-            console.log("isActive", "true");
+            // console.log("isActive", "true");
             movingStyle = {
                 shadowOpacity: 0.2,
                 shadowRadius: 10,
@@ -409,7 +409,7 @@ class AlarmItem extends React.PureComponent {
                 shadowColor: "black"
             };
         } else {
-            console.log("isActive", "false");
+            // console.log("isActive", "false");
         }
 
         return (

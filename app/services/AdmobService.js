@@ -374,7 +374,7 @@ export class AdWrapper extends Component {
         let props = this.props;
 
         // console.log("border", border);
-        console.log("pubBannerProps", props.pubBannerProps);
+        // console.log("pubBannerProps", props.pubBannerProps);
         return (
             <Animatable.View
                 ref={elm => (this._mainViewRef = elm)}
