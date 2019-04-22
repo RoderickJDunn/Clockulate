@@ -109,10 +109,6 @@ class Alarms extends Component {
 
         if (Platform.OS === "android") {
             UIManager.setLayoutAnimationEnabledExperimental(true);
-        } // setup notifications
-        else {
-            //NotificationsIOS.requestPermissions([ALARM_CAT]);
-            // ProximityManager.disable();
         }
 
         try {
@@ -128,7 +124,8 @@ class Alarms extends Component {
                     });
                     setTimeout(() => SplashScreen.hide(), 1000);
                 } else {
-                    SplashScreen.hide();
+                    setTimeout(() => SplashScreen.hide(), 500);
+                    NotificationsIOS.requestPermissions([ALARM_CAT]);
                 }
             });
         } catch (error) {
@@ -255,6 +252,7 @@ class Alarms extends Component {
             // );
             // NotificationsIOS.registerPushKit();
 
+            // TODO: ARE THESE REQUIRED? PROBABLY NOT
             // NotificationsIOS.addEventListener(
             //     "notificationReceivedForeground",
             //     this.onNotificationReceivedForeground.bind(this)
@@ -744,7 +742,7 @@ class Alarms extends Component {
     };
 
     _onAlarmToggled = alarm => {
-        console.info("AlarmsList - alarm toggled: ");
+        // console.info("AlarmsList - alarm toggled: ");
         let nextAlarmStatus =
             alarm.status > ALARM_STATES.OFF
                 ? ALARM_STATES.OFF

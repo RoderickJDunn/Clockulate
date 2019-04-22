@@ -70,7 +70,8 @@
 
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler
 {
-  if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive) { // In iOS 10+ if app is in foreground do nothing. The in-app alert will show
+  if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive) {
+    // If app is in foreground do nothing. The in-app alert will show instead
     completionHandler(0);
   } else { // If app is not active you can show banner, sound and badge.
     [[RNNRouter sharedInstance] userNotificationCenter:center willPresentNotification:notification withCompletionHandler:completionHandler];
