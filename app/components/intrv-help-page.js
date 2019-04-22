@@ -272,7 +272,8 @@ export default class IntrvHelpPage extends Component {
                                                                     key={key}
                                                                     width={
                                                                         SCREEN_WIDTH *
-                                                                            0.85 -
+                                                                            this
+                                                                                ._imgWidthFactor -
                                                                         50
                                                                     }
                                                                     source={{
@@ -346,6 +347,7 @@ const styles = StyleSheet.create({
     },
     scrollViewWrap: {
         height: HELPPAGE_HEIGHT * 0.73,
+        width: SCREEN_WIDTH * 0.95,
         position: "absolute",
         alignSelf: "center",
         // top: HELPPAGE_HEIGHT * 0.5 - (HELPPAGE_HEIGHT * 0.4),
@@ -357,7 +359,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.9,
         shadowRadius: 10,
         shadowColor: "#000",
-        elevation: 5
+        elevation: 5,
+        width: SCREEN_WIDTH * 0.95
     },
     sectionTitleWrap: {
         position: "absolute",
