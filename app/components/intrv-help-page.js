@@ -285,7 +285,8 @@ export default class IntrvHelpPage extends Component {
                                                                         {
                                                                             height:
                                                                                 (SCREEN_WIDTH *
-                                                                                    0.85 -
+                                                                                    this
+                                                                                        ._imgWidthFactor -
                                                                                     50) /
                                                                                 sharedImg.aspectRatio
                                                                         }
