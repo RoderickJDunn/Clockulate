@@ -41,9 +41,7 @@ import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { scale, scaleByFactor } from "../util/font-scale";
 import DurationText from "../components/duration-text";
-import { CheckBox, Container, StyleProvider } from "native-base";
-import getTheme from "../../native-base-theme/components";
-import material from "../../native-base-theme/variables/material";
+import CheckBox from "../components/checkbox";
 import {
     formatDuration,
     calcWholeHours,
@@ -812,36 +810,20 @@ class TaskDetail extends Component {
                                                 Set as default
                                             </Text>
                                         </TouchableOpacity>
-                                        <StyleProvider
-                                            style={getTheme(material)}
-                                        >
-                                            <CheckBox
-                                                onPress={() =>
-                                                    this._onTapCheckBox(
-                                                        !this.state.setAsDefault
-                                                    )
-                                                }
-                                                checked={
-                                                    this.state.setAsDefault
-                                                }
-                                                style={{
-                                                    // paddingTop: 1,
-                                                    paddingLeft: 0,
-                                                    marginRight: 10,
-                                                    // marginBottom: 5,
-                                                    backgroundColor:
-                                                        Colors.brandLightPurple,
-                                                    borderColor: "transparent",
-                                                    alignItems: "center"
-                                                }}
-                                                hitSlop={{
-                                                    top: 15,
-                                                    bottom: 15,
-                                                    left: 5,
-                                                    right: 15
-                                                }}
-                                            />
-                                        </StyleProvider>
+                                        <CheckBox
+                                            onPress={() => {
+                                                this._onTapCheckBox(
+                                                    !this.state.setAsDefault
+                                                );
+                                            }}
+                                            checked={this.state.setAsDefault}
+                                            hitSlop={{
+                                                top: 15,
+                                                bottom: 15,
+                                                left: 5,
+                                                right: 15
+                                            }}
+                                        />
                                     </View>
                                 )}
                         </View>

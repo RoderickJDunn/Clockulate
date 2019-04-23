@@ -22,8 +22,6 @@ import EntypoIcon from "react-native-vector-icons/Entypo";
 import EvilIcon from "react-native-vector-icons/EvilIcons";
 
 import DurationText from "./duration-text";
-import getTheme from "../../native-base-theme/components";
-import material from "../../native-base-theme/variables/material";
 
 import Colors from "../styles/colors";
 
