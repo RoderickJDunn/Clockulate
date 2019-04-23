@@ -33,6 +33,8 @@ const PremiumTonesPlaceholder = {
     data: [{ id: "placeholder", files: [], displayName: "More Sounds" }]
 };
 
+const SOUND_ROW_HEIGHT = 55;
+
 export default class Sounds extends Component {
     static navigationOptions = () => ({
         title: "Sounds"
@@ -88,9 +90,9 @@ export default class Sounds extends Component {
             showTonesUpgradePopup: false,
             forcePro: false
         };
-        InteractionManager.runAfterInteractions(() => {
-            AdvSvcOnScreenConstructed("Sounds");
-        });
+        // InteractionManager.runAfterInteractions(() => {
+        //     AdvSvcOnScreenConstructed("Sounds");
+        // });
     }
 
     componentWillUnmount() {
@@ -168,6 +170,12 @@ export default class Sounds extends Component {
         this.setState({ forcePro: true });
     };
 
+    _getSectHeaderHeight = sectIdx => {
+        return sectIdx == 2 ? 60 : 35;
+    };
+
+    // _getSectFooterHeight = () => 0;
+
     render() {
         // console.log(this.state);
         return (
@@ -181,6 +189,12 @@ export default class Sounds extends Component {
             >
                 <View style={[styles.listContainer]}>
                     <SectionList
+                        /* NOTE: The following was important so that on the initial transition to this
+                                 screen, enough Sound rows are displayed to fill the full screen.
+                                 Without this line, there is a brief gap shown at the bottom, meaning
+                                 not enough rows are rendered in time for the transition...
+                        */
+                        initialNumToRender={23}
                         keyExtractor={sound => sound.displayName}
                         renderItem={item => {
                             // console.log("Rendering sound row: ", item);
@@ -257,20 +271,91 @@ export default class Sounds extends Component {
                         ]}
                         extraData={this.state}
                         getItemLayout={(data, index) => {
+                            // console.log("getItemLayout");
+                            // NOTE: The index passed in here refers to an array that includes SectionHeaders and SectionFooters,
+                            //        even if none are provided (I think). Therefore, for example, if the first section only has
+                            //        1 item, then the 1st item in the 2nd section will have an index of 4:
+                            //          [SECT_1_HEADER, SECT_1_ITEM1, SECT_1_FOOTER, SECT_2_HEADER, SECT_2_ITEM1]
+                            let total = 0;
+                            let sectIdx = 0;
+                            let type = "ROW";
+                            let length = SOUND_ROW_HEIGHT; // initialize with ROW height
+                            let offset = 0;
+                            // console.log(
+                            //     "======================================"
+                            // );
+                            // console.log("Index", index);
+                            for (let i = 0; i < data.length; i++) {
+                                let sectData = data[i].data;
+                                total = total + sectData.length + 2;
+                                if (index < total) {
+                                    if (index == total - 1) {
+                                        // its a section footer
+                                        type = "SECT_FOOT";
+                                        length = 0;
+                                        offset +=
+                                            this._getSectHeaderHeight(i) +
+                                            sectData.length * SOUND_ROW_HEIGHT;
+                                        console.log("offset", offset);
+                                    } else if (
+                                        index ==
+                                        total - sectData.length - 2
+                                    ) {
+                                        // its a section header
+                                        type == "SECT_HEAD";
+                                        length = this._getSectHeaderHeight(i);
+                                    } else {
+                                        // Its a row
+                                        /* Calculate which item this is within curr section
+                                                Logic:
+                                                    overall index -
+                                                    [sectHeader, sectFooter] of all previous sections (i) +
+                                                    sectHeader of the current section
+                                            */
+                                        // let localIdx = index - 2 * i + 1;
+                                        let totalLessCurrSect =
+                                            total - sectData.length - 2;
+                                        // console.log(
+                                        //     "totalLessCurrSect",
+                                        //     totalLessCurrSect
+                                        // );
+                                        let localIdx =
+                                            index - totalLessCurrSect;
+                                        offset +=
+                                            this._getSectHeaderHeight(i) +
+                                            (localIdx + 1) * SOUND_ROW_HEIGHT;
+                                        // console.log("offset", offset);
+                                    }
+                                    sectIdx = i;
+                                    break;
+                                }
+                                offset +=
+                                    this._getSectHeaderHeight(sectIdx) +
+                                    sectData.length * SOUND_ROW_HEIGHT +
+                                    0;
+                                // console.log("offset", offset);
+                            }
+                            // console.log("total", total);
+                            // console.log("type", type);
+                            // console.log("sectIdx", sectIdx);
+                            // console.log("offset", offset);
+                            // console.log("length", length);
                             return {
-                                length: 55,
-                                offset: 55 * index,
+                                length: length,
+                                offset: offset,
                                 index
                             };
                         }}
-                        ItemSeparatorComponent={() => (
-                            <View style={styles.separator} />
-                        )}
-                        // ListFooterComponent={() => (
-                        //     <View
-                        //         style={{ height: 200, backgroundColor: "red" }}
-                        //     />
-                        // )}
+                        ItemSeparatorComponent={() => {
+                            // console.log("ItemSeparatorComponent");
+                            return <View style={styles.separator} />;
+                        }}
+                    />
+                    <View
+                        style={{
+                            height: 20 // padding from bottom (in addition to safe area)
+                            // backgroundColor: "green"
+                        }}
                     />
                 </View>
                 {Upgrades.pro != true && (
@@ -357,7 +442,7 @@ const styles = StyleSheet.create({
     },
     soundListItem: {
         flex: 1,
-        height: 55,
+        height: SOUND_ROW_HEIGHT,
         paddingHorizontal: 15,
         backgroundColor: Colors.darkGreyText
     },
