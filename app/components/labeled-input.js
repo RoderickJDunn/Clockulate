@@ -112,7 +112,7 @@ class LabeledInput extends Component {
                                 this.props.textInputStyle,
                                 {
                                     // height: inputHeight + scaleByFactor(23, 0.5),
-                                    paddingVertical: 3,
+                                    // paddingVertical: 3,
                                     margin: 0,
                                     flex: 1
                                     // backgroundColor: "#ededed"

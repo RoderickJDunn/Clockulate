@@ -65,7 +65,7 @@ const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20];
 
 let _menuIconAnim = new Animated.Value(0);
 
-let isSmallScreen = SCREEN_HEIGHT < 650;
+let isSmallScreen = SCREEN_HEIGHT < 670;
 //scaleByFactor(50, 0.6) // height of TaskList_Header
 /* Layout factors */
 const NON_CLOCK_HEIGHT_FACTOR = 1.15; // multiply this by SCREEN_HEIGHT to get height of non-clock area
@@ -75,7 +75,7 @@ const TASK_HEAD_TL_VIEW_FLEX_FACTOR = 0.06; // flex value for TaskHeader (within
 const TASK_HEAD_AUTO_VIEW_FLEX_FACTOR = 0.15; // flex value for Taskheader (within TaskArea) in Auto view
 const TASK_LIST_TL_VIEW_FLEX_FACTOR = 1 - TASK_HEAD_TL_VIEW_FLEX_FACTOR; // flex value for TaskList (within TaskArea) in TaskList view
 const TASK_LIST_AUTO_VIEW_FLEX_FACTOR = 1 - TASK_HEAD_AUTO_VIEW_FLEX_FACTOR; // flex value for TaskList (within TaskArea) in Auto view
-const FIELDS_AREA_FLEX_FACTOR = isSmallScreen ? 0.24 : 0.17; // flex value for TaskArea (within non-clock area) in Auto view
+const FIELDS_AREA_FLEX_FACTOR = isSmallScreen ? 0.22 : 0.17; // flex value for TaskArea (within non-clock area) in Auto view
 
 const TASK_LIST_TL_VIEW_POS_FACTOR = 0.21; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in TaskList View
 const TASK_LIST_AUTO_VIEW_POS_FACTOR = 0.74; // multiply this by SCREEN_HEIGHT to get the position of TaskList from top of screen in Auto view
@@ -2119,8 +2119,9 @@ class AlarmDetail extends Component {
                                 onTextInputBlur={this.onLabelInputBlur}
                                 separation={0}
                                 textInputStyle={{
-                                    fontSize: scaleByFactor(28, 1.3),
-                                    color: Colors.brandLightGrey
+                                    fontSize: scaleByFactor(32, 0.8),
+                                    color: Colors.brandLightGrey,
+                                    lineHeight: scaleByFactor(32, 0.8)
                                 }}
                                 flex={0.5}
                                 autoResize={false}
@@ -2149,7 +2150,7 @@ class AlarmDetail extends Component {
                             />
                             <View
                                 style={{
-                                    minHeight: 15 / scaleByHeightFactor(1, 20)
+                                    flex: 1 / scaleByHeightFactor(7, 20)
                                 }}
                             />
                             <View
@@ -2176,7 +2177,7 @@ class AlarmDetail extends Component {
                                         this._onArrivalTimePicked
                                     }
                                     timePickerPrompt="What time do you need to arrive?"
-                                    inputFontSize={scaleByFactor(28, 1.3)}
+                                    inputFontSize={scaleByFactor(32, 0.8)}
                                     // separation={scaleByFactor(5, 0.3)}
                                     onOpenModal={Keyboard.dismiss}
                                 />
@@ -2189,7 +2190,8 @@ class AlarmDetail extends Component {
                                         height: "auto"
                                         // backgroundColor: "green",
                                     }}
-                                    inputFontSize={scaleByFactor(28, 1.3)}
+                                    inputFontSize={scaleByFactor(32, 0.8)}
+                                    // inputFontSize={scaleByFactor(31, 1.3)}
                                     // separation={scaleByFactor(5, 0.3)}
                                     behavior={"hider"}
                                     textAlign={"right"}
@@ -2864,8 +2866,8 @@ const styles = StyleSheet.create({
         alignSelf: "stretch",
         justifyContent: "center",
         // backgroundColor: "yellow",
-        padding: scaleByFactor(10, 0.4),
-        paddingBottom: 8,
+        margin: scaleByFactor(10, 0.4),
+        marginBottom: 8,
         flex: FIELDS_AREA_FLEX_FACTOR,
         // minHeight: 55,
         borderBottomColor: "#e9e9e9"

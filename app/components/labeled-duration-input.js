@@ -69,7 +69,7 @@ class LabeledDurationInput extends Component {
                 <Text style={[styles.fieldLabelText, TextStyle.labelText]}>
                     {this.state.data.labelText}
                 </Text>
-                <View style={{ height: 3 }} />
+                {/* <View style={{ height: 3 }} /> */}
                 <View>
                     <DurationText
                         duration={this.state.data.time}

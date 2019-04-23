@@ -129,7 +129,11 @@ class LabeledTimeInput extends Component {
                                     textAlign:
                                         this.props.textAlign == null
                                             ? "left"
-                                            : this.props.textAlign
+                                            : this.props.textAlign,
+                                    padding: 0,
+                                    margin: 0,
+                                    lineHeight: this.props.inputFontSize
+                                    // height: 10
                                     // backgroundColor: "red"
                                 }
                             ]}
@@ -155,7 +159,6 @@ class LabeledTimeInput extends Component {
 const styles = StyleSheet.create({
     container: {
         // flex: 1,
-        alignSelf: "stretch",
         backgroundColor: "transparent",
         justifyContent: "center"
     }
