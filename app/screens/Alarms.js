@@ -932,7 +932,11 @@ class Alarms extends Component {
                     // {...this._idlePanResponder.panHandlers}
                 >
                     <SafeAreaView
-                        forceInset={{ bottom: "always" }}
+                        forceInset={{
+                            top: "never",
+                            horizontal: "never",
+                            bottom: "always"
+                        }}
                         style={[
                             ListStyle.container,
                             { backgroundColor: "transparent" }

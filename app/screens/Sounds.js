@@ -172,7 +172,11 @@ export default class Sounds extends Component {
         // console.log(this.state);
         return (
             <SafeAreaView
-                forceInset={{ bottom: "always" }}
+                forceInset={{
+                    top: "never",
+                    horizontal: "never",
+                    bottom: "always"
+                }}
                 style={{ flex: 1, backgroundColor: Colors.brandMidGrey }}
             >
                 <View style={[styles.listContainer]}>
