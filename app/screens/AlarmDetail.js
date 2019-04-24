@@ -55,7 +55,7 @@ import { fontPreview } from "../styles/text.js";
 import { scale, scaleByFactor, scaleByHeightFactor } from "../util/font-scale";
 import * as DateUtils from "../util/date_utils";
 import { ALARM_STATES } from "../data/constants";
-import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
+import { AdWrapper } from "../services/AdmobService";
 import upgrades from "../config/upgrades";
 import ClkAlert from "../components/clk-awesome-alert";
 

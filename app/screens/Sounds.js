@@ -24,7 +24,7 @@ import { scale, scaleByFactor } from "../util/font-scale";
 import Colors from "../styles/colors";
 import realm from "../data/DataSchemas";
 import { SOUND_TYPES } from "../data/constants";
-import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
+import { AdWrapper } from "../services/AdmobService";
 import Upgrades from "../config/upgrades";
 import ClkAlert from "../components/clk-awesome-alert";
 
@@ -90,9 +90,6 @@ export default class Sounds extends Component {
             showTonesUpgradePopup: false,
             forcePro: false
         };
-        // InteractionManager.runAfterInteractions(() => {
-        //     AdvSvcOnScreenConstructed("Sounds");
-        // });
     }
 
     componentWillUnmount() {

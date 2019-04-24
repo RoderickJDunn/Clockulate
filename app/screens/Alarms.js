@@ -63,11 +63,7 @@ import * as DateUtils from "../util/date_utils";
 import { AlarmModel, AlarmTaskModel } from "../data/models";
 import { scaleByFactor } from "../util/font-scale";
 const { UIManager } = NativeModules;
-import {
-    AdSvcUpdateAppOpenedStats,
-    AdWrapper,
-    AdvSvcUpdateDateLastOpen
-} from "../services/AdmobService";
+import { AdWrapper } from "../services/AdmobService";
 
 /* Dev only */
 import { populateDummyAlarms } from "../data/data-prepop";
@@ -144,10 +140,6 @@ class Alarms extends Component {
         // });
 
         this.verifyAlarmStates();
-
-        InteractionManager.runAfterInteractions(() => {
-            AdSvcUpdateAppOpenedStats();
-        });
     }
 
     // handleActivity() {
@@ -373,7 +365,6 @@ class Alarms extends Component {
             nextAppState === "active"
         ) {
             console.log("App has come to the foreground! (ALARMS LIST)");
-            AdSvcUpdateAppOpenedStats();
             this.verifyAlarmStates();
             this.reloadAlarms();
         } else if (nextAppState === "background") {
@@ -386,7 +377,6 @@ class Alarms extends Component {
             for (let i = 0; i < alarms.length; i++) {
                 cancelInAppAlarm(alarms[i]);
             }
-            AdvSvcUpdateDateLastOpen();
         }
 
         this.setState({ appState: nextAppState });

@@ -48,7 +48,7 @@ import {
     calcMinutes
 } from "../util/date_utils";
 import PickerActionSheet from "../components/picker-action-sheet";
-import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
+import { AdWrapper } from "../services/AdmobService";
 import ClkAlert from "../components/clk-awesome-alert";
 import Upgrades from "../config/upgrades";
 
@@ -210,10 +210,6 @@ class TaskDetail extends Component {
 
         this.initialName = this.state.alarmTask.task.name;
         this.currName = this.state.alarmTask.task.name;
-
-        InteractionManager.runAfterInteractions(() => {
-            AdvSvcOnScreenConstructed("TaskDetail");
-        });
     }
 
     componentDidMount() {

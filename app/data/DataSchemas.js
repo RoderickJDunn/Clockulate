@@ -104,18 +104,6 @@ SettingsSchema.schema = {
     }
 };
 
-class AdvStatSchema extends Realm.Object {}
-AdvStatSchema.schema = {
-    name: "AdvStat",
-    primaryKey: "id",
-    properties: {
-        id: "string",
-        name: "string",
-        value: { type: "int", default: 0 },
-        statType: { type: "int", default: 0 }
-    }
-};
-
 class SleepDisturbanceSchema extends Realm.Object {}
 SleepDisturbanceSchema.schema = {
     name: "SleepDisturbance",
@@ -152,7 +140,6 @@ export default new Realm({
         SoundSchema,
         AlarmSoundSchema,
         SettingsSchema,
-        AdvStatSchema,
         SleepDisturbanceSchema,
         AlarmInstanceSchema
     ]

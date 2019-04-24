@@ -47,7 +47,7 @@ import PlainTextScreen from "../screens/PlainTextScreen";
 import Help from "../screens/Help";
 import LinearGradient from "react-native-linear-gradient";
 import { isIphoneX } from "react-native-iphone-x-helper";
-import { AdWrapper, AdvSvcOnScreenConstructed } from "../services/AdmobService";
+import { AdWrapper } from "../services/AdmobService";
 import Upgrades from "../config/upgrades";
 
 import Colors from "../styles/colors";
@@ -175,12 +175,9 @@ const alarmListNavOptions = ({ navigation }) => ({
             underlayColor={Colors.brandDarkGrey}
             size={28}
             /* "openDrawer" is a built-in navigation function. I did not define it anywhere*/
-            onPress={() => {
-                InteractionManager.runAfterInteractions(() => {
-                    AdvSvcOnScreenConstructed("MainMenu");
-                });
-                navigation.openDrawer();
-            }}
+            // onPress={() => {
+            //     navigation.openDrawer();
+            // }}
             navigate={navigation.navigate}
             hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
             style={{ marginLeft: scaleByFactor(8, 0.9) }}
@@ -208,12 +205,9 @@ const otherDrawerNavOptions = title => {
                 underlayColor={Colors.brandDarkGrey}
                 size={28}
                 /* "openDrawer" is a built-in navigation function. I did not define it anywhere*/
-                onPress={() => {
-                    InteractionManager.runAfterInteractions(() => {
-                        AdvSvcOnScreenConstructed("MainMenu");
-                    });
-                    navigation.openDrawer();
-                }}
+                // onPress={() => {
+                //     navigation.openDrawer();
+                // }}
                 navigate={navigation.navigate}
                 hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
                 style={{ marginLeft: scaleByFactor(8, 0.9) }}

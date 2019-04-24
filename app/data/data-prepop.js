@@ -199,15 +199,6 @@ function insertPrepopData() {
             });
         }
 
-        /* Create Advertising Stats */
-        for (let index = 0; index < prePopAdvStats.length; index++) {
-            realm.create("AdvStat", {
-                id: uuid.v1(),
-                name: prePopAdvStats[index].name,
-                statType:
-                    prePopAdvStats[index].statType || ADV_STAT_TYPES.TOTAL_COUNT
-            });
-        }
 
         /* Create Fake Sleep Disturbances, and LogDates to group them by day */
         // console.log("dummy disturbances");
