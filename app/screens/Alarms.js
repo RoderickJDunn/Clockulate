@@ -21,7 +21,8 @@ import {
     TouchableOpacity,
     Button,
     AsyncStorage,
-    Modal
+    Modal,
+    Animated
 } from "react-native";
 import moment from "moment";
 import LinearGradient from "react-native-linear-gradient";
@@ -52,6 +53,7 @@ import SplashScreen from "react-native-splash-screen";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import MatComIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import FAIcon from "react-native-vector-icons/FontAwesome";
+import * as Animatable from "react-native-animatable";
 
 import ClkAlert from "../components/clk-awesome-alert";
 import Upgrades from "../config/upgrades";
@@ -69,12 +71,16 @@ import { AdWrapper } from "../services/AdmobService";
 import { populateDummyAlarms } from "../data/data-prepop";
 import { ALARM_STATES } from "../data/constants";
 import Settings from "../config/settings";
+import { ifIphoneX } from "react-native-iphone-x-helper";
 
 var loadedSound = null;
 
+const CHARGE_REMINDER_HEIGHT = 90;
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 class Alarms extends Component {
-    width = Dimensions.get("window").width; //full width
-    height = Dimensions.get("window").height; //full height
+    width = SCREEN_WIDTH; //full width
+    height = SCREEN_HEIGHT; //full height
 
     _didFocusListener = null;
     _duplicationInfo = null;
@@ -597,6 +603,34 @@ class Alarms extends Component {
         }); // TODO: filter by 'visible'=true
     };
 
+    _showChargeReminder = () => {
+        if (this.chargeNotifRef) {
+            this.chargeNotifRef.transitionTo({
+                transform: [
+                    {
+                        // translate extra depending on what type of ad is showing, or 0 if no ad.
+                        translateY: -CHARGE_REMINDER_HEIGHT - ifIphoneX(34, 0)
+                    }
+                ]
+            });
+
+            setTimeout(this._hideChargeReminder, 4000);
+        }
+    };
+
+    _hideChargeReminder = () => {
+        if (this.chargeNotifRef) {
+            this.chargeNotifRef.transitionTo({
+                transform: [
+                    {
+                        // translate extra depending on what type of ad is showing, or 0 if no ad.
+                        translateY: 0
+                    }
+                ]
+            });
+        }
+    };
+
     /*
     Handler for 'Add-Alarm' button press. Navigates to AlarmDetail screen sending no Alarm data.
     SIDE-NOTE: This is a NORMAL function (NOT an arrow function). Therefore, this function creates its own 'this'
@@ -881,7 +915,7 @@ class Alarms extends Component {
         console.log("onAnimFinished");
 
         if (Settings.chargeReminder() == true) {
-            this.setState({ showChargePopup: true });
+            this._showChargeReminder();
         }
     };
 
@@ -1177,6 +1211,42 @@ class Alarms extends Component {
                             }}
                         />
                     )}
+                    <Animatable.View
+                        contentInsetAdjustmentBehavior="automatic"
+                        useNativeDriver={true}
+                        ref={elm => (this.chargeNotifRef = elm)}
+                        style={[styles.chargeNotifCont]}
+                    >
+                        <TouchableWithoutFeedback
+                            style={{ flex: 1 }}
+                            onPress={() => {
+                                console.log("on press touchable");
+                                this._hideChargeReminder();
+                                this.setState({ showChargePopup: true });
+                            }}
+                        >
+                            <View style={[styles.chargeNotifTouchableWrap]}>
+                                <EntypoIcon
+                                    name="power-plug"
+                                    size={40}
+                                    style={{
+                                        flex: 0.22,
+                                        textAlign: "center"
+                                    }}
+                                    color={Colors.brandDarkPurple}
+                                    // color={Colors.brandMidOpp}
+                                />
+                                <View style={{ flex: 0.78 }}>
+                                    <Text style={styles.chargeNotifHeaderText}>
+                                        Reminder
+                                    </Text>
+                                    <Text style={styles.chargeNotifBodyText}>
+                                        Please plug in your device
+                                    </Text>
+                                </View>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </Animatable.View>
                     {this.state.showUpgradePopup && (
                         <ClkAlert
                             contHeight={"mid"}
@@ -1300,6 +1370,38 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontSize: scaleByFactor(12, 0.7),
         fontFamily: "Avenir-Black"
+    },
+    chargeNotifCont: {
+        position: "absolute",
+        // bottom: ifIphoneX(34, 0), // DEV: For easy visibility
+        bottom: -CHARGE_REMINDER_HEIGHT,
+        borderTopRightRadius: 15,
+        borderTopLeftRadius: 15,
+        borderBottomLeftRadius: ifIphoneX(15, 0),
+        borderBottomRightRadius: ifIphoneX(15, 0),
+        left: 0,
+        justifyContent: "center",
+        backgroundColor: Colors.brandVeryLightPurple,
+        height: CHARGE_REMINDER_HEIGHT,
+        width: SCREEN_WIDTH
+    },
+    chargeNotifTouchableWrap: {
+        flex: 1,
+        fontFamily: "Gurmukhi MN",
+        flexDirection: "row",
+        alignItems: "center"
+        // backgroundColor: Colors.brandMidOpp
+    },
+    chargeNotifHeaderText: {
+        color: Colors.darkGreyText,
+        fontFamily: "Gurmukhi MN",
+        fontWeight: "700",
+        fontSize: 18
+    },
+    chargeNotifBodyText: {
+        color: Colors.darkGreyText,
+        // fontFamily: "Gurmukhi MN",
+        fontSize: 16
     }
 });
 
