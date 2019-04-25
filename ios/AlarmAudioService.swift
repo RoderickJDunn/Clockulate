@@ -230,6 +230,13 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
                     self.alarmTimer = Timer.scheduledTimer(timeInterval: timeTillAlm, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
                 })
                 }
+                else {
+                  // if Alarm time is in the past, trigger right away. Hopefully, the only way this situation would occurs
+                  //  is if user waits with the RecordPermission popup showing, until the Alarm time passes.
+                  DispatchQueue.main.async(execute: {
+                    self.alarmTimer = Timer.scheduledTimer(timeInterval: 0, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
+                  })
+                }
                 self.isRecording = true
             }
             else {

@@ -767,6 +767,11 @@ class Alarms extends Component {
 
     _onAlarmToggled = alarm => {
         // console.info("AlarmsList - alarm toggled: ");
+
+        if (!alarm) {
+            return;
+        }
+
         let nextAlarmStatus =
             alarm.status > ALARM_STATES.OFF
                 ? ALARM_STATES.OFF
