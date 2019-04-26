@@ -1641,16 +1641,11 @@ class AlarmDetail extends Component {
                             styles.clockBackground,
                             {
                                 height: imageHeight,
-                                transform: [
-                                    // TODO: instead of transform, just set 'top'
-                                    {
-                                        translateY: SCREEN_HEIGHT * 0.0335
+                                top: -100 + SCREEN_HEIGHT * 0.0335
                                     }
-                                ]
-                            }
                         ]}
                         source={{
-                            uri: "clockbgd_v8_iphone_se5678"
+                            uri: "clock_bkg_low_qual"
                         }}
                     />
                     {this._viewIdx == 0 ? (
@@ -1706,17 +1701,11 @@ class AlarmDetail extends Component {
                                         styles.clockBackground,
                                         {
                                             height: imageHeight,
-                                            transform: [
-                                                // TODO: instead of transform, just set 'top'
-                                                {
-                                                    translateY:
-                                                        SCREEN_HEIGHT * 0.0167
+                                            top: -100 + SCREEN_HEIGHT * 0.0167
                                                 }
-                                            ]
-                                        }
                                     ]}
                                     source={{
-                                        uri: "clockbgd_v8_iphone_se5678"
+                                        uri: "clock_bkg_low_qual"
                                     }}
                                 />
                                 <Text
@@ -1879,7 +1868,7 @@ class AlarmDetail extends Component {
                             ]
                         }
                     ]}
-                    source={{ uri: "clockbgd_v8_iphone_se5678" }}
+                    source={{ uri: "clockBgd_v8_iphoneSE_to_8" }}
                 />
                 {touchableBackdrop}
                 <Interactable.View
