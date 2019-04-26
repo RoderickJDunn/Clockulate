@@ -89,9 +89,9 @@ let SlideFromRight = (index, position, width) => {
 const TransitionConfiguration = () => {
     return {
         transitionSpec: {
-            duration: 500,
-            easing: Easing.out(Easing.poly(15)),
+            duration: 1400,
             timing: Animated.timing,
+            easing: Easing.out(Easing.poly(15)),
             useNativeDriver: true
         },
         screenInterpolator: sceneProps => {
