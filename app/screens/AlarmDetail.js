@@ -2435,7 +2435,7 @@ class AlarmDetail extends Component {
                                         ],
                                         top: this._viewIdx == 2 ? 247.5 : 137.5 // Height of 2.5 task-items
                                     }}
-                                    source={require("../img/Indicator_StartTimesV1.png")}
+                                    source={{ uri: "indicator_start_times" }}
                                 />
                                 <EdgeSwiper
                                     animValue={this.startTimesHandleAnim}
