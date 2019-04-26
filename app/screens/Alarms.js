@@ -609,7 +609,7 @@ class Alarms extends Component {
                 transform: [
                     {
                         // translate extra depending on what type of ad is showing, or 0 if no ad.
-                        translateY: -CHARGE_REMINDER_HEIGHT - ifIphoneX(34, 0)
+                        translateY: -CHARGE_REMINDER_HEIGHT - ifIphoneX(34, 5)
                     }
                 ]
             });
@@ -1227,17 +1227,17 @@ class Alarms extends Component {
                             <View style={[styles.chargeNotifTouchableWrap]}>
                                 <EntypoIcon
                                     name="power-plug"
-                                    size={40}
+                                    size={36}
                                     style={{
-                                        flex: 0.22,
+                                        flex: 0.18,
                                         textAlign: "center"
                                     }}
                                     color={Colors.brandDarkPurple}
                                     // color={Colors.brandMidOpp}
                                 />
-                                <View style={{ flex: 0.78 }}>
+                                <View style={{ flex: 0.82 }}>
                                     <Text style={styles.chargeNotifHeaderText}>
-                                        Reminder
+                                        REMINDER
                                     </Text>
                                     <Text style={styles.chargeNotifBodyText}>
                                         Please plug in your device
@@ -1325,15 +1325,12 @@ const styles = StyleSheet.create({
         position: "absolute",
         // bottom: ifIphoneX(34, 0), // DEV: For easy visibility
         bottom: -CHARGE_REMINDER_HEIGHT,
-        borderTopRightRadius: 15,
-        borderTopLeftRadius: 15,
-        borderBottomLeftRadius: ifIphoneX(15, 0),
-        borderBottomRightRadius: ifIphoneX(15, 0),
-        left: 0,
+        borderRadius: 15,
         justifyContent: "center",
-        backgroundColor: Colors.brandVeryLightPurple,
+        alignSelf: "center",
+        backgroundColor: Colors.brandSuperLightPurple,
         height: CHARGE_REMINDER_HEIGHT,
-        width: SCREEN_WIDTH
+        width: SCREEN_WIDTH - 10
     },
     chargeNotifTouchableWrap: {
         flex: 1,
@@ -1344,14 +1341,15 @@ const styles = StyleSheet.create({
     },
     chargeNotifHeaderText: {
         color: Colors.darkGreyText,
-        fontFamily: "Gurmukhi MN",
+        marginBottom: 7,
+        // fontFamily: "Gurmukhi MN",
         fontWeight: "700",
-        fontSize: 18
+        fontSize: 16
     },
     chargeNotifBodyText: {
         color: Colors.darkGreyText,
         // fontFamily: "Gurmukhi MN",
-        fontSize: 16
+        fontSize: 15
     }
 });
 
