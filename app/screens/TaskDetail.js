@@ -373,6 +373,8 @@ class TaskDetail extends Component {
                     const existingTask = new TaskModel();
                     existingTask.name = prevAlarmTask.task.name;
                     existingTask.id = prevAlarmTask.task.id;
+                    existingTask.defaultDuration =
+                        prevAlarmTask.task.defaultDuration;
 
                     if (this.state.setAsDefault) {
                         // only change the existing Task's default duration if 'Set as Default' is checked.
@@ -403,7 +405,7 @@ class TaskDetail extends Component {
                     AND we have found an existing Task in the DB with the name provided by the user. All that could have changed
                     is the duration of the AlarmTask being edited. 
                 */
-                console.log("Updating existing AlarmTask");
+                // console.log("Updating existing AlarmTask");
                 realm.write(() => {
                     // only change the existing Task's default duration if 'Set as Default' is checked.
                     if (this.state.setAsDefault) {
