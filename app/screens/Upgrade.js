@@ -1034,10 +1034,6 @@ const styles = StyleSheet.create({
         height: 40,
         marginHorizontal: 8
     },
-    calcBtnRect: {
-        width: 80,
-        height: 60
-    },
     calcTopHalfBtn: {
         borderBottomLeftRadius: 0,
         borderBottomRightRadius: 0,
@@ -1135,17 +1131,6 @@ const styles = StyleSheet.create({
         fontFamily: "Gurmukhi MN",
         alignSelf: "center",
         letterSpacing: 0.5
-    },
-    rstrPurchaseBtn: {
-        marginTop: 30
-    },
-    rstrPurchaseText: {
-        color: Colors.brandLightOpp,
-        textDecorationLine: "underline",
-        fontSize: 14,
-        textAlign: "center",
-        fontFamily: "Avenir-Black",
-        letterSpacing: 1
     },
     animLinearGrad: {
         position: "absolute",

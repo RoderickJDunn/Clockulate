@@ -10,7 +10,6 @@ import {
     TouchableOpacity,
     TouchableHighlight,
     // TouchableWithoutFeedback,
-    // Slider,
     PanResponder,
     Dimensions,
     Animated,
@@ -39,8 +38,6 @@ const isSmallScreen = SCREEN_HEIGHT < 650;
 const DURATION_AREA_FLEX_FACTOR = isSmallScreen ? 0.3 : 0.25;
 const NAME_AREA_FLEX_FACTOR = isSmallScreen ? 0.3 : 0.25;
 
-// const MAX_SLIDER_VALUE = 7200; // this is 2 hours, in seconds
-
 class TaskItem extends React.Component {
     /*
     Props: Receives an AlarmTask in the 'data' property:
@@ -51,17 +48,6 @@ class TaskItem extends React.Component {
         }
      */
 
-    /* This flag is required to indicate that a user has actually started sliding (ie. onMoveShouldSetPanResponder 
-        has been called and returned true, and the PanResponder has been granted.) This is to distinguish from
-        the case where the user has longPressed a task and the slider is showing, but since they have not slided 
-        their finger yet, the panResponder has not been granted. Without this flag, the user could release from
-        the longPress without sliding at all, and there would be no functionality to remove the slider (since
-        this was previously all done in panResponder callbacks). Now, the 'onPressOut' callback of the 
-        TouchableOpacity will remove the slider from the view if the _isSliding flag is set to false (indicating
-        that the user never actually slid their finger).    
-    */
-    _isSliding = false;
-    _tempDuration = null;
     _isMoving = false;
 
     interactiveRef = null;
@@ -78,7 +64,6 @@ class TaskItem extends React.Component {
                 task: props.data.task,
                 startTime: props.data.startTime
             },
-            isSlidingTask: false,
             isEditingTasks: false,
             closed: true,
             taskDurVisible: props.durationsVisible
@@ -160,12 +145,6 @@ class TaskItem extends React.Component {
         );
     };
 
-    _onDurationChange = () => {
-        // console.debug(data);
-        this.props.onChangeTaskDuration(this.props.data, this._tempDuration);
-        this._tempDuration = null;
-    };
-
     _onLongPress = initialVal => {
         // console.log("_onLongPress task");
         this._isMoving = true;
@@ -194,8 +173,6 @@ class TaskItem extends React.Component {
                 startTime: nextProps.data.startTime
                 // order: nextProps.data.order // NOTE: Not used, but leaving in for convenience in case I want to display order for debugging
             },
-            isSlidingTask:
-                this._tempDuration != null && nextProps.isSlidingTask,
             isEditingTasks: nextProps.isEditingTasks,
             closed: nextProps.closed,
             taskDurVisible: nextProps.durationsVisible
@@ -209,14 +186,9 @@ class TaskItem extends React.Component {
         // console.log("nextProps", nextProps);
 
         // if we are sliding, return true right away. We need to re-render
-        // if (nextState.isSlidingTask) {
-        //     return true;
-        // }
-
         let { enabled, task, duration /* startTime */ } = this.state.data;
         let {
             isEditingTasks,
-            isSlidingTask,
             closed,
             taskDurVisible
             // order // // NOTE: Not used, but leaving in for convenience in case I want to display order for debugging
@@ -235,15 +207,12 @@ class TaskItem extends React.Component {
             durationsVisible
         } = nextProps;
 
-        let { isSlidingTask: nIsSlidingTask } = nextState;
-
         if (
             nEnabled == enabled &&
             nTask.name == task.name &&
             // nStartTime == startTime &&
             nDuration == duration &&
             nIsEditingTasks == isEditingTasks &&
-            nIsSlidingTask == isSlidingTask &&
             nClosed == closed &&
             durationsVisible == taskDurVisible
             // nOrder == order // NOTE: Not used, but leaving in for convenience in case I want to display order for debugging
@@ -258,11 +227,6 @@ class TaskItem extends React.Component {
         // console.log("nEnabled", nEnabled);
         // console.log("nStartTime | startTime", nStartTime, startTime);
         // console.log("nDuration | duration", nDuration, duration);
-        // console.log(
-        //     "nIsSlidingTask | isSlidingTask",
-        //     nIsSlidingTask,
-        //     isSlidingTask
-        // );
         // console.log("nClosed | closed", nClosed, closed);
         // console.log(
         //     "durationsVisible | taskDurVisible",
@@ -339,8 +303,6 @@ class TaskItem extends React.Component {
                                 // console.log(
                                 //     "Touches arr is empty. Released without sliding!"
                                 // );
-                                this._tempDuration = null;
-                                // this.setState({ isSlidingTask: false });
                                 this.props.shouldEndMove();
                                 this.props.didEndMove();
                             }
@@ -535,10 +497,9 @@ class TaskItem extends React.Component {
             - Otherwise, use the default duration for this Task
         */
         let duration =
-            this._tempDuration ||
-            (this.props.data.duration != null
+            this.props.data.duration != null
                 ? this.props.data.duration
-                : this.props.data.task.defaultDuration);
+                : this.props.data.task.defaultDuration;
 
         // console.log("duration", duration);
 
@@ -599,9 +560,6 @@ class TaskItem extends React.Component {
                             this.props.onSnapTask(targetSnapPointId);
                         }
                     }}
-                    /* Disable "Swipe-to-show DELETE" if slider is showing. Otherwise we get
-                    premature panResonder termination, especially on iOS */
-                    dragEnabled={this._tempDuration == null}
                 >
                     <View
                         style={[
@@ -659,8 +617,6 @@ class TaskItem extends React.Component {
                                     // console.log(
                                     //     "Touches arr is empty. Released without sliding!"
                                     // );
-                                    this._tempDuration = null;
-                                    // this.setState({ isSlidingTask: false });
                                     this.props.shouldEndMove();
                                     this.props.didEndMove();
                                 }
@@ -851,11 +807,6 @@ class TaskItem extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 0.9,
-        backgroundColor: "transparent",
-        flexDirection: "row"
-    },
     slider: {
         position: "absolute",
         backgroundColor: Colors.backgroundGrey,

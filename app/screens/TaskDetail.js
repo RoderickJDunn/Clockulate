@@ -36,7 +36,6 @@ import realm from "../data/DataSchemas";
 import LabeledInput from "../components/labeled-input";
 import LabeledDurationInput from "../components/labeled-duration-input";
 import { TaskModel, AlarmTaskModel } from "../data/models";
-import ScreenStyles from "../styles/screens";
 import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { scale, scaleByFactor } from "../util/font-scale";
@@ -646,13 +645,13 @@ class TaskDetail extends Component {
                 : this.state.alarmTask.task.defaultDuration;
         return (
             <ScrollView
-                contentContainerStyle={[
-                    ScreenStyles.TaskScreen,
-                    {
-                        flexGrow: 1
-                        // backgroundColor: "red"
-                    }
-                ]}
+                contentContainerStyle={{
+                    flex: 1,
+                    backgroundColor: Colors.backgroundGrey,
+                    alignSelf: "stretch",
+                    flexGrow: 1
+                    // backgroundColor: "red"
+                }}
                 // NOTE: Must be 'always' instead of 'handled', otherwise keyboard is sometimes
                 //       dismissed while scrolling Suggestions list
                 keyboardShouldPersistTaps="always"
@@ -666,7 +665,7 @@ class TaskDetail extends Component {
                         keyboardVerticalOffset={
                             Platform.OS == "ios"
                                 ? Header.HEIGHT + 20
-                                : Header.HEIGHT + 20 - 500 // -500 is for Android-specific quirk
+                                : Header.HEIGHT + 20 - 500 // NOTE: -500 is for Android-specific quirk
                         }
                     >
                         <View

@@ -826,12 +826,6 @@ class Alarms extends Component {
             //          However, on Android the 'repeat' feature works, so there is only one notification
             clearAlarm(alarm);
             this.setState(this.state);
-
-            // NOTE: Pretty sure this realm.write is unnecessary since clearAlarm sets the alarm.status to
-            //       OFF when the 3rd parameter is 'true', which it is by default.
-            // realm.write(() => {
-            //     alarm.status = nextAlarmStatus;
-            // });
         }
 
         //console.log("this.state", this.state);
@@ -1326,55 +1320,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         height: 80
-    },
-
-    // TODO: REMOVE
-    container: {
-        // backgroundColor: "red",
-        height: scaleByFactor(300, 1),
-        width: "100%",
-        backgroundColor: Colors.brandLightOpp,
-        overflow: "hidden",
-        borderRadius: 12
-    },
-
-    titleArea: {
-        flex: 0.65,
-        justifyContent: "center",
-        alignItems: "center",
-        alignSelf: "stretch",
-        overflow: "hidden",
-        backgroundColor: Colors.brandLightPurple
-    },
-    titleText: {
-        color: Colors.brandDarkGrey,
-        textAlign: "center",
-        fontSize: scaleByFactor(15, 1),
-        marginTop: 5,
-        fontFamily: "Gurmukhi MN"
-    },
-    contentArea: {
-        flex: 0.2
-    },
-    buttonArea: {
-        flex: 0.15,
-        padding: 10,
-        flexDirection: "row",
-        justifyContent: "space-around"
-    },
-    button: {
-        flex: 0.4,
-        borderRadius: 30,
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        elevation: 1,
-        shadowColor: "black"
-    },
-    buttonText: {
-        color: Colors.brandLightOpp,
-        textAlign: "center",
-        fontSize: scaleByFactor(12, 0.7),
-        fontFamily: "Avenir-Black"
     },
     chargeNotifCont: {
         position: "absolute",

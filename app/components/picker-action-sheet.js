@@ -382,11 +382,6 @@ const styles = StyleSheet.create({
         color: Colors.darkGreyText,
         fontSize: 20
     },
-    subtitleText: {
-        // textAlign: "center",
-        color: Colors.disabledGrey,
-        fontSize: 17
-    },
     buttonText: {
         textAlign: "center",
         fontSize: 20,

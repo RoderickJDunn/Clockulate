@@ -2,7 +2,7 @@
  * Created by rdunn on 2017-08-07.
  */
 import React, { Component } from "react";
-import { StyleSheet, Animated, View, Dimensions, Easing } from "react-native";
+import { Animated, View, Dimensions, Easing } from "react-native";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 
 import { scale, scaleByFactor } from "../util/font-scale";
@@ -81,7 +81,6 @@ class EdgeSwiper extends Component {
                 {/* <-- NEEDS TO BE Animated.View for PanGestureHandler*/}
                 <Animated.View
                     style={[
-                        // StyleSheet.absoluteFill,
                         {
                             position: "absolute",
                             // right: 0,
@@ -107,21 +106,5 @@ class EdgeSwiper extends Component {
         );
     }
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 0.5,
-        alignSelf: "stretch",
-        justifyContent: "center",
-        paddingTop: scale(3)
-    },
-    fieldLabelText: {
-        // paddingBottom: 0,
-        backgroundColor: "transparent"
-    },
-    fieldText: {
-        fontSize: scaleByFactor(25, 0.7)
-    }
-});
 
 export default EdgeSwiper;

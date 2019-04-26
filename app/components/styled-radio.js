@@ -151,9 +151,6 @@ class StyledRadio extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    main: {
-        padding: 10
-    },
     underscore: {
         backgroundColor: Colors.brandVeryLightPurple,
         position: "absolute",

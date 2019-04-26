@@ -194,13 +194,6 @@ export default class About extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingTop: 10,
-        backgroundColor: Colors.backgroundBright
-    },
     rateMeCont: {
         // marginTop: 40,
         // marginBottom: 50,

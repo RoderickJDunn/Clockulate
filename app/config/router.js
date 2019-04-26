@@ -42,7 +42,7 @@ import Sounds from "../screens/Sounds";
 import { UpgradeModal, UpgradeStack } from "../screens/UpgradeContainters";
 import { HelpModal, HelpStack } from "../screens/HelpContainers";
 import SleepLog from "../screens/SleepLog";
-import TextInputPage from "../screens/TextInputPage";
+import PickerInputPage from "../screens/PickerInputPage";
 import PlainTextScreen from "../screens/PlainTextScreen";
 import Help from "../screens/Help";
 import LinearGradient from "react-native-linear-gradient";
@@ -504,8 +504,8 @@ const DrawerRoot = createDrawerNavigator(
                     screen: Settings,
                     navigationOptions: otherDrawerNavOptions("Settings")
                 },
-                TextInputScreen: {
-                    screen: TextInputPage,
+                PickerInputScreen: {
+                    screen: PickerInputPage,
                     navigationOptions: {
                         headerStyle: {
                             // Style the header view itself (aka. the nav bar)

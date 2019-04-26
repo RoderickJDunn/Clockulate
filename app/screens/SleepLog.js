@@ -967,67 +967,10 @@ export default class SleepLog extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    disturbanceItemWrap: {
-        alignSelf: "stretch",
-        // bottom: isIphoneX() ? 34 : 0,
-        right: 0,
-        left: 0,
-        height: 50,
-        flexDirection: "row",
-        alignItems: "center",
-        marginLeft: 10,
-        marginRight: 10,
-        paddingRight: 10,
-        borderBottomColor: Colors.disabledGrey,
-        borderBottomWidth: 1
-    },
     generalInfoSectionWrap: {
         height: 210,
         width: SCREEN_WIDTH
         // backgroundColor: "green"
-    },
-    generalInfoSection: {
-        height: 160,
-        width: SCREEN_WIDTH * 3,
-        paddingVertical: 10,
-        flexDirection: "row"
-        // backgroundColor: "green"
-    },
-    generalInfoPage: {
-        alignSelf: "stretch",
-        // width: SCREEN_WIDTH,
-        margin: 10,
-        borderRadius: 29,
-        flex: 1,
-        // height: "100%",
-        backgroundColor: "#23113E",
-        shadowOffset: {
-            height: 1,
-            width: 0
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-        // shadowColor: "black"
-        shadowColor: "white"
-    },
-    sectionSeparator: {
-        height: 0.8,
-        backgroundColor: Colors.brandDarkGrey
-    },
-    distItemSection: {
-        alignSelf: "stretch",
-        justifyContent: "center"
-        // backgroundColor: "blue"
-    },
-    FlatListContainer: {
-        bottom: isIphoneX() ? 34 : 0
-    },
-    statWrapper: {
-        alignContent: "center",
-        justifyContent: "center",
-        alignItems: "center",
-        flex: 0.5
     },
     textGeneralInfoTitleSec: {
         // paddingBottom: 12,
@@ -1035,60 +978,14 @@ const styles = StyleSheet.create({
         alignSelf: "stretch",
         justifyContent: "center"
     },
-    genInfoCircle: {
-        borderRadius: 40,
-        width: 50,
-        height: 50,
-        alignContent: "center",
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: 7,
-        shadowOpacity: 0.2,
-        shadowOffset: {
-            height: 1,
-            width: 0
-        },
-        shadowRadius: 4,
-        shadowColor: "black",
-        elevation: 10
-    },
     textGeneralInfoTitle: {
         fontSize: SCREEN_WIDTH > 350 ? 37 : 32,
         fontFamily: "Quesha",
         color: Colors.brandLightOpp,
         justifyContent: "center"
     },
-    textGeneralInfoContent: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        flex: 1
-        // backgroundColor: "blue"
-    },
-    textGeneralInfoStat: {
-        fontSize: 23,
-        color: Colors.backgroundBright,
-        fontFamily: "Gurmukhi MN",
-        marginTop: 4
-        // color: Colors.brandDarkGrey
-    },
-    statLabelText: {
-        fontSize: SCREEN_WIDTH > 350 ? 14 : 12,
-        color: Colors.backgroundBright,
-        textAlign: "center",
-        fontFamily: "Gurmukhi MN"
-    },
     extraStatsText: {
         color: Colors.brandLightOpp,
         fontSize: 13
-    },
-    distItemText: {
-        color: Colors.brandLightGrey
-    },
-    generalInfoFooter: {
-        height: 30,
-        flexDirection: "row",
-        alignSelf: "stretch",
-        alignContent: "center",
-        justifyContent: "center"
     }
 });

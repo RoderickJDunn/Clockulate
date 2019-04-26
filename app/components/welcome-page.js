@@ -9,7 +9,6 @@ import {
     Image,
     StyleSheet,
     Animated,
-    LayoutAnimation,
     ScrollView,
     Easing
 } from "react-native";
@@ -155,99 +154,9 @@ const styles = StyleSheet.create({
         width: SCREEN_WIDTH,
         height: "auto",
         justifyContent: "center",
-        // height: SCREEN_HEIGHT - HEADER_HEIGHT - 20,
-        // flex: 1,
-        // borderWidth: 2,
-        // borderColor: "black",
-        // height: SCREEN_HEIGHT - 50, // TODO: Change 200 to factor for Title height
-        // alignSelf: "center",
-        // alignContent: "center",
-        // justifyContent: "center",
-        // alignItems: "center",
         paddingTop: 20
-        // marginTop: -88,
-        // backgroundColor: "yellow"
     },
     btnText: {
         color: Colors.brandLightOpp
     }
-    // helpPageBox: {
-    //     // flex: 0.8,
-    //     // height: SCREEN_HEIGHT * 0.5,
-    //     // alignItems: "center",
-    //     // justifyContent: "center",
-    //     alignSelf: "center",
-    //     borderRadius: 35,
-    //     shadowOpacity: 0.9,
-    //     shadowRadius: 10,
-    //     shadowColor: "#000",
-    //     elevation: 5,
-    //     // width: "85%",
-    //     // padding: 25,
-    //     // backgroundColor: "#AAAAFF53"
-    //     // backgroundColor: Colors.brandLightOpp + "BB"
-    // },
-    // sectionTitleWrap: {
-    //     // width: "85%",
-    //     // paddingHorizontal: 10,
-    //     // backgroundColor: Colors.backgroundGrey,
-    //     position: "absolute",
-    //     // flexDirection: "row",
-    //     left: 0,
-    //     right: 0,
-    //     paddingTop: 5,
-    //     paddingBottom: isIphoneX() ? 20 : 0,
-    //     bottom: 5,
-    //     height: HELPPAGE_HEIGHT * 0.13,
-    //     alignSelf: "center",
-    //     alignItems: "center",
-    //     alignContent: "center",
-    //     // borderRadius: 35,
-    //     // borderTopLeftRadius: 35,
-    //     // borderTopRightRadius: 35,
-    //     justifyContent: "center"
-    // },
-    // sectionTitle: {
-    //     fontSize: scaleByFactor(20, 0.8),
-    //     letterSpacing: 2,
-    //     fontFamily: "Gurmukhi MN",
-    //     // marginBottom: 10,
-    //     textAlign: "center",
-    //     color: Colors.brandLightOpp
-    //     // color: Colors.darkGreyText
-    // },
-    // sectSubtitle: {
-    //     fontSize: scaleByFactor(14, 0.8),
-    //     letterSpacing: 2,
-    //     fontFamily: "Gurmukhi MN",
-    //     color: Colors.brandMidOpp,
-    //     alignSelf: "center",
-    //     marginLeft: 5
-    // },
-    // nextSectBtn: {
-    //     // bottom: 50,
-    //     // paddingVertical: 10,
-    //     paddingHorizontal: 15,
-    //     alignSelf: "center",
-    //     alignContent: "center",
-    //     alignItems: "center",
-    //     justifyContent: "center",
-    //     // width: "55%",
-    //     height: scaleByFactor(45),
-    //     width: scaleByFactor(45),
-    //     shadowOpacity: 0.3,
-    //     shadowRadius: 4,
-    //     shadowColor: "#000",
-    //     elevation: 5,
-    //     backgroundColor: Colors.brandLightPurple,
-    //     borderRadius: 40
-    //     // overflow: "hidden"
-    // },
-    // nextSectBtnText: {
-    //     // color: Colors.darkGreyText,
-    //     color: Colors.brandLightOpp,
-    //     fontSize: scaleByFactor(22),
-    //     // fontFamily: "Quesha",
-    //     letterSpacing: 2
-    // }
 });

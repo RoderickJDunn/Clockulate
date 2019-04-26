@@ -9,18 +9,6 @@ import TaskItem from "./task-item";
 import Colors from "../styles/colors";
 
 class TaskList extends React.Component {
-    // _scrollEnabled = true;
-    // _scrollPos = 0;
-    // _scrolledToEnd = false;
-
-    constructor() {
-        super();
-        this._renderItem = this._renderItem.bind(this);
-    }
-    // componentWillReceiveProps(e) {
-    //     // console.log("\ncomponentWillReceiveProps", e);
-    // }
-
     _keyExtractor = (item, index) => item.id;
 
     _renderItem = ({ item, index, move, moveEnd, isActive: isMoving }) => {
@@ -90,7 +78,6 @@ class TaskList extends React.Component {
         // console.log("taskList", this.props.data);
         // console.log("tasksArr in task-list", tasksArr);
         return (
-            // <View style={[listStyle.container]}>
             <TouchableWithoutFeedback
                 /* No Styling since TouchableWithoutFeedback just ignores the style prop */
                 onPressIn={this.props.closeTaskRows}
@@ -162,43 +149,6 @@ class TaskList extends React.Component {
                                 index
                             };
                         }}
-                        // rowDimensions={this.props.taskRowDimensions}
-                        // renderRowsInclude={this.props.renderRowsInclude}
-                        // onScroll={this.props.onScroll}
-                        // onEndReached={() => {
-                        //     console.log("On end reached");
-                        //     // this._scrolledToEnd = true;
-                        //     if (this._flRef) {
-                        //         console.log("setting scroll to disabled");
-                        //         const { current: list } = this._flRef;
-                        //         this._flRef.setNativeProps({
-                        //             scrollEnabled: false
-                        //         });
-
-                        //         setTimeout(() => {
-                        //             this._flRef.setNativeProps({
-                        //                 scrollEnabled: true
-                        //             });
-                        //         }, 1000);
-                        //     }
-                        // }}
-                        // onScroll={nativeEvent => {
-                        //     console.log("Ended scroll drag");
-                        //     this._scrollPos = nativeEvent.contentOffset.y;
-                        //     if (this._scrollPos == 0) {
-                        //         this.setState({});
-                        //     }
-                        // }}
-                        // onScrollEndDrag={nativeEvent => {
-                        //     console.log("Ended scroll drag");
-                        //     this._scrollPos = nativeEvent.contentOffset.y;
-                        //     if (this._scrollPos == 0) {
-
-                        //     }
-                        // }}
-                        // onMomentumScrollEnd={() => {
-                        //     console.log("onMomentumScrollEnd");
-                        // }}
                     />
                 </View>
             </TouchableWithoutFeedback>
@@ -207,16 +157,6 @@ class TaskList extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 0.9,
-        backgroundColor: "transparent",
-        flexDirection: "row"
-    },
-    item: {
-        padding: 10,
-        fontSize: 18,
-        height: 44
-    },
     contContainerStyleEmpty: {
         flexGrow: 1,
         justifyContent: "center"

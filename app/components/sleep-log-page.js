@@ -979,29 +979,16 @@ const styles = StyleSheet.create({
         // shadowColor: "black"
         shadowColor: "white"
     },
-    sectionSeparator: {
-        height: 0.8,
-        backgroundColor: Colors.brandDarkGrey
-    },
     distItemSection: {
         alignSelf: "stretch",
         justifyContent: "center"
         // backgroundColor: "blue"
-    },
-    FlatListContainer: {
-        bottom: isIphoneX() ? 34 : 0
     },
     statWrapper: {
         alignContent: "center",
         justifyContent: "center",
         alignItems: "center",
         flex: 0.5
-    },
-    textGeneralInfoTitleSec: {
-        // paddingBottom: 12,
-        paddingHorizontal: 10,
-        alignSelf: "stretch",
-        justifyContent: "center"
     },
     genInfoCircle: {
         borderRadius: 40,
@@ -1045,36 +1032,11 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontFamily: "Gurmukhi MN"
     },
-    extraStatsText: {
-        color: Colors.brandLightOpp,
-        fontSize: 13
-    },
     distItemText: {
         color: Colors.brandLightGrey,
         fontSize: 17,
         marginTop: 3,
         fontFamily: "Gurmukhi MN"
-    },
-    generalInfoFooter: {
-        height: 30,
-        flexDirection: "row",
-        alignSelf: "stretch",
-        alignContent: "center",
-        justifyContent: "center"
-    },
-    pageDot: {
-        height: 7,
-        width: 7,
-        borderRadius: 7,
-        alignSelf: "center",
-        backgroundColor: "#BABABA",
-        marginHorizontal: 5
-    },
-    pageDotActive: {
-        height: 10,
-        width: 10,
-        borderRadius: 7,
-        backgroundColor: "#989898"
     },
     centerEmptySet: {
         justifyContent: "center",
@@ -1104,20 +1066,6 @@ const styles = StyleSheet.create({
         // alignContent: "center",
         justifyContent: "center",
         backgroundColor: "white"
-    },
-    measuringView: {
-        height: 1,
-        width: PLAYBACK_TRACK_WIDTH,
-        alignSelf: "center",
-        backgroundColor: "black",
-        position: "absolute",
-        top: 0
-    },
-    measuringNotch: {
-        height: 10,
-        width: 1,
-        position: "absolute",
-        backgroundColor: "black"
     },
     audioProgressTrack: {
         height: 2,

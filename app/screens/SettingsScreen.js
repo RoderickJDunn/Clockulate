@@ -78,7 +78,7 @@ export default class SettingsScreenCkt extends React.Component {
                     subtitle: "Minimum time between recordings",
                     subtitleStyles: { numberOfLines: 2 },
                     onPress: () => {
-                        this.props.navigation.navigate("TextInputScreen", {
+                        this.props.navigation.navigate("PickerInputScreen", {
                             dataSets: [coolDownOptions],
                             dataLabels: ["minutes"],
                             currValues: [this.state.settings.recCooldown],
@@ -113,7 +113,7 @@ export default class SettingsScreenCkt extends React.Component {
                     subtitle: "Maximum number of recordings to be kept",
                     subtitleStyles: { numberOfLines: 2 },
                     onPress: () => {
-                        this.props.navigation.navigate("TextInputScreen", {
+                        this.props.navigation.navigate("PickerInputScreen", {
                             dataSets: [maxRecsOptions],
                             dataLabels: ["recordings"],
                             currValues: [this.state.settings.maxRecs],

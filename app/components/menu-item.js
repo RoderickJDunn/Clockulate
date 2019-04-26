@@ -130,13 +130,6 @@ class MenuItem extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    menuHeader: {
-        fontWeight: "bold",
-        alignSelf: "stretch",
-        fontSize: 15,
-        padding: 10,
-        paddingBottom: 5
-    },
     menuOption: {
         // justifyContent: "center",
         // height: scale(50, 0.5),

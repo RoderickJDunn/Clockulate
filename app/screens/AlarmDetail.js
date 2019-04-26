@@ -48,10 +48,9 @@ import EdgeSwiper from "../components/edge-swiper";
 import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { AlarmModel } from "../data/models";
-// import ArrowView from "../components/arrow-view-native";
 import TouchableBackdrop from "../components/touchable-backdrop";
 // TODO: Remove after we're done choosing fonts
-import { fontPreview } from "../styles/text.js";
+// import { fontPreview } from "../styles/text.js";
 import { scale, scaleByFactor, scaleByHeightFactor } from "../util/font-scale";
 import * as DateUtils from "../util/date_utils";
 import { ALARM_STATES } from "../data/constants";
@@ -96,6 +95,9 @@ const FIELDS_AUTO_VIEW_HEIGHT =
             (1 + FIELDS_AREA_FLEX_FACTOR_COMPENSATED)) +
     8 +
     11;
+
+const FLEX_CLOCK_LOADING =
+    0.225 - (SCREEN_HEIGHT / 568 - 1) * 0.02 + ifIphoneX(0.009, 0);
 
 class AlarmDetail extends Component {
     static defaultNavParams = {
@@ -850,19 +852,19 @@ class AlarmDetail extends Component {
     }
 
     /**** THIS IS A DEV FUNCTION THAT WILL BE DELETED BEFORE RELEASE ****/
-    fontCount = 50;
-    nextFont = fontPreview[0];
-    _CHANGE_CLOCK_FONT() {
-        // console.log("Changing font");
-        // console.log(fontPreview);
-        if (this.fontCount < 0 || this.fontCount > fontPreview.length)
-            this.fontCount = 0;
+    // fontCount = 50;
+    // nextFont = fontPreview[0];
+    // _CHANGE_CLOCK_FONT() {
+    //     // console.log("Changing font");
+    //     // console.log(fontPreview);
+    //     if (this.fontCount < 0 || this.fontCount > fontPreview.length)
+    //         this.fontCount = 0;
 
-        this.nextFont = fontPreview[this.fontCount];
-        // console.log("this.nextFont ", this.nextFont);
-        this.fontCount++;
-        this.setState(this.state);
-    }
+    //     this.nextFont = fontPreview[this.fontCount];
+    //     // console.log("this.nextFont ", this.nextFont);
+    //     this.fontCount++;
+    //     this.setState(this.state);
+    // }
     /***************************************************/
 
     onChangeLabel(text) {
@@ -1626,23 +1628,16 @@ class AlarmDetail extends Component {
         if (!this.props.navigation.state.params.notFirstLoad) {
             // if (true) {
 
-            let flexClock =
-                0.225 - (SCREEN_HEIGHT / 568 - 1) * 0.02 + ifIphoneX(0.009, 0);
-            let flexNonClock = 1 - flexClock;
+            let flexNonClock = 1 - FLEX_CLOCK_LOADING;
             return (
-                <View
-                    style={[
-                        styles.screenContainer,
-                        { backgroundColor: Colors.brandUltraDarkPurple }
-                    ]}
-                >
+                <View style={styles.screenContainer}>
                     <Image
                         style={[
                             styles.clockBackground,
                             {
                                 height: imageHeight,
                                 top: -100 + SCREEN_HEIGHT * 0.0335
-                                    }
+                            }
                         ]}
                         source={{
                             uri: "clock_bkg_low_qual"
@@ -1688,7 +1683,7 @@ class AlarmDetail extends Component {
                             <View
                                 style={{
                                     width: SCREEN_WIDTH,
-                                    flex: flexClock,
+                                    flex: FLEX_CLOCK_LOADING,
                                     alignSelf: "stretch",
                                     alignContent: "center",
                                     justifyContent: "center",
@@ -1702,7 +1697,7 @@ class AlarmDetail extends Component {
                                         {
                                             height: imageHeight,
                                             top: -100 + SCREEN_HEIGHT * 0.0167
-                                                }
+                                        }
                                     ]}
                                     source={{
                                         uri: "clock_bkg_low_qual"
@@ -1874,7 +1869,7 @@ class AlarmDetail extends Component {
                 <Interactable.View
                     ref={this._setInteractiveRef}
                     style={[
-                        styles.animatedView,
+                        styles.interactableView,
                         {
                             width: SCREEN_WIDTH,
                             backgroundColor: "transparent"
@@ -2804,7 +2799,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         alignContent: "stretch",
-        backgroundColor: Colors.backgroundGrey
+        backgroundColor: Colors.brandUltraDarkPurple
         // backgroundColor: "green"
     },
 
@@ -2828,11 +2823,6 @@ const styles = StyleSheet.create({
         top: 0
         // top: 20
     },
-    interactableHandle: {
-        backgroundColor: "transparent",
-        // backgroundColor: "#0FF",
-        width: SCREEN_WIDTH
-    },
     nonClockWrapper: {
         alignItems: "stretch",
         height: SCREEN_HEIGHT * NON_CLOCK_HEIGHT_FACTOR,
@@ -2844,7 +2834,7 @@ const styles = StyleSheet.create({
         // borderWidth: 3,
         // borderColor: "blue"
     },
-    animatedView: {
+    interactableView: {
         // flex: 1,
         position: "absolute",
         top: -SCREEN_HEIGHT,
@@ -2889,29 +2879,6 @@ const styles = StyleSheet.create({
         // borderColor: "red",
         // borderWidth: 1
     },
-    // taskAreaFiller: {
-    //     flex: 0.75,
-    //     // padding: scaleByFactor(10, 0.4),
-    //     alignSelf: "stretch"
-    //     // backgroundColor: Colors.backgroundGrey
-    //     // backgroundColor: "#afabb0"
-    // },
-    nonClockBgImage: {
-        position: "absolute",
-        width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
-        top: -15,
-        left: 0
-    },
-    clockBackgroundNotImage: {
-        justifyContent: "center",
-        alignItems: "center",
-        position: "absolute",
-        top: -40,
-        width: SCREEN_WIDTH,
-        height: 195,
-        backgroundColor: "#220957"
-    },
     timeText: {
         // color: "#d5d5d5",
         // color: Colors.brandOffWhiteBlue,
@@ -2922,25 +2889,6 @@ const styles = StyleSheet.create({
         // fontFamily: "Baskerville-Bold"
         fontFamily: "Quesha"
         // fontWeight: "bold"
-    },
-    dateText: {
-        color: "#d5d5d5",
-        fontSize: 40
-    },
-    menuHeader: {
-        fontWeight: "bold",
-        alignSelf: "stretch",
-        fontSize: 15,
-        padding: 10,
-        paddingBottom: 5
-    },
-    menuOption: {
-        // justifyContent: "center",
-        // height: scale(50, 0.5),
-        // padding: 10,
-        alignSelf: "stretch",
-        overflow: "hidden",
-        backgroundColor: "#FDFDFD"
     }
 });
 
