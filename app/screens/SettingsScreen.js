@@ -169,7 +169,7 @@ export default class SettingsScreenCkt extends React.Component {
                 },
                 {
                     title: "Show Hours of Sleep",
-                    subtitle: "Display hours of sleep by default (new alarms)",
+                    subtitle: "Display hours of sleep by default",
                     renderAccessory: () => {
                         let { settings } = this.state;
                         return (
@@ -499,7 +499,7 @@ export default class SettingsScreenCkt extends React.Component {
                 )}
                 {this.state.showHrsOfSleepTip && (
                     <ClkAlert
-                        // contHeight={"mid"}
+                        contHeight={"mid"}
                         headerIcon={
                             <FAIcon
                                 name="info"
@@ -509,7 +509,7 @@ export default class SettingsScreenCkt extends React.Component {
                         }
                         title="Show Hours of Sleep"
                         headerTextStyle={{ color: Colors.brandLightOpp }}
-                        bodyText={`While editing an alarm, display how many hours of sleep I would get if I would fall asleep at that moment.`}
+                        bodyText={`New alarms will, by default, display how many hours of sleep you will get if you were to fall asleep at that moment. You can change this setting per alarm, if you wish.`}
                         dismissConfig={{
                             onPress: () => {
                                 console.log("Dismissed Info popup");
