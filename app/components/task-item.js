@@ -159,7 +159,6 @@ class TaskItem extends React.Component {
     _onTapCheckBox = () => {
         // console.debug(data);
         this.props.onPressItemCheckBox(
-            // DEV: Uncomment
             this.props.data,
             this.props.data.enabled
         );
@@ -654,11 +653,6 @@ class TaskItem extends React.Component {
         let snapPoints;
         let horizontal = true;
 
-        this._alertAreas = this.buildAlertAreas(
-            this.props.data.order,
-            this.props.taskCount
-        );
-
         if (
             moveItemType == MOVING_ITEM_TYPES.HANDLE ||
             this.state.forceHandleType
@@ -667,6 +661,11 @@ class TaskItem extends React.Component {
             console.log("Rendering transparent handle item");
             borderBottomColor = "transparent";
             this.props.setMoveableAnim(null, this.props.data.order); // unused, but needed to fill the moveable array.
+
+            this._alertAreas = this.buildAlertAreas(
+                this.props.data.order,
+                this.props.taskCount
+            );
 
             snapPoints = this.buildSnapPoints(
                 this.props.data.order,
@@ -739,6 +738,12 @@ class TaskItem extends React.Component {
                 }}
             >
                 {this._renderTaskItemCore(duration, extraStyle)}
+                <TouchableOpacity
+                    style={[TaskItemStyle.deleteBtn]}
+                    onPress={this._onPressDelete}
+                >
+                    <Text style={TaskItemStyle.deleteBtnText}>DELETE</Text>
+                </TouchableOpacity>
             </Interactable.View>
         );
     }

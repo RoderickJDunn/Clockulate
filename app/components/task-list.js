@@ -40,7 +40,7 @@ class MoveableRowHelper {
             this.order += direction;
             Animated.timing(this.animatedValue, {
                 toValue: this.position,
-                duration: 200,
+                duration: 350,
                 useNativeDriver: true
             }).start();
         }
