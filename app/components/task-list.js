@@ -20,8 +20,10 @@ class MoveableRowHelper {
     animatedValue;
     order;
     position;
-
+    initOrder;
     constructor(animVal, ord) {
+        this.initOrder = ord;
+
         this.animatedValue = animVal;
         this.order = ord;
         this.position = 0;
@@ -29,7 +31,10 @@ class MoveableRowHelper {
 
     runAnimation(direction) {
         if (this.animatedValue == null) {
-            console.warn("Attempted to animate non-animatable row");
+            console.warn(
+                "Attempted to animate non-animatable row: ",
+                this.toString()
+            );
         } else {
             this.position = this.position + 55 * direction;
             this.order += direction;
@@ -39,6 +44,14 @@ class MoveableRowHelper {
                 useNativeDriver: true
             }).start();
         }
+    }
+
+    toString() {
+        console.log(
+            `Initial Order: ${this.initOrder}  |  CurrOrder: ${
+                this.order
+            }  |  CurrPos: ${this.position}`
+        );
     }
 }
 
@@ -56,8 +69,8 @@ class TaskList extends React.Component {
         this.moveableAnims.push(new MoveableRowHelper(animVal, idx));
     };
 
-    animateMovable = (index, direction) => {
-        console.log("animateMovable: ", index);
+    animateMovables = (index, direction) => {
+        console.log("animateMovables: ", index);
         console.log("this.moveableAnims", this.moveableAnims.length);
 
         let movRow;
@@ -69,6 +82,10 @@ class TaskList extends React.Component {
         }
 
         if (!movRow) {
+            console.log("Dumping moveableRow objects");
+            for (let i = 0; i < this.moveableAnims.length; i++) {
+                this.moveableAnims[i].toString();
+            }
             console.error("Failed to lookup moveableRow with index: ", index);
             return;
         }
@@ -129,7 +146,7 @@ class TaskList extends React.Component {
                 closed={closed}
                 disabled={this.props.isEditingTasks}
                 setMoveableAnim={this.setMoveableAnim}
-                animateMovable={this.animateMovable}
+                animateMovables={this.animateMovables}
                 taskCount={taskCount}
                 moveEnded={this.onMoveEnded}
                 moveItemType={moveType}

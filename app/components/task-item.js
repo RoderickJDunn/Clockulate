@@ -47,9 +47,9 @@ export const MOVING_ITEM_TYPES = {
     MOVEABLE: 3
 };
 
-_movingTransform.addListener(({ value }) => {
-    console.log("transform val: ", value);
-});
+// _movingTransform.addListener(({ value }) => {
+//     console.log("transform val: ", value);
+// });
 
 class TaskItem extends React.Component {
     /*
@@ -64,6 +64,7 @@ class TaskItem extends React.Component {
     interactiveRef = null;
 
     _moveableAnim = new Animated.Value(0);
+    _alertAreas = [];
 
     currArea;
 
@@ -158,6 +159,7 @@ class TaskItem extends React.Component {
     _onTapCheckBox = () => {
         // console.debug(data);
         this.props.onPressItemCheckBox(
+            // DEV: Uncomment
             this.props.data,
             this.props.data.enabled
         );
@@ -176,8 +178,6 @@ class TaskItem extends React.Component {
     onAlert = event => {
         let { key, value } = event.nativeEvent;
 
-        // TODO: Get areas dynamically. Probably from saved class variable.
-        const areas = ["row0", "row1", "row2", "row3"];
         // NOTE: Very strange event structuring for this callback of Interactable.View
         //  the event looks like this:
         /* 
@@ -194,9 +194,14 @@ class TaskItem extends React.Component {
         */
 
         console.log("onAlert");
-
-        // TODO: Determine which area this alert occurred for (I think we only need to care about "enter" events)
+        let areas = this._alertAreas.map(area => area.id);
+        // Determine which area this alert occurred for (I think we only need to care about "enter" events)
         for (let i = 0; i < areas.length; i++) {
+            console.log("areas[i]", areas[i]);
+            console.log(
+                "event.nativeEvent[areas[i]]",
+                event.nativeEvent[areas[i]]
+            );
             if (event.nativeEvent[areas[i]] == "enter") {
                 console.log(`Entering Area ${i}`);
                 console.log("this.currArea", this.currArea);
@@ -219,7 +224,7 @@ class TaskItem extends React.Component {
                     }
                     this.currArea = i;
                     // Animate the corresponding row 55 points in the correct direction
-                    this.props.animateMovable(i, direction);
+                    this.props.animateMovables(i, direction);
                     break;
                 }
             }
@@ -277,6 +282,8 @@ class TaskItem extends React.Component {
                 }
             }, 0);
         }
+
+        this.currArea = nextProps.data.order; // NOTE: this is vital
 
         this.setState({
             data: {
@@ -359,6 +366,7 @@ class TaskItem extends React.Component {
             <View
                 style={[
                     TaskItemStyle.taskInfoWrap,
+                    extraStyles,
                     {
                         borderBottomColor: "transparent"
                         // backgroundColor: "blue"
@@ -367,8 +375,8 @@ class TaskItem extends React.Component {
             >
                 <TouchableOpacity
                     style={[
-                        TaskItemStyle.taskInfoTouchable,
-                        extraStyles
+                        TaskItemStyle.taskInfoTouchable
+                        // extraStyles
                         // { backgroundColor: "blue" }
                     ]}
                     ref={touchable => (this._touchable = touchable)}
@@ -540,73 +548,13 @@ class TaskItem extends React.Component {
         );
     };
 
-    renderPlaceholderItem = duration => {
-        console.log("renderPlaceholderItem");
-
-        let alertAreas = this.buildAlertAreas(
-            this.props.data.order,
-            this.props.taskCount
-        );
-
-        let snapPoints = this.buildSnapPoints(
-            this.props.data.order,
-            this.props.taskCount
-        );
-
-        return (
-            <Interactable.View
-                style={[
-                    TaskListStyle.taskRow,
-                    this.props.style,
-                    {
-                        alignContent: "flex-start",
-                        borderWidth: 4, // DEV:
-                        borderColor: "red" // DEV:
-                    }
-                ]}
-                // ref={this.setInteractableRef}
-                animatedValueY={_movingTransform}
-                verticalOnly={true}
-                snapPoints={snapPoints}
-                alertAreas={alertAreas}
-                onAlert={this.onAlert}
-                dragWithSpring={{ tension: 500, damping: 0.5 }}
-                animatedNativeDriver={true}
-                // onSnap={e => {
-                //     // console.log("Snapping");
-                //     this.props.onSnapTask(e.nativeEvent.id);
-                // }}
-                onDrag={event => {
-                    // console.log("Snapping");
-                    let { state, y, targetSnapPointId } = event.nativeEvent;
-                    if (state == "end") {
-                        console.log("OnDrag end. Placeholder TaskItem");
-                        let task = this.props.data;
-                        console.log("From: ", task.order);
-                        console.log("To: ", this.currArea);
-
-                        _movingTransform.setValue(0);
-                        // _movingTransform = new Animated.Value(0);
-
-                        this.props.moveEnded({
-                            data: task,
-                            from: task.order,
-                            to: this.currArea
-                        });
-                        // this.props.onSnapTask(targetSnapPointId);
-                    }
-                }}
-            >
-                {this._renderTaskItemCore(duration)}
-            </Interactable.View>
-        );
-    };
-
     _renderMovingItem = (duration, animVal, isCopy) => {
         let style;
+        let props = {};
         if (isCopy) {
-            // style = styles.movingStyle;
-            style = { padding: 5, backgroundColor: "#00FFAA55" }; // DEV:
+            style = styles.movingStyle;
+            // style = { backgroundColor: "#00FFAA25" }; // DEV:
+            props = { pointerEvents: "none" };
         }
         return (
             <Animated.View
@@ -622,6 +570,7 @@ class TaskItem extends React.Component {
                         ]
                     }
                 ]}
+                {...props}
             >
                 {this._renderTaskItemCore(duration, style)}
             </Animated.View>
@@ -685,13 +634,36 @@ class TaskItem extends React.Component {
                               If that threshold is passed, the view snaps to the last row-aligned position of the
                               Placeholder view. 
         */
-        let movingStyle;
+        let extraStyle = { opacity: 1 };
         let borderBottomColor = Colors.disabledGrey;
         let { moveItemType } = this.props;
-        if (moveItemType == MOVING_ITEM_TYPES.HANDLE) {
+        let snapPoints;
+        let horizontal = true;
+
+        this._alertAreas = this.buildAlertAreas(
+            this.props.data.order,
+            this.props.taskCount
+        );
+
+        if (
+            moveItemType == MOVING_ITEM_TYPES.HANDLE ||
+            this.state.forceHandleType
+        ) {
+            // DEV: remove forceHandleType
+            console.log("Rendering transparent handle item");
             borderBottomColor = "transparent";
             this.props.setMoveableAnim(null, this.props.data.order); // unused, but needed to fill the moveable array.
-            return this.renderPlaceholderItem(duration);
+
+            snapPoints = this.buildSnapPoints(
+                this.props.data.order,
+                this.props.taskCount
+            );
+
+            extraStyle = { opacity: 0 };
+            // extraStyle = { borderColor: "red", borderWidth: 2 }; // DEV:
+
+            horizontal = false;
+            // return this.renderPlaceholderItem(duration);
         } else if (moveItemType == MOVING_ITEM_TYPES.COPY) {
             console.log("rendering overlying copy");
             return this._renderMovingItem(duration, _movingTransform, true);
@@ -702,9 +674,11 @@ class TaskItem extends React.Component {
                 this.props.data.order
             );
             return this._renderMovingItem(duration, this._moveableAnim);
+        } else {
+            console.debug("Rendering standard TaskItem");
+            snapPoints = [{ x: 0, id: "closed" }, { x: -90, id: "active" }];
+            this._alertAreas = [];
         }
-
-        console.debug("Rendering standard TaskItem");
 
         return (
             <Interactable.View
@@ -715,10 +689,12 @@ class TaskItem extends React.Component {
                     }
                 ]}
                 ref={this.setInteractableRef}
-                horizontalOnly={true}
+                horizontalOnly={horizontal}
+                verticalOnly={!horizontal}
                 animatedValueY={_movingTransform}
-                // verticalOnly={isMoving}
-                snapPoints={[{ x: 0, id: "closed" }, { x: -90, id: "active" }]}
+                alertAreas={this._alertAreas}
+                onAlert={this.onAlert}
+                snapPoints={snapPoints}
                 dragWithSpring={{ tension: 500, damping: 0.5 }}
                 animatedNativeDriver={true}
                 onDrag={event => {
@@ -726,11 +702,29 @@ class TaskItem extends React.Component {
                     let { state, y, targetSnapPointId } = event.nativeEvent;
                     if (state == "end") {
                         console.log("OnDrag end. Standard TaskItem");
-                        this.props.onSnapTask(targetSnapPointId);
+
+                        if (!horizontal) {
+                            let task = this.props.data;
+                            console.log("From: ", task.order);
+                            console.log("To: ", this.currArea);
+
+                            _movingTransform.setValue(0);
+                            // _movingTransform = new Animated.Value(0);
+
+                            this.interactiveRef.changePosition({ y: 0 });
+
+                            this.props.moveEnded({
+                                data: task,
+                                from: task.order,
+                                to: this.currArea
+                            });
+                        } else if (horizontal) {
+                            this.props.onSnapTask(targetSnapPointId);
+                        }
                     }
                 }}
             >
-                {this._renderTaskItemCore(duration)}
+                {this._renderTaskItemCore(duration, extraStyle)}
             </Interactable.View>
         );
     }
