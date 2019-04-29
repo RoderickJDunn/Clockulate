@@ -40,7 +40,7 @@ class MoveableRowHelper {
             this.order += direction;
             Animated.timing(this.animatedValue, {
                 toValue: this.position,
-                duration: 500,
+                duration: 200,
                 useNativeDriver: true
             }).start();
         }
@@ -67,6 +67,11 @@ class TaskList extends React.Component {
 
     setMoveableAnim = (animVal, idx) => {
         this.moveableAnims.push(new MoveableRowHelper(animVal, idx));
+    };
+
+    updateDraggedRowOrder = (index, newPosition) => {
+        console.log("index, newPosition", index, newPosition);
+        this.moveableAnims[index].order = newPosition;
     };
 
     animateMovables = (indices, direction) => {
@@ -120,8 +125,8 @@ class TaskList extends React.Component {
     _keyExtractor = (item, index) => item.id;
 
     _renderItem = (taskCount, { item, index }) => {
-        console.log("index", index);
-        console.log("taskCount", taskCount);
+        // console.log("index", index);
+        // console.log("taskCount", taskCount);
         // console.log("item", item);
         let { onSnapTask, ...other } = this.props;
         // console.log("onSnapTask prop", onSnapTask);
@@ -144,7 +149,7 @@ class TaskList extends React.Component {
             moveType = MOVING_ITEM_TYPES.MOVEABLE;
         }
 
-        console.log("moveType", moveType);
+        // console.log("moveType", moveType);
 
         return (
             <TaskItem
@@ -161,6 +166,7 @@ class TaskList extends React.Component {
                 taskCount={taskCount}
                 moveEnded={this.onMoveEnded}
                 moveItemType={moveType}
+                updateDraggedRowOrder={this.updateDraggedRowOrder}
                 // shouldStartMove={move}
                 // shouldEndMove={moveEnd}
             />

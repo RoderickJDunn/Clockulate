@@ -177,7 +177,6 @@ class TaskItem extends React.Component {
 
     onAlert = event => {
         let { key, value } = event.nativeEvent;
-
         // NOTE: Very strange event structuring for this callback of Interactable.View
         //  the event looks like this:
         /* 
@@ -239,6 +238,7 @@ class TaskItem extends React.Component {
                     this.currArea = i;
                     // Animate the corresponding row 55 points in the correct direction
                     this.props.animateMovables(rowsToAnimate, direction);
+                    this.props.updateDraggedRowOrder(this.props.data.order, i);
                     break;
                 }
             }
@@ -592,7 +592,7 @@ class TaskItem extends React.Component {
     };
 
     render() {
-        console.debug("render task-item");
+        // console.debug("render task-item");
         // console.debug("render task-item props", this.props);
         // console.debug(
         //     "render task-item durationsVisible",
