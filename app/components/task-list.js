@@ -31,11 +31,11 @@ class MoveableRowHelper {
 
     runAnimation(direction) {
         if (this.animatedValue == null) {
-            console.warn(
-                "Attempted to animate non-animatable row: ",
-                this.toString()
-            );
+            console.warn("Attempted to animate non-animatable row: ");
+            this.toString();
         } else {
+            console.info("Running animation for animatable row: ");
+            this.toString();
             this.position = this.position + 55 * direction;
             this.order += direction;
             Animated.timing(this.animatedValue, {
@@ -69,28 +69,39 @@ class TaskList extends React.Component {
         this.moveableAnims.push(new MoveableRowHelper(animVal, idx));
     };
 
-    animateMovables = (index, direction) => {
-        console.log("animateMovables: ", index);
+    animateMovables = (indices, direction) => {
+        console.log("animateMovables: ", indices);
         console.log("this.moveableAnims", this.moveableAnims.length);
 
-        let movRow;
+        let movRows = [];
         // find MoveableRow with the specified order
         for (let i = 0; i < this.moveableAnims.length; i++) {
-            if (this.moveableAnims[i].order == index) {
-                movRow = this.moveableAnims[i];
+            for (let j = 0; j < indices.length; j++) {
+                if (this.moveableAnims[i].order == indices[j]) {
+                    movRows.push(this.moveableAnims[i]);
+                    this.moveableAnims[i].runAnimation(
+                        direction == "top" ? -1 : 1
+                    );
+                    break;
+                }
+            }
+
+            if (movRows.length == indices.length) {
+                break;
             }
         }
 
-        if (!movRow) {
+        if (movRows.length != indices.length) {
             console.log("Dumping moveableRow objects");
             for (let i = 0; i < this.moveableAnims.length; i++) {
                 this.moveableAnims[i].toString();
             }
-            console.error("Failed to lookup moveableRow with index: ", index);
+            console.warn(
+                "Failed to find all moveable rows with indices: ",
+                indices
+            );
             return;
         }
-
-        movRow.runAnimation(direction == "top" ? -1 : 1);
     };
 
     onMoveEnded = moveInfo => {

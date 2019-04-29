@@ -213,18 +213,32 @@ class TaskItem extends React.Component {
                     break;
                 } else {
                     let direction;
+                    let rowsToAnimate = [];
                     if (this.currArea > i) {
                         // new area is less (we've moved towards the top of the list, meaning the
                         //  moveable view must move towards the bottom)
                         direction = "bottom";
+                        let topMostRowToAnimate = i;
+
+                        // Create an array of incremental digits, starting at topMostRowToAnimate, of (this.currArea - i) elements
+                        rowsToAnimate = Array.from(
+                            { length: this.currArea - i },
+                            (v, k) => k + topMostRowToAnimate
+                        );
                     } else if (this.currArea < i) {
                         // new area is more (we've moved towards the bottom of the list, so the
                         //  moveable view must move towards the top)
                         direction = "top";
+                        let topMostRowToAnimate = this.currArea + 1;
+
+                        rowsToAnimate = Array.from(
+                            { length: i - this.currArea },
+                            (v, k) => k + topMostRowToAnimate
+                        );
                     }
                     this.currArea = i;
                     // Animate the corresponding row 55 points in the correct direction
-                    this.props.animateMovables(i, direction);
+                    this.props.animateMovables(rowsToAnimate, direction);
                     break;
                 }
             }
