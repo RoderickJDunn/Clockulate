@@ -10,7 +10,6 @@ import {
     TouchableOpacity,
     TouchableHighlight,
     // TouchableWithoutFeedback,
-    PanResponder,
     Dimensions,
     Animated,
     Platform,
@@ -164,14 +163,27 @@ class TaskItem extends React.Component {
         );
     };
 
+    _dragStartTimer = null;
+
     _onLongPress = initialVal => {
-        // console.log("_onLongPress task");
-        // this.setState({ moveItemType: MOVING_ITEM_TYPES.HANDLE });
+        console.log("_onLongPress task");
         this.props.willStartMove(this.props.data);
-        // if (this._touchable) {
-        //     this._touchable.setOpacityTo(10);
-        // }
-        // this.props.shouldStartMove();
+
+        // NOTE: This is a workaround to prevent movingItem from remaining visible, when drag failed to initialize
+        //       Sometimes after longPress, the row does not respond to the drag. This is a borderline adequate
+        //       workaround that simply cancels the move in 2 seconds if we don't receive the onDrag-start event.
+        //       A better, but probably much more difficult solution would be to use the rn-gesture-handler lib
+        //       instead, but this could cause a performance hit, since I still want to use rn-interactable for
+        //       horizontal dragging to show Delete button.
+        if (!this._dragStartTimer) {
+            this._dragStartTimer = setTimeout(() => {
+                this.props.moveEnded({
+                    data: this.props.data,
+                    from: this.props.data.order,
+                    to: this.props.data.order
+                });
+            }, 2000);
+        }
     };
 
     onAlert = event => {
@@ -395,6 +407,9 @@ class TaskItem extends React.Component {
                     ref={touchable => (this._touchable = touchable)}
                     onPress={this._onPress.bind(this)}
                     onLongPress={this._onLongPress.bind(this)}
+                    // onPressOut={() => {
+                    //     console.log("onPressOut");
+                    // }}
                 >
                     <TouchableOpacity
                         style={TaskItemStyle.checkbox}
@@ -566,7 +581,6 @@ class TaskItem extends React.Component {
         let props = {};
         if (isCopy) {
             style = styles.movingStyle;
-            // style = { backgroundColor: "#00FFAA25" }; // DEV:
             props = { pointerEvents: "none" };
         }
         return (
@@ -586,6 +600,12 @@ class TaskItem extends React.Component {
                 {...props}
             >
                 {this._renderTaskItemCore(duration, style)}
+                <TouchableOpacity
+                    style={[TaskItemStyle.deleteBtn]}
+                    onPress={this._onPressDelete}
+                >
+                    <Text style={TaskItemStyle.deleteBtnText}>DELETE</Text>
+                </TouchableOpacity>
             </Animated.View>
         );
     };
@@ -601,7 +621,7 @@ class TaskItem extends React.Component {
         // console.log("\n");
         // console.log("this.state.tempDuration", this.state.tempDuration);
 
-        /* Statement Explanation: 
+        /* Statement Explanation:
             - Use tempDuration if not null (this means the slider is showing)
             - Otherwise, check if there is a user-set duration for this AlarmTask, if there is, use it
             - Otherwise, use the default duration for this Task
@@ -643,9 +663,9 @@ class TaskItem extends React.Component {
                               placeholder view as it is moved. In other words, this is a copy of the actual view
                               being moved, and follows the movement of that view.
             3. Moveable Item: These are all other TaskItems. They are Animated.Views that remain still unless the
-                              Placeholder animatedValue crosses a positional threshold for that particular row. 
+                              Placeholder animatedValue crosses a positional threshold for that particular row.
                               If that threshold is passed, the view snaps to the last row-aligned position of the
-                              Placeholder view. 
+                              Placeholder view.
         */
         let extraStyle = { opacity: 1 };
         let borderBottomColor = Colors.disabledGrey;
@@ -714,7 +734,7 @@ class TaskItem extends React.Component {
                     // console.log("Snapping");
                     let { state, y, targetSnapPointId } = event.nativeEvent;
                     if (state == "end") {
-                        console.log("OnDrag end. Standard TaskItem");
+                        console.log("OnDrag end.");
 
                         if (!horizontal) {
                             let task = this.props.data;
@@ -734,6 +754,10 @@ class TaskItem extends React.Component {
                         } else if (horizontal) {
                             this.props.onSnapTask(targetSnapPointId);
                         }
+                    } else if (state == "start") {
+                        console.log("OnDrag start.");
+                        clearTimeout(this._dragStartTimer);
+                        this._dragStartTimer = null;
                     }
                 }}
             >
