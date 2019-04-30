@@ -69,7 +69,7 @@ let SlideFromBottom = (index, position, height) => {
     const inputRange = [index - 1, index, index + 1];
     const translateY = position.interpolate({
         inputRange: [index - 1, index, index + 1],
-        outputRange: [height, 0, 0]
+        outputRange: [height, -5, -5]
     });
 
     const SlideFromBottom = { transform: [{ translateY }] };
@@ -89,9 +89,9 @@ let SlideFromRight = (index, position, width) => {
 const TransitionConfiguration = () => {
     return {
         transitionSpec: {
-            duration: 1400,
+            duration: 600,
             timing: Animated.timing,
-            easing: Easing.out(Easing.poly(15)),
+            easing: Easing.out(Easing.exp),
             useNativeDriver: true
         },
         screenInterpolator: sceneProps => {
