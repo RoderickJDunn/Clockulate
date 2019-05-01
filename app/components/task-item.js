@@ -597,13 +597,39 @@ class TaskItem extends React.Component {
         );
     };
 
-    _renderMovingItem = (duration, animVal, isCopy) => {
-        let style;
-        let props = {};
-        if (isCopy) {
-            style = styles.movingStyle;
-            props = { pointerEvents: "none" };
-        }
+    _renderCopyItem = (duration, animVal, scrollOffset) => {
+        let style = styles.movingStyle;
+        return (
+            <Animated.View
+                style={[
+                    TaskListStyle.taskRow,
+                    this.props.style,
+                    {
+                        alignContent: "flex-start",
+                        transform: [
+                            {
+                                translateY: Animated.subtract(
+                                    animVal,
+                                    scrollOffset
+                                )
+                            }
+                        ]
+                    }
+                ]}
+                pointerEvents={"none"}
+            >
+                {this._renderTaskItemCore(duration, style)}
+                <TouchableOpacity
+                    style={[TaskItemStyle.deleteBtn]}
+                    onPress={this._onPressDelete}
+                >
+                    <Text style={TaskItemStyle.deleteBtnText}>DELETE</Text>
+                </TouchableOpacity>
+            </Animated.View>
+        );
+    };
+
+    _renderMovingItem = (duration, animVal) => {
         return (
             <Animated.View
                 style={[
@@ -618,9 +644,8 @@ class TaskItem extends React.Component {
                         ]
                     }
                 ]}
-                {...props}
             >
-                {this._renderTaskItemCore(duration, style)}
+                {this._renderTaskItemCore(duration)}
                 <TouchableOpacity
                     style={[TaskItemStyle.deleteBtn]}
                     onPress={this._onPressDelete}
@@ -762,7 +787,11 @@ class TaskItem extends React.Component {
             // return this._renderGestureHandler(duration, _movingTransform);
         } else if (moveItemType == MOVING_ITEM_TYPES.COPY) {
             console.log("rendering overlying copy");
-            return this._renderMovingItem(duration, _movingTransform, true);
+            return this._renderCopyItem(
+                duration,
+                _movingTransform,
+                this.props.scrollOffset
+            );
         } else if (moveItemType == MOVING_ITEM_TYPES.MOVEABLE) {
             console.log("rendering move-able item");
             this.props.setMoveableAnim(
@@ -782,11 +811,17 @@ class TaskItem extends React.Component {
             <PanGestureHandler
                 style={TaskListStyle.taskRow}
                 // ref={el => (this.startTimesPanRef = el)}
+                minDist={useGestureHandler ? 5 : 2000}
+                failOffsetY={useGestureHandler ? [-20000, 20000] : [-2, 2]}
                 onHandlerStateChange={({ nativeEvent }) => {
                     // console.log("nativeEvent.state", nativeEvent.state);
                     if (nativeEvent.state == State.BEGAN) {
+                        console.log("PanGestureHandler - State.BEGAN");
+
                         _movingTransform.setValue(0);
                     } else if (nativeEvent.state == State.END) {
+                        console.log("PanGestureHandler - State.END");
+
                         let task = this.props.data;
                         console.log("From: ", task.order);
                         console.log("To: ", this.currArea);
@@ -798,6 +833,13 @@ class TaskItem extends React.Component {
                             from: task.order,
                             to: this.currArea
                         });
+                    } else if (nativeEvent.state == State.FAILED) {
+                        console.log("PanGestureHandler - State.FAILED");
+                    } else {
+                        console.log(
+                            "PanGestureHandler - State: ",
+                            nativeEvent.state
+                        );
                     }
                 }}
                 onGestureEvent={Animated.event(
@@ -889,7 +931,6 @@ class TaskItem extends React.Component {
                         }
                     }
                 )}
-                waitFor={this.tapRef}
                 // enabled={useGestureHandler}
             >
                 <Animated.View>

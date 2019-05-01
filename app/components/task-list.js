@@ -59,6 +59,7 @@ class TaskList extends React.Component {
     movingItem = null;
     moveableAnims = [];
     filterMap = null;
+    scrollAnim = new Animated.Value(0);
 
     _onWillStartMove = item => {
         this.movingItem = item;
@@ -76,7 +77,7 @@ class TaskList extends React.Component {
 
     animateMovables = (indices, direction) => {
         console.log("animateMovables: ", indices);
-        console.log("this.moveableAnims", this.moveableAnims.length);
+        console.log("[DEBUG] this.moveableAnims", this.moveableAnims.length);
 
         let movRows = [];
         // find MoveableRow with the specified order
@@ -229,7 +230,7 @@ class TaskList extends React.Component {
                         this.props.tlContainerStyle
                     ]}
                 >
-                    <FlatList
+                    <Animated.FlatList
                         data={filteredAlarmTasks || alarmTasks}
                         renderItem={this._renderItem.bind(this, taskCount)} // pass in # of tasks showing to renderItem
                         keyExtractor={this._keyExtractor}
@@ -252,6 +253,17 @@ class TaskList extends React.Component {
                         //     );
                         // }}
                         bounces={false}
+                        onScroll={Animated.event(
+                            [
+                                {
+                                    nativeEvent: {
+                                        contentOffset: { y: this.scrollAnim }
+                                    }
+                                }
+                            ],
+                            { useNativeDriver: true }
+                        )}
+                        scrollEventThrottle={16}
                         // scrollEnabled={!this.props.isSlidingTask}
                         // scrollEnabled={true}
                         forceRemeasure={this.props.forceRemeasure}
@@ -305,6 +317,7 @@ class TaskList extends React.Component {
                                 position: "absolute",
                                 top: this.movingItem.order * 55
                             }}
+                            scrollOffset={this.scrollAnim}
                             moveItemType={MOVING_ITEM_TYPES.COPY}
                         />
                     )}
