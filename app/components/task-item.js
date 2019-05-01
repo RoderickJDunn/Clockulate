@@ -18,6 +18,7 @@ import {
 import Interactable from "react-native-interactable";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import EvilIcon from "react-native-vector-icons/EvilIcons";
+import { PanGestureHandler, State } from "react-native-gesture-handler";
 
 import DurationText from "./duration-text";
 
@@ -141,11 +142,21 @@ class TaskItem extends React.Component {
     // componentWillUnmount() {
     //     // this.state.position.removeAllListeners();
     // }
+    _isMoving = false;
 
     _onPress = () => {
         // console.debug("TaskItem: onPress");
         // console.debug(this.props.data);
-        if (!this.props.disabled) {
+        if (this._isMoving == true) {
+            this._isMoving = false;
+            let { task } = this.props.data;
+            // if the move has already started, don't navigate. Instead just end the move
+            this.props.moveEnded({
+                data: task,
+                from: task.order,
+                to: this.currArea
+            });
+        } else if (!this.props.disabled) {
             this.props.onPressItem(this.props.data);
         }
     };
@@ -168,6 +179,7 @@ class TaskItem extends React.Component {
     _onLongPress = initialVal => {
         console.log("_onLongPress task");
         this.props.willStartMove(this.props.data);
+        this._isMoving = true;
 
         // NOTE: This is a workaround to prevent movingItem from remaining visible, when drag failed to initialize
         //       Sometimes after longPress, the row does not respond to the drag. This is a borderline adequate
@@ -175,15 +187,15 @@ class TaskItem extends React.Component {
         //       A better, but probably much more difficult solution would be to use the rn-gesture-handler lib
         //       instead, but this could cause a performance hit, since I still want to use rn-interactable for
         //       horizontal dragging to show Delete button.
-        if (!this._dragStartTimer) {
-            this._dragStartTimer = setTimeout(() => {
-                this.props.moveEnded({
-                    data: this.props.data,
-                    from: this.props.data.order,
-                    to: this.props.data.order
-                });
-            }, 2000);
-        }
+        // if (!this._dragStartTimer) {
+        //     this._dragStartTimer = setTimeout(() => {
+        //         this.props.moveEnded({
+        //             data: this.props.data,
+        //             from: this.props.data.order,
+        //             to: this.props.data.order
+        //         });
+        //     }, 2000);
+        // }
     };
 
     onAlert = event => {
@@ -405,8 +417,17 @@ class TaskItem extends React.Component {
                         // { backgroundColor: "blue" }
                     ]}
                     ref={touchable => (this._touchable = touchable)}
-                    onPress={this._onPress.bind(this)}
-                    onLongPress={this._onLongPress.bind(this)}
+                    onPress={this._onPress}
+                    onPressIn={() => {
+                        this.pressInTimer = setTimeout(() => {
+                            console.log("Long enough press!");
+                            this._onLongPress();
+                        }, 650);
+                    }}
+                    onPressOut={() => {
+                        clearTimeout(this.pressInTimer);
+                    }}
+                    // onLongPress={this._onLongPress.bind(this)}
                     // onPressOut={() => {
                     //     console.log("onPressOut");
                     // }}
@@ -610,6 +631,51 @@ class TaskItem extends React.Component {
         );
     };
 
+    _renderGestureHandler(duration, animValue) {
+        return (
+            <PanGestureHandler
+                style={TaskListStyle.taskRow}
+                // ref={el => (this.startTimesPanRef = el)}
+                onGestureEvent={Animated.event(
+                    [
+                        {
+                            nativeEvent: {
+                                translationY: animValue
+                            }
+                        }
+                    ],
+                    {
+                        useNativeDriver: true,
+                        listener: evt => {
+                            let { translationY } = evt.nativeEvent;
+                            console.log(evt.nativeEvent.translationY);
+                            if (translationY % 55 != this.currArea) {
+                                this.currArea = translationY % 55;
+
+                                this.props.animateMovables(
+                                    rowsToAnimate,
+                                    direction
+                                );
+                                this.props.updateDraggedRowOrder(
+                                    this.props.data.order,
+                                    i
+                                );
+                            }
+                        }
+                    }
+                )}
+            >
+                <Animated.View
+                    style={{
+                        transform: [{ translateY: animValue }]
+                    }}
+                >
+                    {this._renderTaskItemCore(duration)}
+                </Animated.View>
+            </PanGestureHandler>
+        );
+    }
+
     render() {
         // console.debug("render task-item");
         // console.debug("render task-item props", this.props);
@@ -671,12 +737,9 @@ class TaskItem extends React.Component {
         let borderBottomColor = Colors.disabledGrey;
         let { moveItemType } = this.props;
         let snapPoints;
-        let horizontal = true;
+        let useGestureHandler = false;
 
-        if (
-            moveItemType == MOVING_ITEM_TYPES.HANDLE ||
-            this.state.forceHandleType
-        ) {
+        if (moveItemType == MOVING_ITEM_TYPES.HANDLE) {
             // DEV: remove forceHandleType
             console.log("Rendering transparent handle item");
             borderBottomColor = "transparent";
@@ -694,9 +757,9 @@ class TaskItem extends React.Component {
 
             extraStyle = { opacity: 0 };
             // extraStyle = { borderColor: "red", borderWidth: 2 }; // DEV:
+            useGestureHandler = true;
 
-            horizontal = false;
-            // return this.renderPlaceholderItem(duration);
+            // return this._renderGestureHandler(duration, _movingTransform);
         } else if (moveItemType == MOVING_ITEM_TYPES.COPY) {
             console.log("rendering overlying copy");
             return this._renderMovingItem(duration, _movingTransform, true);
@@ -713,62 +776,186 @@ class TaskItem extends React.Component {
             this._alertAreas = [];
         }
 
+        tapRef = React.createRef();
+
         return (
-            <Interactable.View
-                style={[
-                    TaskListStyle.taskRow,
-                    {
-                        alignContent: "flex-start"
-                    }
-                ]}
-                ref={this.setInteractableRef}
-                horizontalOnly={horizontal}
-                verticalOnly={!horizontal}
-                animatedValueY={_movingTransform}
-                alertAreas={this._alertAreas}
-                onAlert={this.onAlert}
-                snapPoints={snapPoints}
-                dragWithSpring={{ tension: 500, damping: 0.5 }}
-                animatedNativeDriver={true}
-                onDrag={event => {
-                    // console.log("Snapping");
-                    let { state, y, targetSnapPointId } = event.nativeEvent;
-                    if (state == "end") {
-                        console.log("OnDrag end.");
+            <PanGestureHandler
+                style={TaskListStyle.taskRow}
+                // ref={el => (this.startTimesPanRef = el)}
+                onHandlerStateChange={({ nativeEvent }) => {
+                    // console.log("nativeEvent.state", nativeEvent.state);
+                    if (nativeEvent.state == State.BEGAN) {
+                        _movingTransform.setValue(0);
+                    } else if (nativeEvent.state == State.END) {
+                        let task = this.props.data;
+                        console.log("From: ", task.order);
+                        console.log("To: ", this.currArea);
 
-                        if (!horizontal) {
-                            let task = this.props.data;
-                            console.log("From: ", task.order);
-                            console.log("To: ", this.currArea);
-
-                            _movingTransform.setValue(0);
-                            // _movingTransform = new Animated.Value(0);
-
-                            this.interactiveRef.changePosition({ y: 0 });
-
-                            this.props.moveEnded({
-                                data: task,
-                                from: task.order,
-                                to: this.currArea
-                            });
-                        } else if (horizontal) {
-                            this.props.onSnapTask(targetSnapPointId);
-                        }
-                    } else if (state == "start") {
-                        console.log("OnDrag start.");
-                        clearTimeout(this._dragStartTimer);
-                        this._dragStartTimer = null;
+                        _movingTransform.setValue(0);
+                        this._isMoving = false;
+                        this.props.moveEnded({
+                            data: task,
+                            from: task.order,
+                            to: this.currArea
+                        });
                     }
                 }}
+                onGestureEvent={Animated.event(
+                    [
+                        {
+                            nativeEvent: {
+                                translationY: _movingTransform
+                            }
+                        }
+                    ],
+                    {
+                        useNativeDriver: true,
+                        listener: evt => {
+                            if (this._isMoving == false) {
+                                return;
+                            }
+
+                            let { translationY } = evt.nativeEvent;
+                            console.log(evt.nativeEvent.translationY);
+                            let relativePos = Math.floor(translationY / 55);
+                            let newPosTmp = Math.min(
+                                this.props.taskCount - 1,
+                                this.props.data.order + relativePos
+                            );
+                            newPosTmp = Math.max(newPosTmp, 0);
+
+                            // relativePos = newPosTmp >= this.props.taskCount ? newPosTmp - this.props.taskCount : relativePos;
+                            // relativePos = newPosTmp < 0 ?
+                            // TODO: We don't care if we've moved above the top of the list, only that we are at the top,
+                            //        same with the bottom. Right now we end up calculating negative newPositions, and also
+                            //        newPositions larger than the total # of list items. Bare in mind that this moveBy variable
+                            //        is relative to the original position of the item that was moved, so in this calculation
+                            //        I must account for this fact.
+
+                            if (newPosTmp != this.currArea) {
+                                // if (
+                                //     this.props.data.order + relativePos >
+                                //         this.props.taskCount - 1 ||
+                                //     this.props.data.order + relativePos < 0
+                                // ) {
+                                //     return;
+                                // }
+                                let rowsTraveled = Math.abs(
+                                    this.currArea - newPosTmp
+                                );
+                                console.log(
+                                    "[DEBUG] rowsTraveled",
+                                    rowsTraveled
+                                );
+                                let direction;
+                                let topMostRowToAnimate = Math.min(
+                                    newPosTmp,
+                                    this.currArea + 1
+                                );
+                                console.log(
+                                    "[DEBUG] topMostRowToAnimate",
+                                    topMostRowToAnimate
+                                );
+                                let rowsToAnimate = [];
+                                console.log("[DEBUG] relativePos", relativePos);
+                                if (newPosTmp > this.currArea) {
+                                    direction = "top";
+
+                                    rowsToAnimate = Array.from(
+                                        { length: rowsTraveled },
+                                        (v, k) => k + topMostRowToAnimate
+                                    );
+                                } else {
+                                    direction = "bottom";
+
+                                    // Create an array of incremental digits, starting at topMostRowToAnimate, of (this.currArea - i) elements
+                                    rowsToAnimate = Array.from(
+                                        { length: rowsTraveled },
+                                        (v, k) => k + topMostRowToAnimate
+                                    );
+                                }
+
+                                this.currArea = newPosTmp;
+
+                                this.props.animateMovables(
+                                    rowsToAnimate,
+                                    direction
+                                );
+                                this.props.updateDraggedRowOrder(
+                                    this.props.data.order,
+                                    this.currArea
+                                );
+                            }
+                        }
+                    }
+                )}
+                waitFor={this.tapRef}
+                // enabled={useGestureHandler}
             >
-                {this._renderTaskItemCore(duration, extraStyle)}
-                <TouchableOpacity
-                    style={[TaskItemStyle.deleteBtn]}
-                    onPress={this._onPressDelete}
-                >
-                    <Text style={TaskItemStyle.deleteBtnText}>DELETE</Text>
-                </TouchableOpacity>
-            </Interactable.View>
+                <Animated.View>
+                    <Interactable.View
+                        style={[
+                            TaskListStyle.taskRow,
+                            {
+                                alignContent: "flex-start"
+                            }
+                        ]}
+                        ref={this.setInteractableRef}
+                        horizontalOnly={true}
+                        // animatedValueY={_movingTransform}
+                        alertAreas={this._alertAreas}
+                        onAlert={this.onAlert}
+                        snapPoints={snapPoints}
+                        dragWithSpring={{ tension: 500, damping: 0.5 }}
+                        animatedNativeDriver={true}
+                        dragEnabled={true}
+                        onDrag={event => {
+                            // console.log("Snapping");
+                            let {
+                                state,
+                                y,
+                                targetSnapPointId
+                            } = event.nativeEvent;
+                            if (state == "end") {
+                                console.log("OnDrag end.");
+
+                                // if (!horizontal) {
+                                //     let task = this.props.data;
+                                //     console.log("From: ", task.order);
+                                //     console.log("To: ", this.currArea);
+
+                                //     _movingTransform.setValue(0);
+                                //     // _movingTransform = new Animated.Value(0);
+
+                                //     this.interactiveRef.changePosition({ y: 0 });
+
+                                //     this.props.moveEnded({
+                                //         data: task,
+                                //         from: task.order,
+                                //         to: this.currArea
+                                //     });
+                                // } else if (horizontal) {
+                                this.props.onSnapTask(targetSnapPointId);
+                                // }
+                            } else if (state == "start") {
+                                console.log("OnDrag start.");
+                                clearTimeout(this._dragStartTimer);
+                                this._dragStartTimer = null;
+                            }
+                        }}
+                    >
+                        {this._renderTaskItemCore(duration, extraStyle)}
+                        <TouchableOpacity
+                            style={[TaskItemStyle.deleteBtn]}
+                            onPress={this._onPressDelete}
+                        >
+                            <Text style={TaskItemStyle.deleteBtnText}>
+                                DELETE
+                            </Text>
+                        </TouchableOpacity>
+                    </Interactable.View>
+                </Animated.View>
+            </PanGestureHandler>
         );
     }
 }
