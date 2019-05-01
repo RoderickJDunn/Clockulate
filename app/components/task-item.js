@@ -869,7 +869,9 @@ class TaskItem extends React.Component {
 
                             let { translationY } = evt.nativeEvent;
                             console.log(evt.nativeEvent.translationY);
-                            let relativePos = Math.floor(translationY / 55);
+                            let relativePos = Math.floor(
+                                (translationY + 28) / 55
+                            );
                             let newPosTmp = Math.min(
                                 this.props.taskCount - 1,
                                 this.props.data.order + relativePos
