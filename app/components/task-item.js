@@ -13,7 +13,8 @@ import {
     Dimensions,
     Animated,
     Platform,
-    TextInput
+    TextInput,
+    Easing
 } from "react-native";
 import Interactable from "react-native-interactable";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -823,16 +824,25 @@ class TaskItem extends React.Component {
                         console.log("PanGestureHandler - State.END");
 
                         let task = this.props.data;
-                        console.log("From: ", task.order);
-                        console.log("To: ", this.currArea);
+                        console.log("[DEBUG] From: ", task.order);
+                        console.log("[DEBUG] To: ", this.currArea);
 
-                        _movingTransform.setValue(0);
-                        this._isMoving = false;
-                        this.props.moveEnded({
-                            data: task,
-                            from: task.order,
-                            to: this.currArea
+                        let relativeMovement = this.currArea - task.order;
+
+                        Animated.timing(_movingTransform, {
+                            toValue: relativeMovement * 55,
+                            duration: 350,
+                            easing: Easing.ease,
+                            useNativeDriver: true
+                        }).start(() => {
+                            this.props.moveEnded({
+                                data: task,
+                                from: task.order,
+                                to: this.currArea
+                            });
                         });
+                        // _movingTransform.setValue(0);
+                        this._isMoving = false;
                     } else if (nativeEvent.state == State.FAILED) {
                         console.log("PanGestureHandler - State.FAILED");
                     } else {
@@ -918,6 +928,11 @@ class TaskItem extends React.Component {
                                 }
 
                                 this.currArea = newPosTmp;
+
+                                console.log(
+                                    "[DEBUG] New this.currArea ",
+                                    this.currArea
+                                );
 
                                 this.props.animateMovables(
                                     rowsToAnimate,
