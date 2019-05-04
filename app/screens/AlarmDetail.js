@@ -202,7 +202,8 @@ class AlarmDetail extends Component {
         width: SCREEN_WIDTH,
         height:
             SCREEN_HEIGHT *
-                NON_CLOCK_HEIGHT_FACTOR *
+            NON_CLOCK_HEIGHT_FACTOR *
+            0.81 * // this is equivalent to 1 / 1.22 (since NON_CLOCK is made of up of 2 flex areas: =0.22, and =1)
                 TASK_AREA_AUTO_VIEW_FLEX_FACTOR -
             scaleByFactor(50, 0.6),
         pageX: 0,
@@ -1129,7 +1130,7 @@ class AlarmDetail extends Component {
 
         if (realm.isInTransaction) {
             this._cachedSortedTasks.forEach((task, idx) => {
-                console.log("idx", idx);
+                // console.log("idx", idx);
                 if (task.enabled == false) {
                     task.startTime = null;
                 } else if (task.enabled == true) {
@@ -1147,7 +1148,7 @@ class AlarmDetail extends Component {
         } else {
             realm.write(() => {
                 this._cachedSortedTasks.forEach((task, idx) => {
-                    console.log("idx", idx);
+                    // console.log("idx", idx);
                     if (task.enabled == false) {
                         task.startTime = null;
                     } else if (task.enabled == true) {
@@ -1879,8 +1880,6 @@ class AlarmDetail extends Component {
                     verticalOnly={true}
                     snapPoints={this._snapPoints}
                     animatedValueY={this._clockTransform}
-                    // onSnap={this.onSnap.bind(this)}
-                    // initialPosition={{ y: initInterPosition }}
                     dragEnabled={!this.state.disableDrag}
                     boundaries={{
                         top: -SCREEN_HEIGHT * 0.45, // 0.7 before
@@ -2864,7 +2863,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: scaleByFactor(10, 0.4),
         paddingBottom: scaleByFactor(10, 0.4),
         alignSelf: "stretch",
-        // backgroundColor: Colors.backgroundLightGrey,
         backgroundColor: Colors.brandMidGrey,
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,

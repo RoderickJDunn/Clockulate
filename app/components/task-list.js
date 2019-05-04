@@ -60,6 +60,43 @@ class TaskList extends React.Component {
     moveableAnims = [];
     filterMap = null;
     scrollAnim = new Animated.Value(0);
+    _autoscrollTimer = null;
+    _canScroll = true;
+    _containerHeight = 0;
+    _scrollAmount = 0;
+
+    // componentDidMount() {
+    //     console.log("Mounted!");
+
+    //     this._flContainer.measure((x, y, width, height) => {
+    //         console.log("x, y, width, height", x, y, width, height);
+    //         console.log("measured");
+    //         this._containerHeight = height;
+    //         console.log("this._containerHeight", height);
+    //     });
+    // }
+    // onLayout = ({ nativeEvent }) => {
+    //     let {
+    //         layout: { height }
+    //     } = nativeEvent;
+
+    //     this._listHeight = height;
+    //     console.log("List Height: ", this._listHeight);
+    // };
+
+    onLayout = e => {
+        console.log("onLayout");
+    };
+
+    _resetAutoscrollTimer = () => {
+        if (this._autoscrollTimer) {
+            clearTimeout(this._autoscrollTimer);
+        }
+
+        this._autoscrollTimer = setTimeout(() => {
+            this._canScroll = true;
+        }, 1000);
+    };
 
     _onWillStartMove = item => {
         this.movingItem = item;
@@ -73,6 +110,51 @@ class TaskList extends React.Component {
     updateDraggedRowOrder = (index, newPosition) => {
         console.log("index, newPosition", index, newPosition);
         this.moveableAnims[index].order = newPosition;
+
+        // If we are at the bottom scroll the Flatlist by 1 item
+        // get height of Flatlist window (depends on which view we are in)
+        // let { height } = this.props.containerDimensions;
+        // height -= 55; // DEV: extra offset for testing
+        // // check if the dragged item is at the bottom row of the current WINDOW of the flatlist
+
+        // if (this._canScroll == false) {
+        //     console.log(
+        //         "Waiting for autoScrollTimer to expire. Can't scroll yet"
+        //     );
+        // } else if (newPosition * 55 >= height - this.scrollAnim._value) {
+        //     console.log("Auto-scrolling!");
+        //     this._canScroll = false;
+        //     this._scrollView.getNode().scrollToIndex({
+        //         index: newPosition + 1,
+        //         viewOffset: 0,
+        //         viewPosition: 1
+        //     });
+
+        //     this._resetAutoscrollTimer();
+
+        //     return true;
+        // } else {
+        //     console.log("container height", height);
+        //     console.log("scrollAnim._value", this.scrollAnim._value);
+        // }
+    };
+
+    requestAutoscroll = newPosition => {
+        if (this._canScroll == true) {
+            this._canScroll = false;
+            this._scrollAmount += 55;
+            console.log("Auto-scrolling to ", this._scrollAmount);
+
+            this._scrollView.getNode().scrollToOffset({
+                offset: this._scrollAmount
+            });
+
+            this._resetAutoscrollTimer();
+
+            return true;
+        }
+
+        return false;
     };
 
     animateMovables = (indices, direction) => {
@@ -150,8 +232,6 @@ class TaskList extends React.Component {
             moveType = MOVING_ITEM_TYPES.MOVEABLE;
         }
 
-        // console.log("moveType", moveType);
-
         return (
             <TaskItem
                 // other includes 'willStartMove' cb, 'onPressItem' callback, onPressItemCheckBox callback
@@ -168,6 +248,9 @@ class TaskList extends React.Component {
                 moveEnded={this.onMoveEnded}
                 moveItemType={moveType}
                 updateDraggedRowOrder={this.updateDraggedRowOrder}
+                scrollOffset={this.scrollAnim}
+                containerDimensions={this.props.containerDimensions}
+                requestAutoscroll={this.requestAutoscroll}
                 // shouldStartMove={move}
                 // shouldEndMove={moveEnd}
             />
@@ -229,8 +312,12 @@ class TaskList extends React.Component {
                         },
                         this.props.tlContainerStyle
                     ]}
+                    ref={elm => (this._flContainer = elm)}
+                    collapsable={false}
+                    onLayout={e => this.onLayout(e)}
                 >
                     <Animated.FlatList
+                        ref={elm => (this._scrollView = elm)}
                         data={filteredAlarmTasks || alarmTasks}
                         renderItem={this._renderItem.bind(this, taskCount)} // pass in # of tasks showing to renderItem
                         keyExtractor={this._keyExtractor}
@@ -261,13 +348,16 @@ class TaskList extends React.Component {
                                     }
                                 }
                             ],
-                            { useNativeDriver: true }
+                            {
+                                useNativeDriver: true,
+                                listener: ({ nativeEvent }) =>
+                                    (this._scrollAmount =
+                                        nativeEvent.contentOffset.y)
+                            }
                         )}
                         scrollEventThrottle={16}
                         // scrollEnabled={!this.props.isSlidingTask}
                         // scrollEnabled={true}
-                        forceRemeasure={this.props.forceRemeasure}
-                        containerDimensions={this.props.containerDimensions}
                         contentContainerStyle={contContainerStyle}
                         ListEmptyComponent={
                             <View

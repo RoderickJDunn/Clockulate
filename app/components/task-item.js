@@ -66,7 +66,7 @@ class TaskItem extends React.Component {
 
     _moveableAnim = new Animated.Value(0);
     _alertAreas = [];
-
+    _scrollOffsetDuringMove = 0;
     currArea;
 
     setInteractableRef = el => (this.interactiveRef = el);
@@ -181,6 +181,7 @@ class TaskItem extends React.Component {
         console.log("_onLongPress task");
         this.props.willStartMove(this.props.data);
         this._isMoving = true;
+        this._scrollOffsetAtMoveStart = this.props.scrollOffset._value;
 
         // NOTE: This is a workaround to prevent movingItem from remaining visible, when drag failed to initialize
         //       Sometimes after longPress, the row does not respond to the drag. This is a borderline adequate
@@ -599,6 +600,8 @@ class TaskItem extends React.Component {
     };
 
     _renderCopyItem = (duration, animVal, scrollOffset) => {
+        console.log("renderCopyItem -- scrollOffset", scrollOffset._value);
+        animVal.setOffset(-scrollOffset._value);
         let style = styles.movingStyle;
         return (
             <Animated.View
@@ -609,10 +612,11 @@ class TaskItem extends React.Component {
                         alignContent: "flex-start",
                         transform: [
                             {
-                                translateY: Animated.subtract(
-                                    animVal,
-                                    scrollOffset
-                                )
+                                translateY: animVal
+                                // translateY: Animated.subtract(
+                                //     animVal,
+                                //     scrollOffset
+                                // )
                             }
                         ]
                     }
@@ -700,6 +704,29 @@ class TaskItem extends React.Component {
                 </Animated.View>
             </PanGestureHandler>
         );
+    }
+    _scrollItvlTimer = null;
+
+    _scrollIfNeededAndAllowed(translationY, newPosition) {
+        console.log("_scrollIfNeededAndAllowed");
+        let { height } = this.props.containerDimensions;
+        // height -= 110; // DEV: extra offset for testing
+        // check if the dragged item is at the bottom row of the current WINDOW of the flatlist
+        console.log("Container height", height);
+        console.log("vs. ", this.props.data.order * 55 + translationY);
+        // if (newPosition * 55 >= height - this.scrollOffset._value) {
+        if (
+            this.props.data.order * 55 + translationY >=
+            height - 110 - this._scrollOffsetDuringMove
+        ) {
+            console.log("Requesting scroll!");
+            let ret = this.props.requestAutoscroll(); // TODO: Add direction argument
+
+            if (ret == true) {
+                this._scrollOffsetDuringMove += 55; // TODO: Add/subtract depending on direction argument
+                this.currArea += 1;
+            }
+        }
     }
 
     render() {
@@ -801,7 +828,7 @@ class TaskItem extends React.Component {
             );
             return this._renderMovingItem(duration, this._moveableAnim);
         } else {
-            console.debug("Rendering standard TaskItem");
+            // console.debug("Rendering standard TaskItem");
             snapPoints = [{ x: 0, id: "closed" }, { x: -90, id: "active" }];
             this._alertAreas = [];
         }
@@ -822,6 +849,7 @@ class TaskItem extends React.Component {
                         _movingTransform.setValue(0);
                     } else if (nativeEvent.state == State.END) {
                         console.log("PanGestureHandler - State.END");
+                        clearInterval(this._scrollItvlTimer);
 
                         let task = this.props.data;
                         console.log("[DEBUG] From: ", task.order);
@@ -835,6 +863,7 @@ class TaskItem extends React.Component {
                             easing: Easing.ease,
                             useNativeDriver: true
                         }).start(() => {
+                            this._scrollOffsetDuringMove = 0;
                             this.props.moveEnded({
                                 data: task,
                                 from: task.order,
@@ -867,16 +896,22 @@ class TaskItem extends React.Component {
                                 return;
                             }
 
+                            // clearInterval(this._scrollItvlTimer);
                             let { translationY } = evt.nativeEvent;
-                            console.log(evt.nativeEvent.translationY);
+
+                            translationY += this._scrollOffsetDuringMove;
+                            // console.log(evt.nativeEvent.translationY);
                             let relativePos = Math.floor(
                                 (translationY + 28) / 55
                             );
+
                             let newPosTmp = Math.min(
                                 this.props.taskCount - 1,
                                 this.props.data.order + relativePos
                             );
                             newPosTmp = Math.max(newPosTmp, 0);
+
+                            console.log("newPosTmp", newPosTmp);
 
                             // relativePos = newPosTmp >= this.props.taskCount ? newPosTmp - this.props.taskCount : relativePos;
                             // relativePos = newPosTmp < 0 ?
@@ -887,6 +922,8 @@ class TaskItem extends React.Component {
                             //        I must account for this fact.
 
                             if (newPosTmp != this.currArea) {
+                                clearInterval(this._scrollItvlTimer);
+
                                 // if (
                                 //     this.props.data.order + relativePos >
                                 //         this.props.taskCount - 1 ||
@@ -936,14 +973,27 @@ class TaskItem extends React.Component {
                                     this.currArea
                                 );
 
+                                this._scrollIfNeededAndAllowed(
+                                    translationY,
+                                    this.currArea
+                                );
+
                                 this.props.animateMovables(
                                     rowsToAnimate,
                                     direction
                                 );
+
                                 this.props.updateDraggedRowOrder(
                                     this.props.data.order,
                                     this.currArea
                                 );
+
+                                this._scrollItvlTimer = setInterval(() => {
+                                    this._scrollIfNeededAndAllowed(
+                                        translationY,
+                                        this.currArea
+                                    );
+                                }, 1000);
                             }
                         }
                     }
