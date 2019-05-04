@@ -9,13 +9,16 @@ import {
     View,
     Text,
     Animated,
-    FlatList
+    FlatList,
+    Easing
 } from "react-native";
+import { PanGestureHandler, State } from "react-native-gesture-handler";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import TaskItem, { MOVING_ITEM_TYPES } from "./task-item";
 import Colors from "../styles/colors";
 import AnimatedPulse from "./anim-pulse";
 
+const CONTAINER_HEIGHT_DEV = 400; // DEV:
 class MoveableRowHelper {
     animatedValue;
     order;
@@ -55,34 +58,47 @@ class MoveableRowHelper {
     }
 }
 
+class HandleRowHelper {
+    task;
+    currPos;
+
+    constructor(task, currPos) {
+        this.task = task;
+        this.currPos = currPos;
+    }
+
+    incr() {
+        this.currPos++;
+    }
+
+    decr() {
+        this.currPos--;
+    }
+
+    setPosition(pos) {
+        this.currPos = pos;
+    }
+}
+
 class TaskList extends React.Component {
     movingItem = null;
     moveableAnims = [];
     filterMap = null;
-    scrollAnim = new Animated.Value(0);
+    _scrollAnim = new Animated.Value(0);
     _autoscrollTimer = null;
     _canScroll = true;
     _containerHeight = 0;
     _scrollAmount = 0;
+    _panAnim = new Animated.Value(0);
+    // _panPosOnLastScroll = 0;
+    _scrollDuringMove = 0;
 
-    // componentDidMount() {
-    //     console.log("Mounted!");
-
-    //     this._flContainer.measure((x, y, width, height) => {
-    //         console.log("x, y, width, height", x, y, width, height);
-    //         console.log("measured");
-    //         this._containerHeight = height;
-    //         console.log("this._containerHeight", height);
-    //     });
-    // }
-    // onLayout = ({ nativeEvent }) => {
-    //     let {
-    //         layout: { height }
-    //     } = nativeEvent;
-
-    //     this._listHeight = height;
-    //     console.log("List Height: ", this._listHeight);
-    // };
+    constructor() {
+        super();
+        this._panAnim.addListener(({ value }) => {
+            console.log("transform val: ", value);
+        });
+    }
 
     onLayout = e => {
         console.log("onLayout");
@@ -99,7 +115,9 @@ class TaskList extends React.Component {
     };
 
     _onWillStartMove = item => {
-        this.movingItem = item;
+        // this._panPosOnLastScroll = 200; // TODO: MID-POINT height of container.
+        this._scrollDuringMove = 0;
+        this.movingItem = new HandleRowHelper(item, item.order);
         this.props.willStartMove();
     };
 
@@ -107,54 +125,64 @@ class TaskList extends React.Component {
         this.moveableAnims.push(new MoveableRowHelper(animVal, idx));
     };
 
-    updateDraggedRowOrder = (index, newPosition) => {
-        console.log("index, newPosition", index, newPosition);
-        this.moveableAnims[index].order = newPosition;
+    // TODO: Handle scrolling other direction
 
-        // If we are at the bottom scroll the Flatlist by 1 item
-        // get height of Flatlist window (depends on which view we are in)
-        // let { height } = this.props.containerDimensions;
-        // height -= 55; // DEV: extra offset for testing
-        // // check if the dragged item is at the bottom row of the current WINDOW of the flatlist
-
-        // if (this._canScroll == false) {
-        //     console.log(
-        //         "Waiting for autoScrollTimer to expire. Can't scroll yet"
-        //     );
-        // } else if (newPosition * 55 >= height - this.scrollAnim._value) {
-        //     console.log("Auto-scrolling!");
-        //     this._canScroll = false;
-        //     this._scrollView.getNode().scrollToIndex({
-        //         index: newPosition + 1,
-        //         viewOffset: 0,
-        //         viewPosition: 1
-        //     });
-
-        //     this._resetAutoscrollTimer();
-
-        //     return true;
-        // } else {
-        //     console.log("container height", height);
-        //     console.log("scrollAnim._value", this.scrollAnim._value);
-        // }
-    };
-
-    requestAutoscroll = newPosition => {
+    /**
+     * Scrolls Flatlist only if autoscrollTimer has expired.
+     * Returns the number of points actually scrolled.
+     * @memberof TaskList
+     */
+    requestAutoscroll = direction => {
         if (this._canScroll == true) {
             this._canScroll = false;
-            this._scrollAmount += 55;
-            console.log("Auto-scrolling to ", this._scrollAmount);
+            let amount = direction * 55;
+            let max;
+            console.log(
+                "[DEBUG] Auto-scrolling to ? ",
+                this._scrollAmount + amount
+            );
+
+            // make sure we're not trying to scroll past 0 (start of list)
+            if (amount + this._scrollAmount < 0) {
+                amount = -this._scrollAmount;
+            }
+            // make sure we're not trying to scroll past the end of the list
+            else if (
+                amount + this._scrollAmount >
+                this.props.data.length * 55 - CONTAINER_HEIGHT_DEV
+            ) {
+                amount =
+                    this.props.data.length * 55 -
+                    CONTAINER_HEIGHT_DEV -
+                    this._scrollAmount;
+            }
+
+            console.log("Auto-scrolling to ", this._scrollAmount + amount);
 
             this._scrollView.getNode().scrollToOffset({
-                offset: this._scrollAmount
+                offset: this._scrollAmount + amount
             });
+
+            this._scrollDuringMove += amount; // TODO: Handle scrolling other direction
+
+            console.log(
+                "this._scrollDuringMove (after scroll)",
+                this._scrollDuringMove
+            );
 
             this._resetAutoscrollTimer();
 
-            return true;
+            return amount;
         }
 
-        return false;
+        return 0;
+    };
+
+    updateDraggedRowOrder = () => {
+        let initialOrder = this.movingItem.task.order;
+        let newPosition = this.movingItem.currPos;
+        console.log("index, newPosition", initialOrder, newPosition);
+        this.moveableAnims[initialOrder].order = newPosition;
     };
 
     animateMovables = (indices, direction) => {
@@ -226,7 +254,7 @@ class TaskList extends React.Component {
         let moveType;
         if (this.movingItem == null) {
             moveType = MOVING_ITEM_TYPES.NONE;
-        } else if (this.movingItem.id == item.id) {
+        } else if (this.movingItem.task.id == item.id) {
             moveType = MOVING_ITEM_TYPES.HANDLE;
         } else {
             moveType = MOVING_ITEM_TYPES.MOVEABLE;
@@ -248,7 +276,8 @@ class TaskList extends React.Component {
                 moveEnded={this.onMoveEnded}
                 moveItemType={moveType}
                 updateDraggedRowOrder={this.updateDraggedRowOrder}
-                scrollOffset={this.scrollAnim}
+                _scrollAnimVal={this._scrollAnim}
+                panAnimVal={this._panAnim}
                 containerDimensions={this.props.containerDimensions}
                 requestAutoscroll={this.requestAutoscroll}
                 // shouldStartMove={move}
@@ -264,6 +293,137 @@ class TaskList extends React.Component {
         // console.log("rowState", rowState);
         this.props.onSnapTask(item, index, rowState);
     }
+
+    _scrollIfNeededAndAllowed(yPos, velocity) {
+        console.log("_scrollIfNeededAndAllowed");
+        let { height } = this.props.containerDimensions;
+        height = CONTAINER_HEIGHT_DEV; // DEV:
+        // check if the dragged item is at the bottom row of the current WINDOW of the flatlist
+        console.log("Container height", height);
+        console.log("vs. ", yPos);
+        console.log("velocity: ", velocity);
+        if (yPos >= height - 100 && velocity > 0) {
+            console.log("Requesting scroll DOWN!");
+            let scrolledBy = this.requestAutoscroll(1);
+
+            // if (scrolledBy != 0) {
+            //     this._panPosOnLastScroll = yPos - (yPos % 55); // set to nearest lower multiple of row height
+            // }
+        } /* else {
+            console.log("Not scrolling down... reason:");
+            if (yPos < height - 100) {
+                console.log(
+                    "yPos is less than height-120: ",
+                    yPos,
+                    height - 100
+                );
+            } else if (yPos < this._panPosOnLastScroll) {
+                console.log(
+                    "yPos is less than panPos on last scroll: ",
+                    yPos,
+                    this._panPosOnLastScroll
+                );
+            }
+        } */
+
+        if (yPos <= 55 && velocity < 0) {
+            console.log("Requesting scroll UP!");
+            let scrolledBy = this.requestAutoscroll(-1);
+
+            // if (scrolledBy != 0) {
+            //     this._panPosOnLastScroll = yPos + (yPos % 55); // set to nearest upper multiple of row height
+            // }
+        } else {
+            console.log("Not scrolling UP... reason:");
+            if (yPos > 55) {
+                console.log("yPos is more than 55: ", yPos);
+            } else if (velocity > 0) {
+                console.log(
+                    "yPos is more than panPos on last scroll: ",
+                    yPos,
+                    this._panPosOnLastScroll
+                );
+            }
+        }
+    }
+
+    _onDragItem = evt => {
+        // if (this._isMoving == false) {
+        //     return;
+        // }
+
+        // clearInterval(this._scrollItvlTimer);
+        let { y, velocityY } = evt.nativeEvent;
+
+        let yWithScrollOffset = y + this._scrollAmount;
+
+        // console.log(evt.nativeEvent.translationY);
+        let newPosTmp = Math.floor(yWithScrollOffset / 55);
+
+        // make sure newPosition is not > # of rows
+        newPosTmp = Math.min(this.props.data.length - 1, newPosTmp);
+
+        // make sure newPosition is not < 0
+        newPosTmp = Math.max(newPosTmp, 0);
+
+        this._scrollIfNeededAndAllowed(y, velocityY);
+
+        if (newPosTmp != this.movingItem.currPos) {
+            clearInterval(this._scrollItvlTimer);
+
+            let rowsTraveled = Math.abs(this.movingItem.currPos - newPosTmp);
+            console.log("[DEBUG] rowsTraveled", rowsTraveled);
+            let direction;
+
+            // TODO: WHY did I add this Min check?
+            let topMostRowToAnimate = Math.min(
+                newPosTmp,
+                this.movingItem.currPos + 1
+            );
+            console.log("[DEBUG] topMostRowToAnimate", topMostRowToAnimate);
+            let rowsToAnimate = [];
+            // console.log(
+            //     "[DEBUG] relativePos",
+            //     relativePos
+            // );
+            if (newPosTmp > this.movingItem.currPos) {
+                direction = "top";
+
+                rowsToAnimate = Array.from(
+                    { length: rowsTraveled },
+                    (v, k) => k + topMostRowToAnimate
+                );
+            } else {
+                direction = "bottom";
+
+                // Create an array of incremental digits, starting at topMostRowToAnimate, of (this.movingItem.currPos - i) elements
+                rowsToAnimate = Array.from(
+                    { length: rowsTraveled },
+                    (v, k) => k + topMostRowToAnimate
+                );
+            }
+
+            this.movingItem.setPosition(newPosTmp);
+
+            console.log(
+                "[DEBUG] New this.movingItem.currPos ",
+                this.movingItem.currPos
+            );
+
+            this.animateMovables(rowsToAnimate, direction);
+
+            this.updateDraggedRowOrder();
+
+            // this._scrollItvlTimer = setInterval(
+            //     () => {
+            //         this._scrollIfNeededAndAllowed(
+            //             translationY,
+            //         );
+            //     },
+            //     1000
+            // );
+        }
+    };
 
     render() {
         // console.debug("Render TaskList");
@@ -295,6 +455,8 @@ class TaskList extends React.Component {
 
         let { onSnapTask, ...other } = this.props;
 
+        let useGestureHandler = this.movingItem != null;
+
         // console.log('alarmTasks', alarmTasks);
         // console.log("taskList", this.props.data);
         // console.log("tasksArr in task-list", tasksArr);
@@ -304,112 +466,209 @@ class TaskList extends React.Component {
                 onPressIn={this.props.closeTaskRows}
             >
                 {/* This wrapper view is required for the TouchableWithoutFeedback to work within the TaskArea. */}
-                <View
-                    style={[
-                        {
-                            flex: 1,
-                            alignContent: "stretch"
-                        },
-                        this.props.tlContainerStyle
-                    ]}
-                    ref={elm => (this._flContainer = elm)}
-                    collapsable={false}
-                    onLayout={e => this.onLayout(e)}
-                >
-                    <Animated.FlatList
-                        ref={elm => (this._scrollView = elm)}
-                        data={filteredAlarmTasks || alarmTasks}
-                        renderItem={this._renderItem.bind(this, taskCount)} // pass in # of tasks showing to renderItem
-                        keyExtractor={this._keyExtractor}
-                        // scrollPercent={5}
-                        // onMoveEnd={moveInfo => {
-                        //     // console.log("'this' now: " + this.constructor.name);
-                        //     // console.log("moveInfo.from", moveInfo.from);
-                        //     // console.log("moveInfo.to", moveInfo.to);
-                        //     // console.log("row", moveInfo.row);
-                        //     // console.log(
-                        //     //     "tasksArr in onRowMoved callback in task-list",
-                        //     //     tasksArr
-                        //     // );
-                        //     this.props.onReorderTasks(
-                        //         alarmTasks,
-                        //         filterMap,
-                        //         moveInfo.data.id,
-                        //         moveInfo.from,
-                        //         moveInfo.to
-                        //     );
-                        // }}
-                        bounces={false}
-                        onScroll={Animated.event(
+                <View>
+                    <PanGestureHandler
+                        style={[
+                            {
+                                flex: 1,
+                                alignContent: "stretch"
+                            }
+                            // this.props.tlContainerStyle
+                        ]}
+                        // ref={el => (this.startTimesPanRef = el)}
+                        minDist={useGestureHandler ? 5 : 2000}
+                        failOffsetY={
+                            useGestureHandler ? [-20000, 20000] : [-2, 2]
+                        }
+                        onHandlerStateChange={({ nativeEvent }) => {
+                            // console.log("nativeEvent.state", nativeEvent.state);
+                            if (nativeEvent.state == State.BEGAN) {
+                                console.log(
+                                    "================= PanGestureHandler - State.BEGAN ================="
+                                );
+
+                                // this._panAnim.setValue(0);
+                            } else if (nativeEvent.state == State.END) {
+                                console.log(
+                                    "================= PanGestureHandler - State.END ================="
+                                );
+                                //     clearInterval(this._scrollItvlTimer);
+
+                                let { task } = this.movingItem;
+                                console.log("[DEBUG] From: ", task.order);
+                                console.log(
+                                    "[DEBUG] To: ",
+                                    this.movingItem.currPos
+                                );
+
+                                let relativeMovement =
+                                    this.movingItem.currPos - task.order;
+
+                                console.log(
+                                    "[DEBUG] relativeMovement: ",
+                                    relativeMovement
+                                );
+                                console.log(
+                                    "[DEBUG] _scrollDuringMove",
+                                    this._scrollDuringMove
+                                );
+
+                                Animated.timing(this._panAnim, {
+                                    toValue:
+                                        relativeMovement * 55 -
+                                        this._scrollDuringMove,
+                                    duration: 350,
+                                    easing: Easing.ease,
+                                    useNativeDriver: true
+                                }).start(() => {
+                                    this._panAnim.setValue(0);
+                                    this.onMoveEnded({
+                                        data: task,
+                                        from: task.order,
+                                        to: this.movingItem.currPos
+                                    });
+                                });
+                                // this._isMoving = false;
+                            } else if (nativeEvent.state == State.FAILED) {
+                                console.log("PanGestureHandler - State.FAILED");
+                            } else {
+                                console.log(
+                                    "PanGestureHandler - State: ",
+                                    nativeEvent.state
+                                );
+                            }
+                        }}
+                        onGestureEvent={Animated.event(
                             [
                                 {
                                     nativeEvent: {
-                                        contentOffset: { y: this.scrollAnim }
+                                        translationY: this._panAnim
                                     }
                                 }
                             ],
                             {
                                 useNativeDriver: true,
-                                listener: ({ nativeEvent }) =>
-                                    (this._scrollAmount =
-                                        nativeEvent.contentOffset.y)
+                                listener: this._onDragItem
                             }
                         )}
-                        scrollEventThrottle={16}
-                        // scrollEnabled={!this.props.isSlidingTask}
-                        // scrollEnabled={true}
-                        contentContainerStyle={contContainerStyle}
-                        ListEmptyComponent={
-                            <View
-                                style={{
-                                    alignSelf: "stretch",
-                                    alignContent: "stretch",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    flex: 1
-                                }}
-                            >
-                                <Text
+                        // enabled={useGestureHandler}
+                    >
+                        <Animated.FlatList
+                            ref={elm => (this._scrollView = elm)}
+                            data={filteredAlarmTasks || alarmTasks}
+                            renderItem={this._renderItem.bind(this, taskCount)} // pass in # of tasks showing to renderItem
+                            keyExtractor={this._keyExtractor}
+                            // scrollPercent={5}
+                            // onMoveEnd={moveInfo => {
+                            //     // console.log("'this' now: " + this.constructor.name);
+                            //     // console.log("moveInfo.from", moveInfo.from);
+                            //     // console.log("moveInfo.to", moveInfo.to);
+                            //     // console.log("row", moveInfo.row);
+                            //     // console.log(
+                            //     //     "tasksArr in onRowMoved callback in task-list",
+                            //     //     tasksArr
+                            //     // );
+                            //     this.props.onReorderTasks(
+                            //         alarmTasks,
+                            //         filterMap,
+                            //         moveInfo.data.id,
+                            //         moveInfo.from,
+                            //         moveInfo.to
+                            //     );
+                            // }}
+                            bounces={false}
+                            onScroll={Animated.event(
+                                [
+                                    {
+                                        nativeEvent: {
+                                            contentOffset: {
+                                                y: this._scrollAnim
+                                            }
+                                        }
+                                    }
+                                ],
+                                {
+                                    useNativeDriver: true,
+                                    listener: ({ nativeEvent }) =>
+                                        (this._scrollAmount =
+                                            nativeEvent.contentOffset.y)
+                                }
+                            )}
+                            scrollEventThrottle={16}
+                            scrollEnabled={this.movingItem == null}
+                            // scrollEnabled={true}
+                            contentContainerStyle={contContainerStyle}
+                            ListEmptyComponent={
+                                <View
                                     style={{
-                                        fontSize: 16,
-                                        color: Colors.backgroundBright,
-                                        fontFamily: "Gurmukhi MN",
-                                        letterSpacing: 0.5
+                                        alignSelf: "stretch",
+                                        alignContent: "stretch",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        flex: 1
                                     }}
                                 >
-                                    No tasks yet...
-                                </Text>
-                            </View>
-                        }
-                        getItemLayout={(data, index) => {
-                            return {
-                                length: 55,
-                                offset: 55 * index,
-                                index
-                            };
-                        }}
-                    />
-                    {this.movingItem != null && (
-                        <TaskItem
-                            // other includes 'willStartMove' cb, 'onPressItem' callback, onPressItemCheckBox callback
-                            {...other}
-                            willStartMove={this._onWillStartMove}
-                            isMoving={true}
-                            data={this.movingItem}
-                            id={this.movingItem.id}
-                            onSnapTask={this._onSnapTask.bind(
-                                this,
-                                this.movingItem,
-                                0
-                            )} // FIXME: 0 should be index of row...
-                            closed={true}
-                            style={{
-                                position: "absolute",
-                                top: this.movingItem.order * 55
+                                    <Text
+                                        style={{
+                                            fontSize: 16,
+                                            color: Colors.backgroundBright,
+                                            fontFamily: "Gurmukhi MN",
+                                            letterSpacing: 0.5
+                                        }}
+                                    >
+                                        No tasks yet...
+                                    </Text>
+                                </View>
+                            }
+                            getItemLayout={(data, index) => {
+                                return {
+                                    length: 55,
+                                    offset: 55 * index,
+                                    index
+                                };
                             }}
-                            scrollOffset={this.scrollAnim}
-                            moveItemType={MOVING_ITEM_TYPES.COPY}
                         />
+                    </PanGestureHandler>
+
+                    {this.movingItem != null && (
+                        <Animated.View
+                            style={[
+                                {
+                                    top:
+                                        this.movingItem.task.order * 55 -
+                                        this._scrollAmount,
+                                    position: "absolute",
+                                    transform: [
+                                        {
+                                            translateY: this._panAnim
+                                            // translateY: Animated.subtract(
+                                            //     this._panAnim,
+                                            //     this._scrollAnim
+                                            // )
+                                        }
+                                    ]
+                                }
+                            ]}
+                            pointerEvents={"none"}
+                        >
+                            <TaskItem
+                                // other includes 'willStartMove' cb, 'onPressItem' callback, onPressItemCheckBox callback
+                                {...other}
+                                willStartMove={this._onWillStartMove}
+                                isMoving={true}
+                                data={this.movingItem.task}
+                                id={this.movingItem.task.id}
+                                onSnapTask={this._onSnapTask.bind(
+                                    this,
+                                    this.movingItem,
+                                    0
+                                )} // FIXME: 0 should be index of row...
+                                closed={true}
+                                scrollAnimVal={this._scrollAnim}
+                                panAnimVal={this._panAnim}
+                                moveItemType={MOVING_ITEM_TYPES.COPY}
+                            />
+                        </Animated.View>
                     )}
                 </View>
             </TouchableWithoutFeedback>
