@@ -19,7 +19,6 @@ import {
 import Interactable from "react-native-interactable";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import EvilIcon from "react-native-vector-icons/EvilIcons";
-import { PanGestureHandler, State } from "react-native-gesture-handler";
 
 import DurationText from "./duration-text";
 
@@ -78,7 +77,8 @@ class TaskItem extends React.Component {
             isEditingTasks: false,
             closed: true,
             taskDurVisible: props.durationsVisible,
-            moveItemType: MOVING_ITEM_TYPES.NONE
+            moveItemType: MOVING_ITEM_TYPES.NONE,
+            index: props.index
         };
 
         this.currArea = props.data.order;
@@ -148,7 +148,7 @@ class TaskItem extends React.Component {
             // if the move has already started, don't navigate. Instead just end the move
             this.props.moveEnded({
                 data: task,
-                from: task.order,
+                from: this.props.index,
                 to: this.currArea
             });
         } else if (!this.props.disabled) {
@@ -173,7 +173,7 @@ class TaskItem extends React.Component {
 
     _onLongPress = initialVal => {
         console.log("_onLongPress task");
-        this.props.willStartMove(this.props.data);
+        this.props.willStartMove(this.props.data, this.state.index);
         this._isMoving = true;
         // this._scrollOffsetAtMoveStart = this.props.scrollOffset._value;
 
@@ -257,51 +257,12 @@ class TaskItem extends React.Component {
                     this.currArea = i;
                     // Animate the corresponding row 55 points in the correct direction
                     this.props.animateMovables(rowsToAnimate, direction);
-                    this.props.updateDraggedRowOrder(this.props.data.order, i);
+                    this.props.updateDraggedRowOrder(this.state.index, i);
                     break;
                 }
             }
         }
     };
-
-    buildAlertAreas(initOrder, taskCount) {
-        let areas = [];
-        // areas.push({ id: "row0", influenceArea: { top: 0, bottom: 28 } });
-
-        const offset = 28; // pixel offset to make animation start half-way between items
-
-        // calculate the top-most position in the task list, relative to the position of initOrder (which is 0)
-        let relativePos = -55 * initOrder;
-
-        for (let i = 0; i < taskCount; i++) {
-            let posWithOffset = relativePos - 28;
-            areas.push({
-                id: "row" + i,
-                influenceArea: {
-                    top: posWithOffset,
-                    bottom: posWithOffset + 55
-                }
-            });
-            relativePos += 55;
-        }
-
-        return areas;
-    }
-
-    buildSnapPoints(initOrder, taskCount) {
-        let areas = [];
-        // areas.push({ id: "row0", influenceArea: { top: 0, bottom: 28 } });
-
-        // calculate the top-most position in the task list, relative to the position of initOrder (which is 0)
-        let relativePos = -55 * initOrder;
-
-        for (let i = 0; i < taskCount; i++) {
-            areas.push({ y: relativePos, id: i + "" });
-            relativePos += 55;
-        }
-
-        return areas;
-    }
 
     componentWillReceiveProps(nextProps) {
         // console.log("componentWillReceiveProps: nextProps", nextProps);
@@ -316,7 +277,7 @@ class TaskItem extends React.Component {
             }, 0);
         }
 
-        this.currArea = nextProps.data.order; // NOTE: this is vital
+        this.currArea = nextProps.index; // NOTE: this is vital
 
         this.setState({
             data: {
@@ -329,7 +290,8 @@ class TaskItem extends React.Component {
             isEditingTasks: nextProps.isEditingTasks,
             closed: nextProps.closed,
             taskDurVisible: nextProps.durationsVisible,
-            moveItemType: nextProps.moveItemType
+            moveItemType: nextProps.moveItemType,
+            index: nextProps.index
         });
     }
 
@@ -345,14 +307,16 @@ class TaskItem extends React.Component {
             isEditingTasks,
             closed,
             taskDurVisible,
-            moveItemType
+            moveItemType,
+            index
             // order // // NOTE: Not used, but leaving in for convenience in case I want to display order for debugging
         } = this.state;
 
         let {
             enabled: nEnabled,
             task: nTask,
-            duration: nDuration
+            duration: nDuration,
+            index: nIndex
             // startTime: nStartTime
             // order: nOrder // NOTE: Not used, but leaving in for convenience in case I want to display order for debugging
         } = nextProps.data;
@@ -371,7 +335,8 @@ class TaskItem extends React.Component {
             nIsEditingTasks == isEditingTasks &&
             nClosed == closed &&
             durationsVisible == taskDurVisible &&
-            nMoveItemType == moveItemType
+            nMoveItemType == moveItemType &&
+            nIndex == index
             // nOrder == order // NOTE: Not used, but leaving in for convenience in case I want to display order for debugging
         ) {
             // console.log("Not rendering task-item");
@@ -468,10 +433,15 @@ class TaskItem extends React.Component {
                         // ellipsizeMode="tail"
                         selectable={false}
                     >
-                        {"(" +
-                            this.props.data.order +
-                            ") " +
-                            this.props.data.task.name}
+                        <Text style={{ fontSize: 14 }}>
+                            {this.props.data.order}
+                        </Text>
+                        <Text style={{ fontSize: 22, lineHeight: 22 }}>
+                            {"   (" +
+                                this.state.index +
+                                ") " +
+                                this.props.data.task.name}
+                        </Text>
                     </Text>
                     <View
                         style={[
@@ -704,36 +674,19 @@ class TaskItem extends React.Component {
 
         if (moveItemType == MOVING_ITEM_TYPES.HANDLE) {
             // DEV: remove forceHandleType
-            console.log("Rendering transparent handle item");
+            // console.log("Rendering transparent handle item");
             borderBottomColor = "transparent";
-            this.props.setMoveableAnim(null, this.props.data.order); // unused, but needed to fill the moveable array.
-
-            this._alertAreas = this.buildAlertAreas(
-                this.props.data.order,
-                this.props.taskCount
-            );
-
-            snapPoints = this.buildSnapPoints(
-                this.props.data.order,
-                this.props.taskCount
-            );
+            this.props.setMoveableAnim(null, this.state.index); // unused, but needed to fill the moveable array.
 
             extraStyle = { opacity: 0 };
             // extraStyle = { borderColor: "red", borderWidth: 2 }; // DEV:
             useGestureHandler = true;
         } else if (moveItemType == MOVING_ITEM_TYPES.COPY) {
             console.log("rendering overlying copy");
-            return this._renderCopyItem(
-                duration,
-                this.props.panAnimVal,
-                this.props.scrollAnimVal
-            );
+            return this._renderCopyItem(duration);
         } else if (moveItemType == MOVING_ITEM_TYPES.MOVEABLE) {
-            console.log("rendering move-able item");
-            this.props.setMoveableAnim(
-                this._moveableAnim,
-                this.props.data.order
-            );
+            // console.log("rendering move-able item");
+            this.props.setMoveableAnim(this._moveableAnim, this.state.index);
             return this._renderMovingItem(duration, this._moveableAnim);
         } else {
             // console.debug("Rendering standard TaskItem");

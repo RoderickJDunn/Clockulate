@@ -60,9 +60,11 @@ class MoveableRowHelper {
 class HandleRowHelper {
     task;
     currPos;
+    initOrder;
 
     constructor(task, currPos) {
         this.task = task;
+        this.initOrder = currPos;
         this.currPos = currPos;
     }
 
@@ -92,7 +94,10 @@ class TaskList extends React.Component {
     _panAnim = new Animated.Value(0);
     // _panPosOnLastScroll = 0;
     _scrollDuringMove = 0;
-    _taskCount = 0;
+    _taskCountTotal = 0; // all tasks, including hidden ones
+    _taskCount = 0; // excludes currently hidden tasks
+    filteredAlarmTasks = null;
+    hideDisabledTasks = false;
 
     constructor(props) {
         super(props);
@@ -101,6 +106,8 @@ class TaskList extends React.Component {
         });
 
         this._taskCount = props.data.length;
+        this._taskCountTotal = props.data.length;
+        this.hideDisabledTasks = props.hideDisabledTasks;
     }
 
     onLayout = e => {
@@ -118,10 +125,10 @@ class TaskList extends React.Component {
         }, 350);
     };
 
-    _onWillStartMove = item => {
+    _onWillStartMove = (item, index) => {
         // this._panPosOnLastScroll = 200; // TODO: MID-POINT height of container.
         this._scrollDuringMove = 0;
-        this.movingItem = new HandleRowHelper(item, item.order);
+        this.movingItem = new HandleRowHelper(item, index);
         this.props.willStartMove();
     };
 
@@ -150,8 +157,8 @@ class TaskList extends React.Component {
             //     this._scrollAmount + amount
             // );
             console.log(
-                "this.props.data.length * 55 - contHeight",
-                this.props.data.length * 55 - contHeight
+                "this._taskCount * 55 - contHeight",
+                this._taskCount * 55 - contHeight
             );
 
             console.log(
@@ -171,20 +178,17 @@ class TaskList extends React.Component {
             // make sure we're not trying to scroll past the end of the list
             else if (
                 amount + this._scrollAmount >
-                this.props.data.length * 55 - contHeight
+                this._taskCount * 55 - contHeight
             ) {
                 console.log(
-                    "[DEBUG] Trying to scroll past bottom (this.props.data.length * 55 - contHeight)."
+                    "[DEBUG] Trying to scroll past bottom (this._taskCount * 55 - contHeight)."
                 );
                 console.log(
                     "[DEBUG] Bottom: ",
-                    this.props.data.length * 55 - contHeight
+                    this._taskCount * 55 - contHeight
                 );
 
-                amount =
-                    this.props.data.length * 55 -
-                    contHeight -
-                    this._scrollAmount;
+                amount = this._taskCount * 55 - contHeight - this._scrollAmount;
                 //
             }
 
@@ -208,7 +212,7 @@ class TaskList extends React.Component {
 
             this._resetScrollLimiter();
 
-            if (amount != 0) {
+            if (Math.abs(amount) > 1) {
                 this._autoscrollTimer = setTimeout(() => {
                     console.log("CALLBACK: Autoscroll direction: ", direction);
                     let newPosTmp = this.movingItem.currPos + direction;
@@ -216,7 +220,7 @@ class TaskList extends React.Component {
                     if (
                         this.requestAutoscroll(direction) != 0 &&
                         newPosTmp >= 0 &&
-                        newPosTmp < this.props.data.length
+                        newPosTmp < this._taskCount
                     ) {
                         this._refreshAndAnimate(newPosTmp);
                     }
@@ -231,7 +235,7 @@ class TaskList extends React.Component {
     };
 
     updateDraggedRowOrder = () => {
-        let initialOrder = this.movingItem.task.order;
+        let initialOrder = this.movingItem.initOrder;
         let newPosition = this.movingItem.currPos;
         console.log("index, newPosition", initialOrder, newPosition);
         this.moveableAnims[initialOrder].order = newPosition;
@@ -287,7 +291,7 @@ class TaskList extends React.Component {
 
     _keyExtractor = (item, index) => item.id;
 
-    _renderItem = (taskCount, { item, index }) => {
+    _renderItem = ({ item, index }) => {
         // console.log("index", index);
         // console.log("taskCount", taskCount);
         // console.log("item", item);
@@ -324,12 +328,11 @@ class TaskList extends React.Component {
                 disabled={this.props.isEditingTasks}
                 setMoveableAnim={this.setMoveableAnim}
                 animateMovables={this.animateMovables}
-                taskCount={taskCount}
                 moveEnded={this.onMoveEnded}
                 moveItemType={moveType}
                 updateDraggedRowOrder={this.updateDraggedRowOrder}
-                _scrollAnimVal={this._scrollAnim}
                 panAnimVal={this._panAnim}
+                index={index} // required, since (order != index) if any items are being hidden
                 // containerDimensions={this.props.containerDimensions}
                 // shouldStartMove={move}
                 // shouldEndMove={moveEnd}
@@ -460,7 +463,7 @@ class TaskList extends React.Component {
         let newPosTmp = Math.floor(yWithScrollOffset / 55);
 
         // make sure newPosition is not > # of rows
-        newPosTmp = Math.min(this.props.data.length - 1, newPosTmp);
+        newPosTmp = Math.min(this._taskCount - 1, newPosTmp);
 
         // make sure newPosition is not < 0
         newPosTmp = Math.max(newPosTmp, 0);
@@ -470,21 +473,70 @@ class TaskList extends React.Component {
         }
     };
 
+    updateFilteredTasks = nextProps => {
+        let alarmTasks = nextProps.data;
+        this.filteredAlarmTasks = nextProps.hideDisabledTasks
+            ? nextProps.data.filtered("enabled == true")
+            : null;
+
+        if (this.filteredAlarmTasks) {
+            this.filterMap = this.filteredAlarmTasks.map(aTask => {
+                return aTask.order;
+            });
+        } else {
+            this.filterMap = null;
+        }
+    };
+
     componentWillReceiveProps(nextProps) {
-        if (this._taskCount > nextProps.data.length) {
+        let prevVisibleTasksCount = this.hideDisabledTasks
+            ? this.filteredAlarmTasks.length
+            : nextProps.data.length;
+
+        this.updateFilteredTasks(nextProps);
+
+        let nextVisibleTasksCount = nextProps.hideDisabledTasks
+            ? this.filteredAlarmTasks.length
+            : nextProps.data.length;
+
+        if (
+            this.hideDisabledTasks == false &&
+            nextProps.hideDisabledTasks == true
+        ) {
+            // user has just pressed hideDisabledTasks (we are now hiding disabled tasks)
+            // we need to call scroll since it seems Native does not handle the change in content size gracefully
+            //  ie) otherwise there will be a gap at the bottom of the list until user manually scrolls.
+            // NOTE: Again, this delay is necessary because Native doesn't know yet that there is about to be
+            //          fewer items on the list.
+            setTimeout(() => {
+                this._scrollView.getNode().scrollToOffset({
+                    offset: this._scrollAmount
+                });
+            }, 200);
+
+            // this._scrollView.getNode().scrollToOffset({
+            //     offset:
+            //         this._scrollAmount -
+            //         (prevVisibleTasksCount - nextVisibleTasksCount) * 55
+            // });
+        }
+
+        if (this._taskCountTotal > nextProps.data.length) {
             // taskItem was deleted
             console.log("A taskItem was deleted");
             this._scrollView.getNode().scrollToOffset({
                 offset: this._scrollAmount - 55
             });
-        } else if (this._taskCount < nextProps.data.length) {
+        } else if (this._taskCountTotal < nextProps.data.length) {
             // taskItem was added
             console.log("A taskItem was added");
             this._fScrollToEnd = true;
         } else {
             console.log("No taskItems were added or deleted");
         }
-        this._taskCount = nextProps.data.length;
+        this._taskCount = nextVisibleTasksCount;
+        this._taskCountTotal = nextProps.data.length;
+        this._hideDisabledTasks = nextProps.hideDisabledTasks;
     }
 
     componentDidUpdate() {
@@ -503,29 +555,19 @@ class TaskList extends React.Component {
 
     render() {
         console.debug("Render TaskList");
-        console.debug("taskCount: ", this.props.data.length);
+        console.debug("taskCount (excluding hidden rows): ", this._taskCount);
         let contContainerStyle = styles.contContainerStyleNotEmpty;
 
         let alarmTasks = this.props.data;
-        let taskCount;
-        let filteredAlarmTasks = this.props.hideDisabledTasks
-            ? this.props.data.filtered("enabled == true")
-            : null;
 
-        this.filterMap = null;
-        if (filteredAlarmTasks) {
-            this.filterMap = filteredAlarmTasks.map(aTask => {
-                return aTask.order;
-            });
-            if (filteredAlarmTasks.length == 0) {
+        if (this.filteredAlarmTasks) {
+            if (this.filteredAlarmTasks.length == 0) {
                 contContainerStyle = styles.contContainerStyleEmpty;
             }
-            taskCount = filteredAlarmTasks.length;
         } else {
             if (alarmTasks.length == 0) {
                 contContainerStyle = styles.contContainerStyleEmpty;
             }
-            taskCount = alarmTasks.length;
         }
         console.log("this.movingItem", this.movingItem);
 
@@ -570,15 +612,18 @@ class TaskList extends React.Component {
                                 );
                                 //     clearInterval(this._scrollItvlTimer);
 
-                                let { task } = this.movingItem;
-                                console.log("[DEBUG] From: ", task.order);
+                                console.log(
+                                    "[DEBUG] From: ",
+                                    this.movingItem.initOrder
+                                );
                                 console.log(
                                     "[DEBUG] To: ",
                                     this.movingItem.currPos
                                 );
 
                                 let relativeMovement =
-                                    this.movingItem.currPos - task.order;
+                                    this.movingItem.currPos -
+                                    this.movingItem.initOrder;
 
                                 console.log(
                                     "[DEBUG] relativeMovement: ",
@@ -601,8 +646,8 @@ class TaskList extends React.Component {
                                 }).start(() => {
                                     this._panAnim.setValue(0);
                                     this.onMoveEnded({
-                                        data: task,
-                                        from: task.order,
+                                        data: this.movingItem.task,
+                                        from: this.movingItem.initOrder,
                                         to: this.movingItem.currPos
                                     });
                                 });
@@ -633,8 +678,8 @@ class TaskList extends React.Component {
                     >
                         <Animated.FlatList
                             ref={elm => (this._scrollView = elm)}
-                            data={filteredAlarmTasks || alarmTasks}
-                            renderItem={this._renderItem.bind(this, taskCount)} // pass in # of tasks showing to renderItem
+                            data={this.filteredAlarmTasks || alarmTasks}
+                            renderItem={this._renderItem.bind(this)} // pass in # of tasks showing to renderItem
                             keyExtractor={this._keyExtractor}
                             // scrollPercent={5}
                             // onMoveEnd={moveInfo => {
@@ -713,7 +758,7 @@ class TaskList extends React.Component {
                             style={[
                                 {
                                     top:
-                                        this.movingItem.task.order * 55 -
+                                        this.movingItem.initOrder * 55 -
                                         this._scrollAmount,
                                     position: "absolute",
                                     transform: [
@@ -745,6 +790,7 @@ class TaskList extends React.Component {
                                 scrollAnimVal={this._scrollAnim}
                                 panAnimVal={this._panAnim}
                                 moveItemType={MOVING_ITEM_TYPES.COPY}
+                                index={this.movingItem.initOrder}
                             />
                         </Animated.View>
                     )}
