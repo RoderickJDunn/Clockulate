@@ -189,6 +189,7 @@ class AlarmDetail extends Component {
 
     tskListDimsTLView = {
         width: SCREEN_WIDTH,
+        // TODO: FIX height calculation
         height:
             SCREEN_HEIGHT *
                 NON_CLOCK_HEIGHT_FACTOR *
@@ -202,10 +203,11 @@ class AlarmDetail extends Component {
         width: SCREEN_WIDTH,
         height:
             SCREEN_HEIGHT *
-            NON_CLOCK_HEIGHT_FACTOR *
-            0.81 * // this is equivalent to 1 / 1.22 (since NON_CLOCK is made of up of 2 flex areas: =0.22, and =1)
+                NON_CLOCK_HEIGHT_FACTOR *
+                (1 / (FIELDS_AREA_FLEX_FACTOR + 1)) *
                 TASK_AREA_AUTO_VIEW_FLEX_FACTOR -
-            scaleByFactor(50, 0.6),
+            scaleByFactor(50, 0.6) -
+            ifIphoneX(34, 0),
         pageX: 0,
         pageY:
             Header.HEIGHT +

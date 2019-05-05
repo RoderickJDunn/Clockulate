@@ -18,10 +18,6 @@ import TaskItem, { MOVING_ITEM_TYPES } from "./task-item";
 import Colors from "../styles/colors";
 import AnimatedPulse from "./anim-pulse";
 
-const CONTAINER_HEIGHT_DEV = 360; // DEV:
-
-const BOTTOM_SCROLL_THRESH = CONTAINER_HEIGHT_DEV - 55;
-
 class MoveableRowHelper {
     animatedValue;
     order;
@@ -141,6 +137,7 @@ class TaskList extends React.Component {
             console.log("this._scrollAmount", this._scrollAmount);
 
             this._canScroll = false;
+            let contHeight = this.props.containerDimensions.height;
             let amount = direction * 55;
             let max;
 
@@ -150,8 +147,8 @@ class TaskList extends React.Component {
             //     this._scrollAmount + amount
             // );
             console.log(
-                "this.props.data.length * 55 - CONTAINER_HEIGHT_DEV",
-                this.props.data.length * 55 - CONTAINER_HEIGHT_DEV
+                "this.props.data.length * 55 - contHeight",
+                this.props.data.length * 55 - contHeight
             );
 
             console.log(
@@ -171,19 +168,19 @@ class TaskList extends React.Component {
             // make sure we're not trying to scroll past the end of the list
             else if (
                 amount + this._scrollAmount >
-                this.props.data.length * 55 - CONTAINER_HEIGHT_DEV
+                this.props.data.length * 55 - contHeight
             ) {
                 console.log(
-                    "[DEBUG] Trying to scroll past bottom (this.props.data.length * 55 - CONTAINER_HEIGHT_DEV)."
+                    "[DEBUG] Trying to scroll past bottom (this.props.data.length * 55 - contHeight)."
                 );
                 console.log(
                     "[DEBUG] Bottom: ",
-                    this.props.data.length * 55 - CONTAINER_HEIGHT_DEV
+                    this.props.data.length * 55 - contHeight
                 );
 
                 amount =
                     this.props.data.length * 55 -
-                    CONTAINER_HEIGHT_DEV -
+                    contHeight -
                     this._scrollAmount;
                 //
             }
@@ -330,7 +327,7 @@ class TaskList extends React.Component {
                 updateDraggedRowOrder={this.updateDraggedRowOrder}
                 _scrollAnimVal={this._scrollAnim}
                 panAnimVal={this._panAnim}
-                containerDimensions={this.props.containerDimensions}
+                // containerDimensions={this.props.containerDimensions}
                 // shouldStartMove={move}
                 // shouldEndMove={moveEnd}
             />
@@ -355,7 +352,6 @@ class TaskList extends React.Component {
         }
 
         let { height } = this.props.containerDimensions;
-        height = CONTAINER_HEIGHT_DEV; // DEV:
         // check if the dragged item is at the bottom row of the current WINDOW of the flatlist
         // console.log("Container height", height);
         // console.log("vs. ", yPos);
@@ -511,7 +507,7 @@ class TaskList extends React.Component {
                 /* No Styling since TouchableWithoutFeedback just ignores the style prop */
                 onPressIn={this.props.closeTaskRows}
             >
-                {/* This wrapper view is required for the TouchableWithoutFeedback to work within the TaskArea. */}
+                {/* This wrapper view is required for the TouchableWithoutFeedback to work within the TaskArea, and to give bottom SafeArea space */}
                 <View style={{ flex: 1 }}>
                     <PanGestureHandler
                         style={[
