@@ -193,8 +193,10 @@ class AlarmDetail extends Component {
         height:
             SCREEN_HEIGHT *
                 NON_CLOCK_HEIGHT_FACTOR *
+                (1 / (FIELDS_AREA_FLEX_FACTOR + 1)) *
                 TASK_AREA_TL_VIEW_FLEX_FACTOR -
-            scaleByFactor(50, 0.6),
+            scaleByFactor(50, 0.6) -
+            ifIphoneX(34, 0),
         pageX: 0,
         pageY: Header.HEIGHT + ifIphoneX(20, 0) + 4 + scaleByFactor(50, 0.6)
     };
