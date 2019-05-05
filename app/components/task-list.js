@@ -18,7 +18,10 @@ import TaskItem, { MOVING_ITEM_TYPES } from "./task-item";
 import Colors from "../styles/colors";
 import AnimatedPulse from "./anim-pulse";
 
-const CONTAINER_HEIGHT_DEV = 400; // DEV:
+const CONTAINER_HEIGHT_DEV = 360; // DEV:
+
+const BOTTOM_SCROLL_THRESH = CONTAINER_HEIGHT_DEV - 55;
+
 class MoveableRowHelper {
     animatedValue;
     order;
@@ -85,6 +88,7 @@ class TaskList extends React.Component {
     moveableAnims = [];
     filterMap = null;
     _scrollAnim = new Animated.Value(0);
+    _scrollLimitTimer = null;
     _autoscrollTimer = null;
     _canScroll = true;
     _containerHeight = 0;
@@ -104,14 +108,15 @@ class TaskList extends React.Component {
         console.log("onLayout");
     };
 
-    _resetAutoscrollTimer = () => {
-        if (this._autoscrollTimer) {
-            clearTimeout(this._autoscrollTimer);
+    _resetScrollLimiter = () => {
+        if (this._scrollLimitTimer) {
+            clearTimeout(this._scrollLimitTimer);
         }
 
-        this._autoscrollTimer = setTimeout(() => {
+        this._scrollLimitTimer = setTimeout(() => {
+            console.log("Now allowed to scroll!");
             this._canScroll = true;
-        }, 1000);
+        }, 350);
     };
 
     _onWillStartMove = item => {
@@ -125,8 +130,6 @@ class TaskList extends React.Component {
         this.moveableAnims.push(new MoveableRowHelper(animVal, idx));
     };
 
-    // TODO: Handle scrolling other direction
-
     /**
      * Scrolls Flatlist only if autoscrollTimer has expired.
      * Returns the number of points actually scrolled.
@@ -134,34 +137,67 @@ class TaskList extends React.Component {
      */
     requestAutoscroll = direction => {
         if (this._canScroll == true) {
+            console.log("Scroll direction", direction);
+            console.log("this._scrollAmount", this._scrollAmount);
+
             this._canScroll = false;
             let amount = direction * 55;
             let max;
+
+            console.log("Initial amount", amount);
+            // console.log(
+            //     "[DEBUG] Auto-scrolling to ? ",
+            //     this._scrollAmount + amount
+            // );
             console.log(
-                "[DEBUG] Auto-scrolling to ? ",
-                this._scrollAmount + amount
+                "this.props.data.length * 55 - CONTAINER_HEIGHT_DEV",
+                this.props.data.length * 55 - CONTAINER_HEIGHT_DEV
+            );
+
+            console.log(
+                "amount + this._scrollAmount",
+                amount + this._scrollAmount
             );
 
             // make sure we're not trying to scroll past 0 (start of list)
             if (amount + this._scrollAmount < 0) {
                 amount = -this._scrollAmount;
+                console.log("[DEBUG] Trying to scroll past top (0).");
+                console.log(
+                    "[DEBUG] Setting amount to -this.scrollAmount: ",
+                    this._scrollAmount
+                );
             }
             // make sure we're not trying to scroll past the end of the list
             else if (
                 amount + this._scrollAmount >
                 this.props.data.length * 55 - CONTAINER_HEIGHT_DEV
             ) {
+                console.log(
+                    "[DEBUG] Trying to scroll past bottom (this.props.data.length * 55 - CONTAINER_HEIGHT_DEV)."
+                );
+                console.log(
+                    "[DEBUG] Bottom: ",
+                    this.props.data.length * 55 - CONTAINER_HEIGHT_DEV
+                );
+
                 amount =
                     this.props.data.length * 55 -
                     CONTAINER_HEIGHT_DEV -
                     this._scrollAmount;
+                //
             }
 
-            console.log("Auto-scrolling to ", this._scrollAmount + amount);
+            console.log(
+                `Auto-scrolling by to ${amount} to`,
+                this._scrollAmount + amount
+            );
 
             this._scrollView.getNode().scrollToOffset({
                 offset: this._scrollAmount + amount
             });
+
+            console.log("Initial amount", amount);
 
             this._scrollDuringMove += amount; // TODO: Handle scrolling other direction
 
@@ -170,9 +206,25 @@ class TaskList extends React.Component {
                 this._scrollDuringMove
             );
 
-            this._resetAutoscrollTimer();
+            this._resetScrollLimiter();
 
+            if (amount != 0) {
+                this._autoscrollTimer = setTimeout(() => {
+                    console.log("CALLBACK: Autoscroll direction: ", direction);
+                    let newPosTmp = this.movingItem.currPos + direction;
+
+                    if (
+                        this.requestAutoscroll(direction) != 0 &&
+                        newPosTmp >= 0 &&
+                        newPosTmp < this.props.data.length
+                    ) {
+                        this._refreshAndAnimate(newPosTmp);
+                    }
+                }, 500);
+            }
             return amount;
+        } else {
+            console.log("ERROR: Can't scroll yet ... ");
         }
 
         return 0;
@@ -279,7 +331,6 @@ class TaskList extends React.Component {
                 _scrollAnimVal={this._scrollAnim}
                 panAnimVal={this._panAnim}
                 containerDimensions={this.props.containerDimensions}
-                requestAutoscroll={this.requestAutoscroll}
                 // shouldStartMove={move}
                 // shouldEndMove={moveEnd}
             />
@@ -295,82 +346,62 @@ class TaskList extends React.Component {
     }
 
     _scrollIfNeededAndAllowed(yPos, velocity) {
-        console.log("_scrollIfNeededAndAllowed");
+        console.log("\n\n");
+        console.log("---------- _scrollIfNeededAndAllowed ----------");
+
+        if (this._canScroll != true) {
+            console.log("Can't scroll yet");
+            return 0;
+        }
+
         let { height } = this.props.containerDimensions;
         height = CONTAINER_HEIGHT_DEV; // DEV:
         // check if the dragged item is at the bottom row of the current WINDOW of the flatlist
-        console.log("Container height", height);
-        console.log("vs. ", yPos);
-        console.log("velocity: ", velocity);
-        if (yPos >= height - 100 && velocity > 0) {
+        // console.log("Container height", height);
+        // console.log("vs. ", yPos);
+        // console.log("velocity: ", velocity);
+
+        clearInterval(this._autoscrollTimer);
+
+        if (yPos >= height - 55 && velocity > 0) {
             console.log("Requesting scroll DOWN!");
-            let scrolledBy = this.requestAutoscroll(1);
+            return this.requestAutoscroll(1);
 
             // if (scrolledBy != 0) {
             //     this._panPosOnLastScroll = yPos - (yPos % 55); // set to nearest lower multiple of row height
             // }
-        } /* else {
-            console.log("Not scrolling down... reason:");
+        } else {
+            console.log("xxx - Not scrolling down... reason:");
             if (yPos < height - 100) {
                 console.log(
-                    "yPos is less than height-120: ",
+                    "   yPos is less than height-120: ",
                     yPos,
                     height - 100
                 );
-            } else if (yPos < this._panPosOnLastScroll) {
-                console.log(
-                    "yPos is less than panPos on last scroll: ",
-                    yPos,
-                    this._panPosOnLastScroll
-                );
+            } else if (velocity < 0) {
+                console.log("   velocity less than 0: ", velocity);
             }
-        } */
+        }
 
         if (yPos <= 55 && velocity < 0) {
             console.log("Requesting scroll UP!");
-            let scrolledBy = this.requestAutoscroll(-1);
-
+            return this.requestAutoscroll(-1);
             // if (scrolledBy != 0) {
             //     this._panPosOnLastScroll = yPos + (yPos % 55); // set to nearest upper multiple of row height
             // }
         } else {
-            console.log("Not scrolling UP... reason:");
+            console.log("xxx - Not scrolling UP... reason:");
             if (yPos > 55) {
-                console.log("yPos is more than 55: ", yPos);
+                console.log("   yPos is more than 55: ", yPos);
             } else if (velocity > 0) {
-                console.log(
-                    "yPos is more than panPos on last scroll: ",
-                    yPos,
-                    this._panPosOnLastScroll
-                );
+                console.log("   velocity more than 0: ", velocity);
             }
         }
+        return 0;
     }
 
-    _onDragItem = evt => {
-        // if (this._isMoving == false) {
-        //     return;
-        // }
-
-        // clearInterval(this._scrollItvlTimer);
-        let { y, velocityY } = evt.nativeEvent;
-
-        let yWithScrollOffset = y + this._scrollAmount;
-
-        // console.log(evt.nativeEvent.translationY);
-        let newPosTmp = Math.floor(yWithScrollOffset / 55);
-
-        // make sure newPosition is not > # of rows
-        newPosTmp = Math.min(this.props.data.length - 1, newPosTmp);
-
-        // make sure newPosition is not < 0
-        newPosTmp = Math.max(newPosTmp, 0);
-
-        this._scrollIfNeededAndAllowed(y, velocityY);
-
+    _refreshAndAnimate(newPosTmp) {
         if (newPosTmp != this.movingItem.currPos) {
-            clearInterval(this._scrollItvlTimer);
-
             let rowsTraveled = Math.abs(this.movingItem.currPos - newPosTmp);
             console.log("[DEBUG] rowsTraveled", rowsTraveled);
             let direction;
@@ -413,21 +444,36 @@ class TaskList extends React.Component {
             this.animateMovables(rowsToAnimate, direction);
 
             this.updateDraggedRowOrder();
+        }
+    }
 
-            // this._scrollItvlTimer = setInterval(
-            //     () => {
-            //         this._scrollIfNeededAndAllowed(
-            //             translationY,
-            //         );
-            //     },
-            //     1000
-            // );
+    _onDragItem = evt => {
+        // if (this._isMoving == false) {
+        //     return;
+        // }
+
+        // clearInterval(this._scrollItvlTimer);
+        let { y, velocityY } = evt.nativeEvent;
+
+        let yWithScrollOffset = y + this._scrollAmount;
+
+        // console.log(evt.nativeEvent.translationY);
+        let newPosTmp = Math.floor(yWithScrollOffset / 55);
+
+        // make sure newPosition is not > # of rows
+        newPosTmp = Math.min(this.props.data.length - 1, newPosTmp);
+
+        // make sure newPosition is not < 0
+        newPosTmp = Math.max(newPosTmp, 0);
+
+        if (this._scrollIfNeededAndAllowed(y, velocityY) == 0) {
+            this._refreshAndAnimate(newPosTmp);
         }
     };
 
     render() {
-        // console.debug("Render TaskList");
-        // console.debug("props: ", this.props);
+        console.debug("Render TaskList");
+        console.debug("taskCount: ", this.props.data.length);
         let contContainerStyle = styles.contContainerStyleNotEmpty;
 
         let alarmTasks = this.props.data;
@@ -466,7 +512,7 @@ class TaskList extends React.Component {
                 onPressIn={this.props.closeTaskRows}
             >
                 {/* This wrapper view is required for the TouchableWithoutFeedback to work within the TaskArea. */}
-                <View>
+                <View style={{ flex: 1 }}>
                     <PanGestureHandler
                         style={[
                             {
@@ -512,6 +558,8 @@ class TaskList extends React.Component {
                                     "[DEBUG] _scrollDuringMove",
                                     this._scrollDuringMove
                                 );
+
+                                clearInterval(this._autoscrollTimer);
 
                                 Animated.timing(this._panAnim, {
                                     toValue:
