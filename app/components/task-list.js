@@ -92,12 +92,15 @@ class TaskList extends React.Component {
     _panAnim = new Animated.Value(0);
     // _panPosOnLastScroll = 0;
     _scrollDuringMove = 0;
+    _taskCount = 0;
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this._panAnim.addListener(({ value }) => {
             console.log("transform val: ", value);
         });
+
+        this._taskCount = props.data.length;
     }
 
     onLayout = e => {
@@ -466,6 +469,37 @@ class TaskList extends React.Component {
             this._refreshAndAnimate(newPosTmp);
         }
     };
+
+    componentWillReceiveProps(nextProps) {
+        if (this._taskCount > nextProps.data.length) {
+            // taskItem was deleted
+            console.log("A taskItem was deleted");
+            this._scrollView.getNode().scrollToOffset({
+                offset: this._scrollAmount - 55
+            });
+        } else if (this._taskCount < nextProps.data.length) {
+            // taskItem was added
+            console.log("A taskItem was added");
+            this._fScrollToEnd = true;
+        } else {
+            console.log("No taskItems were added or deleted");
+        }
+        this._taskCount = nextProps.data.length;
+    }
+
+    componentDidUpdate() {
+        if (this._fScrollToEnd) {
+            this._fScrollToEnd = false;
+
+            /* NOTE: For some reason delay is required in order for the newly added item to be included in the native 
+                calculation of what 'end' is equal to. In other words, give Native a few moments to register that there 
+                is a new item at the bottom, before calling scrollToEnd.
+            */
+            setTimeout(() => {
+                this._scrollView.getNode().scrollToEnd();
+            }, 300);
+        }
+    }
 
     render() {
         console.debug("Render TaskList");
