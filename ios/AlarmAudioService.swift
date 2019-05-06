@@ -105,8 +105,13 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
       
       //adding the notification to notification center
       UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
-   // }
+      
     }
+    
+    if let recorder = self.recorder {
+      recorder.abort()  // called so that temporary recording file(s) is deleted in case of crash. (It can become very large)
+    }
+    
     self.isRecording = false;
   }
   
@@ -224,11 +229,11 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
                 // Only set timer if the time is in the future. Its possible that this is called when app is re-opened, and therefore, the
                 //  alarm time could be in the past.
                 if timeTillAlm > 0 {
-                self.alarmTimer.invalidate()
-                // Audio initialization succeeded... set a timer for the time in alarmInfo, with callback of the function below (alarmDidTrigger). Set userInfo property of timer to sound file name.
-                DispatchQueue.main.async(execute: {
-                    self.alarmTimer = Timer.scheduledTimer(timeInterval: timeTillAlm, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
-                })
+                  self.alarmTimer.invalidate()
+                  // Audio initialization succeeded... set a timer for the time in alarmInfo, with callback of the function below (alarmDidTrigger). Set userInfo property of timer to sound file name.
+                  DispatchQueue.main.async(execute: {
+                      self.alarmTimer = Timer.scheduledTimer(timeInterval: timeTillAlm, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
+                  })
                 }
                 else {
                   // if Alarm time is in the past, trigger right away. Hopefully, the only way this situation would occurs
