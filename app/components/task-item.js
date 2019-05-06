@@ -383,15 +383,11 @@ class TaskItem extends React.Component {
                         this.pressInTimer = setTimeout(() => {
                             console.log("Long enough press!");
                             this._onLongPress();
-                        }, 650);
+                        }, 400);
                     }}
                     onPressOut={() => {
                         clearTimeout(this.pressInTimer);
                     }}
-                    // onLongPress={this._onLongPress.bind(this)}
-                    // onPressOut={() => {
-                    //     console.log("onPressOut");
-                    // }}
                 >
                     <TouchableOpacity
                         style={TaskItemStyle.checkbox}
