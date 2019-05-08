@@ -721,7 +721,7 @@ export default class SleepLogPage extends React.PureComponent {
         let { almInst } = this.props;
         let { playingDisturbance, activeSound } = this.state;
 
-        let timestamp;
+        let timestamp = " "; // NOTE: string with space by default, since otherwise playbackHandle becomes offset just before animation
         if (playingDisturbance) {
             let time = moment(playingDisturbance.time);
             timestamp = time.format("h:mm a (MMM-DD)");
