@@ -75,6 +75,118 @@ func print(_ items: Any...) {
     case ignoreAll
 }
 
+private class RotatingAudioRecorder {
+  var savingSamplesPerSecond = 22050
+  let fileCount = 2
+  let recorderDelegate : AVAudioRecorderDelegate
+  var activeRecorderId = 0
+  var recordSettings : [String : Int] = [:]
+  private var recordingTimeAccum = 0.0
+  var recordTime : Double {
+    get {
+      if let activeRec = self.audioRecorders[self.activeRecorderId] {
+          return recordingTimeAccum + activeRec.currentTime
+      }
+      else {
+        return 0.0
+      }
+    }
+  }
+  
+  fileprivate lazy var audioRecorders = [AVAudioRecorder?](repeating: nil, count: 2)
+
+  init(savingSamplesPerSecond: Int, recorderDelegate: AVAudioRecorderDelegate) {
+    self.savingSamplesPerSecond = savingSamplesPerSecond
+    self.recorderDelegate = recorderDelegate
+    
+    // USE kAudioFormatLinearPCM
+    // SEE IMA4 vs M4A http://stackoverflow.com/questions/3509921/recorder-works-on-iphone-3gs-but-not-on-iphone-3g
+    self.recordSettings = [
+      AVSampleRateKey : self.savingSamplesPerSecond,
+      AVFormatIDKey : Int(kAudioFormatLinearPCM),
+      AVNumberOfChannelsKey : Int(1),
+      AVLinearPCMIsFloatKey : 0,
+      AVEncoderAudioQualityKey : Int.max
+    ]
+    
+    if let recorder = self.createRecorder(id: self.activeRecorderId) {
+        // self.activeRecorder = recorder
+        self.audioRecorders[self.activeRecorderId] = recorder
+    }
+  }
+  
+  func getActiveRecorder() -> AVAudioRecorder? {
+    return self.audioRecorders[self.activeRecorderId]
+  }
+  
+  func createRecorder(id: Int) -> AVAudioRecorder? {
+    
+    let file = "recording\(arc4random()).caf"
+    let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(file)
+    
+    var audioRecorder : AVAudioRecorder? = nil
+    
+    do {
+      audioRecorder = try AVAudioRecorder(url: url, settings: self.recordSettings)
+      audioRecorder?.delegate = self.recorderDelegate
+      audioRecorder?.isMeteringEnabled = true
+      guard audioRecorder?.prepareToRecord() != nil else {
+          // return nil if prepareToRecord fails
+          print("ERROR: Prepare to record failed")
+          return nil
+      }
+    }
+    catch {
+      print("failed to create AVAudioRecorder")
+    }
+    
+    return audioRecorder
+  }
+  
+  func rotate() -> AVAudioRecorder? {
+    let nextId = self.activeRecorderId ^ 1
+    
+    if let nextRec = self.createRecorder(id: nextId) {
+      self.audioRecorders[nextId] = nextRec
+      
+      // start recording with new recorder
+      self.audioRecorders[nextId]!.record()
+      
+      // stop recording with old recorder, and remove old temp file
+      if let oldRec = self.audioRecorders[self.activeRecorderId] {
+        recordingTimeAccum += oldRec.currentTime
+        oldRec.stop()
+        _ = try? FileManager.default.removeItem(at: oldRec.url)
+      }
+      
+      // set previous recorder slot to nil
+      self.audioRecorders[self.activeRecorderId] = nil
+      
+      // update activeId
+      self.activeRecorderId = nextId
+      
+      return self.audioRecorders[self.activeRecorderId]
+    }
+    else {
+      print("ERROR: Rotate recorder failed. Unable to create new recorder")
+      return nil
+    }
+  }
+    
+    func abort() {
+      let fileManager: FileManager = FileManager.default
+      
+      // make sure recorders are stopped, and remove temporary files
+      for recorder in self.audioRecorders {
+        if let rec = recorder {
+          rec.stop()
+          _ = try? fileManager.removeItem(at: rec.url)
+        }
+      }
+    }
+    
+}
+
 /// An automated listener / recorder
 open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
     
@@ -148,44 +260,18 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         }
     }
   
+    fileprivate lazy var rotatingRec : RotatingAudioRecorder = RotatingAudioRecorder(savingSamplesPerSecond: self.savingSamplesPerSecond, recorderDelegate: self)
+  
+    fileprivate lazy var audioRecorder : AVAudioRecorder! = {
+        return self.rotatingRec.getActiveRecorder()
+    }()
+  
+    fileprivate var rotationNeeded = false
+  
     fileprivate var totalRecDurationThisHour = 0 // tracks the total Recording duration for the current hour
   
     fileprivate var currentHour = 0 // tracks the last known hour (only updated in stopAndSaveRecording()
-  
-    /// Location of the recorded file
-    fileprivate lazy var recordedFileURL: URL = {
-        let file = "recording\(arc4random()).caf"
-        let url = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(file)
-        return url
-    }()
-    
-    fileprivate lazy var audioRecorder: AVAudioRecorder! = {
-        // USE kAudioFormatLinearPCM
-        // SEE IMA4 vs M4A http://stackoverflow.com/questions/3509921/recorder-works-on-iphone-3gs-but-not-on-iphone-3g
-        let recordSettings: [String : Int] = [
-            AVSampleRateKey : self.savingSamplesPerSecond,
-            AVFormatIDKey : Int(kAudioFormatLinearPCM),
-            AVNumberOfChannelsKey : Int(1),
-            AVLinearPCMIsFloatKey : 0,
-            AVEncoderAudioQualityKey : Int.max
-        ]
-        //FIXME: do not use ! here
-        
-        do {
-            let audioRecorder = try AVAudioRecorder(url: self.recordedFileURL, settings: recordSettings)
-            audioRecorder.delegate = self
-            audioRecorder.isMeteringEnabled = true
-            if !audioRecorder.prepareToRecord() {
-                // FDSoundActivateRecorder can't prepare recorder
-            }
-            return audioRecorder
-        }
-        catch {
-            print("failed to create AVAudioRecorder")
-            return nil
-        }
-        
-    }()
+
     
     fileprivate(set) var status = FDSoundActivatedRecorderStatus.inactive  {
         didSet {
@@ -196,8 +282,16 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
     fileprivate var recordingIntervals = [Double]()
     fileprivate var triggerCount = 0
     fileprivate var intervalTimer = Timer()
-    fileprivate var recordingBeginTime = CMTime()
-    fileprivate var recordingEndTime = CMTime()
+    fileprivate var rotationTimer = Timer()
+  
+    /** The startTime of the current recording, relative to start of currently active recorder. ie) Since recorder was last rotated.
+        Used in stopAndSaveRecording to determine where to start the 'cut' of the temporary file, and to calculate the duration of the rec.  */
+    fileprivate var recStartTimeOnActiveRec = CMTime()
+  
+    /** The overall time in seconds that the previous recording ended, relative to when startListening was first called
+        Used in `interval` callback to determine when refactoryPeriod should end. */
+    fileprivate var recordingEndTime = 0.0
+  
     fileprivate var timestamp = Date()
     fileprivate var timestamp_fmt: ISO8601DateFormatter {
         let dff =  ISO8601DateFormatter()
@@ -224,7 +318,7 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         status = .listening
         
         currentHour = Calendar.current.component(.hour, from: Date())
-
+      
         guard audioRecorder != nil else {
             print("ERROR: Failed to start listening. AudioRecorder is nil")
             return
@@ -255,6 +349,11 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
           }
         #endif
       
+        print("Setting rotation timer") // TODO:
+        DispatchQueue.main.async {
+          self.rotationTimer = Timer.scheduledTimer(timeInterval: 30, target: self, selector: #selector(self.rotateRecorder), userInfo: nil, repeats: true)
+        }
+      
         DispatchQueue.main.async {
           self.intervalTimer = Timer.scheduledTimer(timeInterval: self.intervalSeconds, target: self, selector: #selector(FDSoundActivatedRecorder.interval), userInfo: nil, repeats: true)
           self.listeningIntervals.removeAll()
@@ -262,6 +361,35 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
           self.triggerCount = 0
         }
     }
+    
+  @objc
+  func rotateRecorder() {
+    if self.status == .recording || self.status == .processingRecording {
+      self.rotationNeeded = true
+      return
+    }
+    
+      self.intervalTimer.invalidate()
+      self.listeningIntervals.removeAll()
+      self.recordingIntervals.removeAll()
+      self.triggerCount = 0
+      if let newRecorder = self.rotatingRec.rotate() {
+         self.audioRecorder = newRecorder
+        
+          DispatchQueue.main.async {
+            print("INFO: Rotated recorder")
+            self.intervalTimer = Timer.scheduledTimer(timeInterval: self.intervalSeconds, target: self, selector: #selector(FDSoundActivatedRecorder.interval), userInfo: nil, repeats: true)
+            self.listeningIntervals.removeAll()
+            self.recordingIntervals.removeAll()
+            self.triggerCount = 0
+          }
+        
+      }
+      else {
+          print("ERROR: Failed to rotate recorder.")
+          // TODO: Handle error somehow
+      }
+  }
     
     /// Go back in time and start recording `riseTriggerIntervals` ago
     open func startRecording() {
@@ -272,9 +400,9 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         //let timeSamples = max(0.0, audioRecorder.currentTime - Double(intervalSeconds) * Double(riseTriggerIntervals)) * Double(savingSamplesPerSecond)
         // @Roderick -- changed to <0.5> instead of <intervalSeconds> (0.05), so that we get more of the audio before the trigger
         let timeSamples = max(0.0, audioRecorder.currentTime - 0.5 * Double(riseTriggerIntervals)) * Double(savingSamplesPerSecond)
-        recordingBeginTime = CMTimeMake(value: Int64(timeSamples), timescale: Int32(savingSamplesPerSecond))
+        recStartTimeOnActiveRec = CMTimeMake(value: Int64(timeSamples), timescale: Int32(savingSamplesPerSecond))
         timestamp = Date()
-        print("starting recording: \(recordingBeginTime.seconds)")
+        print("starting recording: \(recStartTimeOnActiveRec.seconds)")
     }
     
     /// End the recording and send any processed & saved file to `delegate`
@@ -287,7 +415,10 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         status = .processingRecording
         self.microphoneLevel = 0.0
         let timeSamples = audioRecorder.currentTime * Double(savingSamplesPerSecond)
-        recordingEndTime = CMTimeMake(value: Int64(timeSamples), timescale: Int32(savingSamplesPerSecond))
+        let recEndTimeOnActiveRec = CMTimeMake(value: Int64(timeSamples), timescale: Int32(savingSamplesPerSecond))
+      
+        // save the time that this recording ended (relative to when listening started)
+        self.recordingEndTime = self.rotatingRec.recordTime
 
         guard self.sarMode == .recordOnTrigger else {
             // sarMode is not set to record. (its set to notifyOnlyOnTrigger)
@@ -304,7 +435,7 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
             return
         }
         
-        let recDuration = recordingEndTime.seconds - recordingBeginTime.seconds
+        let recDuration = recEndTimeOnActiveRec.seconds - recStartTimeOnActiveRec.seconds
         
         guard !recDuration.isNaN else {
             print("INFO: No recording started yet. Nothing to save!")
@@ -356,25 +487,31 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
             let fileManager = FileManager.default
             _ = try? fileManager.removeItem(at: trimmedAudioFileURL)
         }
-        print("recordingBeginTime: \(recordingBeginTime)")
-        print("recordingEndTime: \(recordingEndTime)")
+        print("recordingBeginTime: \(recStartTimeOnActiveRec)")
+        print("recordingEndTime: \(recEndTimeOnActiveRec)")
       
         // Create time ranges for trimming and fading
-      let fadeInDoneTime = CMTimeAdd(recordingBeginTime, CMTimeMake(value: Int64(Double(riseTriggerIntervals) * Double(intervalSeconds) * Double(savingSamplesPerSecond)), timescale: Int32(savingSamplesPerSecond)))
-      let fadeOutStartTime = CMTimeSubtract(recordingEndTime, CMTimeMake(value: Int64(Double(fallTriggerIntervals) * Double(intervalSeconds) * Double(savingSamplesPerSecond)), timescale: Int32(savingSamplesPerSecond)))
-      let exportTimeRange = CMTimeRangeFromTimeToTime(start: recordingBeginTime, end: recordingEndTime)
-      let fadeInTimeRange = CMTimeRangeFromTimeToTime(start: recordingBeginTime, end: fadeInDoneTime)
-      let fadeOutTimeRange = CMTimeRangeFromTimeToTime(start: fadeOutStartTime, end: recordingEndTime)
+      let fadeInDoneTime = CMTimeAdd(recStartTimeOnActiveRec, CMTimeMake(value: Int64(Double(riseTriggerIntervals) * Double(intervalSeconds) * Double(savingSamplesPerSecond)), timescale: Int32(savingSamplesPerSecond)))
+      let fadeOutStartTime = CMTimeSubtract(recEndTimeOnActiveRec, CMTimeMake(value: Int64(Double(fallTriggerIntervals) * Double(intervalSeconds) * Double(savingSamplesPerSecond)), timescale: Int32(savingSamplesPerSecond)))
+      let exportTimeRange = CMTimeRangeFromTimeToTime(start: recStartTimeOnActiveRec, end: recEndTimeOnActiveRec)
+      let fadeInTimeRange = CMTimeRangeFromTimeToTime(start: recStartTimeOnActiveRec, end: fadeInDoneTime)
+      let fadeOutTimeRange = CMTimeRangeFromTimeToTime(start: fadeOutStartTime, end: recEndTimeOnActiveRec)
 
         // Set up the AVMutableAudioMix which does fading
-        let avAsset = AVAsset(url: self.audioRecorder.url)
-      var tracks = avAsset.tracks(withMediaType: AVMediaType.audio)
+      let avAsset = AVAsset(url: self.audioRecorder.url)
+       var tracks = avAsset.tracks(withMediaType: AVMediaType.audio)
         
         guard tracks.count > 0 else {
             print("ERROR: Failed to export audio. No tracks found...")
             self.listeningIntervals.removeAll()
             self.recordingIntervals.removeAll()
             self.status = .listening
+          
+          if self.rotationNeeded {
+              self.rotationNeeded = false
+              self.rotateRecorder()
+          }
+          
             return
         }
         
@@ -411,6 +548,11 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
                 default:
                     self.delegate?.soundActivatedRecorderDidAbort(self)
                 }
+              
+              if self.rotationNeeded {
+                self.rotationNeeded = false
+                self.rotateRecorder()
+              }
             }
         }
     }
@@ -418,12 +560,13 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
     /// End any recording or listening and discard any recorded file
     open func abort() {
         self.intervalTimer.invalidate()
+        self.rotationTimer.invalidate()
         self.audioRecorder.stop()
         if status != .inactive {
             status = .inactive
             self.delegate?.soundActivatedRecorderDidAbort(self)
-            let fileManager: FileManager = FileManager.default
-            _ = try? fileManager.removeItem(at: self.audioRecorder.url)
+          
+            self.rotatingRec.abort()
         }
     }
     
@@ -443,7 +586,9 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         
         self.audioRecorder.updateMeters()
         let currentLevel = Double(self.audioRecorder.averagePower(forChannel: 0))
-//        print("currentLevel: \(currentLevel)")
+      
+        // print("currentLevel: \(currentLevel)")
+      
         switch currentLevel {
         case _ where currentLevel > 0:
             microphoneLevel = 1
@@ -460,7 +605,7 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
             let recordingAverageLevel = recordingIntervals.reduce(0.0, +) / Double(recordingIntervals.count)
             if recordingIntervals.count >= recordingMinimumIntervals && currentLevel <= max(microphoneLevelSilenceThreshold, recordingAverageLevel - fallTriggerDb) {
                 triggerCount = triggerCount + 1
-            } else if (audioRecorder.currentTime - recordingBeginTime.seconds > maxRecordingLength) { /* Check if recording time has exceeded maxRecordingLength */
+            } else if (audioRecorder.currentTime - recStartTimeOnActiveRec.seconds > maxRecordingLength) { /* Check if recording time has exceeded maxRecordingLength */
                 triggerCount = fallTriggerIntervals
                 print("Recording ending as length has exceeded maxRecordingLength (\(maxRecordingLength))")
             } else {
@@ -498,8 +643,8 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
             break
         case .refractoryPeriod:
 //            print("refractoryPeriod")
-            // TODO: check if refractory period has ended, and if so, enter listening period
-             if (audioRecorder.currentTime > recordingEndTime.seconds + refractoryPeriodLen) {
+            // check if refractory period has ended, and if so, enter listening period
+             if (rotatingRec.recordTime > recordingEndTime + refractoryPeriodLen) {
                     print("RefractoryPeriod ended. Now listening")
                     status = .listening
              }
