@@ -7,7 +7,6 @@ import com.wix.reactnativenotifications.RNNotificationsPackage;
 import org.devio.rn.splashscreen.SplashScreenReactPackage;
 import com.dooboolab.RNIap.RNIapPackage;
 import com.rnfs.RNFSPackage;
-import com.reactlibrary.RNTooltipsPackage;
 import com.sbugert.rnadmob.RNAdMobPackage;
 import com.wheelpicker.WheelPickerPackage;
 import com.airbnb.android.react.lottie.LottiePackage;
@@ -45,7 +44,6 @@ public class MainApplication extends Application implements ReactApplication {
             new SplashScreenReactPackage(),
             new RNIapPackage(),
             new RNFSPackage(),
-            new RNTooltipsPackage(),
             new RNAdMobPackage(),
             new WheelPickerPackage(),
             new LottiePackage(),

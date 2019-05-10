@@ -160,7 +160,6 @@ dependencies {
     compile project(':react-native-splash-screen')
     compile project(':react-native-iap')
     compile project(':react-native-fs')
-    compile project(':react-native-tooltips')
     compile project(':react-native-admob')
     compile project(':react-native-wheel-picker-android')
     compile 'com.android.support:support-v4:27.1.0'
