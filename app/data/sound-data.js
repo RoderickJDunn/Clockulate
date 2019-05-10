@@ -79,7 +79,8 @@ let SOUND_DATA = [
         category: "",
         order: 18,
         enabled: false,
-        type: SOUND_TYPES.NORMAL
+        type: SOUND_TYPES.NORMAL,
+        source: "Purple Planet"
     },
     {
         files: ["tone01_digital1.mp3"],
@@ -130,7 +131,8 @@ let SOUND_DATA = [
         category: "",
         order: 20,
         enabled: false,
-        type: SOUND_TYPES.NORMAL
+        type: SOUND_TYPES.NORMAL,
+        source: "Purple Planet"
     },
     {
         files: ["drifting_away.mp3"],
@@ -139,7 +141,8 @@ let SOUND_DATA = [
         category: "",
         order: 21,
         enabled: false,
-        type: SOUND_TYPES.NORMAL
+        type: SOUND_TYPES.NORMAL,
+        source: "Purple Planet"
     },
     {
         files: ["tone7_epicbliss_30s.mp3", "tone7_epicbliss_full.mp3"],
@@ -157,7 +160,8 @@ let SOUND_DATA = [
         category: "",
         order: 24,
         enabled: false,
-        type: SOUND_TYPES.NORMAL
+        type: SOUND_TYPES.NORMAL,
+        source: "Purple Planet"
     },
     {
         files: ["serenity.mp3"],
@@ -166,7 +170,8 @@ let SOUND_DATA = [
         category: "",
         order: 25,
         enabled: false,
-        type: SOUND_TYPES.NORMAL
+        type: SOUND_TYPES.NORMAL,
+        source: "Purple Planet"
     },
     {
         files: ["successful_motivation.mp3"],
@@ -175,7 +180,8 @@ let SOUND_DATA = [
         category: "",
         order: 26,
         enabled: false,
-        type: SOUND_TYPES.NORMAL
+        type: SOUND_TYPES.NORMAL,
+        source: "Purple Planet"
     },
     {
         files: ["thinking_time.mp3"],
@@ -184,7 +190,8 @@ let SOUND_DATA = [
         category: "",
         order: 27,
         enabled: false,
-        type: SOUND_TYPES.NORMAL
+        type: SOUND_TYPES.NORMAL,
+        source: "Purple Planet"
     },
     {
         files: ["first_steps.mp3"],
@@ -193,7 +200,8 @@ let SOUND_DATA = [
         category: "",
         order: 22,
         enabled: false,
-        type: SOUND_TYPES.NORMAL
+        type: SOUND_TYPES.NORMAL,
+        source: "Purple Planet"
     },
     {
         files: ["bright_ideas.mp3"],
@@ -202,7 +210,8 @@ let SOUND_DATA = [
         category: "",
         order: 19,
         enabled: false,
-        type: SOUND_TYPES.NORMAL
+        type: SOUND_TYPES.NORMAL,
+        source: "Purple Planet"
     },
     {
         files: ["tone2_walkwithme_30s.mp3", "tone2_walkwithme_full.mp3"],
@@ -220,7 +229,8 @@ let SOUND_DATA = [
         category: "",
         order: 23,
         enabled: false,
-        type: SOUND_TYPES.NORMAL
+        type: SOUND_TYPES.NORMAL,
+        source: "Purple Planet"
     },
     {
         files: ["tone95_lookalive_30s.mp3"],

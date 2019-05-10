@@ -47,9 +47,8 @@ export default class About extends React.Component {
                 {
                     title: "Attributions",
                     onPress: () => {
-                        this.props.navigation.navigate("PlainTextScreen", {
-                            title: "Attributions",
-                            text: "MyAttributions Text"
+                        this.props.navigation.navigate("AttributionsScreen", {
+                            title: "Attributions"
                         });
                     },
                     showDisclosureIndicator: true

@@ -38,6 +38,7 @@ import AlarmDetail from "../screens/AlarmDetail";
 import TaskDetail from "../screens/TaskDetail";
 import Settings from "../screens/SettingsScreen";
 import About from "../screens/About";
+import Attributions from "../screens/Attributions";
 import Sounds from "../screens/Sounds";
 import { UpgradeModal, UpgradeStack } from "../screens/UpgradeContainters";
 import { HelpModal, HelpStack } from "../screens/HelpContainers";
@@ -542,6 +543,10 @@ const DrawerRoot = createDrawerNavigator(
                     AboutScreen: {
                         screen: About,
                         navigationOptions: otherDrawerNavOptions("About")
+                    },
+                    AttributionsScreen: {
+                        screen: Attributions,
+                        navigationOptions: otherDrawerNavOptions("Attributions")
                     },
                     PlainTextScreen: {
                         screen: PlainTextScreen,

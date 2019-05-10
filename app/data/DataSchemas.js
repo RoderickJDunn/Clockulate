@@ -76,6 +76,7 @@ SoundSchema.schema = {
         displayName: "string",
         category: "string",
         isPremium: { type: "bool", default: false },
+        source: "string?",
         type: "int",
         order: "int"
     }

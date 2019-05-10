@@ -141,7 +141,8 @@ function insertPrepopData() {
             displayName: SOUND_DATA[0].displayName,
             category: SOUND_DATA[0].category,
             order: 0,
-            type: SOUND_DATA[0].type
+            type: SOUND_DATA[0].type,
+            source: ""
         });
         for (let i = 1; i < SOUND_DATA.length; i++) {
             realm.create("Sound", {
@@ -151,7 +152,8 @@ function insertPrepopData() {
                 category: SOUND_DATA[i].category,
                 order: i, // SOUND_DATA[i].order, // NOTE: Ignoring order property of SoundData, and just assinging by list order
                 isPremium: SOUND_DATA[i].isPremium || false,
-                type: SOUND_DATA[i].type
+                type: SOUND_DATA[i].type,
+                source: SOUND_DATA[i].source || ""
             });
         }
 
