@@ -578,6 +578,7 @@ const DrawerRoot = createDrawerNavigator(
             activeTintColor: Colors.brandLightPurple,
             itemsContainerStyle: {
                 marginVertical: 0,
+                paddingVertical: 0,
                 backgroundColor: Colors.brandDarkPurple
             },
             iconContainerStyle: {
