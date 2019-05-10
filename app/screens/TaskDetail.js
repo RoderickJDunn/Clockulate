@@ -55,6 +55,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const HEADER_HEIGHT = Header.HEIGHT;
 const AUTOCP_INPUT_HEIGHT = 75;
+const isSmallScreen = SCREEN_HEIGHT < 650;
 /*
 This screen allows user to edit details about a Task: Specifically, its Name, Duration, and Enabled
  */
@@ -212,12 +213,17 @@ class TaskDetail extends Component {
     }
 
     componentDidMount() {
-        console.log("TaskDetail -- componentDidMount");
-        this.addKeyboardListeners();
-        this.props.navigation.setParams({
-            handleSave: this.handleSave.bind(this)
-        });
-        if (this._nameInputRef) setTimeout(this._nameInputRef.focus, 600);
+        // console.log("TaskDetail -- componentDidMount");
+
+        // InteractionManager.runAfterInteractions(() => {
+        setTimeout(() => {
+            this.addKeyboardListeners();
+            this.props.navigation.setParams({
+                handleSave: this.handleSave.bind(this)
+            });
+            if (this._nameInputRef) this._nameInputRef.focus();
+            // if (this._nameInputRef) setTimeout(this._nameInputRef.focus, 1400);
+        }, 1000);
     }
 
     componentWillUnmount() {
@@ -249,8 +255,8 @@ class TaskDetail extends Component {
 
     keyboardWillShow = event => {
         console.log("keyboardWillShow -------");
-        console.log(event.endCoordinates);
-        console.log(SCREEN_HEIGHT);
+        // console.log(event.endCoordinates);
+        // console.log(SCREEN_HEIGHT);
         this.setState({ keyboardHeight: event.endCoordinates.screenY });
     };
 
@@ -591,9 +597,15 @@ class TaskDetail extends Component {
                 }}
                 style={Styles.suggestionItemWrapper}
             >
-                <Text style={[Styles.suggestionText, { fontSize: 20 }]}>
-                    {name}
-                </Text>
+                <View style={Styles.suggestionTextWrap}>
+                    <Text
+                        numberOfLines={1}
+                        ellipsizeMode={"tail"}
+                        style={[Styles.suggestionText, { fontSize: 20 }]}
+                    >
+                        {name}
+                    </Text>
+                </View>
                 <DurationText
                     duration={defaultDuration}
                     short={true}
@@ -675,7 +687,7 @@ class TaskDetail extends Component {
                                 flex: 1
                             }}
                         >
-                            <View style={[Styles.AdvDeleteWrapper]}>
+                            <View style={[Styles.deleteWrapper]}>
                                 <TouchableOpacity
                                     style={Styles.DeleteButton}
                                     onPress={this._onDeleteTask.bind(this)}
@@ -947,7 +959,7 @@ class TaskDetail extends Component {
 export default TaskDetail;
 
 const Styles = StyleSheet.create({
-    AdvDeleteWrapper: {
+    deleteWrapper: {
         alignSelf: "stretch",
         position: "absolute",
         bottom: isIphoneX() ? 34 : 0,
@@ -1010,10 +1022,17 @@ const Styles = StyleSheet.create({
     },
     suggestionDurationText: {
         fontSize: 16,
-        fontFamily: "Gurmukhi MN"
+        fontFamily: "Gurmukhi MN",
+        textAlign: "right"
+    },
+    suggestionTextWrap: {
+        flexBasis: 1,
+        flexGrow: 1,
+        alignSelf: "stretch",
+        justifyContent: "space-around"
     },
     suggestionText: {
-        textAlign: "center",
+        textAlign: "left",
         textAlignVertical: "center",
         fontFamily: "Gurmukhi MN",
         color: Colors.brandLightOpp
