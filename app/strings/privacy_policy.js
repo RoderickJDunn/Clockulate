@@ -18,7 +18,7 @@ The app does use third party services that may collect information used to ident
 const SH_INFO_COLL =
     "Link to privacy policy of third party service providers used by the app";
 
-const BUL_INFO_COLL = ["AdMob", "Log Data"];
+const BUL_INFO_COLL = ["AdMob", "AdFalcon", "AppLovin", "InMobi"];
 
 const H_LOG_DATA = "Log Data";
 const B_LOG_DATA =
@@ -76,9 +76,7 @@ function renderBulletPoint(text, link) {
                     style={[style]}
                     onPress={() => {
                         if (link) {
-                            Linking.openURL(
-                                "https://support.google.com/admob/answer/6128543?hl=en"
-                            );
+                            Linking.openURL(link);
                         }
                     }}
                 >
@@ -99,6 +97,18 @@ export default function renderPrivacyPolicy() {
             {renderBulletPoint(
                 BUL_INFO_COLL[0],
                 "https://support.google.com/admob/answer/6128543?hl=en"
+            )}
+            {renderBulletPoint(
+                BUL_INFO_COLL[1],
+                "http://www.adfalcon.com/en/tech-policy.html"
+            )}
+            {renderBulletPoint(
+                BUL_INFO_COLL[2],
+                "https://www.applovin.com/privacy/"
+            )}
+            {renderBulletPoint(
+                BUL_INFO_COLL[3],
+                "https://www.inmobi.com/privacy-policy/"
             )}
             <Text style={styles.headingText}>{H_LOG_DATA}</Text>
             <Text style={styles.bodyText}>{B_LOG_DATA}</Text>
