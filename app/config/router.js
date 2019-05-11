@@ -546,7 +546,18 @@ const DrawerRoot = createDrawerNavigator(
                     },
                     AttributionsScreen: {
                         screen: Attributions,
-                        navigationOptions: otherDrawerNavOptions("Attributions")
+                        navigationOptions: {
+                            headerStyle: {
+                                // Style the header view itself (aka. the nav bar)
+                                backgroundColor: Colors.brandDarkGrey,
+                                borderBottomWidth: 0
+                            },
+                            headerTintColor: Colors.brandLightOpp,
+                            headerTitleStyle: {
+                                // style the Title text of the header
+                                color: Colors.brandLightOpp
+                            }
+                        }
                     },
                     PlainTextScreen: {
                         screen: PlainTextScreen,
