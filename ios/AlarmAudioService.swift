@@ -10,6 +10,8 @@ import Foundation
 import AVFoundation
 import MediaPlayer
 import UserNotifications
+import CallKit
+
 //import FDSoundActivatedRecorder
 
 enum AlarmStatus: Int {
@@ -20,7 +22,7 @@ enum AlarmStatus: Int {
 }
 
 @objc(AlarmAudioService)
-class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
+class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCallObserverDelegate {
   private let TAG = "AlarmAudioService: "
   
   var recorder: FDSoundActivatedRecorder?
@@ -35,6 +37,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   var fadein_cnt = 0
   var currAlarm: Dictionary<String,Any> = [:]
   var refractoryTime = 300.0
+  var callObserver = CXCallObserver()
   
   func CKT_LOG(_ msg: String) {
       print(TAG, msg)
@@ -64,6 +67,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
         recorder = FDSoundActivatedRecorder()
         CKT_LOG("Created recorder")
     }
+    callObserver.setDelegate(self, queue: nil)
+    
     
     // NOTE: this is to setup NSNotifications, which are internal to program (not related to User Notifications)
     self.setupNotifications()
@@ -85,13 +90,40 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
   @objc
   func appWillTerminate() {
      print("app will terminate")
-    if isRecording {
-    //if UIApplication.shared.applicationState == .background {
+    
+    self.displayWarningNotification()
+    
+    if let recorder = self.recorder {
+      recorder.abort()  // called so that temporary recording file(s) is deleted in case of crash. (It can become very large)
+    }
+    
+    self.isRecording = false;
+  }
+  
+  @objc
+  func audioWasInterupted(notification: Notification) {
+    print("audioWasInterupted")
+
+    self.displayWarningNotification()
+    
+    self.isRecording = false;
+  }
+  
+  @objc
+  func callObserver(_ callObserver: CXCallObserver, callChanged call: CXCall) {
+    print("Call status changed. Call-ended: \(call.hasEnded)")
+    if call.hasEnded {
+      self.displayWarningNotification()
+    }
+  }
+  
+  func displayWarningNotification() {
+    print("displayWarningNotification? alarmStatus: \(self.alarmStatus)")
+    if self.alarmStatus != AlarmStatus.OFF {
       let content = UNMutableNotificationContent()
       
       //adding title, subtitle, body and badge
       content.title = "Sleep analysis had to exit"
-      //            content.subtitle = "iOS Development is fun"
       content.body = "Please re-open Clockulate to resume sleep analysis. This will also ensure that your alarm rings even if your phone is on Silent."
       content.badge = 1
       content.sound = UNNotificationSound.default
@@ -107,41 +139,6 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
       UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
       
     }
-    
-    if let recorder = self.recorder {
-      recorder.abort()  // called so that temporary recording file(s) is deleted in case of crash. (It can become very large)
-    }
-    
-    self.isRecording = false;
-  }
-  
-  @objc
-  func audioWasInterupted(notification: Notification) {
-    print("audioWasInterupted")
-    if isRecording {
-      //if UIApplication.shared.applicationState == .background {
-      let content = UNMutableNotificationContent()
-      
-      //adding title, subtitle, body and badge
-      content.title = "Sleep analysis had to exit"
-      //            content.subtitle = "iOS Development is fun"
-      content.body = "Please open Clockulate to resume sleep analysis. This will also ensure that your alarm rings even if your phone is on Silent."
-      content.badge = 1
-      content.sound = UNNotificationSound.default
-      
-      //getting the notification trigger
-      //it will be called after 5 seconds
-      let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-      
-      //getting the notification request
-      let request = UNNotificationRequest(identifier: "Recording Stopped", content: content, trigger: trigger)
-      
-      //adding the notification to notification center
-      UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
-      // }
-    }
-    
-    self.isRecording = false;
   }
   
   @objc
@@ -168,6 +165,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate {
           })
         }
         self.isRecording = true
+        
+        // TODO: If self.isRecording == false, restart recording functionality. // TODO: VERY IMPORTANT !!!!!!! Otherwise AlarmService does not resume after phone call, or other audio interruption
       }
       else {
         error = "Received invalid date value"
