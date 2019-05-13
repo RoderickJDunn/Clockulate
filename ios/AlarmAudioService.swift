@@ -38,6 +38,11 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
   var currAlarm: Dictionary<String,Any> = [:]
   var refractoryTime = 300.0
   var callObserver = CXCallObserver()
+
+  let MAX_RING_DURATION = 90.0
+
+  /** Tracks consecutive autosnooze calls, so that we don't ring endlessly if user doesn't hear the device. */
+  var autosnoozeCnt = 0
   
   func CKT_LOG(_ msg: String) {
       print(TAG, msg)
@@ -146,6 +151,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
       CKT_LOG("initializeAlarm (Native)")
     
     var error: String? = nil
+
+    self.autosnoozeCnt = 0 // this is a good place to reset autosnoozeCount, since this function is only called due to direct user interaction with app.
     
     self.currAlarm = alarmInfo as! Dictionary<String,Any>
     
@@ -246,11 +253,6 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
           self.CKT_LOG("Got permission to record")
             self.CKT_LOG(alarmInfo.description)
         
-            // NOTE: userDelayOffset : This is used when the autoSnooze timer fires to calculate when the next snooze should be scheduled for.
-            //      Theres a good chance that there is a better way to calculate that, but this does seem to work.
-            //      A simpler way may be to just calculate how long the autoSnoozeTimer takes (just use the same formula min(90, snoozeTime - 5)),
-            //        then subtract this from snoozeTime. That should give how much time is left before the next snooze....
-        //      currAlarm["userDelayOffset"] = 0 as Any
             
             // unpack settings
             if let cooldown = settings["recCooldown"] as? Double {
@@ -404,7 +406,6 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
       player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileType.mp3.rawValue)
       
       guard let player = player else { return }
-      print("AVAudioSession Category Playback OK")
       player.prepareToPlay()
       
       player.volume = 0
@@ -420,11 +421,14 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
       print("AVAudioSession is Active")
       
       self.CKT_LOG("Setting playback timeout timer")
-      // TODO: Set audio-loop timer. Audio should loop until this timer expires, at which point
-      //        the alarm will be automatically snoozed.
-      var autoSnoozeTmo = userInfo["snoozeTime"] as! Double
-      autoSnoozeTmo *= 60
-      autoSnoozeTmo = min(90, autoSnoozeTmo - 5) // NOTE: I need to limit to less than snoozeTime otherwise backup notification may not be canceled in time.
+      // Set audio-loop timer. Audio should loop until this timer expires, at which point the alarm will be automatically snoozed.
+      var snoozeTime = userInfo["snoozeTime"] as! Double
+      snoozeTime *= 60
+
+      // calculate how long the Alarm should ring for. 
+      // NOTE: It will ring for at MOST, MAX_RING_DURATION seconds. If snoozeTime is 1min, the alarm can only ring up until 5sec before the next snooze, otherwise backup
+      //        notification may not be canceled in time.
+      let autoSnoozeTmo = min(MAX_RING_DURATION, snoozeTime - 5) 
       // autoSnoozeTmo = 20 // DEV: setting autoSnooze time to 20sec for DEV.
       DispatchQueue.main.async(execute: {
         self.autoSnoozeTimer = Timer.scheduledTimer(timeInterval: autoSnoozeTmo, target: self, selector: #selector(self.automaticSnooze), userInfo: self.currAlarm, repeats: false)
@@ -435,70 +439,41 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     }
   }
   
-//  @objc
-//  func automaticSnooze(_ timer: Timer) {
-//    self.CKT_LOG("Setting automaticSnooze")
-//
-//    var alarm = timer.userInfo as! Dictionary<String, AnyObject>
-//
-//    // Emit AutoSnoozed event so JS knows to increment snoozeCount for this alarm
-//    sendEvent(withName: "onAutoSnoozed", body: ["alarm": alarm["id"]])
-//
-//    let snoozeTime = alarm["snoozeTime"] as! Double
-//
-//
-//    // Calculate time until snooze
-//    let autoSnoozeTime = min(90, snoozeTime - 5)
-//    let timeTillSnooze = snoozeTime - autoSnoozeTime
-//
-//    if let wakeUpTime = RCTConvert.nsDate(alarm["time"]) {
-//      let dateOfSnooze = wakeUpTime.addingTimeInterval(offsetAfterWake)
-//      let timeTillSnooze = dateOfSnooze.timeIntervalSinceNow / 60 // Convert to minutes, since I'm passing it to snoozeAlarm()
-//      self.CKT_LOG("Time until Snooze: \(timeTillSnooze)")
-//
-//      self.alarmTimer.invalidate()
-//      // Audio initialization succeeded... set a timer for the time in alarmInfo, with callback of the function below (alarmDidTrigger). Set userInfo property of timer to sound file name.
-//
-//      // the offset due to user-delay in explicit snooze has not changed, since this autoSnooze function triggered.
-//      self.snoozeAlarm(timeTillSnooze, userDelayOffset)
-//
-//      self.isRecording = true
-//    }
-//    else {
-//      self.CKT_LOG("ERROR: Failed to calculate snooze time automatically.")
-//    }
-//
-//
-//  }
-  
   @objc
   func automaticSnooze(_ timer: Timer) {
     self.CKT_LOG("Setting automaticSnooze")
     
     self.alarmTimer.invalidate() // TODO: Unnecessary?
 
+
+    // Check if we've passed the limit on auto-snoozes for this alarm.
+    if self.autosnoozeCnt > 10 { // DEV: change to 10
+        self.CKT_LOG("INFO: Surpassed autosnooze limit. Not snoozing anymore.")
+        return;
+    }
+    
+    self.autosnoozeCnt += 1
+    
     var alarm = timer.userInfo as! Dictionary<String, AnyObject>
 
     // Emit AutoSnoozed event so JS knows to increment snoozeCount for this alarm
     sendEvent(withName: "onAutoSnoozed", body: ["alarm": alarm["id"]])
     
-    let snoozeTime = alarm["snoozeTime"] as! Double
+    var snoozeTime = alarm["snoozeTime"] as! Double
+    snoozeTime *= 60
     
     // NOTE: I need to schedule the next snooze for the exact snoozeInterval since the last trigger.
     //      Otherwise, the next trigger will not execute in time to cancel the backup notifications.
-    let autoSnoozeTime = min(90, snoozeTime - 5)
+    let autoSnoozeTime = min(MAX_RING_DURATION, snoozeTime - 5) // calculate how long the Alarm rang for
+
+    // Subtract how long the alarm rang for, from snoozeTime. This gives usthe time left before the next snooze
     let timeTillSnooze = (snoozeTime - autoSnoozeTime) / 60
-    // ** //
 
     self.CKT_LOG("snoozeTime: \(timeTillSnooze)")
   
-    // Calculate time until snooze
     self.snoozeAlarm(timeTillSnooze)
 
     self.isRecording = true
- 
-
-
   }
   
   @objc
@@ -576,20 +551,15 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
 //        return;
 //      }
     
-    print("1")
-
       fadein_cnt = 0
       if let player = player {
         player.stop()
       }
-    print("2")
 
       let seconds = minutes * 60;
       DispatchQueue.main.async(execute: {
         self.alarmTimer = Timer.scheduledTimer(timeInterval: seconds, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
       })
-    
-     print("3")
   }
   
   @objc
