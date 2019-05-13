@@ -147,6 +147,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     
     var error: String? = nil
     
+    self.currAlarm = alarmInfo as! Dictionary<String,Any>
+    
     if (alarmStatus == .SET) {
       CKT_LOG("Alarm already SET. Updating parameters")
       
@@ -164,9 +166,21 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
             self.alarmTimer = Timer.scheduledTimer(timeInterval: timeTillAlm, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
           })
         }
-        self.isRecording = true
         
-        // TODO: If self.isRecording == false, restart recording functionality. // TODO: VERY IMPORTANT !!!!!!! Otherwise AlarmService does not resume after phone call, or other audio interruption
+        // If self.isRecording == false, restart recording functionality. VERY IMPORTANT !!!!!!! Otherwise AlarmService does not resume after phone call, or other audio interruption
+        // TODO: THIS NEEDS MORE TESTING
+        if self.isRecording == false {
+          AVAudioSession.sharedInstance().requestRecordPermission() { [unowned self] allowed in
+            DispatchQueue.main.async {
+              
+              if allowed {
+                self.beginMonitoringAudio()
+              }
+              
+              self.isRecording = true
+            }
+          }
+        }
       }
       else {
         error = "Received invalid date value"
@@ -177,12 +191,52 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     }
     else if (alarmStatus == .SNOOZED) {
       /* This check is vital:
-          When app is re-opened after Alarm triggers, then resumeAlarm is called on the off-chance that this NativeAudio service
-          has stopped running (maybe app was terminated.) If that's the case, alarmStatus would be .OFF, and Alarm would be
-          initialized properly. However, in this case (SNOOZED), we can just ignore the initialize call, since snoozing timer
-          has already been handled.
+          When app is re-opened after Alarm triggers, then resumeAlarm is called on the off-chance that this Native audio recorder
+          is not running (maybe app was terminated, or audio was interrupted by call, or something else) If app was terminated,
+          alarmStatus would be .OFF, and Alarm would be initialized normally (not here). However, if audio was interrupted once
+          alarm had already been snoozed, then the app was re-opened, we would end up here. In this case we need to restart
+          recording, so that future triggers (snoozes) can occur with full sound playback while app is in the background.
        */
-      CKT_LOG("Alarm is already snoozed. Nothing to do here");
+      
+      // If snoozeTimer fireDate is in the future, leave it alone (the app was simply brought into the foreground). If the firedate is in the past, or the timer isValid==false, set snoozeTimer fresh.
+      let timeUntilTrigger = self.alarmTimer.fireDate.timeIntervalSinceNow
+      
+      if self.alarmTimer.isValid == true && timeUntilTrigger > 0 {
+        // snoozeTimer already set. Don't do anything to it
+        print("INFO: Snooze timer already set and valid")
+      }
+      else {
+        print("INFO: Snooze timer is NOT valid, or firedate in past. Resetting")
+        
+        // NOTE: This is a lazy hack to trick snoozeAlarm() into working in this scenario. Since we are already SNOOZED, snoozeAlarm won't do anything.
+        // Therefore, I'm setting a fake status to simulate the alarm having just triggered, so that snoozeAlarm succesfully sets the timer etc.
+        self.alarmStatus = AlarmStatus.RINGING
+        
+        let snoozeTmo = alarmInfo["snoozeTime"] as! Double
+        self.snoozeAlarm(snoozeTmo)
+      }
+      
+      
+      /* If self.isRecording == false, we need to resume Recorder, so that full audio playback can occur again. */
+      // TODO: THIS NEEDS TESTING
+      if self.isRecording == false {
+        AVAudioSession.sharedInstance().requestRecordPermission() { [unowned self] allowed in
+          DispatchQueue.main.async {
+            
+            self.recorder!.sarMode = FDSoundActivatedRecorderMode.ignoreAll // ignore all disturbances while we in the snoozing/ringing period
+            self.recorder?.rotationEnabled = false // rotation must be disabled, otherwise record() call fails once we start playing Audio
+            
+            if allowed {
+              self.beginMonitoringAudio()
+            }
+            
+            self.isRecording = true
+            
+          }
+        }
+      }
+      
+      // CKT_LOG("Alarm is already snoozed. Nothing to do here");
       onCompletion([error as Any])
       return;
     }
@@ -191,8 +245,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
       DispatchQueue.main.async {
           self.CKT_LOG("Got permission to record")
             self.CKT_LOG(alarmInfo.description)
-            self.currAlarm = alarmInfo as! Dictionary<String,Any>
-            
+        
             // NOTE: userDelayOffset : This is used when the autoSnooze timer fires to calculate when the next snooze should be scheduled for.
             //      Theres a good chance that there is a better way to calculate that, but this does seem to work.
             //      A simpler way may be to just calculate how long the autoSnoozeTimer takes (just use the same formula min(90, snoozeTime - 5)),
@@ -211,6 +264,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
             self.CKT_LOG("Setting refractoryTime to \(self.refractoryTime)")
             self.recorder?.refractoryPeriodLen = self.refractoryTime
             self.recorder?.subdirectory = self.currAlarm["instId"] as! String
+            self.recorder?.rotationEnabled = true
         
             if allowed {
               self.beginMonitoringAudio()
@@ -339,6 +393,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     print("Found sound file")
    
     do {
+      self.recorder?.rotationEnabled = false // disable rotation once alarm triggers, since once audio playback starts, future calls to record() will fail
+      
       //                try AVAudioSession.sharedInstance().setActive(true)
       try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback, options: AVAudioSession.CategoryOptions.duckOthers)
       print("AVAudioSession Category PlayAndRecord OK")
@@ -493,9 +549,9 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     
     self.alarmStatus = AlarmStatus.SNOOZED
     
-    if (self.isRecording == false) {
-      // TODO: Restart recorder?
-    }
+    //if (self.isRecording == false) {
+      // TODO: Restart recorder? NO. This is done in initializeAlarm, if necessary.
+    //}
 
     self.CKT_LOG("Native snoozeAlarm: \(minutes) minutes")
     

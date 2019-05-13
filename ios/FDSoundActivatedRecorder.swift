@@ -144,13 +144,19 @@ private class RotatingAudioRecorder {
   }
   
   func rotate() -> AVAudioRecorder? {
+    
     let nextId = self.activeRecorderId ^ 1
     
     if let nextRec = self.createRecorder(id: nextId) {
       self.audioRecorders[nextId] = nextRec
       
       // start recording with new recorder
-      self.audioRecorders[nextId]!.record()
+      if self.audioRecorders[nextId]!.record() != true {
+        print("ERROR: Failed to start recording after rotating recorder")
+      }
+      else {
+        print("INFO: Successfully started recording after rotating recorder")
+      }
       
       // stop recording with old recorder, and remove old temp file
       if let oldRec = self.audioRecorders[self.activeRecorderId] {
@@ -260,6 +266,13 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         }
     }
   
+    public var rotationEnabled = true 
+    /* {
+      didSet {
+        print("DEBUG: RotationEnabled flag was set to \(self.rotationEnabled)")
+      }
+    } */
+  
     fileprivate lazy var rotatingRec : RotatingAudioRecorder = RotatingAudioRecorder(savingSamplesPerSecond: self.savingSamplesPerSecond, recorderDelegate: self)
   
     fileprivate lazy var audioRecorder : AVAudioRecorder! = {
@@ -364,6 +377,10 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
     
   @objc
   func rotateRecorder() {
+    guard self.rotationEnabled == true else {
+      return
+    }
+    
     if self.status == .recording || self.status == .processingRecording {
       self.rotationNeeded = true
       return
