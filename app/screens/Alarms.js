@@ -530,17 +530,21 @@ class Alarms extends Component {
                 if (nextStatus == ALARM_STATES.SET) {
                     /* Now schedule notification(s) for the changes */
                     // passing in reloadAlarms function for iOS in-app alarm to be able to refresh AlarmsList screen
-                    requestAnimationFrame(() => {
-                        scheduleAlarm(
+                    // setTimeout(() => {
+                    //     // NOTE: I'm using a setTimeout here because runAfterInteractions doesn't seem to wait for the
+                    //     //          back navigation animation to finish, for some reason.
+
+                    // NOTE: Revision. Actually it seems that setTimeout isn't required. I'm not seeing a stutter (maybe a fix elsewhere helped)
+                    scheduleAlarm(
+                        changedAlarm,
+                        this.reloadAlarms.bind(this),
+                        this.alarmDidInitialize.bind(
+                            this,
                             changedAlarm,
-                            this.reloadAlarms.bind(this),
-                            this.alarmDidInitialize.bind(
-                                this,
-                                changedAlarm,
-                                nextStatus
-                            )
-                        );
-                    });
+                            nextStatus
+                        )
+                    );
+                    // }, 1000);
                 } else {
                     this.reloadAlarms();
                 }
