@@ -18,7 +18,7 @@ class LabeledTimeInput extends Component {
                 fieldText: props.fieldText
             },
             /* Whether the time display should be hidden (for hrs of sleep setting) */
-            hideTime: true // TODO: Check setting in DB
+            hideTime: true
         };
     }
 

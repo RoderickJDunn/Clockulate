@@ -429,14 +429,19 @@ class TaskItem extends React.Component {
                         // ellipsizeMode="tail"
                         selectable={false}
                     >
-                        <Text style={{ fontSize: 14 }}>
+                        {/* DEV: */}
+                        {/* <Text style={{ fontSize: 14 }}>
                             {this.props.data.order}
                         </Text>
                         <Text style={{ fontSize: 22, lineHeight: 22 }}>
+                            {" "}
                             {"   (" +
-                                this.state.index +
+                            this.state.index +
                                 ") " +
                                 this.props.data.task.name}
+                        </Text> */}
+                        <Text style={{ fontSize: 22, lineHeight: 22 }}>
+                            {this.props.data.task.name}
                         </Text>
                     </Text>
                     <View
@@ -669,13 +674,11 @@ class TaskItem extends React.Component {
         let useGestureHandler = false;
 
         if (moveItemType == MOVING_ITEM_TYPES.HANDLE) {
-            // DEV: remove forceHandleType
             // console.log("Rendering transparent handle item");
             borderBottomColor = "transparent";
             this.props.setMoveableAnim(null, this.state.index); // unused, but needed to fill the moveable array.
 
             extraStyle = { opacity: 0 };
-            // extraStyle = { borderColor: "red", borderWidth: 2 }; // DEV:
             useGestureHandler = true;
         } else if (moveItemType == MOVING_ITEM_TYPES.COPY) {
             console.log("rendering overlying copy");

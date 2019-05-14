@@ -339,7 +339,7 @@ function insertPrepopData() {
             wakeUpTime: wake1, // NOTE: (TODO:) This time MUST match that calculated based on the alarmTasks and arrival time.
             //              Otherwise, it will be incorrect, until the first re-render.
             arrivalTime: arrive1,
-            mode: "autocalc", // TODO: Change back to basic for testing
+            mode: "autocalc",
             tasks: [almTask1, almTask2, almTask3, almTask4],
             label: "Normal week day",
             status: ALARM_STATES.OFF, // if true, it is active, and will Ring at wakeUpTime.

@@ -16,10 +16,6 @@ import _ from "lodash";
 
 import Colors from "../styles/colors";
 
-// TODO:
-//  1) Put Title param in Title Screen Header
-//  2) Put blank space bettwen picker and header. (see settings app for examples)
-//  3) Put description below the picker
 export default class PickerInputPage extends React.Component {
     /*
     Props: 

@@ -126,7 +126,6 @@ class TaskList extends React.Component {
     };
 
     _onWillStartMove = (item, index) => {
-        // this._panPosOnLastScroll = 200; // TODO: MID-POINT height of container.
         this._scrollDuringMove = 0;
         this.movingItem = new HandleRowHelper(item, index);
         this.props.willStartMove();
@@ -203,7 +202,7 @@ class TaskList extends React.Component {
 
             console.log("Initial amount", amount);
 
-            this._scrollDuringMove += amount; // TODO: Handle scrolling other direction
+            this._scrollDuringMove += amount;
 
             console.log(
                 "this._scrollDuringMove (after scroll)",
@@ -785,7 +784,7 @@ class TaskList extends React.Component {
                                     this,
                                     this.movingItem,
                                     0
-                                )} // FIXME: 0 should be index of row...
+                                )}
                                 closed={true}
                                 scrollAnimVal={this._scrollAnim}
                                 panAnimVal={this._panAnim}

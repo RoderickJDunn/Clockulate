@@ -47,8 +47,8 @@ let initializeAlarm = (alarm, alarmDidInitialize) => {
 
     initNativeAlarm(
         alarm,
-        { recCooldown: 0.25 }, // DEV: Setting to 15sec for convenience. Change back to Settings.recCooldown()
-        // { recCooldown: Settings.recCooldown() },
+        // { recCooldown: 0.25 }, // DEV: Setting to 15sec for convenience. Change back to Settings.recCooldown()
+        { recCooldown: Settings.recCooldown() },
         err => {
             console.log("didInitializeAlarm?: ", err ? false : true);
             alarmDidInitialize();
@@ -141,7 +141,7 @@ let presentAlert = alarm => {
 };
 
 AlarmTriggerEvents.addListener("onAutoSnoozed", info => {
-    // TODO: Increment snoozeCount of Alarm in DB
+    // Increment snoozeCount of Alarm in DB
 
     let alarm = realm.objectForPrimaryKey("Alarm", info.alarm);
 
@@ -351,14 +351,15 @@ let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
     // if (__DEV__) {
     //     snoozeTime = 15;
     // }
-    console.log("shortSoundFile", shortSoundFile);
+    // console.log("shortSoundFile", shortSoundFile);
+    let backupTimes = [];
     for (let i = 0; i < notiCount; i++) {
-        console.log("Wakeup time: ", wakeUpMoment.toDate());
+        backupTimes.push(`${i}. ${wakeUpMoment.toDate()}, `);
 
         NotificationsIOS.localNotification({
             alertBody:
-                alarm.label +
-                "(Backup Notification -- should only fire if AlarmService not running)", // DEV: remove extra string
+                alarm.label
+                // + "(Backup Notification -- should only fire if AlarmService not running)", // DEV: remove extra string
             alertTitle: "Clockulate",
             alertAction: "Click here to open",
             soundName: shortSoundFile,
@@ -369,6 +370,8 @@ let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
         });
         wakeUpMoment.add(snoozeTime, "s");
     }
+
+    console.log("Backup notifications", ...backupTimes);
 };
 
 export let cancelAllNotifications = () => {
@@ -443,7 +446,7 @@ export let resumeAlarm = (alarm, reload, alarmDidInitialize) => {
     //          could have just rang, then user opened the app, and then this fn was called.)
     //          I need to grab the latest alarm even if .end already has a value.
     if (allAIs.length == 0) {
-        // NOTE: Sanity check: There is no active AlarmInstance. In resumeAlarm(), this should NEVER happen.
+        // NOTE: Sanity check: There are no AlarmInstances. In resumeAlarm(), this should NEVER happen.
         // create new AlarmInstance with start date of now, and empty End date, and empty disturbance list
         console.warn(
             "No AlarmInstances found while running resumeAlarm. Should never happen."
@@ -730,8 +733,6 @@ let onInAppSnoozePressed = (alarm, sound) => {
 };
 
 let setAlarmInstEnd = () => {
-    // TODO: Handle deleting AlarmInstances if Alarm span is too short
-
     // Fetch current AlarmInstance and set its 'end' datetime to now.
     let almInsts = realm.objects("AlarmInstance").sorted("start", true);
     let currAlmInst = almInsts
@@ -759,7 +760,8 @@ let setAlarmInstEnd = () => {
         // Delete AlmInst if total length <15 mins
         if (
             mNow - moment(currAlmInst.start) <
-            30 * 1000 /*DEV: Change first value to 900 (15min) for production */
+            900 * 1000
+            // 30 * 1000 /* DEV: 30 seconds for for development  */
         ) {
             console.log("Alm Inst is <15 min long. Deleting");
 
@@ -810,90 +812,9 @@ let onInAppTurnOffPressed = (alarm, sound) => {
 
     clearAlarm(alarm);
 
-    /* TODO: TEST: test that app doesn't crash here if this function isn't called on another screen (not AlarmsList)*/
+    /* TODO: TEST: test that app doesn't crash here if this function is called on another screen (not AlarmsList)*/
     reloadAlarmsList();
 };
-
-// export let setInAppAlarm = (alarm, reloadAlarmsList) => {
-//     console.log("setInAppAlarm");
-
-//     if (alarm) {
-//         console.log("setInAppAlarm", alarm.wakeUpTime);
-//         console.log("snoozeCount", alarm.snoozeCount);
-//         console.log("status", alarm.status);
-//     }
-
-//     // calculate time until alarm
-//     let now = new Date();
-
-//     let msUntilAlarm = alarm.wakeUpTime - now;
-
-//     /* if alarm has been snoozed at least once, we need to adjust the in-app alarm time accordingly
-//         (also taking into account snooze-time setting)
-//      */
-//     if (alarm.snoozeCount != null && alarm.snoozeCount > 0) {
-//         console.log(
-//             "Setting an inAppAlarm for snooze. Snooze Count: ",
-//             alarm.snoozeCount
-//         );
-
-//         let minutesToAdd = alarm.snoozeCount * alarm.snoozeTime; // DEV: Change '1' to alarm.snoozeTime for release.
-//         let inAppNotifTime = moment(alarm.wakeUpTime).add(
-//             minutesToAdd,
-//             "minute"
-//         );
-//         msUntilAlarm = inAppNotifTime.toDate() - now;
-//     } else if (msUntilAlarm < 0) {
-//         // This is the first time this alarm has triggered (not a snooze), but the alarmTime was calculated to be in the past.
-//         // Add 1 day
-//         let inAppNotifTime = moment(alarm.wakeUpTime).add(1, "day");
-//         msUntilAlarm = inAppNotifTime.toDate() - now;
-//     }
-
-//     console.log(
-//         `Setting in-app alarm for ${msUntilAlarm / 1000 / 60} minutes from now`
-//     );
-
-//     let timeoutId = setTimeout(() => {
-//         console.log("Alarm went off while app is open!");
-
-//         realm.write(() => {
-//             alarm.status = ALARM_STATES.RINGING;
-//         });
-//         reloadAlarmsList();
-
-//         setAlarmInstEnd();
-
-//         Alert.alert(
-//             "!!!",
-//             alarm.label,
-//             [
-//                 {
-//                     text: "Snooze",
-//                     onPress: onInAppSnoozePressed.bind(
-//                         this,
-//                         alarm,
-//                         null
-//                     )
-//                 },
-//                 {
-//                     text: "Turn Off",
-//                     onPress: onInAppTurnOffPressed.bind(
-//                         this,
-//                         alarm,
-//                         null
-//                     )
-//                 }
-//                 // { text: "OK", onPress: () => console.log("OK Pressed") }
-//             ],
-//             { cancelable: false }
-//         );
-//     }, msUntilAlarm);
-
-//     realm.write(() => {
-//         alarm.timeoutId = timeoutId;
-//     });
-// };
 
 export let cancelInAppAlarm = alarm => {
     if (alarm && alarm.timeoutId) {
@@ -915,8 +836,7 @@ export let checkForImplicitSnooze = (alarm, mNow) => {
         );
     }
 
-    // let almSnoozeTime = alarm.snoozeTime * 60; // convert snoozeTime to seconds
-    let almSnoozeTime = alarm.snoozeTime * 60; // convert snoozeTime to seconds DEV: Change 1 to alarm.snoozeTime
+    let almSnoozeTime = alarm.snoozeTime * 60; // convert snoozeTime to seconds 
     console.log("almSnoozeTime", almSnoozeTime);
 
     let expectedSnoozeCount = Math.ceil(secondsDiff / almSnoozeTime);

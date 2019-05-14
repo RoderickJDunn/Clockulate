@@ -151,7 +151,7 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
         message: alarm.label, // Required
         ticker: alarm.label,
         autoCancel: false, // default: true
-        vibrate: true, // FIXME: change back to true
+        vibrate: true,
         vibration: 100, // default: 100, no vibration if vibrate: false
         smallIcon: "icon.png", // Required
         largeIcon: "icon.png",
@@ -187,8 +187,7 @@ export let setInAppAlarm = (alarm, reloadAlarmsList) => {
      */
     if (alarm.snoozeCount != null && alarm.snoozeCount > 0) {
         console.log("This is a snooze...");
-        // For now use 0.25 minutes as the snooze time (15 sec) for dev/testing
-        let minutesToAdd = alarm.snoozeCount * 1; // FIXME: Make this '10' before alpha release. '10' is the hard-coded snooze time for now...
+        let minutesToAdd = alarm.snoozeCount * 1;
         let inAppNotifTime = moment(alarm.wakeUpTime).add(
             minutesToAdd,
             "minute"

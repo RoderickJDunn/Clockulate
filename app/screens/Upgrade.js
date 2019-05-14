@@ -527,8 +527,8 @@ export default class Upgrade extends React.Component {
         // IAP functionality
         console.log("onPressUpgrade");
 
-        // upgrades.setPro(true);
-        // return;
+        // upgrades.setPro(true); // DEV:
+        // return; // DEV:
 
         this.setState({ isLoading: true });
         await RNIap.clearTransaction();
@@ -576,16 +576,10 @@ export default class Upgrade extends React.Component {
             );
         }
 
-        /* DEV: Simulates user buying the IAP */
-        // upgrades.setPro(true);
-        // this.props.navigation.setParams();
-        /* END-DEV */
-
         /* ************************************ */
     };
 
     onPressRstrPurchase = async () => {
-        //TODO: Implement IAP functionality. NEEDS TESTING WITH SANDBOX
         console.log("onPressRstrPurchase");
         this.setState({ isLoading: true });
 
@@ -953,7 +947,7 @@ export default class Upgrade extends React.Component {
                                         ? `One-time purchase of ${
                                               products[0].localizedPrice
                                           }`
-                                        : ""}
+                                        : " "}
                                 </Text>
                             </View>
                         ) : (

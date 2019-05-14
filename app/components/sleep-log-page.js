@@ -611,7 +611,7 @@ export default class SleepLogPage extends React.PureComponent {
                                         <Pie
                                             radius={42}
                                             innerRadius={38}
-                                            /*TODO: calculate series, and rotation
+                                            /* calculate series, and rotation
                                             1. If startTime is not 12:00, calculate rotation to apply
                                             2. Calculate duration (then device convert to perecent (/ 24))
                                                 2a. If duration < 12 hrs, convert it to percent (dur / 12 * 100)

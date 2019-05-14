@@ -49,8 +49,7 @@ import Colors from "../styles/colors";
 import { TextStyle } from "../styles/text";
 import { AlarmModel } from "../data/models";
 import TouchableBackdrop from "../components/touchable-backdrop";
-// TODO: Remove after we're done choosing fonts
-// import { fontPreview } from "../styles/text.js";
+
 import { scale, scaleByFactor, scaleByHeightFactor } from "../util/font-scale";
 import * as DateUtils from "../util/date_utils";
 import { ALARM_STATES } from "../data/constants";
@@ -58,9 +57,12 @@ import { AdWrapper } from "../services/AdmobService";
 import upgrades from "../config/upgrades";
 import ClkAlert from "../components/clk-awesome-alert";
 
+// // DEV:
+// import { fontPreview } from "../styles/text.js";
+// import { createAlarmTasks } from "../test/insert_data";
+
 let { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const snoozeTimeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20];
-// const snoozeTimeOptions = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15]; // DEV: short snooze option
 
 let _menuIconAnim = new Animated.Value(0);
 
@@ -189,7 +191,6 @@ class AlarmDetail extends Component {
 
     tskListDimsTLView = {
         width: SCREEN_WIDTH,
-        // TODO: FIX height calculation
         height:
             SCREEN_HEIGHT *
                 NON_CLOCK_HEIGHT_FACTOR *
@@ -288,7 +289,6 @@ class AlarmDetail extends Component {
                     showTasksUpgradePopup: false,
                     showStartTimesUpgradePopup: false
                 };
-                // this.state.alarm.mode = "normal"; // FIXME: this is to hack in normal mode for testing
             });
         } else {
             // console.log("We are editing an existing alarm: ", params);
@@ -1389,7 +1389,6 @@ class AlarmDetail extends Component {
 
     _onPressTasksHeader() {
         console.log("_onPressTasksHeader");
-        this._taskListNeedsRemeasure = true;
         // this._hideModeText();
         if (this.state.taskListFullScreen == false) {
             console.log("1");
@@ -1429,7 +1428,6 @@ class AlarmDetail extends Component {
                 this._viewIdx = 2;
                 if (measuredViewHasChanged) {
                     // since lastView will never be set to "normal", we know that the last view measured was "autocalc". Therefore we need to remeasure
-                    this._taskListNeedsRemeasure = true;
                     this._snapPoints = this._ALL_SNAP_POINTS.slice(1); // returns new array containing 1st element to end (2nd element)
                     // since view has changed, we need to set new state
                     this.setState({
@@ -1442,9 +1440,6 @@ class AlarmDetail extends Component {
                 nextState = { taskListFullScreen: false, activeTask: null };
 
                 // first check if the last measured view was "tasklist".
-                if (this._lastMeasuredView == "tasklist") {
-                    this._taskListNeedsRemeasure = true;
-                }
                 this._lastMeasuredView = "autocalc";
                 this._viewIdx = targetSnapPointId == "autocalc" ? 1 : 0;
                 let modeHasChanged = targetSnapPointId != alarmState.mode;
@@ -1792,11 +1787,6 @@ class AlarmDetail extends Component {
         let sortedTasks = this._cachedSortedTasks;
 
         console.log("AlarmDetail: this._viewIdx", this._viewIdx);
-
-        let forceRemeasure = this._taskListNeedsRemeasure;
-        this._taskListNeedsRemeasure = false;
-
-        // console.log("forceRemeasure?", forceRemeasure);
 
         let touchableBackdrop,
             fullScreenTouchableBackdrop = null;
@@ -2377,7 +2367,6 @@ class AlarmDetail extends Component {
                                         // didEndMove={this._didEndMove}
                                         onReorderTasks={this._onReorderTasks}
                                         willStartMove={this._willStartTaskMove}
-                                        forceRemeasure={forceRemeasure} // TODO: is this prop event required anymore?
                                         hideDisabledTasks={
                                             this.state.hideDisabledTasks
                                         }
@@ -2730,7 +2719,7 @@ class AlarmDetail extends Component {
                         }}
                     />
                 )}
-                {/* Measuring line -- dev view to measure whether views are aligned properly */}
+                {/* DEV: Measuring line -- dev view to measure whether views are aligned properly */}
                 {/* <View
                     style={{
                         position: "absolute",
@@ -2771,26 +2760,76 @@ class AlarmDetail extends Component {
                         title={"Snooze Time"}
                     />
                 )}
-                {/* NOTE: DEV: View for flicking between Placeholder screen and real screen */}
+                {/* NOTE: DEV: Button to sort tasks alphabetically */}
                 {/* <TouchableOpacity
                     style={{
                         width: 100,
-                        height: 100,
+                        height: 50,
                         backgroundColor: "yellow",
                         position: "absolute",
                         right: 0
                     }}
                     onPress={() => {
-                        let {
-                            notFirstLoad
-                        } = this.props.navigation.state.params;
-                        notFirstLoad = !notFirstLoad;
-                        this.props.navigation.setParams({
-                            notFirstLoad: notFirstLoad
+                        let sortedAlmTasks = this.state.alarm.tasks.sorted(
+                            "task.name"
+                        );
+
+                        realm.write(() => {
+                            for (let i = 0; i < sortedAlmTasks.length; i++) {
+                                sortedAlmTasks[i].order = i;
+                                console.log("i", i);
+                                console.log(
+                                    "sortedAlmTasks[i]",
+                                    sortedAlmTasks[i]
+                                );
+                            }
+
+                            console.log(
+                                "sortedAlmTasks.length",
+                                sortedAlmTasks.length
+                            );
+
+                            this.state.alarm.tasks = sortedAlmTasks.snapshot();
                         });
+
+                        this.forceUpdate();
                     }}
                 >
-                    <Text>ToggleView</Text>
+                    <Text>Sort A-Z</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={{
+                        width: 100,
+                        height: 50,
+                        backgroundColor: "yellow",
+                        position: "absolute",
+                        left: 0
+                    }}
+                    onPress={() => {
+                        createAlarmTasks(this.state.alarm);
+
+                        this.forceUpdate();
+                    }}
+                >
+                    <Text>Create Tasks</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={{
+                        width: 100,
+                        height: 50,
+                        backgroundColor: "red",
+                        position: "absolute",
+                        top: 70,
+                        left: 0
+                    }}
+                    onPress={() => {
+                        realm.write(() => {
+                            this.state.alarm.tasks = [];
+                        });
+                        this.forceUpdate();
+                    }}
+                >
+                    <Text>Delete all Tasks</Text>
                 </TouchableOpacity> */}
             </ScrollView>
         );

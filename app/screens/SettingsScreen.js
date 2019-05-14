@@ -233,7 +233,6 @@ export default class SettingsScreenCkt extends React.Component {
                     subtitle: "Required to monitor sleep and ensure wakeup",
                     renderAccessory: () => {
                         let { mic } = this.state.permissions;
-                        // TODO: I need to remove the Switch
                         return mic != null ? (
                             mic == true ? (
                                 <EntypoIcon

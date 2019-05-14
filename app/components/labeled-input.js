@@ -47,8 +47,7 @@ class LabeledInput extends Component {
     }
 
     render() {
-        console.log("render", "LabeledInput");
-        // console.log("render labeledInput");
+        // console.log("render", "LabeledInput");
         // console.log("this.state.inputText", this.state.inputText);
         // console.log("this.props.fieldText", this.props.fieldText);
         let onBlur, onFocus, height, labelBottomPadding, flex;

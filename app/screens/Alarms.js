@@ -67,11 +67,12 @@ import { scaleByFactor } from "../util/font-scale";
 const { UIManager } = NativeModules;
 import { AdWrapper } from "../services/AdmobService";
 
-/* Dev only */
-import { populateDummyAlarms } from "../data/data-prepop";
 import { ALARM_STATES } from "../data/constants";
 import Settings from "../config/settings";
 import { ifIphoneX } from "react-native-iphone-x-helper";
+
+/* Dev only */
+// import { populateDummyAlarms } from "../data/data-prepop";
 
 var loadedSound = null;
 
@@ -243,26 +244,6 @@ class Alarms extends Component {
 
         if (Platform.OS === "ios") {
             NotificationsIOS.consumeBackgroundQueue();
-
-            // NotificationsIOS.addEventListener(
-            //     "pushKitRegistered",
-            //     this.onPushKitRegistered.bind(this)
-            // );
-            // NotificationsIOS.registerPushKit();
-
-            // TODO: ARE THESE REQUIRED? PROBABLY NOT
-            // NotificationsIOS.addEventListener(
-            //     "notificationReceivedForeground",
-            //     this.onNotificationReceivedForeground.bind(this)
-            // );
-            // NotificationsIOS.addEventListener(
-            //     "notificationReceivedBackground",
-            //     this.onNotificationReceivedBackground.bind(this)
-            // );
-            // NotificationsIOS.addEventListener(
-            //     "notificationOpened",
-            //     this.onNotificationOpened.bind(this)
-            // );
         } else {
             // PushNotificationAndroid.cancelAllLocalNotifications();
 
@@ -432,11 +413,11 @@ class Alarms extends Component {
                 checkForImplicitSnooze(alarms[i], mNow);
                 // setInAppAlarm(alarms[i], this.reloadAlarms.bind(this));
 
-                // TODO: Its possible that the app was terminated, or audio was interupted.
-                //          If this is the case, we need to resume Native module functionality without scheduling a timer for wakeUpTime (since it has already passed).
-                //          Instead the native module will need to set the timer for the next snoozeInterval. I guess it should check if wakeUpTime has passed, and if so,
-                //          check the snoozeCount value, and snoozeTime value, and calculate when to set the snooze timer for. Hopefully, instead of calling
-                //          setInAppAlarm after checkForImplicitSnooze, I can just call resumeAlarm.
+                // Its possible that the app was terminated, or audio was interupted.
+                //     If this is the case, we need to resume Native module functionality without scheduling a timer for wakeUpTime (since it has already passed).
+                //     Instead the native module will need to set the timer for the next snoozeInterval. I guess it should check if wakeUpTime has passed, and if so,
+                //     check the snoozeCount value, and snoozeTime value, and calculate when to set the snooze timer for. Hopefully, instead of calling
+                //     setInAppAlarm after checkForImplicitSnooze, I can just call resumeAlarm.
 
                 resumeAlarm(
                     alarms[i],
@@ -454,19 +435,6 @@ class Alarms extends Component {
             // Make sure there are no notifications scheduled, since no Alarms are enabled or snoozed.
             cancelAllNotifications();
         }
-
-        // FIXME: Or remove... I commented this out for now because if there are any SET/SNOOZED/RINGING alarms when clearAlarm is called,
-        //          the native AlarmService stops the active alarm, as turnOffAlarm does not accept any parameters. It just stops whatever alarm is active.
-        // else {
-        //     // ensure there are no timers or notifications scheduled for all OFF Alarms
-        //     let offAlarms = realm
-        //         .objects("Alarm")
-        //         .filtered("status == $0", ALARM_STATES.OFF);
-
-        //     for (let i = 0; i < offAlarms.length; i++) {
-        //         clearAlarm(offAlarms[i]);
-        //     }
-        // }
     }
 
     handleAddAlarm() {
@@ -600,7 +568,7 @@ class Alarms extends Component {
         this.setState({
             alarms: realm.objects("Alarm").sorted("order"),
             isLoading: false
-        }); // TODO: filter by 'visible'=true
+        });
     };
 
     _showChargeReminder = () => {
@@ -934,9 +902,6 @@ class Alarms extends Component {
         //     console.log(a.id);
         // });
 
-        // TODO: Uncomment this line to monitor for inactivity, and enable ProxMonitor if no activity for x seconds
-        // this.resetTimer();
-
         // this.setState({ duplicatedAlarmId: null });
         let duplicationInfo = this._duplicationInfo;
 
@@ -1006,7 +971,6 @@ class Alarms extends Component {
                                 );
                             }}
                             keyExtractor={this._keyExtractor}
-                            // extraData={this.state} // TODO: FIXME: May be able to fix flickering issue by being more careful about what extraData we pass in. THis may prevent unessesary re-renders of AlarmItems when they haven't changed
                             onMoveEnd={moveInfo => {
                                 // console.log("moveInfo", moveInfo);
                                 this._onReorderAlarms(

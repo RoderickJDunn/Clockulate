@@ -55,7 +55,7 @@ class EdgeSwiper extends Component {
     }
 
     render() {
-        console.log("render", "EdgeSwiper");
+        // console.log("render", "EdgeSwiper");
         // console.log("render labeledInput");
         // console.log("this.state.inputText", this.state.inputText);
         // console.log("this.props.fieldText", this.props.fieldText);

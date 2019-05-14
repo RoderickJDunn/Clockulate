@@ -133,7 +133,6 @@ let HELP_SECTIONS = [
 ];
 
 // SCREEN_HEIGHT -= 88; // add 88 since the Nav bar is transparent
-// TODO: In-app purchases
 export default class Help extends React.Component {
     /*
     Props: 
@@ -379,7 +378,7 @@ export default class Help extends React.Component {
                                         (this._pageRefs[
                                             idx + this._welcomeOffset
                                         ] = elm)
-                                    } /// TODO: add each to an array of page references, so I can imperitively call 'nextStep' on the current page.
+                                    }
                                     key={idx + this._welcomeOffset}
                                     idx={idx + this._welcomeOffset}
                                     sectionInfo={section}
@@ -561,10 +560,7 @@ export default class Help extends React.Component {
 
 const styles = StyleSheet.create({
     pagingDotsCont: {
-        // position: "absolute",
-        // bottom: 20, // TODO: iPhonex offset
         height: 20,
-        // height: 30
         flexDirection: "row",
         alignSelf: "center",
         alignContent: "center",

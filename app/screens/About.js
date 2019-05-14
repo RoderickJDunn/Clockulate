@@ -29,8 +29,6 @@ const backupLink = `itms-apps://itunes.apple.com/app/id${APP_ID}`;
 const contactLink = "http://www.clockulate.ca/contact";
 const supportLink = "http://www.clockulate.ca/support";
 
-// export var APP_VERSION = VersionNumber.appVersion;
-// TODO:
 export default class About extends React.Component {
     /*
     Props: 

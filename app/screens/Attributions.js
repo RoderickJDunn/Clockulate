@@ -74,8 +74,9 @@ export default class Attributions extends React.Component {
                     license = License.REALM;
                     /** else if: I may need to add further specific licenses here */
                 } else {
-                    license = // DEV:
-                        "@#($*&@#$(*& SSDF SDF UNKNOWN LICENSE TYPE @#)(*$&DFISDFOIHSDFOISD FSDF \nW(#########***********\n\n\n\n\n32478DDDDDDD62346^#^@#*&$#@*&$^@#*$&^@#*&$^87";
+                    license = "";
+                    // license = // DEV:
+                    //     "@#($*&@#$(*& SSDF SDF UNKNOWN LICENSE TYPE @#)(*$&DFISDFOIHSDFOISD FSDF \nW(#########***********\n\n\n\n\n32478DDDDDDD62346^#^@#*&$#@*&$^@#*$&^@#*&$^87";
                 }
         }
 
