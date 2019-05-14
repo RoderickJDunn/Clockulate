@@ -332,23 +332,26 @@ export default class Help extends React.Component {
                     }}
                     horizontalOnly={true}
                     snapPoints={this._snapPoints}
-                    // dragWithSpring={{ tension: 1000, damping: 0.5 }}
                     animatedNativeDriver={true}
                     animatedValueX={this._bgdPosition}
                     onDrag={event => {
-                        console.log("onDrag");
+                        // console.log("onDrag");
                         let { state, y, targetSnapPointId } = event.nativeEvent;
                         if (state == "end") {
-                            console.log("onDrag end");
+                            // console.log("onDrag end");
+
+                            // console.log("targetSnapPointId", targetSnapPointId);
                             //     this.props.onSnap(targetSnapPointId);
                             this._idx = parseInt(targetSnapPointId);
+                            // console.log("this._idx ", this._idx);
 
                             if (
                                 this._pageRefs &&
                                 this._pageRefs.length == 4 + this._welcomeOffset
                             ) {
                                 let currPageRef = this._pageRefs[this._idx];
-                                currPageRef.updateBoundaryFlags();
+                                currPageRef.updateBoundaryFlags &&
+                                    currPageRef.updateBoundaryFlags();
                             } else {
                                 console.warn("Pagerefs not working correctly.");
                                 console.log(
