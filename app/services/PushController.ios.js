@@ -357,9 +357,8 @@ let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
         backupTimes.push(`${i}. ${wakeUpMoment.toDate()}, `);
 
         NotificationsIOS.localNotification({
-            alertBody:
-                alarm.label
-                // + "(Backup Notification -- should only fire if AlarmService not running)", // DEV: remove extra string
+            alertBody: alarm.label,
+            // + "(Backup Notification -- should only fire if AlarmService not running)", // DEV: remove extra string
             alertTitle: "Clockulate",
             alertAction: "Click here to open",
             soundName: shortSoundFile,
@@ -836,7 +835,7 @@ export let checkForImplicitSnooze = (alarm, mNow) => {
         );
     }
 
-    let almSnoozeTime = alarm.snoozeTime * 60; // convert snoozeTime to seconds 
+    let almSnoozeTime = alarm.snoozeTime * 60; // convert snoozeTime to seconds
     console.log("almSnoozeTime", almSnoozeTime);
 
     let expectedSnoozeCount = Math.ceil(secondsDiff / almSnoozeTime);
