@@ -51,7 +51,9 @@ export default class WelcomePage extends Component {
                 easing: Easing.inOut(Easing.ease),
                 useNativeDriver: true
             }).start();
-            this.setState({ showWelcome: true });
+
+            this.welcomeTxtRef && this.welcomeTxtRef.fadeIn(1500, 1000);
+            // this.setState({ showWelcome: true });
         }, 3000);
     }
 
@@ -64,14 +66,14 @@ export default class WelcomePage extends Component {
 
         let { currSectIdx } = this.props;
 
-        console.log("idx", idx);
-        console.log("stepIdx", stepIdx);
-        console.log("currSectIndex", currSectIdx);
-        console.log("HEADER_HEIGHT", HEADER_HEIGHT);
+        // console.log("idx", idx);
+        // console.log("stepIdx", stepIdx);
+        // console.log("currSectIndex", currSectIdx);
+        // console.log("HEADER_HEIGHT", HEADER_HEIGHT);
         // let images = sectionInfo.images.slice(0, stepIdx + 1);
 
         // console.log("images", images);
-        console.log("SCREEN_HEIGHT", SCREEN_HEIGHT);
+        // console.log("SCREEN_HEIGHT", SCREEN_HEIGHT);
 
         return (
             <View style={styles.helpPage}>
@@ -92,36 +94,33 @@ export default class WelcomePage extends Component {
                     }}
                     source={{ uri: "WelcomeScreen_logo_v2" }}
                 />
-                {this.state.showWelcome && (
-                    <Animatable.View
-                        contentInsetAdjustmentBehavior="automatic"
-                        useNativeDriver={true}
-                        animation={"fadeIn"}
-                        delay={1000}
-                        duration={1500}
+                <Animatable.View
+                    contentInsetAdjustmentBehavior="automatic"
+                    useNativeDriver={true}
+                    ref={elm => (this.welcomeTxtRef = elm)}
+                    style={{
+                        height: SCREEN_HEIGHT * 0.5,
+                        width: SCREEN_WIDTH,
+                        position: "absolute",
+                        bottom: 0,
+                        opacity: 0
+                    }}
+                >
+                    <Text
                         style={{
-                            height: SCREEN_HEIGHT * 0.5,
-                            width: SCREEN_WIDTH,
                             position: "absolute",
-                            bottom: 0
+                            justifyContent: "center",
+                            alignSelf: "stretch",
+                            textAlign: "center",
+                            width: "100%",
+                            color: Colors.brandLightOpp,
+                            fontFamily: "Gurmukhi MN",
+                            fontSize: 30
                         }}
                     >
-                        <Text
-                            style={{
-                                position: "absolute",
-                                justifyContent: "center",
-                                alignSelf: "stretch",
-                                textAlign: "center",
-                                width: "100%",
-                                color: Colors.brandLightOpp,
-                                fontFamily: "Gurmukhi MN",
-                                fontSize: 30
-                            }}
-                        >
-                            Welcome
-                        </Text>
-                    </Animatable.View>
-                )}
+                        Welcome
+                    </Text>
+                </Animatable.View>
                 {/* Measuring line */}
                 {/* <View
                         style={{
