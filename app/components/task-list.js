@@ -17,6 +17,7 @@ import DraggableFlatList from "react-native-draggable-flatlist";
 import TaskItem, { MOVING_ITEM_TYPES } from "./task-item";
 import Colors from "../styles/colors";
 import AnimatedPulse from "./anim-pulse";
+import { clamp } from "../util/math_utils";
 
 class MoveableRowHelper {
     animatedValue;
@@ -101,9 +102,11 @@ class TaskList extends React.Component {
 
     constructor(props) {
         super(props);
-        this._panAnim.addListener(({ value }) => {
-            console.log("transform val: ", value);
-        });
+
+        // DEV:
+        // this._panAnim.addListener(({ value }) => {
+        //     console.log("transform val: ", value);
+        // });
 
         this._taskCount = props.data.length;
         this._taskCountTotal = props.data.length;
@@ -461,11 +464,9 @@ class TaskList extends React.Component {
         // console.log(evt.nativeEvent.translationY);
         let newPosTmp = Math.floor(yWithScrollOffset / 55);
 
-        // make sure newPosition is not > # of rows
-        newPosTmp = Math.min(this._taskCount - 1, newPosTmp);
-
-        // make sure newPosition is not < 0
-        newPosTmp = Math.max(newPosTmp, 0);
+        // make sure newPosition is not > # of rows,
+        // and make sure newPosition is not < 0
+        newPosTmp = clamp(newPosTmp, 0, this._taskCount - 1);
 
         if (this._scrollIfNeededAndAllowed(y, velocityY) == 0) {
             this._refreshAndAnimate(newPosTmp);
@@ -635,10 +636,32 @@ class TaskList extends React.Component {
 
                                 clearInterval(this._autoscrollTimer);
 
+                                // Find range of valid relative movements in both directions:
+
+                                // max relative momement towards top. NOTE: this number is negative because it is RELATIVE movement (decrease in order number)
+                                let maxUpwardMvmt = -this.movingItem.initOrder;
+
+                                // max relative momement towards bottom
+                                let maxDownwardMvmt =
+                                    this._taskCount -
+                                    1 -
+                                    this.movingItem.initOrder;
+
+                                // console.log("maxDownwardMvmt", maxDownwardMvmt);
+                                // console.log("maxUpwardMvmt", maxUpwardMvmt);
+
+                                let toValue =
+                                    relativeMovement * 55 -
+                                    this._scrollDuringMove;
+
+                                toValue = clamp(
+                                    toValue,
+                                    maxUpwardMvmt * 55,
+                                    maxDownwardMvmt * 55
+                                );
+
                                 Animated.timing(this._panAnim, {
-                                    toValue:
-                                        relativeMovement * 55 -
-                                        this._scrollDuringMove,
+                                    toValue: toValue,
                                     duration: 350,
                                     easing: Easing.ease,
                                     useNativeDriver: true
