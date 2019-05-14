@@ -63,13 +63,13 @@ export class AlarmInstance {
 export class AlarmSound {
     constructor(sound) {
         if (!sound) {
-            sound = realm.objects("Sound").filtered("order = $0", 4)[0];
+            sound = realm.objects("Sound").filtered("order = $0", 1)[0];
         }
         this.id = uuid.v1();
         this.sound = sound;
         this.type = SOUND_TYPES.NORMAL;
 
-        // DEV: Defaut sound is silent for dev. But for releases it should be Digital4 (uncomment the block above)
+        // DEV: Defaut sound is silent for dev. But for releases it should be CloudWalk (uncomment the block above)
         // if (!sound) {
         //     sound = realm.objects("Sound").filtered("order = $0", 0)[0];
         // }
