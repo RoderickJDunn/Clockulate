@@ -386,7 +386,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     
     CKT_LOG("alarmDidTrigger: Playing \(String(describing: soundFileName))")
     
-    // Play audio
+    // Get audio file 
     guard let url = Bundle.main.url(forResource: soundFileName, withExtension: "mp3") else {
       CKT_LOG("ERROR: Failed to find soundfile: \(soundFileName)")
       return

@@ -96,7 +96,7 @@ class AlarmItem extends React.PureComponent {
 
         let count = 0;
 
-        /* DEV-only -- listen to animate value as it changes */
+        /* DEV: -- listen to animate value as it changes */
         // this._position.addListener(v => {
         //     count++;
         //     if (count % 10 == 0) console.log(v);

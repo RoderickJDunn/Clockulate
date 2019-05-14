@@ -293,7 +293,6 @@ export default class Sounds extends Component {
                                         offset +=
                                             this._getSectHeaderHeight(i) +
                                             sectData.length * SOUND_ROW_HEIGHT;
-                                        console.log("offset", offset);
                                     } else if (
                                         index ==
                                         total - sectData.length - 2

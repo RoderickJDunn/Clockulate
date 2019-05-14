@@ -127,14 +127,14 @@ export default class IntrvHelpPage extends Component {
 
         let { currSectIdx } = this.props;
 
-        console.log("idx", idx);
-        console.log("stepIdx", stepIdx);
-        console.log("currSectIndex", currSectIdx);
-        console.log("HEADER_HEIGHT", HEADER_HEIGHT);
+        // console.log("idx", idx);
+        // console.log("stepIdx", stepIdx);
+        // console.log("currSectIndex", currSectIdx);
+        // console.log("HEADER_HEIGHT", HEADER_HEIGHT);
         let images = sectionInfo.images.slice(0, stepIdx + 1);
 
-        console.log("images", images);
-        console.log("SCREEN_HEIGHT", SCREEN_HEIGHT);
+        // console.log("images", images);
+        // console.log("SCREEN_HEIGHT", SCREEN_HEIGHT);
 
         return (
             <TouchableWithoutFeedback onPress={this.nextStep}>
@@ -235,10 +235,10 @@ export default class IntrvHelpPage extends Component {
                                                         uri: img.path
                                                     }}
                                                     onHeightChange={height => {
-                                                        console.log(
-                                                            "onHeightChange",
-                                                            height
-                                                        );
+                                                        // console.log(
+                                                        //     "onHeightChange",
+                                                        //     height
+                                                        // );
                                                         if (
                                                             height > STEP_HEIGHT
                                                         ) {
