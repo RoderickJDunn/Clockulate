@@ -117,14 +117,15 @@ class AlarmDetail extends Component {
 
         let menuIsOpen = navigation.state.params.menuIsOpen;
         return {
-            title: "Edit Alarm",
+            // title: "Edit Alarm",
             // This is how you define a custom back button. Apart from styling, this also seems like the best way to
             //  perform any additional tasks before executing navigation.goBack(), otherwise, goBack() is called
             //  automatically when the back button is pushed
             headerLeft: menuIsOpen ? null : (
                 <TouchableOpacity
                     onPress={() => {
-                        params.handleBackBtn && params.handleBackBtn();
+                        params.handleBackBtn &&
+                            params.handleBackBtn(/* Don't enable */ false);
                     }}
                     hitSlop={{ top: 10, bottom: 10, left: 0, right: 20 }}
                 >
@@ -136,40 +137,59 @@ class AlarmDetail extends Component {
                     />
                 </TouchableOpacity>
             ),
-            headerRight: (
+            headerTitle: (
                 <TouchableOpacity
+                    style={{ paddingHorizontal: 20 }}
                     onPress={() => {
                         params.setMenuState && params.setMenuState(!menuIsOpen);
                     }}
-                    style={{
-                        alignSelf: "flex-end",
-                        paddingLeft: 20,
-                        paddingRight: 10
-                        // height: Header.HEIGHT - 20
-                    }}
                 >
+                    <Text style={styles.navTitleText}>Edit Alarm</Text>
                     <Animated.View
                         style={{
                             alignSelf: "center",
                             alignItems: "center",
                             justifyContent: "center",
-                            flex: 1,
+                            position: "absolute",
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
                             transform: [
                                 {
-                                    rotate: _menuIconAnim.interpolate({
+                                    rotateX: _menuIconAnim.interpolate({
                                         inputRange: [0, 1],
-                                        outputRange: ["0deg", "-90deg"]
+                                        outputRange: ["0deg", "180deg"]
                                     })
-                                }
+                                },
+                                { perspective: 1000 }
                             ]
                         }}
                     >
-                        <MaterialIcon
+                        <FAIcon
                             color={Colors.brandLightGrey}
-                            name="more-vert"
-                            size={25}
+                            name="chevron-down"
+                            size={10}
                         />
                     </Animated.View>
+                </TouchableOpacity>
+            ),
+            headerRight: (
+                <TouchableOpacity
+                    onPress={() => {
+                        params.handleBackBtn &&
+                            params.handleBackBtn(/* Enable Alarm */ true);
+                    }}
+                    style={{
+                        paddingLeft: 20,
+                        paddingRight: 10
+                        // height: Header.HEIGHT - 20
+                    }}
+                >
+                    <MaterialIcon
+                        color={Colors.brandLightGrey}
+                        name="done"
+                        size={25}
+                    />
                 </TouchableOpacity>
             )
         };
@@ -704,14 +724,17 @@ class AlarmDetail extends Component {
     //     console.debug("AlarmDetail componentWillUnmount");
     // }
 
-    handleBackPress() {
+    handleBackPress(tryToEnable = false) {
         // console.debug("Going back to Alarms List");
         // console.debug(this.state);
 
         let nextAlarmStatus;
         realm.write(() => {
             let { alarm } = this.state;
-            if (this.isAnotherAlarmOn) {
+
+            // don't enable this alarm unless there is no other alarm on, and tryToEnable param is true
+            // tryToEnable should only be true if this was called from the SAVE_AND_ENABLE btn (right-btn of nav bar)
+            if (this.isAnotherAlarmOn || tryToEnable == false) {
                 nextAlarmStatus = ALARM_STATES.OFF;
             } else {
                 nextAlarmStatus = ALARM_STATES.SET;
@@ -2930,6 +2953,11 @@ const styles = StyleSheet.create({
         // fontFamily: "Baskerville-Bold"
         fontFamily: "Quesha"
         // fontWeight: "bold"
+    },
+    navTitleText: {
+        color: Colors.brandLightOpp,
+        fontSize: Platform.OS === "ios" ? 17 : 20,
+        fontWeight: Platform.OS === "ios" ? "600" : "500"
     }
 });
 
