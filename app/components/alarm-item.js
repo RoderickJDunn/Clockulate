@@ -751,7 +751,8 @@ class AlarmItem extends React.PureComponent {
                                             fontFamily: "Gurmukhi MN",
                                             fontSize: scaleByFactor(15, 0.4)
                                         }}
-                                        numberOfLines={2}
+                                        multiline={false}
+                                        numberOfLines={1}
                                     >
                                         {this.props.alarm.label}
                                     </Text>
