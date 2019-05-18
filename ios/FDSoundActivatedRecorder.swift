@@ -53,12 +53,12 @@ import AVFoundation
 }
 
 func print(_ items: Any...) {
-  #if DEBUG
+   #if DEBUG
   items.forEach { item in
     Swift.print(item, terminator:"")
   }
   Swift.print("")
-  #endif
+   #endif
 }
 
 @objc public enum FDSoundActivatedRecorderStatus: Int {
@@ -296,6 +296,8 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
     fileprivate var triggerCount = 0
     fileprivate var intervalTimer = Timer()
     fileprivate var rotationTimer = Timer()
+    fileprivate var startAlmIgnoreTimer = Timer()
+  
   
     /** The startTime of the current recording, relative to start of currently active recorder. ie) Since recorder was last rotated.
         Used in stopAndSaveRecording to determine where to start the 'cut' of the temporary file, and to calculate the duration of the rec.  */
@@ -356,7 +358,7 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
           print("Yes! We are in release build!")
           self.sarMode = .ignoreAll
           DispatchQueue.main.async {
-            Timer.scheduledTimer(withTimeInterval: 900, repeats: false) { timer in
+            self.startAlmIgnoreTimer = Timer.scheduledTimer(withTimeInterval: 900, repeats: false) { timer in
               self.sarMode = .recordOnTrigger
             }
           }
@@ -578,6 +580,8 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
     open func abort() {
         self.intervalTimer.invalidate()
         self.rotationTimer.invalidate()
+        self.startAlmIgnoreTimer.invalidate()
+      
         self.audioRecorder.stop()
         if status != .inactive {
             status = .inactive
