@@ -57,6 +57,10 @@ let prePopTasks = [
         defaultDuration: 1800
     },
     {
+        name: "Drive to Work (rush hour)",
+        defaultDuration: 2700
+    },
+    {
         name: "Take the Bus to work",
         defaultDuration: 2700
     },
@@ -103,6 +107,18 @@ let prePopTasks = [
     {
         name: "Drop kids off at school",
         defaultDuration: 1200
+    },
+    {
+        name: "Answer emails",
+        defaultDuration: 1200
+    },
+    {
+        name: "Put on make up",
+        defaultDuration: 900
+    },
+    {
+        name: "Meditate",
+        defaultDuration: 600
     }
     // {
     //     name: "",
