@@ -542,6 +542,7 @@ class TaskDetail extends Component {
                             this._adWrapRef.fadeOut();
                         }
                     }}
+                    ellipsizeMode="tail"
                     blurOnSubmit={true}
                     // onContentSizeChange={e =>
                     //     this.updateSize(e.nativeEvent.contentSize.height)
