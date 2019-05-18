@@ -156,6 +156,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     
     self.currAlarm = alarmInfo as! Dictionary<String,Any>
     
+    self.CKT_LOG(alarmInfo.description)
+    
     if (alarmStatus == .SET) {
       CKT_LOG("Alarm already SET. Updating parameters")
       
@@ -167,10 +169,11 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
         // Only set timer if the time is in the future. Its possible that this is called when app is re-opened, and therefore, the
         //  alarm time could be in the past.
         if timeTillAlm > 0 {
-          self.alarmTimer.invalidate()
+          
           // Audio initialization succeeded... set a timer for the time in alarmInfo, with callback of the function below (alarmDidTrigger). Set userInfo property of timer to sound file name.
           DispatchQueue.main.async(execute: {
-            self.alarmTimer = Timer.scheduledTimer(timeInterval: timeTillAlm, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
+              self.alarmTimer.invalidate()
+              self.alarmTimer = Timer.scheduledTimer(timeInterval: timeTillAlm, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
           })
         }
         
@@ -251,8 +254,6 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     AVAudioSession.sharedInstance().requestRecordPermission() { [unowned self] allowed in
       DispatchQueue.main.async {
           self.CKT_LOG("Got permission to record")
-            self.CKT_LOG(alarmInfo.description)
-        
             
             // unpack settings
             if let cooldown = settings["recCooldown"] as? Double {
@@ -284,18 +285,16 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
                 // Only set timer if the time is in the future. Its possible that this is called when app is re-opened, and therefore, the
                 //  alarm time could be in the past.
                 if timeTillAlm > 0 {
-                  self.alarmTimer.invalidate()
+                  
                   // Audio initialization succeeded... set a timer for the time in alarmInfo, with callback of the function below (alarmDidTrigger). Set userInfo property of timer to sound file name.
-                  DispatchQueue.main.async(execute: {
-                      self.alarmTimer = Timer.scheduledTimer(timeInterval: timeTillAlm, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
-                  })
+                    self.alarmTimer.invalidate()
+                    self.alarmTimer = Timer.scheduledTimer(timeInterval: timeTillAlm, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
                 }
                 else {
                   // if Alarm time is in the past, trigger right away. Hopefully, the only way this situation would occurs
                   //  is if user waits with the RecordPermission popup showing, until the Alarm time passes.
-                  DispatchQueue.main.async(execute: {
+                  self.alarmTimer.invalidate()
                     self.alarmTimer = Timer.scheduledTimer(timeInterval: 0, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
-                  })
                 }
                 self.isRecording = true
             }
@@ -445,7 +444,6 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     
     self.alarmTimer.invalidate() // TODO: Unnecessary?
 
-
     // Check if we've passed the limit on auto-snoozes for this alarm.
     if self.autosnoozeCnt > 10 { // DEV: change to 10
         self.CKT_LOG("INFO: Surpassed autosnooze limit. Not snoozing anymore.")
@@ -514,9 +512,6 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     //    so that timer must be invalidated right away to avoid a double call to this.
     self.autoSnoozeTimer.invalidate()
     
-    // Invalidate this timer to stop fade-in audio timer functionality (since we are stopping audio next anyway).
-    self.alarmTimer.invalidate()
-    
     if (self.alarmStatus == AlarmStatus.SNOOZED) {
       CKT_LOG("Alarm is already Snoozed. Ignoring")
       return
@@ -558,6 +553,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
 
       let seconds = minutes * 60;
       DispatchQueue.main.async(execute: {
+        // Invalidate this timer to stop fade-in audio timer functionality (since we are stopping audio next anyway).
+        self.alarmTimer.invalidate()
         self.alarmTimer = Timer.scheduledTimer(timeInterval: seconds, target: self, selector: #selector(self.alarmDidTrigger), userInfo: self.currAlarm, repeats: false)
       })
   }
