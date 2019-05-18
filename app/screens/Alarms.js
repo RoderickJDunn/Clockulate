@@ -772,13 +772,14 @@ class Alarms extends Component {
 
             /* *** DEBUGGING *** */
             // set alarm to next whole minute
-            if (__DEV__) {
-                // let inOneMin = moment().add(1, "minutes");
-                // wakeUpTime = inOneMin.second(0).toDate();
+            // DEV:
+            // if (__DEV__) {
+            //     // let inOneMin = moment().add(1, "minutes");
+            //     // wakeUpTime = inOneMin.second(0).toDate();
 
-                let inTenSec = moment().add(10, "seconds");
-                wakeUpTime = inTenSec.toDate();
-            }
+            //     let inTenSec = moment().add(10, "seconds");
+            //     wakeUpTime = inTenSec.toDate();
+            // }
             /* ***************** */
 
             realm.write(() => {

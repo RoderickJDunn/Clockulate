@@ -357,8 +357,7 @@ let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
         backupTimes.push(`${i}. ${wakeUpMoment.toDate()}, `);
 
         NotificationsIOS.localNotification({
-            alertBody: alarm.label,
-            // + "(Backup Notification -- should only fire if AlarmService not running)", // DEV: remove extra string
+            alertBody: alarm.label, // + "(Backup)", // DEV: remove extra string
             alertTitle: "Clockulate",
             alertAction: "Click here to open",
             soundName: shortSoundFile,
@@ -479,6 +478,7 @@ export let resumeAlarm = (alarm, reload, alarmDidInitialize) => {
             snoozeCount: alarm.snoozeCount,
             snoozeTime: alarm.snoozeTime,
             instId: currAlmInst.id
+            // source: "resumeAlarm" DEV:
         },
         alarmDidInitialize
     );
@@ -667,6 +667,7 @@ export let scheduleAlarm = (alarm, reload, alarmDidInitialize) => {
             snoozeCount: alarm.snoozeCount,
             snoozeTime: alarm.snoozeTime,
             instId: currAlmInst.id
+            // source: "scheduleAlarm" // DEV:
         },
         alarmDidInitialize
     );
