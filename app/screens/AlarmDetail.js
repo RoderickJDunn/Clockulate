@@ -358,7 +358,7 @@ class AlarmDetail extends Component {
 
         this._ALL_SPS_AND_KEYBOARD = [
             { y: this.snapNormal, id: "normal" },
-            { y: this.snapNormal - 200, id: "keyboard" },
+            { y: this.snapNormal - 350, id: "keyboard" },
             { y: this.snapAuto, id: "autocalc" },
             { y: this.snapTaskList, id: "tasklist" }
         ];
@@ -2025,26 +2025,29 @@ class AlarmDetail extends Component {
                                 opacity: this._clockTransform.interpolate({
                                     inputRange: [
                                         this.snapAuto,
+                                        this.snapNormal - 300,
                                         this.snapNormal
                                     ],
-                                    outputRange: [0, 1]
+                                    outputRange: [0, 1, 1]
                                 }),
                                 // backgroundColor: "#AA6",
-                                fontSize: scaleByFactor(16, 0.6),
+                                fontSize: 16,
                                 textAlign: "center",
                                 color: Colors.brandMidOpp,
                                 fontWeight: "400",
                                 justifyContent: "center",
-                                height: 100,
                                 position: "absolute",
                                 bottom: "0%",
                                 width: SCREEN_WIDTH,
                                 alignSelf: "stretch",
+                                paddingHorizontal: 20,
+                                maxHeight: 60, // so that it doesn't get taller than ~3 lines
                                 ...labelForceVisible
                             }}
-                            autoResize={false}
-                            numberOfLines={1}
-                            multiline={false}
+                            blurOnSubmit={true}
+                            // autoResize={false}
+                            numberOfLines={3}
+                            multiline={true}
                         />
                     </Animated.View>
                     <this.AnimatedHandle
