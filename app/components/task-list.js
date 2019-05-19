@@ -333,7 +333,6 @@ class TaskList extends React.Component {
                 moveEnded={this.onMoveEnded}
                 moveItemType={moveType}
                 updateDraggedRowOrder={this.updateDraggedRowOrder}
-                panAnimVal={this._panAnim}
                 index={index} // required, since (order != index) if any items are being hidden
                 // containerDimensions={this.props.containerDimensions}
                 // shouldStartMove={move}
@@ -786,10 +785,6 @@ class TaskList extends React.Component {
                                     transform: [
                                         {
                                             translateY: this._panAnim
-                                            // translateY: Animated.subtract(
-                                            //     this._panAnim,
-                                            //     this._scrollAnim
-                                            // )
                                         }
                                     ]
                                 }
@@ -809,8 +804,6 @@ class TaskList extends React.Component {
                                     0
                                 )}
                                 closed={true}
-                                scrollAnimVal={this._scrollAnim}
-                                panAnimVal={this._panAnim}
                                 moveItemType={MOVING_ITEM_TYPES.COPY}
                                 index={this.movingItem.initOrder}
                             />
