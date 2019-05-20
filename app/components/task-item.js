@@ -501,9 +501,13 @@ class TaskItem extends React.Component {
                                     //     "this.props.data",
                                     //     this.props.data
                                     // );
+                                    // console.log(
+                                    //     "moveItemType: ",
+                                    //     this.props.moveItemType
+                                    // );
                                     if (
                                         this.props.data &&
-                                        this.props.movingItemType ==
+                                        this.props.moveItemType ==
                                             MOVING_ITEM_TYPES.NONE
                                     ) {
                                         // console.log("ok sending ref");
