@@ -93,11 +93,12 @@ export class AlarmTaskModel {
         task: the base task entry to which this AlarmTask is linked
         order: the order of this AlarmTask within the linked Alarm's list of AlarmTasks.
      */
-    constructor(task, order) {
+    constructor(task, order, enabled = true) {
         this.id = uuid.v1();
         this.task = task;
         this.order = order;
         this.duration = 0;
+        this.enabled = enabled;
     }
 }
 

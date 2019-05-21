@@ -709,7 +709,8 @@ class Alarms extends Component {
         for (let i = 0; i < item.tasks.length; i++) {
             let almTask = new AlarmTaskModel(
                 item.tasks[i].task,
-                item.tasks[i].order
+                item.tasks[i].order,
+                item.tasks[i].enabled
             );
             almTask.duration = item.tasks[i].duration;
 
