@@ -1566,7 +1566,7 @@ class AlarmDetail extends Component {
     }
 
     _toggleShowStartTimes() {
-        if (upgrades.pro != true) {
+        if (upgrades.pro != true && this.state.durationsVisible) {
             this._setMenuState(0, { showStartTimesUpgradePopup: true });
             return;
         }
