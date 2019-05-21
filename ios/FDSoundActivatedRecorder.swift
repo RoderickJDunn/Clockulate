@@ -53,12 +53,12 @@ import AVFoundation
 }
 
 func print(_ items: Any...) {
-   #if DEBUG
+  #if DEBUG
   items.forEach { item in
     Swift.print(item, terminator:"")
   }
   Swift.print("")
-   #endif
+  #endif
 }
 
 @objc public enum FDSoundActivatedRecorderStatus: Int {
@@ -358,15 +358,17 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
           print("Yes! We are in release build!")
           self.sarMode = .ignoreAll
           DispatchQueue.main.async {
+            // DEV: Change withTimeInterval to 900 (15 minutes)
             self.startAlmIgnoreTimer = Timer.scheduledTimer(withTimeInterval: 900, repeats: false) { timer in
               self.sarMode = .recordOnTrigger
             }
           }
         #endif
       
-        print("Setting rotation timer") // TODO:
+        print("Setting rotation timer")
         DispatchQueue.main.async {
-          self.rotationTimer = Timer.scheduledTimer(timeInterval: 30, target: self, selector: #selector(self.rotateRecorder), userInfo: nil, repeats: true)
+          // DEV: timeInterval should be 300 (5 minutes)
+          self.rotationTimer = Timer.scheduledTimer(timeInterval: 300, target: self, selector: #selector(self.rotateRecorder), userInfo: nil, repeats: true)
         }
       
         DispatchQueue.main.async {
@@ -593,7 +595,7 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
     
     /// This is a PRIVATE method but it must be public because a selector is used in NSTimer (Swift bug)
     @objc open func interval() {
-//        print("\n\n\ninterval")
+        // print("\n\n\ninterval")
         guard self.audioRecorder.isRecording else {
             print("Timeout... aborting")
             // Timed out
@@ -602,6 +604,7 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
         }
 
         guard self.sarMode != .ignoreAll else {
+            //print("ignoring")
             return
         }
         
