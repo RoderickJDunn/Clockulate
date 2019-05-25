@@ -74,7 +74,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["age_of_innovation.mp3"],
+        files: ["age_of_innovation_30s.mp3", "age_of_innovation.mp3"],
         displayName: "Age of Innovation",
         category: "",
         order: 18,
@@ -125,7 +125,7 @@ let SOUND_DATA = [
 
     /* Premium Sounds */
     {
-        files: ["dawn_of_time.mp3"],
+        files: ["dawn_of_time_30s.mp3", "dawn_of_time.mp3"],
         displayName: "Dawn of Time",
         isPremium: true,
         category: "",
@@ -135,7 +135,7 @@ let SOUND_DATA = [
         source: "Purple Planet"
     },
     {
-        files: ["drifting_away.mp3"],
+        files: ["drifting_away_30s.mp3", "drifting_away.mp3"],
         displayName: "Drifting Away",
         isPremium: true,
         category: "",
@@ -154,7 +154,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["positive_motivation.mp3"],
+        files: ["positive_motivation_30s.mp3", "positive_motivation.mp3"],
         displayName: "Positive Motivation",
         isPremium: true,
         category: "",
@@ -164,7 +164,7 @@ let SOUND_DATA = [
         source: "Purple Planet"
     },
     {
-        files: ["serenity.mp3"],
+        files: ["serenity_30s.mp3", "serenity.mp3"],
         displayName: "Serenity",
         isPremium: true,
         category: "",
@@ -174,7 +174,7 @@ let SOUND_DATA = [
         source: "Purple Planet"
     },
     {
-        files: ["successful_motivation.mp3"],
+        files: ["successful_motivation_30s.mp3", "successful_motivation.mp3"],
         displayName: "True Motivation",
         isPremium: true,
         category: "",
@@ -184,7 +184,7 @@ let SOUND_DATA = [
         source: "Purple Planet"
     },
     {
-        files: ["thinking_time.mp3"],
+        files: ["thinking_time_30s.mp3", "thinking_time.mp3"],
         displayName: "Thinking Time",
         isPremium: true,
         category: "",
@@ -194,7 +194,7 @@ let SOUND_DATA = [
         source: "Purple Planet"
     },
     {
-        files: ["first_steps.mp3"],
+        files: ["first_steps_30s.mp3", "first_steps.mp3"],
         displayName: "First Steps",
         isPremium: true,
         category: "",
@@ -204,7 +204,7 @@ let SOUND_DATA = [
         source: "Purple Planet"
     },
     {
-        files: ["bright_ideas.mp3"],
+        files: ["bright_ideas_30s.mp3", "bright_ideas.mp3"],
         displayName: "Bright Ideas",
         isPremium: true,
         category: "",
@@ -223,7 +223,7 @@ let SOUND_DATA = [
         type: SOUND_TYPES.NORMAL
     },
     {
-        files: ["happy_instrumental.mp3"],
+        files: ["happy_instrumental_30s.mp3", "happy_instrumental.mp3"],
         displayName: "Happy Instrumental",
         isPremium: true,
         category: "",
