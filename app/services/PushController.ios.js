@@ -50,8 +50,8 @@ let initializeAlarm = (alarm, alarmDidInitialize) => {
         // { recCooldown: 0.25 }, // DEV: Setting to 15sec for convenience. Change back to Settings.recCooldown()
         { recCooldown: Settings.recCooldown() },
         err => {
-            console.log("didInitializeAlarm?: ", err ? false : true);
-            alarmDidInitialize();
+            console.log("didInitializeAlarm: err: ", err);
+            alarmDidInitialize(err);
         }
     );
 };

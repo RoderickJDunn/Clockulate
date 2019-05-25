@@ -193,10 +193,15 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
                 self.recPermGranted = true
                 self.isRecording = true
               }
-              
-              self.isRecording = true
+              else {
+                self.recPermGranted = false
+                error = "NoRecPermission"
+              }
+            }
             }
           }
+        else {
+          error = self.recPermGranted ? nil : "NoRecPermission"
         }
       }
       else {
@@ -248,9 +253,10 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
               self.recPermGranted = true
               self.isRecording = true
             }
-            
-            self.isRecording = true
-            
+            else {
+              self.recPermGranted = false
+              error = "NoRecPermission"
+            }
           }
         }
       }
@@ -281,6 +287,12 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
             if allowed {
               self.beginMonitoringAudio()
               self.recPermGranted = true
+            }
+            else {
+              self.recPermGranted = false
+              error = "NoRecPermission"
+//              onCompletion([error as Any])
+//              return
             }
         
             self.CKT_LOG("setting alarm timer")
