@@ -579,7 +579,9 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
         player.stop()
     }
     
-    recorder!.abort() // TODO: ?? or a better function
+    if let rec = recorder {
+      rec.abort() // TODO: ?? or a better function
+    }
     self.isRecording = false
     self.alarmStatus = AlarmStatus.OFF
   }
