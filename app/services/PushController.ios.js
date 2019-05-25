@@ -69,15 +69,17 @@ AlarmTriggerEvents.addListener("onAlarmTriggered", info => {
 
     // TODO: Remove any existing notifications from Notification center.
 
-    // Canceling all local notifications
-    console.log("Canceling all local notifications");
-    NotificationsIOS.cancelAllLocalNotifications();
+    let dbAlarm = realm.objectForPrimaryKey("Alarm", alarmInfo.id);
 
     alarmInfo.time = moment(alarmInfo.time).toDate();
 
-    // console.log("alarm after modification", alarm);
+    console.log("Canceling all local notifications");
+    NotificationsIOS.cancelAllLocalNotifications(() => {
+        console.log("done cancelling");
+        _scheduleBackupNotifications(alarmInfo, alarmInfo.notifSound);
+    });
 
-    _scheduleBackupNotifications(alarmInfo, alarmInfo.sound);
+    // console.log("alarm after modification", alarm);
 
     NotificationsIOS.localNotification({
         alertBody: alarmInfo.label,
@@ -89,8 +91,6 @@ AlarmTriggerEvents.addListener("onAlarmTriggered", info => {
         silent: true
         // NOTE: no fireDate means fire immediately
     });
-
-    let dbAlarm = realm.objectForPrimaryKey("Alarm", alarmInfo.id);
 
     realm.write(() => {
         dbAlarm.status = ALARM_STATES.RINGING;
@@ -253,11 +253,13 @@ let snoozeAction = new NotificationAction(
 
                 // I need to cancel and reschedule backup Notifications here as well,
                 //   since snoozing explicitly adds an offset to snoozeIntervals
-                NotificationsIOS.cancelAllLocalNotifications();
-
+                NotificationsIOS.cancelAllLocalNotifications(() => {
+                    _scheduleBackupNotifications(
+                        currAlarm,
+                        currAlarm.alarmSound.sound.files[0]
+                    );
+                });
                 // console.log("alarm: ", currAlarm);
-
-                _scheduleBackupNotifications(currAlarm, currAlarm.sound);
             }
         } catch (e) {
             console.log("Error: ", e);
@@ -277,11 +279,12 @@ let disableAction = new NotificationAction(
         console.log("ACTION RECEIVED");
         console.log(action);
 
+        PushNotificationIOS.cancelAllLocalNotifications();
+
         turnOffNative();
+
         try {
             let { _data } = action.notification;
-            console.log("Got data. Canceling all local notifications");
-            NotificationsIOS.cancelAllLocalNotifications();
 
             let currAlarm = realm.objectForPrimaryKey("Alarm", _data.alarmId);
             if (currAlarm) {
@@ -291,16 +294,16 @@ let disableAction = new NotificationAction(
                 });
             }
 
-            setAlarmInstEnd();
+            setAlarmInstEnd(completed);
         } catch (e) {
             console.log("Error: ", e);
+            completed();
+            console.log("completed disable action");
         }
         // console.log(lastNotificationIds);
         // lastNotificationIds.forEach(notifId => {
         //     NotificationsIOS.cancelLocalNotification(notifId);
         // });
-
-        completed();
     }
 );
 
@@ -373,7 +376,7 @@ let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
 };
 
 export let cancelAllNotifications = () => {
-    PushNotificationIOS.cancelAllLocalNotifications();
+    PushNotificationIOS.cancelAllLocalNotifications(() => {});
 };
 
 /**
@@ -475,6 +478,9 @@ export let resumeAlarm = (alarm, reload, alarmDidInitialize) => {
             label: alarm.label,
             time: alarm.wakeUpTime.toISOString(),
             sound: longSoundFile.slice(0, -4),
+            /* NOTE: sending notifSound purely so it can be sent back to JS with onAlarmTrigger event. This is important so that backupNotifications are scheduled with
+            the same sound as the one used by native. This prevents us from having to do another realm lookup or RANDOM sound calculation */
+            notifSound: shortSoundFile,
             snoozeCount: alarm.snoozeCount,
             snoozeTime: alarm.snoozeTime,
             instId: currAlmInst.id
@@ -482,6 +488,11 @@ export let resumeAlarm = (alarm, reload, alarmDidInitialize) => {
         },
         alarmDidInitialize
     );
+
+    console.log("Cancelling all localNotifications (from resumeAlarm)");
+    NotificationsIOS.cancelAllLocalNotifications(() => {
+        _scheduleBackupNotifications(alarm, shortSoundFile);
+    });
 };
 
 /**
@@ -664,6 +675,9 @@ export let scheduleAlarm = (alarm, reload, alarmDidInitialize) => {
             label: alarm.label,
             time: alarm.wakeUpTime.toISOString(),
             sound: longSoundFile.slice(0, -4),
+            /* NOTE: sending notifSound purely so it can be sent back to JS with onAlarmTrigger event. This is important so that backupNotifications are scheduled with
+                the same sound as the one used by native. This prevents us from having to do another realm lookup or RANDOM sound calculation */
+            notifSound: shortSoundFile,
             snoozeCount: alarm.snoozeCount,
             snoozeTime: alarm.snoozeTime,
             instId: currAlmInst.id
@@ -732,7 +746,7 @@ let onInAppSnoozePressed = (alarm, sound) => {
     reloadAlarmsList();
 };
 
-let setAlarmInstEnd = () => {
+let setAlarmInstEnd = completed => {
     // Fetch current AlarmInstance and set its 'end' datetime to now.
     let almInsts = realm.objects("AlarmInstance").sorted("start", true);
     let currAlmInst = almInsts
@@ -761,7 +775,7 @@ let setAlarmInstEnd = () => {
         if (
             mNow - moment(currAlmInst.start) <
             900 * 1000
-            // 30 * 1000 /* DEV: 30 seconds for for development  */
+            // 10 * 1000 /* DEV: 10 seconds for for development  */
         ) {
             console.log("Alm Inst is <15 min long. Deleting");
 
@@ -770,8 +784,13 @@ let setAlarmInstEnd = () => {
             );
             var path = RNFS.DocumentDirectoryPath + "/" + currAlmInst.id;
 
-            RNFS.unlink(path).then(() => {
-                console.log("Deleted directory" + path);
+            RNFS.unlink(path)
+                .then(() => {
+                    console.log("Deleted directory: " + path);
+                    completed && completed();
+                })
+                .catch(() => {
+                    completed && completed();
             });
 
             if (realm.isInTransaction) {
@@ -793,12 +812,14 @@ let setAlarmInstEnd = () => {
                     currAlmInst.end = new Date();
                 });
             }
+            completed && completed();
         }
     } else {
         // This will happen whenever an inactive Alarm is deleted. If it happens
         //  when an Alarm is triggered or disabled, thats an issue, but I'm not
         //  sure there is anything easy to do to recover from it.
         console.info("No active alarm instance found");
+        completed && completed();
     }
 };
 
