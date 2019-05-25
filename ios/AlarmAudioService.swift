@@ -91,6 +91,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
                                    selector: #selector(appWillTerminate),
                                    name: UIApplication.willTerminateNotification,
                                    object: nil)
+    
+    notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.willResignActiveNotification, object: nil)
   }
   
   @objc
@@ -117,6 +119,19 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     }
     
     self.isRecording = false;
+  }
+  
+  @objc
+  func appMovedToBackground() {
+    if !self.recPermGranted {
+      CKT_LOG("Rec permission not granted. Disabling alarm timers before going into background")
+      // This is important otherwise it seems that timers fire once app comes into foreground again.
+      
+      self.alarmTimer.invalidate()
+      self.autoSnoozeTimer.invalidate()
+      
+      // self.DEV_printScheduledNotifs()
+    }
   }
   
   @objc
