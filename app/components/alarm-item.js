@@ -624,7 +624,8 @@ class AlarmItem extends React.PureComponent {
                                     this.props.alarm
                                 )}
                             >
-                                {status > ALARM_STATES.OFF &&
+                                {this.props.recPermission &&
+                                    status > ALARM_STATES.OFF &&
                                     status < ALARM_STATES.SNOOZED && (
                                         <Pulse color="#ff6060" />
                                     )}

@@ -26,7 +26,8 @@ import {
 } from "react-native";
 import moment from "moment";
 import LinearGradient from "react-native-linear-gradient";
-import { SafeAreaView } from "react-navigation";
+import { SafeAreaView, NavigationEvents } from "react-navigation";
+import Permissions from "react-native-permissions";
 
 import PushNotificationAndroid from "react-native-push-notification";
 import {
@@ -34,7 +35,6 @@ import {
     scheduleAlarm,
     clearAlarm,
     snoozeAlarm,
-    cancelInAppAlarm,
     setInAppAlarm,
     resumeAlarm,
     checkForImplicitSnooze,
@@ -91,11 +91,13 @@ class Alarms extends Component {
     _idleTimer = null;
     // proxMgrEnabled = false;
     isCurrentScreen = true;
+    _recPermission = false;
 
     constructor() {
         super();
         console.log("AlarmsList -- Constructor");
         console.log("(App was opened from KILLED state)");
+
         //console.log("Fetching Alarms...");
         this.state = {
             alarms: realm.objects("Alarm").sorted("order"), //
@@ -129,6 +131,12 @@ class Alarms extends Component {
                 } else {
                     setTimeout(() => SplashScreen.hide(), 500);
                     NotificationsIOS.requestPermissions([ALARM_CAT]);
+
+                    // load Permissions
+                    Permissions.check("microphone").then(response => {
+                        console.log("response", response);
+                        this._recPermission = response == "authorized";
+                    });
                 }
             });
         } catch (error) {
@@ -356,14 +364,13 @@ class Alarms extends Component {
             this.reloadAlarms();
         } else if (nextAppState === "background") {
             console.log("App is going into background");
-            // cancel any set timers for in-app alarms (iOS only)
 
-            let alarms = realm
-                .objects("Alarm")
-                .filtered("status == $0", ALARM_STATES.SET);
-            for (let i = 0; i < alarms.length; i++) {
-                cancelInAppAlarm(alarms[i]);
-            }
+            // let alarms = realm
+            //     .objects("Alarm")
+            //     .filtered("status == $0", ALARM_STATES.SET);
+            // for (let i = 0; i < alarms.length; i++) {
+            //     cancelInAppAlarm(alarms[i]);
+            // }
         }
 
         this.setState({ appState: nextAppState });
@@ -433,6 +440,7 @@ class Alarms extends Component {
 
         if (alarms.length == 0) {
             // Make sure there are no notifications scheduled, since no Alarms are enabled or snoozed.
+            console.log("Cancelling notifications (from verifyAlarmStates)");
             cancelAllNotifications();
         }
     }
@@ -805,11 +813,16 @@ class Alarms extends Component {
         //console.log("this.state", this.state);
     };
 
-    alarmDidInitialize(alarm, nextAlarmStatus) {
-        // console.log(
-        //     "Alarms: alarmDidInitialize. NextStatus: ",
-        //     nextAlarmStatus
-        // );
+    alarmDidInitialize(alarm, nextAlarmStatus, error) {
+        console.log("alarmDidInitialize. ? error:", error);
+        console.log("alarm", alarm);
+        console.log("NextStatus: ", nextAlarmStatus);
+        if (!error) {
+            this._recPermission = true;
+        } else if (error == "NoRecPermission") {
+            this._recPermission = false;
+        }
+
         realm.write(() => {
             alarm.status = nextAlarmStatus;
             this.setState({ isLoading: false });
@@ -887,7 +900,7 @@ class Alarms extends Component {
     onAnimFinished = () => {
         console.log("onAnimFinished");
 
-        if (Settings.chargeReminder() == true) {
+        if (Settings.chargeReminder() == true && this._recPermission) {
             this._showChargeReminder();
         }
     };
@@ -903,7 +916,7 @@ class Alarms extends Component {
         // console.debug(this.state);
         // let { alarms } = this.state;
         // console.log("alarms", alarms);
-
+        console.log("this._recPermission", this._recPermission);
         // alarms.forEach(a => {
         //     console.log(a.id);
         // });
@@ -973,6 +986,7 @@ class Alarms extends Component {
                                         endMove={moveEnd}
                                         isActive={isActive}
                                         onAnimFinished={this.onAnimFinished}
+                                        recPermission={this._recPermission}
                                     />
                                 );
                             }}
@@ -1026,26 +1040,26 @@ class Alarms extends Component {
                             />
                         )}
                         {/* <TouchableOpacity
-                        style={{
-                            position: "absolute",
-                            bottom: 0,
-                            right: 0,
-                            height: 100,
-                            width: 100,
-                            alignSelf: "flex-end",
-                            backgroundColor: "red"
-                        }}
-                        onPress={() => {
-                            if (this.state.alarms.length == 0) {
-                                populateDummyAlarms();
-                            } else {
-                                realm.write(() => {
-                                    realm.delete(this.state.alarms);
-                                });
-                            }
-                            this.setState(this.state);
-                        }}
-                    /> */}
+                            style={{
+                                position: "absolute",
+                                bottom: 0,
+                                right: 0,
+                                height: 100,
+                                width: 100,
+                                alignSelf: "flex-end",
+                                backgroundColor: "red"
+                            }}
+                            onPress={() => {
+                                if (this.state.alarms.length == 0) {
+                                    populateDummyAlarms();
+                                } else {
+                                    realm.write(() => {
+                                        realm.delete(this.state.alarms);
+                                    });
+                                }
+                                this.setState(this.state);
+                            }}
+                        /> */}
                         {Upgrades.pro != true && (
                             <AdWrapper
                                 // borderPosition="top"
@@ -1079,7 +1093,9 @@ class Alarms extends Component {
                                     }
                                 }}
                                 onPressProAdv={() =>
-                                    this.setState({ showUpgradePopup: "short" })
+                                    this.setState({
+                                        showUpgradePopup: "short"
+                                    })
                                 }
                             />
                         )}
@@ -1092,7 +1108,7 @@ class Alarms extends Component {
                             />
                         </View>
                     )}
-                    {this.state.showChargePopup && (
+                    {this.state.showChargePopup && this._recPermission && (
                         <ClkAlert
                             flexibleHeader={true}
                             contHeight={"large"}
@@ -1166,14 +1182,18 @@ class Alarms extends Component {
                             dismissConfig={{
                                 onPress: () => {
                                     console.log("Dismissed Plugin popup");
-                                    this.setState({ showChargePopup: false });
+                                    this.setState({
+                                        showChargePopup: false
+                                    });
                                 },
                                 text: "Dismiss"
                             }}
                             confirmConfig={{
                                 onPress: () => {
                                     console.log("Confirmed Plugin popup");
-                                    this.setState({ showChargePopup: false });
+                                    this.setState({
+                                        showChargePopup: false
+                                    });
                                     Settings.chargeReminder(false);
                                 },
                                 text: "Don't Show Again"
@@ -1227,7 +1247,9 @@ class Alarms extends Component {
                                 />
                             }
                             title="Interested in Going Pro?"
-                            headerTextStyle={{ color: Colors.brandLightOpp }}
+                            headerTextStyle={{
+                                color: Colors.brandLightOpp
+                            }}
                             bodyText={
                                 (this.state.showUpgradePopup == "long"
                                     ? "You are using the free version of Clockulate, which is limited to two alarms. "
@@ -1238,7 +1260,9 @@ class Alarms extends Component {
                             dismissConfig={{
                                 onPress: () => {
                                     console.log("Dismissed Upgrade popup");
-                                    this.setState({ showUpgradePopup: false });
+                                    this.setState({
+                                        showUpgradePopup: false
+                                    });
                                 },
                                 text: "Dismiss"
                             }}
@@ -1247,7 +1271,9 @@ class Alarms extends Component {
                                     console.log(
                                         "Confirmed Upgrade popup: Going to Upgrades screen"
                                     );
-                                    this.setState({ showUpgradePopup: false });
+                                    this.setState({
+                                        showUpgradePopup: false
+                                    });
                                     this.props.navigation.navigate("Upgrade");
                                 },
                                 text: "Go to Upgrades"
@@ -1255,18 +1281,28 @@ class Alarms extends Component {
                         />
                     )}
                     {/* <Button
-                        title={"Cancel All Notis"}
-                        style={{
-                            position: "absolute",
-                            bottom: 100,
-                            left: 30,
-                            height: 60,
-                            width: 120
+                            title={"Cancel All Notis"}
+                            style={{
+                                position: "absolute",
+                                bottom: 100,
+                                left: 30,
+                                height: 60,
+                                width: 120
+                            }}
+                            onPress={() => {
+                                NotificationsIOS.cancelAllLocalNotifications();
+                            }}
+                        /> */}
+                    <NavigationEvents
+                        onWillFocus={payload => {
+                            console.log("Alarms: onWillFocus");
+                            // load Permissions
+                            Permissions.check("microphone").then(response => {
+                                console.log("response", response);
+                                this._recPermission = response == "authorized";
+                            });
                         }}
-                        onPress={() => {
-                            NotificationsIOS.cancelAllLocalNotifications();
-                        }}
-                    /> */}
+                    />
                 </LinearGradient>
             </TouchableWithoutFeedback>
         );
