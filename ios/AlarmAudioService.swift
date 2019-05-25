@@ -37,6 +37,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
   var fadein_cnt = 0
   var currAlarm: Dictionary<String,Any> = [:]
   var refractoryTime = 300.0
+  var recPermGranted = false
   var callObserver = CXCallObserver()
 
   let MAX_RING_DURATION = 90.0
@@ -96,7 +97,9 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
   func appWillTerminate() {
      print("app will terminate")
     
+    if self.recPermGranted {
     self.displayWarningNotification()
+    }
     
     if let recorder = self.recorder {
       recorder.abort()  // called so that temporary recording file(s) is deleted in case of crash. (It can become very large)
@@ -109,7 +112,9 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
   func audioWasInterupted(notification: Notification) {
     print("audioWasInterupted")
 
+    if self.recPermGranted {
     self.displayWarningNotification()
+    }
     
     self.isRecording = false;
   }
@@ -117,7 +122,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
   @objc
   func callObserver(_ callObserver: CXCallObserver, callChanged call: CXCall) {
     print("Call status changed. Call-ended: \(call.hasEnded)")
-    if call.hasEnded {
+    if call.hasEnded && self.recPermGranted {
       self.displayWarningNotification()
     }
   }
@@ -185,6 +190,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
               
               if allowed {
                 self.beginMonitoringAudio()
+                self.recPermGranted = true
+                self.isRecording = true
               }
               
               self.isRecording = true
@@ -238,6 +245,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
             
             if allowed {
               self.beginMonitoringAudio()
+              self.recPermGranted = true
+              self.isRecording = true
             }
             
             self.isRecording = true
@@ -271,6 +280,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
         
             if allowed {
               self.beginMonitoringAudio()
+              self.recPermGranted = true
             }
         
             self.CKT_LOG("setting alarm timer")
