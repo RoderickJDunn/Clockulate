@@ -1,8 +1,14 @@
 // import React from "react";
 import {
-    Platform
+    Platform,
+    PixelRatio
     // TouchableOpacity
 } from "react-native";
+
+import NET_IMAGES from "./network_images";
+
+const IMAGE_URL_BASE =
+    "https://raw.githubusercontent.com/RoderickJDunn/ckt-help-imgs/master/";
 
 // maps screen sizes to correct images
 const IMG_MAP_ANDROID = {
@@ -79,7 +85,7 @@ function roundDownToSizeClass(width) {
 /* Takes a base image name, screenWidth, (and optionally screen height) 
     and looks up the full name of the image to use for this screen size.
 */
-let getFullImgNameForScreenSize = (imgBaseName, screenWidth) => {
+export let getFullImgNameForScreenSize = (imgBaseName, screenWidth) => {
     // round screenWidth down to nearest category:
     let sizeClass = screenWidth;
     let imgMap = IMG_MAP_IOS;
@@ -93,8 +99,18 @@ let getFullImgNameForScreenSize = (imgBaseName, screenWidth) => {
 
     // look up imgBaseName in IMG_MAP, then the screen size in that:
     let fullImgName = imgMap[imgBaseName] && imgMap[imgBaseName][sizeClass];
+
     // console.log("returning image: ", fullImgName);
     return fullImgName;
 };
 
-export default getFullImgNameForScreenSize;
+/* Takes a base image name and looks up the full name of the image to use for this
+    device's Pixel Density (ratio). Note that this function is only useful for images
+    retrieved over network, since otherwise iOS returns the correct image for pixel density
+    automatically (using the @2x / @3x notation).
+*/
+export let getFullImgNameForPxDensity = imgBaseName => {
+    console.log("fetching full img name for ", imgBaseName);
+    console.log("PixelRatio.get()", PixelRatio.get());
+    return IMAGE_URL_BASE + NET_IMAGES[imgBaseName][PixelRatio.get()];
+};

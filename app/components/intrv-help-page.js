@@ -17,6 +17,7 @@ import { isIphoneX } from "react-native-iphone-x-helper";
 import AutoHeightImage from "react-native-auto-height-image";
 import * as Animatable from "react-native-animatable";
 import FAIcon from "react-native-vector-icons/FontAwesome";
+import { getFullImgNameForPxDensity } from "../img/image_map";
 
 import Colors from "../styles/colors";
 import { scaleByFactor } from "../util/font-scale";
@@ -208,6 +209,10 @@ export default class IntrvHelpPage extends Component {
                                         );
                                     }
                                     // console.log("sharedImgs", sharedImgs);
+                                    // console.log(
+                                    //     "fetching img at uri: ",
+                                    //     getFullImgNameForPxDensity(img.path)
+                                    // );
                                     return (
                                         <TouchableWithoutFeedback
                                             key={index}
@@ -232,7 +237,9 @@ export default class IntrvHelpPage extends Component {
                                                         50
                                                     }
                                                     source={{
-                                                        uri: img.path
+                                                        uri: getFullImgNameForPxDensity(
+                                                            img.path
+                                                        )
                                                     }}
                                                     onHeightChange={height => {
                                                         // console.log(
@@ -277,8 +284,9 @@ export default class IntrvHelpPage extends Component {
                                                                         50
                                                                     }
                                                                     source={{
-                                                                        uri:
+                                                                        uri: getFullImgNameForPxDensity(
                                                                             sharedImg.path
+                                                                        )
                                                                     }}
                                                                     style={[
                                                                         sharedImg.style,

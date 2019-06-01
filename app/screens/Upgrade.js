@@ -703,7 +703,10 @@ export default class Upgrade extends React.Component {
                             ]
                         }}
                         resizeMode="contain"
-                        source={{ uri: "UpgradeScreen_logo_v2" }}
+                        source={{
+                            uri:
+                                "https://raw.githubusercontent.com/RoderickJDunn/ckt-help-imgs/master/UpgradeScreen_logo_v2%402x.png"
+                        }}
                     />
                     <View
                         style={{
@@ -827,42 +830,6 @@ export default class Upgrade extends React.Component {
                     renderItem={this.upgradeItem}
                     data={this.upgradeData}
                 />
-
-                {/* <View
-                    style={{
-                        width: SCREEN_WIDTH,
-                        height: 100,
-                        paddingHorizontal: 10,
-                        paddingBottom: isIphoneX() ? 20 : 0,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        borderTopWidth: 3,
-                        borderTopColor: Colors.brandDarkGrey,
-                        backgroundColor: Colors.brandLightOpp
-                    }}
-                >
-                    <Text
-                        style={{
-                            color: Colors.darkGreyText,
-                            fontFamily: "Gurmukhi MN",
-                            marginTop: 8,
-                            fontSize: 22
-                        }}
-                    >
-                        Clockulate Version
-                    </Text>
-                    <Text
-                        style={{
-                            color: Colors.labelText,
-                            fontFamily: "Gurmukhi MN",
-                            marginTop: 8,
-                            fontSize: 22
-                        }}
-                    >
-                        {upgrades.pro == true ? "PRO" : "FREE"}
-                    </Text>
-                </View> */}
                 <View
                     style={{
                         position: "absolute",

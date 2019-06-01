@@ -9,7 +9,8 @@ import {
     Image,
     StyleSheet,
     Animated,
-    LayoutAnimation
+    LayoutAnimation,
+    ActivityIndicator
 } from "react-native";
 import { Header, NavigationEvents } from "react-navigation";
 import LinearGradient from "react-native-linear-gradient";
@@ -18,7 +19,7 @@ import FAIcon from "react-native-vector-icons/FontAwesome";
 import AutoHeightImage from "react-native-auto-height-image";
 import * as Animatable from "react-native-animatable";
 
-import getFullImgNameForScreenSize from "../img/image_map";
+import { getFullImgNameForPxDensity } from "../img/image_map";
 import Colors from "../styles/colors";
 import ClkAlert from "../components/clk-awesome-alert";
 import IntrvHelpPage from "../components/intrv-help-page";
@@ -132,6 +133,16 @@ let HELP_SECTIONS = [
     }
 ];
 
+let IMG_URLS = HELP_SECTIONS.reduce((accum, sect) => {
+    let sectImgUrls = sect.images.map(img =>
+        getFullImgNameForPxDensity(img.path)
+    );
+
+    accum.push(...sectImgUrls);
+    return accum;
+}, []);
+// console.log("IMG_URLS", IMG_URLS);
+
 // SCREEN_HEIGHT -= 88; // add 88 since the Nav bar is transparent
 export default class Help extends React.Component {
     /*
@@ -145,6 +156,8 @@ export default class Help extends React.Component {
             sectIdx: 0,
             showInfoPopup: false,
             isFirstStep: this.props.screenType != "modal",
+            isLoading: true,
+            downloadSuccess: false,
             isFocused: true
         };
 
@@ -184,6 +197,53 @@ export default class Help extends React.Component {
         }
     }
 
+    _fetchImages = () => {
+        let preFetchTasks = [];
+
+        this.setState({ isLoading: true, downloadSuccess: false });
+
+        IMG_URLS.forEach(u => {
+            // console.log("fetching : ", u);
+            preFetchTasks.push(Image.prefetch(u));
+        });
+
+        Promise.all(preFetchTasks)
+            .then(results => {
+                let downloadedAll = true;
+                results.forEach(result => {
+                    if (!result) {
+                        // console.log("Result: ", result);
+                        //error occurred downloading a pic
+                        downloadedAll = false;
+                    } else {
+                        // console.log("Result: ", result);
+                    }
+                });
+
+                if (downloadedAll) {
+                    console.log("Downloaded all images!");
+                    this.setState({ isLoading: false, downloadSuccess: true });
+                    // alert("Downloed all images!");
+                } else {
+                    console.log("Failed to download all images");
+                    this.handleImgLoadError("Failed to receive all images");
+                }
+            })
+            .catch(e => {
+                this.handleImgLoadError(e);
+            });
+    };
+
+    handleImgLoadError = e => {
+        this.setState({ isLoading: false, downloadSuccess: false });
+        if (!this._isModal && this.state.isFirstStep) {
+            alert(
+                "Unable to download help documentation. Please make sure you have a Wi-Fi or Data connection."
+            );
+        }
+        console.log(e);
+    };
+
     toggleInfoPopup = () => {
         let { showInfoPopup } = this.state;
         this.setState({ showInfoPopup: !showInfoPopup });
@@ -195,6 +255,14 @@ export default class Help extends React.Component {
             this._pageRefs.length == 4 + this._welcomeOffset
         ) {
             let currPageRef = this._pageRefs[this._idx];
+
+            if (!currPageRef) {
+                alert(
+                    "Unable to download help documentation. Please make sure you have a Wi-Fi or Data connection."
+                );
+                return; // can occur if Help images do not load
+            }
+
             if (!currPageRef.nextStep()) {
                 this.goToNextSect();
             }
@@ -210,6 +278,11 @@ export default class Help extends React.Component {
             this._pageRefs.length == 4 + this._welcomeOffset
         ) {
             let currPageRef = this._pageRefs[this._idx];
+
+            if (!currPageRef) {
+                return; // can occur if Help images do not load
+            }
+
             if (!currPageRef.prevStep()) {
                 this.goToPrevSect();
             }
@@ -314,12 +387,12 @@ export default class Help extends React.Component {
                 <NavigationEvents
                     onWillFocus={payload => {
                         this.setState({ isFocused: true });
+                        this._fetchImages();
                     }}
                     onWillBlur={() => {
                         this.setState({ isFocused: false });
                     }}
                 />
-                {/* {this.renderCalcButtons()} */}
                 <Interactable.View
                     ref={elm => (this._interactable = elm)}
                     style={{
@@ -334,6 +407,7 @@ export default class Help extends React.Component {
                     snapPoints={this._snapPoints}
                     animatedNativeDriver={true}
                     animatedValueX={this._bgdPosition}
+                    dragEnabled={this.state.downloadSuccess}
                     onDrag={event => {
                         // console.log("onDrag");
                         let { state, y, targetSnapPointId } = event.nativeEvent;
@@ -374,6 +448,8 @@ export default class Help extends React.Component {
                         />
                     )}
                     {this.state.isFocused &&
+                    !this.state.isLoading &&
+                    this.state.downloadSuccess ? (
                         HELP_SECTIONS.map((section, idx) => {
                             return (
                                 <IntrvHelpPage
@@ -389,7 +465,50 @@ export default class Help extends React.Component {
                                     setBoundaryFlag={this.setBoundaryFlag}
                                 />
                             );
-                        })}
+                        })
+                    ) : (
+                        <View
+                            style={{
+                                width: SCREEN_WIDTH,
+                                height: "auto",
+                                alignContent: "center",
+                                justifyContent: "center",
+                                alignItems: "center"
+                            }}
+                        >
+                            {this.state.isLoading ? (
+                                <ActivityIndicator style={{ flex: 1 }} />
+                            ) : (
+                                <TouchableOpacity
+                                    style={{
+                                        flexDirection: "row",
+                                        alignItems: "center",
+                                        padding: 10
+                                    }}
+                                    onPress={this._fetchImages}
+                                >
+                                    <Text
+                                        style={{
+                                            color: Colors.brandLightOpp,
+                                            fontSize: 20
+                                            // lineHeight: 20
+                                            // textAlign: "center",
+                                            // textAlignVertical: "center",
+                                            // justifyContent: "center"
+                                        }}
+                                    >
+                                        Tap to Reload
+                                    </Text>
+                                    <FAIcon
+                                        name="refresh"
+                                        color={Colors.brandLightOpp}
+                                        size={15}
+                                        style={{ marginLeft: 10 }}
+                                    />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    )}
                 </Interactable.View>
                 {this._isModal && this._idx > 0 && (
                     <Animatable.View

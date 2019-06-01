@@ -25,7 +25,7 @@ import { ADV_STAT_TYPES } from "../data/constants";
 import { isIphoneX } from "react-native-iphone-x-helper";
 import Colors from "../styles/colors";
 let { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-import getFullImgNameForScreenSize from "../img/image_map";
+import { getFullImgNameForScreenSize } from "../img/image_map";
 
 let MAP_SCREEN_TO_ADV_IMG = {
     MainMenu: "",
