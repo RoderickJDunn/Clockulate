@@ -74,11 +74,8 @@ AlarmTriggerEvents.addListener("onAlarmTriggered", info => {
     alarmInfo.time = moment(alarmInfo.time).toDate();
 
     console.log("Canceling all local notifications");
-    NotificationsIOS.cancelAllLocalNotifications(() => {
-        console.log("done cancelling");
-        _scheduleBackupNotifications(alarmInfo, alarmInfo.notifSound);
-    });
-
+    NotificationsIOS.cancelAllLocalNotifications();
+    _scheduleBackupNotifications(alarmInfo, alarmInfo.notifSound);
     // console.log("alarm after modification", alarm);
 
     NotificationsIOS.localNotification({
@@ -260,12 +257,11 @@ let snoozeAction = new NotificationAction(
                 //     "then scheduling new backups with currAlarm:",
                 //     currAlarm
                 // );
-                NotificationsIOS.cancelAllLocalNotifications(() => {
-                    _scheduleBackupNotifications(
-                        currAlarm,
-                        currAlarm.alarmSound.sound.files[0]
-                    );
-                });
+                NotificationsIOS.cancelAllLocalNotifications();
+                _scheduleBackupNotifications(
+                    currAlarm,
+                    currAlarm.alarmSound.sound.files[0]
+                );
                 // console.log("alarm: ", currAlarm);
             }
         } catch (e) {
@@ -287,8 +283,9 @@ let disableAction = new NotificationAction(
         console.log(action);
 
         // console.log("Canceling all local notifications (from Disable action)");
-        PushNotificationIOS.cancelAllLocalNotifications();
 
+        NotificationsIOS.cancelAllLocalNotifications();
+        console.log("cancelled notifs");
         turnOffNative();
 
         try {
@@ -388,7 +385,7 @@ let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
 };
 
 export let cancelAllNotifications = () => {
-    PushNotificationIOS.cancelAllLocalNotifications(() => {});
+    PushNotificationIOS.cancelAllLocalNotifications();
 };
 
 /**
@@ -501,9 +498,8 @@ export let resumeAlarm = (alarm, reload, alarmDidInitialize) => {
     );
 
     console.log("Cancelling all localNotifications (from resumeAlarm)");
-    NotificationsIOS.cancelAllLocalNotifications(() => {
-        _scheduleBackupNotifications(alarm, shortSoundFile);
-    });
+    NotificationsIOS.cancelAllLocalNotifications();
+    _scheduleBackupNotifications(alarm, shortSoundFile);
 };
 
 /**
@@ -759,6 +755,7 @@ let onInAppSnoozePressed = (alarm, sound) => {
 };
 
 let setAlarmInstEnd = completed => {
+    console.log("setAlarmInstEnd");
     // Fetch current AlarmInstance and set its 'end' datetime to now.
     let almInsts = realm.objects("AlarmInstance").sorted("start", true);
     let currAlmInst = almInsts
@@ -766,6 +763,8 @@ let setAlarmInstEnd = completed => {
             ? almInsts[0]
             : null
         : null;
+
+    // console.log("currAlmInst", currAlmInst);
 
     if (currAlmInst != null) {
         // store running averages of sleep
