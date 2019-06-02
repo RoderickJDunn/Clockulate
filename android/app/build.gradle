@@ -109,8 +109,8 @@ android {
         applicationId "com.clock_sample1"
         minSdkVersion 19
         targetSdkVersion 22
-        versionCode 17
-        versionName "1.0.10"
+        versionCode 18
+        versionName "1.0.11"
         ndk {
             abiFilters "armeabi-v7a", "x86"
         }
