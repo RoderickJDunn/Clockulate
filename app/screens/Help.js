@@ -66,6 +66,7 @@ let HELP_SECTIONS = [
                 style: null
             }
         ],
+        pageCount: 4, // different from image count, due to images 2/3 sharing a page
         snapOffsets: [SCREEN_HEIGHT * 0.6, SCREEN_HEIGHT]
     },
     {
@@ -92,6 +93,7 @@ let HELP_SECTIONS = [
                 }
             }
         ],
+        pageCount: 4,
         snapOffsets: []
     },
     {
@@ -114,7 +116,8 @@ let HELP_SECTIONS = [
                 path: "ADTasks_final_step4",
                 style: null
             }
-        ]
+        ],
+        pageCount: 4
     },
     {
         name: "Edit Alarm",
@@ -129,6 +132,7 @@ let HELP_SECTIONS = [
                 style: { paddingVertical: SCREEN_HEIGHT * 0.28 }
             }
         ],
+        pageCount: 2,
         isFinalSect: true
     }
 ];
@@ -212,16 +216,36 @@ export default class Help extends React.Component {
                 let downloadedAll = true;
                 results.forEach(result => {
                     if (!result) {
-                        // console.log("Result: ", result);
+                        // console.log("Failed Result: ", result);
                         //error occurred downloading a pic
                         downloadedAll = false;
-                    } else {
-                        // console.log("Result: ", result);
-                    }
+                    } /* else {
+                        console.log("Success Result: ", result);
+                    } */
                 });
 
                 if (downloadedAll) {
                     console.log("Downloaded all images!");
+                    // const { mountTime } = this.state;
+
+                    // Image.queryCache(IMG_URLS).then(map => {
+                    //     IMG_URLS.forEach((url, i) => {
+                    //         const result = map[url];
+                    //         console.log("\nCache result for ", IMG_URLS[i]);
+                    //         if (result) {
+                    //             console.log(
+                    //                 `✔ queryCache "${result}" (+${new Date() -
+                    //                     mountTime}ms))`
+                    //             );
+                    //         } else {
+                    //             console.log(
+                    //                 `✘ queryCache (+${new Date() -
+                    //                     mountTime}ms)`
+                    //             );
+                    //         }
+                    //     });
+                    // });
+
                     this.setState({ isLoading: false, downloadSuccess: true });
                     // alert("Downloed all images!");
                 } else {
@@ -322,6 +346,7 @@ export default class Help extends React.Component {
     };
 
     setBoundaryFlag = ({ lastStep, firstStep }) => {
+        // console.log("setBoundaryFlag");
         if (lastStep && this._idx == 3 + this._welcomeOffset) {
             // only set FinalStep to true if this is the last step, AND the last Page
             this.setState({ isFinalStep: true, isFirstStep: false });

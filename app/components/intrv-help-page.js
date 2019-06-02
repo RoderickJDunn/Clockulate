@@ -62,50 +62,34 @@ export default class IntrvHelpPage extends Component {
 
         const images = sectionInfo.images;
 
-        console.log("\nNext Step");
-        console.log("this._scrollPos", this._scrollPos);
-        console.log("STEP_HEIGHT", STEP_HEIGHT);
-        console.log("this._svCurrHeight", this._svCurrHeight);
+        // console.log("\nNext Step");
+        // console.log("idx", idx);
+        // console.log("stepIdx", stepIdx);
+        // console.log("this._scrollPos", this._scrollPos);
+        // console.log("STEP_HEIGHT", STEP_HEIGHT);
+        // console.log("this._svCurrHeight", this._svCurrHeight);
 
-        if (
-            stepIdx < images.length - 1 &&
-            this._scrollPos >= this._svCurrHeight - STEP_HEIGHT - 25
-        ) {
-            console.log("Inserting next step");
+        let nextStepIdx = Math.round(this._scrollPos / STEP_HEIGHT) + 1;
+        // console.log("images.length", images.length);
 
-            stepIdx++;
-            let config = {
-                duration: 250,
-                update: {
-                    duration: 250,
-                    type: "easeOut"
-                }
-            };
-            LayoutAnimation.configureNext(config);
-            this.setState({ stepIdx: stepIdx });
-            return true;
-        } else if (this._scrollPos <= this._svCurrHeight - STEP_HEIGHT - 26) {
-            console.log("Scrolling to already revealed next step");
-            /* If we are not currently scrolled to the bottom 
-                 scroll to next step, even it has already been revealed.
-            */
+        if (nextStepIdx < sectionInfo.pageCount) {
+            console.log("Jumping to step Index: ", nextStepIdx);
 
-            let currStepIdx = Math.round(this._scrollPos / STEP_HEIGHT);
-            currStepIdx = Math.min(images.length - 1, currStepIdx + 1);
-            console.log("Jumping to step Index: ", currStepIdx);
-
-            this._scrollViewRef.scrollTo({ y: currStepIdx * STEP_HEIGHT });
+            this._scrollViewRef.scrollTo({ y: nextStepIdx * STEP_HEIGHT });
+            this.setState({ stepIdx: nextStepIdx });
             return true;
         } else {
             return false;
         }
     };
 
-    updateBoundaryFlags = () => {
-        if (
-            this.state.stepIdx == 1 &&
-            this._scrollPos >= this._svCurrHeight - STEP_HEIGHT - 26
-        ) {
+    updateBoundaryFlags = nextStepIdx => {
+        let { stepIdx, sectionInfo } = this.state;
+        if (nextStepIdx == null) {
+            nextStepIdx = stepIdx;
+        }
+
+        if (nextStepIdx == sectionInfo.pageCount - 1) {
             // If 1) This is the last step, 2) We're at the bottom,
             this.props.setBoundaryFlag({
                 lastStep: true
@@ -132,7 +116,8 @@ export default class IntrvHelpPage extends Component {
         // console.log("stepIdx", stepIdx);
         // console.log("currSectIndex", currSectIdx);
         // console.log("HEADER_HEIGHT", HEADER_HEIGHT);
-        let images = sectionInfo.images.slice(0, stepIdx + 1);
+        // let images = sectionInfo.images.slice(0, stepIdx + 1);
+        let images = sectionInfo.images;
 
         // console.log("images", images);
         // console.log("SCREEN_HEIGHT", SCREEN_HEIGHT);
@@ -165,7 +150,11 @@ export default class IntrvHelpPage extends Component {
                                 this._svCurrHeight =
                                     event.nativeEvent.contentSize.height;
 
-                                this.updateBoundaryFlags();
+                                let newStepIdx = Math.round(
+                                    this._scrollPos / STEP_HEIGHT
+                                );
+                                this.setState({ stepIdx: newStepIdx });
+                                this.updateBoundaryFlags(newStepIdx);
                             }}
                             contentContainerStyle={[
                                 {
@@ -176,32 +165,16 @@ export default class IntrvHelpPage extends Component {
                                     // backgroundColor: "blue"
                                 }
                             ]}
-                            onContentSizeChange={(
-                                contentWidth,
-                                contentHeight
-                            ) => {
-                                console.log(
-                                    "onContentSizeChange (" +
-                                        this.state.idx +
-                                        ")",
-                                    contentHeight
-                                );
-                                this._scrollViewRef.scrollToEnd({
-                                    animated: true
-                                });
-                            }}
                         >
                             <View onStartShouldSetResponder={() => true}>
                                 {images.map((img, index) => {
+                                    let sharedImgs;
+
                                     if (img.sharedWithPrev == true) {
                                         return null;
                                     }
 
-                                    let sharedImgs;
-                                    if (
-                                        index < stepIdx &&
-                                        img.sharePageWithNext
-                                    ) {
+                                    if (img.sharePageWithNext) {
                                         console.log("Found sharePage");
                                         sharedImgs = images.slice(
                                             index + 1,
