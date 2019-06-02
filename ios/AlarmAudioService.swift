@@ -100,7 +100,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
      print("app will terminate")
     
     if self.recPermGranted {
-    self.displayWarningNotification()
+      self.displayWarningNotification()
     }
     
     if let recorder = self.recorder {
@@ -115,7 +115,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     print("audioWasInterupted")
 
     if self.recPermGranted {
-    self.displayWarningNotification()
+      self.displayWarningNotification()
     }
     
     self.isRecording = false;
@@ -141,6 +141,16 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
       self.displayWarningNotification()
     }
   }
+  
+//   func DEV_printScheduledNotifs() {
+//     UNUserNotificationCenter.current().getPendingNotificationRequests { (notifications) in
+//       print("Notif Count: \(notifications.count)")
+//       for item in notifications {
+//         print("\(item.content.body) (sound: \(item.content.sound.debugDescription))")
+//         print((item.trigger as! UNCalendarNotificationTrigger).nextTriggerDate()?.description)
+//       }
+//     }
+//   }
   
   func displayWarningNotification() {
     print("displayWarningNotification? alarmStatus: \(self.alarmStatus)")
@@ -213,8 +223,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
                 error = "NoRecPermission"
               }
             }
-            }
           }
+        }
         else {
           error = self.recPermGranted ? nil : "NoRecPermission"
         }
@@ -446,8 +456,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
       
       player.volume = 0
       MPVolumeView.setVolume(0.8)
-      DispatchQueue.main.async(execute: {
-        self.alarmTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(self.fadeInVolume), userInfo: nil, repeats: true)
+      DispatchQueue.main.async(execute: {        self.alarmTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(self.fadeInVolume), userInfo: nil, repeats: true)
       })
       
       player.play()
@@ -469,6 +478,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
       DispatchQueue.main.async(execute: {
         self.autoSnoozeTimer = Timer.scheduledTimer(timeInterval: autoSnoozeTmo, target: self, selector: #selector(self.automaticSnooze), userInfo: self.currAlarm, repeats: false)
       })
+      
+    //   self.DEV_printScheduledNotifs()
       
     } catch {
       print(error.localizedDescription)
@@ -542,17 +553,23 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
   
   @objc
   func snoozeAlarm(_ minutes : Double) {
+  
+    print("\n(Native snoozeAlarm)")
+    // self.DEV_printScheduledNotifs()
     
-
     // Invalidate timers first.
     // This is called by JS from explicit (or implicit?) snooze, but autoSnoozeTimer callback also calls this function,
     //    so that timer must be invalidated right away to avoid a double call to this.
     self.autoSnoozeTimer.invalidate()
-    
     if (self.alarmStatus == AlarmStatus.SNOOZED) {
       CKT_LOG("Alarm is already Snoozed. Ignoring")
       return
     }
+//    else if (!self.recPermGranted) {
+//      CKT_LOG("No rec permission. Ignoring native snooze.")
+//      // This should only happen if we don't have mic permission granted. return so we don't crash
+//      return
+//    }
     
     self.alarmStatus = AlarmStatus.SNOOZED
     
@@ -599,6 +616,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
   @objc
   func turnOffAlarm() {
     CKT_LOG("Turning off alarm")
+    
     self.alarmTimer.invalidate()
     self.autoSnoozeTimer.invalidate()
     fadein_cnt = 0
@@ -611,6 +629,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     }
     self.isRecording = false
     self.alarmStatus = AlarmStatus.OFF
+    
+    // self.DEV_printScheduledNotifs()
   }
   
   /* Delegate Methods */

@@ -31,11 +31,11 @@ AlarmSchema.schema = {
             optional: true
         },
         timeoutId: {
-            type: "int", // this is used in iOS only to allow for in-app notifications
+            type: "int", // this is used in android only
             optional: true
         },
         snoozeCount: {
-            type: "int", // this is used in iOS only in order to set the correct times for snoozed in-app nofications
+            type: "int", // this is used in iOS only in order to determine whether implicit snooze is required.
             optional: true
         }
     }

@@ -150,7 +150,7 @@ AlarmTriggerEvents.addListener("onAutoSnoozed", info => {
         alarm.snoozeCount += 1;
     });
 
-    reloadAlarmsList();
+    reloadAlarmsList && reloadAlarmsList();
 });
 
 NoiseDetectionEvents.addListener("onNoiseDetected", info => {
@@ -253,6 +253,13 @@ let snoozeAction = new NotificationAction(
 
                 // I need to cancel and reschedule backup Notifications here as well,
                 //   since snoozing explicitly adds an offset to snoozeIntervals
+                // console.log(
+                //     "Canceling all local notifications (from snooze action)"
+                // );
+                // console.log(
+                //     "then scheduling new backups with currAlarm:",
+                //     currAlarm
+                // );
                 NotificationsIOS.cancelAllLocalNotifications(() => {
                     _scheduleBackupNotifications(
                         currAlarm,
@@ -279,6 +286,7 @@ let disableAction = new NotificationAction(
         console.log("ACTION RECEIVED");
         console.log(action);
 
+        // console.log("Canceling all local notifications (from Disable action)");
         PushNotificationIOS.cancelAllLocalNotifications();
 
         turnOffNative();
@@ -357,7 +365,11 @@ let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
     // console.log("shortSoundFile", shortSoundFile);
     let backupTimes = [];
     for (let i = 0; i < notiCount; i++) {
-        backupTimes.push(`${i}. ${wakeUpMoment.toDate()}, `);
+        // backupTimes.push(
+        //     `${i}. ${wakeUpMoment.toDate()}, ${shortSoundFile}, snoozeCount:${
+        //         alarm.snoozeCount
+        //     }`
+        // );
 
         NotificationsIOS.localNotification({
             alertBody: alarm.label, // + "(Backup)", // DEV: remove extra string
@@ -372,7 +384,7 @@ let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
         wakeUpMoment.add(snoozeTime, "s");
     }
 
-    console.log("Backup notifications", ...backupTimes);
+    // console.log("Backup notifications", ...backupTimes);
 };
 
 export let cancelAllNotifications = () => {
@@ -401,7 +413,6 @@ export let resumeAlarm = (alarm, reload, alarmDidInitialize) => {
     console.log("resumeAlarm");
     // first cancel any in-app timer for this alarm, since we were already doing this anyway in scheduleAlarm, and it wasn't causing problems.
     // Plus, its best to cancel it right away since if the timer expired during this function there could be a race condition.
-    cancelInAppAlarm(alarm);
 
     reloadAlarmsList = reload;
 
@@ -700,6 +711,8 @@ export let clearAlarm = (alarm, notificationId, disableAlarm = true) => {
     //     console.log("status", alarm.status);
     // }
 
+    console.log("clearAlarm (cancelling notifs");
+
     PushNotificationIOS.cancelLocalNotifications({ alarmId: alarm.id });
 
     if (!alarm) {
@@ -713,7 +726,6 @@ export let clearAlarm = (alarm, notificationId, disableAlarm = true) => {
                 setAlarmInstEnd(); // set end time of active AlarmInstance
             }
             alarm.snoozeCount = 0;
-            cancelInAppAlarm(alarm);
         });
     }
 };
@@ -791,7 +803,7 @@ let setAlarmInstEnd = completed => {
                 })
                 .catch(() => {
                     completed && completed();
-            });
+                });
 
             if (realm.isInTransaction) {
                 // Delete AlarmInstance, associated disturbances, and any recording files
@@ -835,12 +847,6 @@ let onInAppTurnOffPressed = (alarm, sound) => {
 
     /* TODO: TEST: test that app doesn't crash here if this function is called on another screen (not AlarmsList)*/
     reloadAlarmsList();
-};
-
-export let cancelInAppAlarm = alarm => {
-    if (alarm && alarm.timeoutId) {
-        clearTimeout(alarm.timeoutId);
-    }
 };
 
 export let checkForImplicitSnooze = (alarm, mNow) => {
