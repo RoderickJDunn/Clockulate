@@ -560,7 +560,6 @@ export default class Help extends React.Component {
                             underlayColor={Colors.brandDarkGrey}
                             size={24}
                             onPress={() => {
-                                // ClKAlert -- how to use Help
                                 this._exitHelp();
                             }}
                             hitSlop={{
@@ -680,7 +679,7 @@ export default class Help extends React.Component {
                         }
                         title="Quick Tip"
                         headerTextStyle={{ color: Colors.brandLightOpp }}
-                        bodyText={`Tap anywhere to reveal next tip.\n\nSwipe left/right to move to next/previous section`}
+                        bodyText={`Tap anywhere to reveal the next tip for this section.\nSwipe left/right to jump between sections`}
                         dismissConfig={{
                             onPress: () => {
                                 console.log("Dismissed Info popup");
