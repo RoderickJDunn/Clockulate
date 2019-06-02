@@ -142,15 +142,15 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     }
   }
   
-//   func DEV_printScheduledNotifs() {
-//     UNUserNotificationCenter.current().getPendingNotificationRequests { (notifications) in
-//       print("Notif Count: \(notifications.count)")
-//       for item in notifications {
-//         print("\(item.content.body) (sound: \(item.content.sound.debugDescription))")
-//         print((item.trigger as! UNCalendarNotificationTrigger).nextTriggerDate()?.description)
-//       }
-//     }
-//   }
+//    func DEV_printScheduledNotifs() {
+//      UNUserNotificationCenter.current().getPendingNotificationRequests { (notifications) in
+//        print("Notif Count: \(notifications.count)")
+//        for item in notifications {
+//          print("\(item.content.body) (sound: \(item.content.sound.debugDescription))")
+//          print((item.trigger as! UNCalendarNotificationTrigger).nextTriggerDate()?.description)
+//        }
+//      }
+//    }
   
   func displayWarningNotification() {
     print("displayWarningNotification? alarmStatus: \(self.alarmStatus)")
@@ -208,7 +208,6 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
         }
         
         // If self.isRecording == false, restart recording functionality. VERY IMPORTANT !!!!!!! Otherwise AlarmService does not resume after phone call, or other audio interruption
-        // TODO: THIS NEEDS MORE TESTING
         if self.isRecording == false {
           AVAudioSession.sharedInstance().requestRecordPermission() { [unowned self] allowed in
             DispatchQueue.main.async {
@@ -222,6 +221,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
                 self.recPermGranted = false
                 error = "NoRecPermission"
               }
+              onCompletion([error as Any]) // execute callback with nil on success, otherwise send erro
+              return
             }
           }
         }
@@ -233,7 +234,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
         error = "Received invalid date value"
       }
       
-      onCompletion([error as Any]) // execute callback with nil on success, otherwise send erro
+      onCompletion([error as Any])
       return;
     }
     else if (alarmStatus == .SNOOZED) {
@@ -265,7 +266,6 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
       
       
       /* If self.isRecording == false, we need to resume Recorder, so that full audio playback can occur again. */
-      // TODO: THIS NEEDS TESTING
       if self.isRecording == false {
         AVAudioSession.sharedInstance().requestRecordPermission() { [unowned self] allowed in
           DispatchQueue.main.async {
@@ -282,12 +282,15 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
               self.recPermGranted = false
               error = "NoRecPermission"
             }
+            onCompletion([error as Any])
+            return
           }
         }
       }
-      
-      // CKT_LOG("Alarm is already snoozed. Nothing to do here");
-      onCompletion([error as Any])
+      else {
+        error = self.recPermGranted ? nil : "NoRecPermission"
+        onCompletion([error as Any])
+      }
       return;
     }
 
