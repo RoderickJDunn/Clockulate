@@ -69,7 +69,28 @@ AlarmTriggerEvents.addListener("onAlarmTriggered", info => {
 
     // TODO: Remove any existing notifications from Notification center.
 
-    let dbAlarm = realm.objectForPrimaryKey("Alarm", alarmInfo.id);
+    let dbAlarm;
+    if (alarmInfo.id) {
+        // ID is NOT null, look up the alarm directly by primary key
+        dbAlarm = realm.objectForPrimaryKey("Alarm", alarmInfo.id);
+    } else {
+        // Id is NULL. Lookup the alarm by finding the alarm that is currently SET, or SNOOZED. There should only be 1.
+        /* NOTE: This occurs if native service exited (eg. app terminated), and user does not re-enter the app until after the alarm rings.
+                 This happens because JS calls checkForImplicitSnooze() -> native-snoozeAlarm(), which sets the alarm timer (passing the current native Alarm dictionary).
+                 At this point the dictionary is empty (since app was terminated), and resumeAlarm()-->native-initializeAlarm(), which populates the native Alarm dict,
+                 is only called after checkfForImplicitSnooze. There is definately a better way to fix this, but I think this will cause the least breaking changes */
+        let alrms = realm
+            .objects("Alarm")
+            .filtered("status > $0", ALARM_STATES.OFF);
+        if (alrms.length > 0) {
+            dbAlarm = alrms[0];
+        } else {
+            console.error(
+                "No active alarms found. Should never happen in this callback"
+            );
+            return;
+        }
+    }
 
     alarmInfo.time = moment(alarmInfo.time).toDate();
 

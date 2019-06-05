@@ -246,10 +246,8 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
           recording, so that future triggers (snoozes) can occur with full sound playback while app is in the background.
        */
       
-      // If snoozeTimer fireDate is in the future, leave it alone (the app was simply brought into the foreground). If the firedate is in the past, or the timer isValid==false, set snoozeTimer fresh.
-      let timeUntilTrigger = self.alarmTimer.fireDate.timeIntervalSinceNow
-      
-      if self.alarmTimer.isValid == true && timeUntilTrigger > 0 {
+      // If snoozeTimer fireDate is in the future, leave it alone (the app was simply brought into the foreground). If the firedate is in the past, or the timer isValid==false, set snoozeTimer fresh.     
+      if self.alarmTimer.isValid == true && self.alarmTimer.fireDate.timeIntervalSinceNow > 0 {
         // snoozeTimer already set. Don't do anything to it
         print("INFO: Snooze timer already set and valid")
       }
@@ -575,6 +573,18 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
 //    }
     
     self.alarmStatus = AlarmStatus.SNOOZED
+    
+    // NOTE: Hacky band-aid. This handles the case where the app terminated before Alarm triggers. Then once the alarm triggers (backup notif is delivered),
+    //        the user re-opens the app. At this point, both snoozeAlarm() and initializeAlarm() will be called, in that order. The problem is that
+    //        snoozeAlarm would then set the alarmTimer even though self.currAlarm is empty, causing the alarm to trigger with no Sound (and no valid ID,
+    //        which causes problems in JS onAlarmTriggered event). Therefore, we return if self.currAlarm is emtpy, since this function will be called again
+    //        by initializeAlarm.
+    if (self.currAlarm["id"] == nil) {
+        // defer setting the snooze alarm timer, and the rest of these tasks to 'initializeAlarm', which will
+        // be called momentarily (when JS calls resumeAlarm)
+        return
+    }
+    
     
     //if (self.isRecording == false) {
       // TODO: Restart recorder? NO. This is done in initializeAlarm, if necessary.
