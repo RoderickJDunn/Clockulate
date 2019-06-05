@@ -53,12 +53,12 @@ import AVFoundation
 }
 
 func print(_ items: Any...) {
-  #if DEBUG
+ #if DEBUG
   items.forEach { item in
     Swift.print(item, terminator:"")
   }
   Swift.print("")
-  #endif
+ #endif
 }
 
 @objc public enum FDSoundActivatedRecorderStatus: Int {
