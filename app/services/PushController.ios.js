@@ -732,6 +732,7 @@ export let clearAlarm = (alarm, notificationId, disableAlarm = true) => {
     console.log("clearAlarm (cancelling notifs");
 
     PushNotificationIOS.cancelLocalNotifications({ alarmId: alarm.id });
+    turnOffNative();
 
     if (!alarm) {
         alarm = realm.objectForPrimaryKey("Alarm", notificationId);

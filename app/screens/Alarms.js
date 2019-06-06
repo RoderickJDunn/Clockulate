@@ -536,6 +536,12 @@ class Alarms extends Component {
                 // Only schedule an Alarm if the changed Alarm status is SET. If it is not SET, then
                 // another alarm is SET, and we don't want to schedule another.
                 if (nextStatus == ALARM_STATES.SET) {
+                    if (changedAlarm.status > ALARM_STATES.SET) {
+                        // if the alarm is already ringing or snoozed, we need to turn turn it OFF in native first.
+                        // this does NOT disable the Alarm in the DB, nor does it end the AlarmInstance.
+                        clearAlarm(changedAlarm, null, false);
+                    }
+
                     /* Now schedule notification(s) for the changes */
                     // passing in reloadAlarms function for iOS in-app alarm to be able to refresh AlarmsList screen
                     // setTimeout(() => {
