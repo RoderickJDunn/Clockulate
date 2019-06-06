@@ -306,6 +306,7 @@ let disableAction = new NotificationAction(
         // console.log("Canceling all local notifications (from Disable action)");
 
         NotificationsIOS.cancelAllLocalNotifications();
+        NotificationsIOS.removeAllDeliveredNotifications();
         console.log("cancelled notifs");
         turnOffNative();
 
@@ -739,7 +740,7 @@ export let clearAlarm = (alarm, notificationId, disableAlarm = true) => {
         realm.write(() => {
             if (disableAlarm) {
                 alarm.status = ALARM_STATES.OFF;
-                turnOffNative();
+                NotificationsIOS.removeAllDeliveredNotifications();
                 setAlarmInstEnd(); // set end time of active AlarmInstance
             }
             alarm.snoozeCount = 0;
