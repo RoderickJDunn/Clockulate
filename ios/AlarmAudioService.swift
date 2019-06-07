@@ -188,6 +188,14 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     
     self.CKT_LOG(alarmInfo.description)
     
+    let state = UIApplication.shared.applicationState
+    if (state == .inactive || state == .background) {
+      // Handles the case where this function is called as App Instance is started when notification action is taken when the app was in a terminated state.
+      // eg) App
+      print("App State Inactive. Not initializing native alarm service")
+      return;
+    }
+    
     if (alarmStatus == .SET) {
       CKT_LOG("Alarm already SET. Updating parameters")
       
