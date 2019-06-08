@@ -574,6 +574,15 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
       CKT_LOG("Alarm is already Snoozed. Ignoring")
       return
     }
+    
+    let state = UIApplication.shared.applicationState
+    if (state == .inactive || state == .background) {
+      // Handles the case where this function is called as App Instance is started when notification action is taken when the app was in a terminated state.
+      // eg) App
+      print("App State Inactive. Not initializing native alarm service")
+      return;
+    }
+    
 //    else if (!self.recPermGranted) {
 //      CKT_LOG("No rec permission. Ignoring native snooze.")
 //      // This should only happen if we don't have mic permission granted. return so we don't crash
