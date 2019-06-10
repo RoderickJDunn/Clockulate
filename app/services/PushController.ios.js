@@ -278,11 +278,16 @@ let snoozeAction = new NotificationAction(
                 //     "then scheduling new backups with currAlarm:",
                 //     currAlarm
                 // );
+
+                if (currAlarm.alarmSound.type == SOUND_TYPES.RANDOM) {
+                    let randomSound = getRandomSound();
+                    shortSoundFile = randomSound.files[0]; // this selects the first file in the file array which should be the short version
+                } else {
+                    shortSoundFile = currAlarm.alarmSound.sound.files[0];
+                }
+
                 NotificationsIOS.cancelAllLocalNotifications();
-                _scheduleBackupNotifications(
-                    currAlarm,
-                    currAlarm.alarmSound.sound.files[0]
-                );
+                _scheduleBackupNotifications(currAlarm, shortSoundFile);
                 // console.log("alarm: ", currAlarm);
             }
         } catch (e) {
@@ -354,7 +359,7 @@ let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
 
     let notiCount;
     let now = moment();
-    console.log("Scheduling backup notifications: ");
+    console.log("Scheduling backup notifications for alarm: ", alarm);
 
     if (wakeUpMoment - now > 0) {
         console.log("\tAlarm is in the future. Setting all notifications");
@@ -381,7 +386,7 @@ let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
     // if (__DEV__) {
     //     snoozeTime = 15;
     // }
-    // console.log("shortSoundFile", shortSoundFile);
+    console.log("shortSoundFile", shortSoundFile);
     let backupTimes = [];
     for (let i = 0; i < notiCount; i++) {
         // backupTimes.push(
@@ -408,6 +413,22 @@ let _scheduleBackupNotifications = (alarm, shortSoundFile) => {
 
 export let cancelAllNotifications = () => {
     PushNotificationIOS.cancelAllLocalNotifications();
+};
+
+let getRandomSound = () => {
+    /* Get all 'normal' Sounds (not Silent or Random) */
+    let allSounds = realm
+        .objects("Sound")
+        .filtered("type = $0", SOUND_TYPES.NORMAL);
+
+    if (Upgrades.pro != true) {
+        allSounds = allSounds.filtered("isPremium = false");
+    }
+
+    /* randomly select any 'Sound' that is not "Vibrate Only" and not "Random"  */
+    let randomSound = allSounds[Math.floor(Math.random() * allSounds.length)];
+
+    return randomSound;
 };
 
 /**
@@ -442,18 +463,7 @@ export let resumeAlarm = (alarm, reload, alarmDidInitialize) => {
     let longSoundFile = "";
     let filesLen = alarm.alarmSound.sound.files.length;
     if (alarm.alarmSound.type == SOUND_TYPES.RANDOM) {
-        /* Get all 'normal' Sounds (not Silent or Random) */
-        let allSounds = realm
-            .objects("Sound")
-            .filtered("type = $0", SOUND_TYPES.NORMAL);
-
-        if (Upgrades.pro != true) {
-            allSounds = allSounds.filtered("isPremium = false");
-        }
-
-        /* randomly select any 'Sound' that is not "Vibrate Only" and not "Random"  */
-        let randomSound =
-            allSounds[Math.floor(Math.random() * allSounds.length)];
+        let randomSound = getRandomSound();
         shortSoundFile = randomSound.files[0]; // this selects the first file in the file array which should be the short version
         longSoundFile = randomSound.files[randomSound.files.length - 1]; // this selects the last file in the file array which should be the long version (might be the same)
         // realm.write(() => {
@@ -551,17 +561,7 @@ export let scheduleAlarm = (alarm, reload, alarmDidInitialize) => {
     // console.log("alarm.alarmSound", alarm.alarmSound);
     if (alarm.alarmSound.type == SOUND_TYPES.RANDOM) {
         /* Get all 'normal' Sounds (not Silent or Random) */
-        let allSounds = realm
-            .objects("Sound")
-            .filtered("type = $0", SOUND_TYPES.NORMAL);
-
-        if (Upgrades.pro != true) {
-            allSounds = allSounds.filtered("isPremium = false");
-        }
-
-        /* randomly select any 'Sound' that is not "Vibrate Only" and not "Random"  */
-        let randomSound =
-            allSounds[Math.floor(Math.random() * allSounds.length)];
+        let randomSound = getRandomSound();
         shortSoundFile = randomSound.files[0]; // this selects the first file in the file array which should be the short version
         longSoundFile = randomSound.files[randomSound.files.length - 1]; // this selects the last file in the file array which should be the long version (might be the same)
         // realm.write(() => {

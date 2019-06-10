@@ -46,7 +46,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
   var autosnoozeCnt = 0
   
   func CKT_LOG(_ msg: String) {
-      print(TAG, msg)
+      print("\(TAG) \(msg)")
   }
   
   override static func requiresMainQueueSetup() -> Bool {
@@ -127,6 +127,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
       CKT_LOG("Rec permission not granted. Disabling alarm timers before going into background")
       // This is important otherwise it seems that timers fire once app comes into foreground again.
       
+      // TODO: ? DispatchQueue.main.sync(execute: <#T##() -> Void#>)
       self.alarmTimer.invalidate()
       self.autoSnoozeTimer.invalidate()
       
@@ -188,12 +189,20 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     
     self.CKT_LOG(alarmInfo.description)
     
-    let state = UIApplication.shared.applicationState
-    if (state == .inactive || state == .background) {
-      // Handles the case where this function is called as App Instance is started when notification action is taken when the app was in a terminated state.
-      // eg) App
-      print("App State Inactive. Not initializing native alarm service")
-      return;
+    var isInBackground = false
+    
+    DispatchQueue.main.sync(execute: {
+      let state = UIApplication.shared.applicationState
+      if (state == .inactive || state == .background) {
+        // Handles the case where this function is called as App Instance is started when notification action is taken when the app was in a terminated state.
+        // eg) App
+        print("App State Inactive. Not initializing native alarm service")
+        isInBackground = true
+      }
+    })
+
+    if (isInBackground) {
+      return
     }
     
     if (alarmStatus == .SET) {
@@ -574,20 +583,29 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
       CKT_LOG("Alarm is already Snoozed. Ignoring")
       return
     }
+  
     
-    let state = UIApplication.shared.applicationState
-    if (state == .inactive || state == .background) {
-      // Handles the case where this function is called as App Instance is started when notification action is taken when the app was in a terminated state.
-      // eg) App
-      print("App State Inactive. Not initializing native alarm service")
-      return;
-    }
+    // TODO: CLEAN ALL THIS UP
+    // There are several scenarios that we DO NOT want to start the native snooze timer.
+    // The native snooze timer should only start if:
+    // ** curr_alarm is not nil, AND we are not already snoozed ... AND ...
+    //  AND ONE of the following is true:
+    //  1. We are in the foreground
+    //     OR
+    //  2. we are in the background, but rec permission is granted and we are recording
     
-//    else if (!self.recPermGranted) {
-//      CKT_LOG("No rec permission. Ignoring native snooze.")
-//      // This should only happen if we don't have mic permission granted. return so we don't crash
-//      return
-//    }
+    
+    var isInBackground = false
+    
+    DispatchQueue.main.sync(execute: {
+      let state = UIApplication.shared.applicationState
+      if (state == .inactive || state == .background) {
+        // Handles the case where this function is called as App Instance is started when notification action is taken when the app was in a terminated state.
+        // eg) App
+        print("App State Inactive. Not initializing native alarm service")
+        isInBackground = true
+      }
+    })
     
     self.alarmStatus = AlarmStatus.SNOOZED
     
@@ -595,17 +613,17 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     //        the user re-opens the app. At this point, both snoozeAlarm() and initializeAlarm() will be called, in that order. The problem is that
     //        snoozeAlarm would then set the alarmTimer even though self.currAlarm is empty, causing the alarm to trigger with no Sound (and no valid ID,
     //        which causes problems in JS onAlarmTriggered event). Therefore, we return if self.currAlarm is emtpy, since this function will be called again
-    //        by initializeAlarm.
+    //        by initializeAlarm (once currAlarm has been set).
     if (self.currAlarm["id"] == nil) {
         // defer setting the snooze alarm timer, and the rest of these tasks to 'initializeAlarm', which will
         // be called momentarily (when JS calls resumeAlarm)
         return
     }
-    
-    
-    //if (self.isRecording == false) {
-      // TODO: Restart recorder? NO. This is done in initializeAlarm, if necessary.
-    //}
+    else if (self.recPermGranted == false && isInBackground) {
+      // If we have no mic permission, and we're running in background, DO NOT set snoozeTimer. Its important that if we don't have rec permission, NO timers
+      //  should run while we are in the background.
+      return
+    }
 
     self.CKT_LOG("Native snoozeAlarm: \(minutes) minutes")
     
