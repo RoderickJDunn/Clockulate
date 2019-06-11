@@ -401,7 +401,7 @@ export default class Help extends React.Component {
             <LinearGradient
                 start={{ x: 0.0, y: 0.25 }}
                 end={{ x: 0.0, y: 1.25 }}
-                locations={[0, 1.05]}
+                locations={[0, 1.0]}
                 colors={["#110331", "#4B1F7A"]}
                 style={{
                     flex: 1,

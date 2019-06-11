@@ -561,8 +561,8 @@ class AlarmItem extends React.PureComponent {
                 >
                     <LinearGradient
                         start={{ x: 0.0, y: 0.25 }}
-                        end={{ x: 0.5, y: 1.0 }}
-                        locations={[0, 0.5, 1.4]}
+                        end={{ x: 2, y: 1.0 }}
+                        locations={[0, 0.5, 1.0]}
                         colors={[
                             Colors.brandDarkGrey,
                             Colors.brandMidLightGrey,

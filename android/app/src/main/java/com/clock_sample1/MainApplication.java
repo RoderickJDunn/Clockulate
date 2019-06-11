@@ -3,6 +3,7 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.BV.LinearGradient.LinearGradientPackage;
 import com.wix.reactnativenotifications.RNNotificationsPackage;
 import org.devio.rn.splashscreen.SplashScreenReactPackage;
 import com.dooboolab.RNIap.RNIapPackage;
@@ -12,7 +13,6 @@ import com.wheelpicker.WheelPickerPackage;
 import com.airbnb.android.react.lottie.LottiePackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
 import com.apsl.versionnumber.RNVersionNumberPackage;
-import com.BV.LinearGradient.LinearGradientPackage;
 import com.zmxv.RNSound.RNSoundPackage;
 //import com.zmxv.RNSound.RNSoundPackage;
 // import com.reactlibrary.RNArrowsPackage;
@@ -40,6 +40,7 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(new MainReactPackage(),
+            new LinearGradientPackage(),
             new RNNotificationsPackage(),
             new SplashScreenReactPackage(),
             new RNIapPackage(),
