@@ -65,6 +65,7 @@ class AlarmItem extends React.PureComponent {
     _ringingScaleAnim = new Animated.Value(1);
 
     _ringTransform = [];
+    _isMoving = false;
     // _onPressItem = item => {
     //     // console.debug("_onPressItem called");
 
@@ -573,14 +574,17 @@ class AlarmItem extends React.PureComponent {
                             id={this.props.alarm.id}
                             label={this.props.alarm.label}
                             onStartShouldSetResponder={evt => true}
-                            onPressIn={() => this.setState({ isMoving: true })}
                             onPress={() => {
                                 this.props.onPress(this.props.alarm);
                             }}
-                            onLongPress={this.props.startMove}
+                            onLongPress={() => {
+                                this._isMoving = true;
+                                this.props.startMove();
+                            }}
                             // onPressOut={this.props.endMove}
                             onPressOut={() => {
-                                if (this.props.isActive == true) {
+                                if (this._isMoving == true) {
+                                    this._isMoving = false;
                                     this.props.endMove();
                                 }
                             }}
