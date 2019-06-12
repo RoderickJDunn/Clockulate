@@ -399,19 +399,6 @@ class AlarmItem extends React.PureComponent {
                 this.props.animateConfig.sourceRow;
         }
 
-        let movingStyle = {};
-        if (this.props.isActive) {
-            // console.log("isActive", "true");
-            movingStyle = {
-                shadowOpacity: 0.2,
-                shadowRadius: 10,
-                elevation: 3,
-                shadowColor: "black"
-            };
-        } else {
-            // console.log("isActive", "false");
-        }
-
         return (
             <Animated.View
                 style={[
@@ -537,11 +524,7 @@ class AlarmItem extends React.PureComponent {
                 </Animated.View>
                 <Interactable.View
                     ref={interactableRef}
-                    style={[
-                        AlarmListStyle.alarmRow,
-                        ListStyle.item,
-                        movingStyle
-                    ]}
+                    style={[AlarmListStyle.alarmRow, ListStyle.item]}
                     horizontalOnly={true}
                     snapPoints={[
                         { x: 0, id: "closed" },
@@ -564,8 +547,12 @@ class AlarmItem extends React.PureComponent {
                         end={{ x: 2, y: 1.0 }}
                         locations={[0, 0.5, 1.0]}
                         colors={[
-                            Colors.brandDarkGrey,
-                            Colors.brandMidLightGrey,
+                            this.props.isActive
+                                ? Colors.brandLightPurple
+                                : Colors.brandDarkGrey,
+                            this.props.isActive
+                                ? Colors.brandLightPurple
+                                : Colors.brandMidLightGrey,
                             Colors.brandDarkGrey
                         ]}
                         style={{ padding: 10 }}
@@ -586,7 +573,7 @@ class AlarmItem extends React.PureComponent {
                             id={this.props.alarm.id}
                             label={this.props.alarm.label}
                             onStartShouldSetResponder={evt => true}
-                            // onPressIn={() => this.setState({ isMoving: true })}
+                            onPressIn={() => this.setState({ isMoving: true })}
                             onPress={() => {
                                 this.props.onPress(this.props.alarm);
                             }}
@@ -604,7 +591,6 @@ class AlarmItem extends React.PureComponent {
                                     flex: 1,
                                     alignSelf: "stretch"
                                 }
-                                // movingStyle
                             ]}
                         >
                             {/* onStartShouldSetResponder: returning true prevents touches from bubbling up further! */}
@@ -765,7 +751,9 @@ class AlarmItem extends React.PureComponent {
                 <View
                     style={{
                         height: 1,
-                        backgroundColor: Colors.disabledGrey
+                        backgroundColor: this.props.isActive
+                            ? Colors.brandLightPurple
+                            : Colors.disabledGrey
                     }}
                 />
             </Animated.View>

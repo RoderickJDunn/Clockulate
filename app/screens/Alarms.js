@@ -26,7 +26,7 @@ import {
 } from "react-native";
 import moment from "moment";
 import LinearGradient from "react-native-linear-gradient";
-import { SafeAreaView, NavigationEvents } from "react-navigation";
+import { SafeAreaView, NavigationEvents, Header } from "react-navigation";
 import Permissions from "react-native-permissions";
 
 import PushNotificationAndroid from "react-native-push-notification";
@@ -77,6 +77,7 @@ import { ifIphoneX } from "react-native-iphone-x-helper";
 var loadedSound = null;
 
 const CHARGE_REMINDER_HEIGHT = 90;
+const ALARM_ITEM_HEIGHT = scaleByFactor(100, 0.2);
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 class Alarms extends Component {
@@ -1005,6 +1006,19 @@ class Alarms extends Component {
                                     moveInfo.to,
                                     moveInfo.data
                                 );
+                            }}
+                            getItemLayout={(data, index) => {
+                                return {
+                                    length: ALARM_ITEM_HEIGHT,
+                                    offset: ALARM_ITEM_HEIGHT * index,
+                                    index
+                                };
+                            }}
+                            containerDimensions={{
+                                width: SCREEN_WIDTH,
+                                height: SCREEN_HEIGHT,
+                                pageX: 0,
+                                pageY: Header.HEIGHT + ifIphoneX(22, 0)
                             }}
                         />
                         {duplicationInfo && (
