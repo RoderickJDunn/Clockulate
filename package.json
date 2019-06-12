@@ -1,6 +1,6 @@
 {
     "name": "Clock_Sample1",
-    "version": "1.0.14",
+    "version": "1.0.15",
     "private": true,
     "devDependencies": {
         "babel-jest": "23.6.0",
