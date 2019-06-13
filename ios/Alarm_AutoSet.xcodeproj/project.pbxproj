@@ -54,7 +54,7 @@
 		7788F8EC225A6A5B00DC5317 /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77829B121F846B9D00705E6A /* libRCTPushNotification.a */; };
 		778B4A4D1F96D91000AB5DCA /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 778B4A4C1F96D91000AB5DCA /* LaunchScreen.xib */; };
 		778D96772210BB75003C853E /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 778D96762210BB75003C853E /* StoreKit.framework */; };
-		779A8890225A746A00337EDC /* libRNNotifications.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 779A8882225A743D00337EDC /* libRNNotifications.a */; };
+		77A67BEE22B1B12F00B3CFB8 /* libRNNotifications.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77A67BED22B1B12200B3CFB8 /* libRNNotifications.a */; };
 		77A8267E22999BBA003505F8 /* tone11_hauntedsunrise.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77A8267122999BB8003505F8 /* tone11_hauntedsunrise.mp3 */; };
 		77A8267F22999BBA003505F8 /* tone03_digital3.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77A8267222999BB8003505F8 /* tone03_digital3.mp3 */; };
 		77A8268022999BBA003505F8 /* tone02_digital2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 77A8267322999BB8003505F8 /* tone02_digital2.mp3 */; };
@@ -414,9 +414,9 @@
 			remoteGlobalIDString = 6445B0D5207E0D4D00D84F6A;
 			remoteInfo = LottieLibraryMacOS;
 		};
-		779A8881225A743D00337EDC /* PBXContainerItemProxy */ = {
+		77A67BEC22B1B12200B3CFB8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 779A8847225A743D00337EDC /* RNNotifications.xcodeproj */;
+			containerPortal = 77A67BE822B1B12200B3CFB8 /* RNNotifications.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RNNotifications;
@@ -633,7 +633,7 @@
 		778B4A4C1F96D91000AB5DCA /* LaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = LaunchScreen.xib; path = Alarm_AutoSet/LaunchScreen.xib; sourceTree = "<group>"; };
 		778D96762210BB75003C853E /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		778D96782210BEC0003C853E /* RNIap.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNIap.xcodeproj; path = "../node_modules/react-native-iap/ios/RNIap.xcodeproj"; sourceTree = "<group>"; };
-		779A8847225A743D00337EDC /* RNNotifications.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNNotifications.xcodeproj; path = "../node_modules/react-native-notifications/RNNotifications/RNNotifications.xcodeproj"; sourceTree = "<group>"; };
+		77A67BE822B1B12200B3CFB8 /* RNNotifications.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNNotifications.xcodeproj; path = "../node_modules/react-native-notifications/RNNotifications/RNNotifications.xcodeproj"; sourceTree = "<group>"; };
 		77A8267122999BB8003505F8 /* tone11_hauntedsunrise.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone11_hauntedsunrise.mp3; sourceTree = "<group>"; };
 		77A8267222999BB8003505F8 /* tone03_digital3.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone03_digital3.mp3; sourceTree = "<group>"; };
 		77A8267322999BB8003505F8 /* tone02_digital2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = tone02_digital2.mp3; sourceTree = "<group>"; };
@@ -731,10 +731,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				77A67BEE22B1B12F00B3CFB8 /* libRNNotifications.a in Frameworks */,
 				77C4495422AECD3B001C052C /* libBVLinearGradient.a in Frameworks */,
 				77A826C32299B133003505F8 /* libRCTImage.a in Frameworks */,
 				77C05AB9225A7B7100915F75 /* libRNIap.a in Frameworks */,
-				779A8890225A746A00337EDC /* libRNNotifications.a in Frameworks */,
 				7788F8EC225A6A5B00DC5317 /* libRCTPushNotification.a in Frameworks */,
 				7788F81C2252D44F00DC5317 /* libSplashScreen.a in Frameworks */,
 				77C7CA1A21C416AC00BF8143 /* libART.a in Frameworks */,
@@ -1112,10 +1112,10 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		779A8848225A743D00337EDC /* Products */ = {
+		77A67BE922B1B12200B3CFB8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				779A8882225A743D00337EDC /* libRNNotifications.a */,
+				77A67BED22B1B12200B3CFB8 /* libRNNotifications.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1182,7 +1182,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				779A8847225A743D00337EDC /* RNNotifications.xcodeproj */,
+				77A67BE822B1B12200B3CFB8 /* RNNotifications.xcodeproj */,
 				7788F7D62252D41E00DC5317 /* SplashScreen.xcodeproj */,
 				778D96782210BEC0003C853E /* RNIap.xcodeproj */,
 				77C7C9D421C4168100BF8143 /* ART.xcodeproj */,
@@ -1467,8 +1467,8 @@
 					ProjectRef = 778D96782210BEC0003C853E /* RNIap.xcodeproj */;
 				},
 				{
-					ProductGroup = 779A8848225A743D00337EDC /* Products */;
-					ProjectRef = 779A8847225A743D00337EDC /* RNNotifications.xcodeproj */;
+					ProductGroup = 77A67BE922B1B12200B3CFB8 /* Products */;
+					ProjectRef = 77A67BE822B1B12200B3CFB8 /* RNNotifications.xcodeproj */;
 				},
 				{
 					ProductGroup = 77F1E3502137804600203E45 /* Products */;
@@ -1775,11 +1775,11 @@
 			remoteRef = 779A8853225A743D00337EDC /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		779A8882225A743D00337EDC /* libRNNotifications.a */ = {
+		77A67BED22B1B12200B3CFB8 /* libRNNotifications.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libRNNotifications.a;
-			remoteRef = 779A8881225A743D00337EDC /* PBXContainerItemProxy */;
+			remoteRef = 77A67BEC22B1B12200B3CFB8 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		77B0242D206EBC2D006A6525 /* libRNSound.a */ = {

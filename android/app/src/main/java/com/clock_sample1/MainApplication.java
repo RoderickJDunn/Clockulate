@@ -3,8 +3,8 @@ package com.clock_sample1;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
-import com.BV.LinearGradient.LinearGradientPackage;
 import com.wix.reactnativenotifications.RNNotificationsPackage;
+import com.BV.LinearGradient.LinearGradientPackage;
 import org.devio.rn.splashscreen.SplashScreenReactPackage;
 import com.dooboolab.RNIap.RNIapPackage;
 import com.rnfs.RNFSPackage;
@@ -40,8 +40,8 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(new MainReactPackage(),
-            new LinearGradientPackage(),
             new RNNotificationsPackage(),
+            new LinearGradientPackage(),
             new SplashScreenReactPackage(),
             new RNIapPackage(),
             new RNFSPackage(),

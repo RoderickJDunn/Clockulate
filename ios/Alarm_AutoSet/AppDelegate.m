@@ -13,6 +13,7 @@
 #import "RNSplashScreen.h"
 #import <React/RCTPushNotificationManager.h>
 #import "RNNotifications.h"
+#import "RNNRouter.h"
 @import GoogleMobileAds;
 
 
@@ -60,4 +61,32 @@
   return YES;
 }
 
+- (void)applicationDidBecomeActive:(UIApplication *)application
+{
+  // remove badge count from app icon
+  [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+}
+
+// Required for the notification event.
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)notification
+{
+  NSLog(@"didReceiveRemoteNotification");
+  [[RNNRouter sharedInstance] application:application didReceiveRemoteNotification:notification fetchCompletionHandler:nil];
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler
+{
+  if ([[UIApplication sharedApplication] applicationState] == UIApplicationStateActive) {
+    // If app is in foreground do nothing. The in-app alert will show instead
+    completionHandler(0);
+  } else { // If app is not active you can show banner, sound and badge.
+    [[RNNRouter sharedInstance] userNotificationCenter:center willPresentNotification:notification withCompletionHandler:completionHandler];
+  }
+  
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)(void))completionHandler
+{
+  [[RNNRouter sharedInstance] userNotificationCenter:center didReceiveNotificationResponse:response withCompletionHandler:completionHandler];
+}
 @end

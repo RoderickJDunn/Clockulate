@@ -47,7 +47,7 @@
         "react-native-iphone-x-helper": "^1.2.0",
         "react-native-linear-gradient": "^2.5.4",
         "react-native-modal-datetime-picker": "^4.9.0",
-        "react-native-notifications": "^1.5.0",
+        "react-native-notifications": "git://github.com/RoderickJDunn/react-native-notifications.git#action-fixes",
         "react-native-permissions": "^1.1.1",
         "react-native-pie": "^0.5.0",
         "react-native-push-notification": "^3.0.2",
