@@ -585,8 +585,6 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
       CKT_LOG("Alarm is already Snoozed. Ignoring")
       return
     }
-  
-    
     // TODO: CLEAN ALL THIS UP
     // There are several scenarios that we DO NOT want to start the native snooze timer.
     // The native snooze timer should only start if:
@@ -599,16 +597,28 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     
     var isInBackground = false
     
-    DispatchQueue.main.sync(execute: {
+    // Only dispatch to queue of main thread if we are not already running on the main thread. Otherwise, deadlock can occur.
+    //  NOTE: I witnessed such a deadlock here when snoozeAlarm is called from automaticSnooze().
+    if Thread.isMainThread {
       let state = UIApplication.shared.applicationState
       if (state == .inactive || state == .background) {
         // Handles the case where this function is called as App Instance is started when notification action is taken when the app was in a terminated state.
         // eg) App
-        print("App State Inactive. Not initializing native alarm service")
+        print("App State Inactive. Not starting native snooze timer.")
         isInBackground = true
       }
-    })
-    
+    } else {
+      DispatchQueue.main.sync(execute: {
+        let state = UIApplication.shared.applicationState
+        if (state == .inactive || state == .background) {
+          // Handles the case where this function is called as App Instance is started when notification action is taken when the app was in a terminated state.
+          // eg) App
+          print("App State Inactive. Not starting native snooze timer.")
+          isInBackground = true
+        }
+      })
+    }
+
     self.alarmStatus = AlarmStatus.SNOOZED
     
     // NOTE: Hacky band-aid. This handles the case where the app terminated before Alarm triggers. Then once the alarm triggers (backup notif is delivered),
