@@ -193,15 +193,17 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     
     DispatchQueue.main.sync(execute: {
       let state = UIApplication.shared.applicationState
-      if (state == .inactive || state == .background) {
+      if (state == .background) {
         // Handles the case where this function is called as App Instance is started when notification action is taken when the app was in a terminated state.
         // eg) App
-        print("App State Inactive. Not initializing native alarm service")
+        self.CKT_LOG("App State background. Not initializing native alarm service")
         isInBackground = true
       }
     })
 
     if (isInBackground) {
+      error = "Unable to initialize alarm while app is in background"
+      onCompletion([error as Any])
       return
     }
     
