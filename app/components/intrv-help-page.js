@@ -107,6 +107,14 @@ export default class IntrvHelpPage extends Component {
         }
     };
 
+    flashScrollIndicators = () => {
+        if (!this._scrollViewRef) {
+            console.error("ScrollView Reference is null");
+        } else {
+            this._scrollViewRef.flashScrollIndicators();
+        }
+    };
+
     render() {
         let { idx, stepIdx, sectionInfo, showNextBtn } = this.state;
 
@@ -135,6 +143,7 @@ export default class IntrvHelpPage extends Component {
                             // snapToOffsets={sectionInfo.snapOffsets}
                             snapToInterval={STEP_HEIGHT}
                             decelerationRate="fast"
+                            indicatorStyle="white"
                             onMomentumScrollEnd={event => {
                                 console.log(
                                     "onMomentumScrollEnd: contentOffset.y",

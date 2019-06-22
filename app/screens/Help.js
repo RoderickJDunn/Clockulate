@@ -449,8 +449,11 @@ export default class Help extends React.Component {
                                 this._pageRefs.length == 4 + this._welcomeOffset
                             ) {
                                 let currPageRef = this._pageRefs[this._idx];
+
                                 currPageRef.updateBoundaryFlags &&
                                     currPageRef.updateBoundaryFlags();
+                                currPageRef.flashScrollIndicators &&
+                                    currPageRef.flashScrollIndicators();
                             } else {
                                 console.warn("Pagerefs not working correctly.");
                                 console.log(
