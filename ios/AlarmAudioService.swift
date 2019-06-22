@@ -574,7 +574,7 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
   @objc
   func snoozeAlarm(_ minutes : Double) {
   
-    print("\n(Native snoozeAlarm)")
+    print("Native snoozeAlarm")
     // self.DEV_printScheduledNotifs()
     
     // Invalidate timers first.
@@ -601,19 +601,26 @@ class AlarmAudioService: RCTEventEmitter, FDSoundActivatedRecorderDelegate, CXCa
     //  NOTE: I witnessed such a deadlock here when snoozeAlarm is called from automaticSnooze().
     if Thread.isMainThread {
       let state = UIApplication.shared.applicationState
-      if (state == .inactive || state == .background) {
+      if (state == .background) {
         // Handles the case where this function is called as App Instance is started when notification action is taken when the app was in a terminated state.
-        // eg) App
-        print("App State Inactive. Not starting native snooze timer.")
+        // NOTE: I remove 'inactive' from this check, because of the following scenario
+        //    1. Terminate app before alarm rings
+        //    2. Tap initial alarm trigger notification to re-open app.
+        //    3. Alarm snooze timer did not launch because the app state was detected here to be inactive (or maybe background).
+        print("App State: Background. Not starting native snooze timer.")
         isInBackground = true
       }
     } else {
       DispatchQueue.main.sync(execute: {
         let state = UIApplication.shared.applicationState
-        if (state == .inactive || state == .background) {
+        if (state == .background) {
           // Handles the case where this function is called as App Instance is started when notification action is taken when the app was in a terminated state.
-          // eg) App
-          print("App State Inactive. Not starting native snooze timer.")
+          // NOTE: I remove 'inactive' from this check, because of the following scenario
+          //    1. Terminate app before alarm rings
+          //    2. Tap initial alarm trigger notification to re-open app.
+          //    3. Alarm snooze timer did not launch because the app state was detected here to be inactive (or maybe background).
+          
+          print("App State: Background. Not starting native snooze timer.")
           isInBackground = true
         }
       })
