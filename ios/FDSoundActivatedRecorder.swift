@@ -8,7 +8,7 @@
 
 import Foundation
 import AVFoundation
-
+import os
 /*
  * HOW RECORDING WORKS
  *
@@ -53,12 +53,20 @@ import AVFoundation
 }
 
 func print(_ items: Any...) {
- #if DEBUG
+#if DEBUG
   items.forEach { item in
-    Swift.print(item, terminator:"")
+    if let str = item as? String {
+      os_log("[CKT] %{public}s", str);
+    }
+    else if let describable = item as? CustomStringConvertible {
+      os_log("[CKT] %{public}s", describable.description);
+    }
+    else {
+      Swift.print(item, terminator:"")
+      Swift.print("")
+    }
   }
-  Swift.print("")
- #endif
+#endif
 }
 
 @objc public enum FDSoundActivatedRecorderStatus: Int {
