@@ -41,6 +41,10 @@ PODS:
   - GoogleUtilities/Reachability (5.7.0):
     - GoogleUtilities/Logger
   - InMobiSDK (7.2.4)
+  - lottie-ios (2.5.3)
+  - lottie-react-native (2.6.1):
+    - lottie-ios (~> 2.5.0)
+    - React
   - nanopb (0.3.901):
     - nanopb/decode (= 0.3.901)
     - nanopb/encode (= 0.3.901)
@@ -79,8 +83,6 @@ PODS:
     - React/Core
   - React/RCTBlob (0.59.9):
     - React/Core
-  - React/RCTGeolocation (0.59.9):
-    - React/Core
   - React/RCTImage (0.59.9):
     - React/Core
     - React/RCTNetwork
@@ -115,11 +117,11 @@ DEPENDENCIES:
   - Google-Mobile-Ads-SDK
   - GoogleMobileAdsMediationAppLovin
   - GoogleMobileAdsMediationInMobi
+  - lottie-react-native (from `../node_modules/lottie-react-native`)
   - React/Core (from `../node_modules/react-native`)
   - React/CxxBridge (from `../node_modules/react-native`)
   - React/RCTActionSheet (from `../node_modules/react-native`)
   - React/RCTAnimation (from `../node_modules/react-native`)
-  - React/RCTGeolocation (from `../node_modules/react-native`)
   - React/RCTImage (from `../node_modules/react-native`)
   - React/RCTLinkingIOS (from `../node_modules/react-native`)
   - React/RCTNetwork (from `../node_modules/react-native`)
@@ -141,6 +143,8 @@ EXTERNAL SOURCES:
     :podspec: ../node_modules/react-native/third-party-podspecs/Folly.podspec
   glog:
     :podspec: ../node_modules/react-native/third-party-podspecs/glog.podspec
+  lottie-react-native:
+    :path: ../node_modules/lottie-react-native
   React:
     :path: ../node_modules/react-native
   ReactNativePermissions:
@@ -166,6 +170,8 @@ SPEC CHECKSUMS:
   GoogleMobileAdsMediationInMobi: 8c9e7e3348a375ab4c1b7f54fd6cc0efd6b01f53
   GoogleUtilities: 273e67030e0de313e7304f6dcfa96fc5214f6c23
   InMobiSDK: f15ac7c70e433de356631665187ee924fe6712dc
+  lottie-ios: a50d5c0160425cd4b01b852bb9578963e6d92d31
+  lottie-react-native: 3d8181d43619b1fe804c828bd5a09d20fe8bdea7
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   React: a86b92f00edbe1873a63e4a212c29b7a7ad5224f
   ReactNativePermissions: 2e324bb3baf12702e3ec27f76c8ae1158fa69fc6
@@ -173,6 +179,6 @@ SPEC CHECKSUMS:
   RNIap: 162398bede59bc5e1a1c80be4a8def8745ba7db7
   yoga: 03ff42a6f223fb88deeaed60249020d80c3091ee
 
-PODFILE CHECKSUM: 6d592959e7302b55d40728428d6c9db8af1b6838
+PODFILE CHECKSUM: cb3c508bd6395a900f1ea0225e9b410eba2842a9
 
 COCOAPODS: 1.3.1

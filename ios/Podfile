@@ -12,7 +12,7 @@ target 'Alarm_AutoSet' do
     'CxxBridge', # Include this for RN >= 0.47
     'RCTActionSheet',
     'RCTAnimation',
-    'RCTGeolocation',
+    #'RCTGeolocation',
     'RCTImage',
     'RCTLinkingIOS',
     'RCTNetwork',
@@ -30,7 +30,10 @@ target 'Alarm_AutoSet' do
 #  pod 'react-native-maps', path: '../../'
 #  pod 'react-native-google-maps', path: '../../'  # <~~ if you need GoogleMaps support on iOS
 # Add new pods below this line
-pod 'react-native-notifications', :path => '../node_modules/react-native-notifications'
+pod 'lottie-react-native', :path => '../node_modules/lottie-react-native'
+
+
+# pod 'react-native-notifications', :path => '../node_modules/react-native-notifications'
 
 pod 'BVLinearGradient', :path => '../node_modules/react-native-linear-gradient'
 

@@ -17,13 +17,13 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.18</string>
+	<string>1.0.19</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>25</string>
+	<string>27</string>
 	<key>LSApplicationCategoryType</key>
-	<string></string>
+	<string/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -95,6 +95,8 @@
 	<false/>
 	<key>AppLovinSdkKey</key>
 	<string>--wyFpzJDvtfM-TcP-sC6B1TuxCdU_ady9OvsChl6xIgH0mAluRM4xEKinVhh2CtcUM7tbc3ILw5CVNJqcubVb</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>This permission will never be requested.</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-5775007461562122~1333890178</string>
 </dict>
