@@ -2390,7 +2390,7 @@ class AlarmDetail extends Component {
                                             this.state.isEditingTasks
                                         }
                                         isSlidingTask={this.state.isSlidingTask}
-                                        // didEndMove={this._didEndMove}
+                                        didEndMove={this._didEndMove}
                                         onReorderTasks={this._onReorderTasks}
                                         willStartMove={this._willStartTaskMove}
                                         hideDisabledTasks={

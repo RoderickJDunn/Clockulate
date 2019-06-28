@@ -16,9 +16,10 @@ import {
     TextInput,
     Easing
 } from "react-native";
-import Interactable from "react-native-interactable";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import EvilIcon from "react-native-vector-icons/EvilIcons";
+import Swipeable from "react-native-gesture-handler/Swipeable";
+import { RectButton } from "react-native-gesture-handler";
 
 import DurationText from "./duration-text";
 
@@ -55,14 +56,14 @@ class TaskItem extends React.Component {
         }
      */
 
-    interactiveRef = null;
+    swipeableRef = null;
 
     _moveableAnim = new Animated.Value(0);
     _alertAreas = [];
     _scrollOffsetDuringMove = 0;
     currArea;
 
-    setInteractableRef = el => (this.interactiveRef = el);
+    setSwipeableRef = el => (this.swipeableRef = el);
 
     constructor(props) {
         super(props);
@@ -175,93 +176,6 @@ class TaskItem extends React.Component {
         console.log("_onLongPress task");
         this.props.willStartMove(this.props.data, this.state.index);
         this._isMoving = true;
-        // this._scrollOffsetAtMoveStart = this.props.scrollOffset._value;
-
-        // NOTE: This is a workaround to prevent movingItem from remaining visible, when drag failed to initialize
-        //       Sometimes after longPress, the row does not respond to the drag. This is a borderline adequate
-        //       workaround that simply cancels the move in 2 seconds if we don't receive the onDrag-start event.
-        //       A better, but probably much more difficult solution would be to use the rn-gesture-handler lib
-        //       instead, but this could cause a performance hit, since I still want to use rn-interactable for
-        //       horizontal dragging to show Delete button.
-        // if (!this._dragStartTimer) {
-        //     this._dragStartTimer = setTimeout(() => {
-        //         this.props.moveEnded({
-        //             data: this.props.data,
-        //             from: this.props.data.order,
-        //             to: this.props.data.order
-        //         });
-        //     }, 2000);
-        // }
-    };
-
-    onAlert = event => {
-        let { key, value } = event.nativeEvent;
-        // NOTE: Very strange event structuring for this callback of Interactable.View
-        //  the event looks like this:
-        /* 
-            {
-                event_properties,
-                ...
-                nativeEvent: {
-                    nativeEvt_properties,
-                    ...
-                    <"alertAreaId">: <"enter"|"leave">,
-                    "row0": <"enter"|"leave">       -- example
-                }
-            }
-        */
-
-        console.log("onAlert");
-        let areas = this._alertAreas.map(area => area.id);
-        // Determine which area this alert occurred for (I think we only need to care about "enter" events)
-        for (let i = 0; i < areas.length; i++) {
-            console.log("areas[i]", areas[i]);
-            console.log(
-                "event.nativeEvent[areas[i]]",
-                event.nativeEvent[areas[i]]
-            );
-            if (event.nativeEvent[areas[i]] == "enter") {
-                console.log(`Entering Area ${i}`);
-                console.log("this.currArea", this.currArea);
-                if (i == this.currArea) {
-                    console.log(
-                        "We're already in this area, not doing anything ",
-                        i
-                    );
-                    break;
-                } else {
-                    let direction;
-                    let rowsToAnimate = [];
-                    if (this.currArea > i) {
-                        // new area is less (we've moved towards the top of the list, meaning the
-                        //  moveable view must move towards the bottom)
-                        direction = "bottom";
-                        let topMostRowToAnimate = i;
-
-                        // Create an array of incremental digits, starting at topMostRowToAnimate, of (this.currArea - i) elements
-                        rowsToAnimate = Array.from(
-                            { length: this.currArea - i },
-                            (v, k) => k + topMostRowToAnimate
-                        );
-                    } else if (this.currArea < i) {
-                        // new area is more (we've moved towards the bottom of the list, so the
-                        //  moveable view must move towards the top)
-                        direction = "top";
-                        let topMostRowToAnimate = this.currArea + 1;
-
-                        rowsToAnimate = Array.from(
-                            { length: i - this.currArea },
-                            (v, k) => k + topMostRowToAnimate
-                        );
-                    }
-                    this.currArea = i;
-                    // Animate the corresponding row 55 points in the correct direction
-                    this.props.animateMovables(rowsToAnimate, direction);
-                    this.props.updateDraggedRowOrder(this.state.index, i);
-                    break;
-                }
-            }
-        }
     };
 
     componentWillReceiveProps(nextProps) {
@@ -271,8 +185,8 @@ class TaskItem extends React.Component {
         if (this.props.closed == false && nextProps.closed == true) {
             setTimeout(() => {
                 // console.log("Timeout closing task delete view...");
-                if (this.interactiveRef) {
-                    this.interactiveRef.snapTo({ index: 0 });
+                if (this.swipeableRef) {
+                    this.swipeableRef.close();
                 }
             }, 0);
         }
@@ -660,13 +574,13 @@ class TaskItem extends React.Component {
         // let sortHandlers = this.props.sortHandlers;
 
         /* During a move, there are 3 new components used, rather than the regular one. The names may need work.
-            1. Placeholder:   This is a transparent Interactable.View and is therefore the view that the user directly
-                              drags. It's motion is set to verticalOnly={true}
-            2. Moving Item:   This is an absolutely positioned Animated.View (relative to the entire TaskList), so
-                              that it renders above all other TaskItems. Its position animated toi match that of the
+            1. Handle:   This is a transparent version of the regular component. It is therefore the view that the user directly
+                              drags.
+            2. Copy:       This is an absolutely positioned Animated.View (relative to the entire TaskList), so
+                              that it renders above all other TaskItems. Its position animated to match that of the
                               placeholder view as it is moved. In other words, this is a copy of the actual view
                               being moved, and follows the movement of that view.
-            3. Moveable Item: These are all other TaskItems. They are Animated.Views that remain still unless the
+            3. Moveable Item: These are all other TaskItems during a move. They are Animated.Views that remain still unless the
                               Placeholder animatedValue crosses a positional threshold for that particular row.
                               If that threshold is passed, the view snaps to the last row-aligned position of the
                               Placeholder view.
@@ -674,7 +588,7 @@ class TaskItem extends React.Component {
         let extraStyle = { opacity: 1 };
         let borderBottomColor = Colors.disabledGrey;
         let { moveItemType } = this.props;
-        let snapPoints;
+        // let snapPoints = [{ x: 0, id: "closed" }, { x: -90, id: "active" }];
         let useGestureHandler = false;
 
         if (moveItemType == MOVING_ITEM_TYPES.HANDLE) {
@@ -693,49 +607,32 @@ class TaskItem extends React.Component {
             return this._renderMovingItem(duration, this._moveableAnim);
         } else {
             // console.debug("Rendering standard TaskItem");
-            snapPoints = [{ x: 0, id: "closed" }, { x: -90, id: "active" }];
+            // snapPoints = [{ x: 0, id: "closed" }, { x: -90, id: "active" }];
             this._alertAreas = [];
         }
 
-        tapRef = React.createRef();
-
         return (
-            <Interactable.View
-                style={[
-                    TaskListStyle.taskRow,
-                    {
-                        alignContent: "flex-start"
-                    }
-                ]}
-                ref={this.setInteractableRef}
-                horizontalOnly={true}
-                alertAreas={this._alertAreas}
-                onAlert={this.onAlert}
-                snapPoints={snapPoints}
-                dragWithSpring={{ tension: 500, damping: 0.5 }}
-                animatedNativeDriver={true}
-                dragEnabled={true}
-                onDrag={event => {
-                    // console.log("Snapping");
-                    let { state, y, targetSnapPointId } = event.nativeEvent;
-                    if (state == "end") {
-                        console.log("OnDrag end.");
-                        this.props.onSnapTask(targetSnapPointId);
-                    } else if (state == "start") {
-                        console.log("OnDrag start.");
-                        clearTimeout(this._dragStartTimer);
-                        this._dragStartTimer = null;
-                    }
+            <Swipeable
+                ref={this.setSwipeableRef}
+                onSwipeableOpen={() => {
+                    console.log("Task row swiped open");
+                    this.props.onSnapTask("active");
                 }}
+                onSwipeableClose={() => {
+                    console.log("Task row swiped open");
+                    this.props.onSnapTask("closed");
+                }}
+                renderRightActions={() => (
+                    <TouchableOpacity
+                        style={[TaskItemStyle.deleteBtn]}
+                        onPress={this._onPressDelete}
+                    >
+                        <Text style={TaskItemStyle.deleteBtnText}>DELETE</Text>
+                    </TouchableOpacity>
+                )}
             >
                 {this._renderTaskItemCore(duration, extraStyle)}
-                <TouchableOpacity
-                    style={[TaskItemStyle.deleteBtn]}
-                    onPress={this._onPressDelete}
-                >
-                    <Text style={TaskItemStyle.deleteBtnText}>DELETE</Text>
-                </TouchableOpacity>
-            </Interactable.View>
+            </Swipeable>
         );
     }
 }

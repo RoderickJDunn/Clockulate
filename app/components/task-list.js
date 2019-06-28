@@ -592,6 +592,7 @@ class TaskList extends React.Component {
                             }
                             // this.props.tlContainerStyle
                         ]}
+                        maxDist={1000} // NOTE: May be required for android, as otherwise transitioning from longPress->pan is flakey
                         // ref={el => (this.startTimesPanRef = el)}
                         minDist={useGestureHandler ? 5 : 2000}
                         failOffsetY={
@@ -611,6 +612,10 @@ class TaskList extends React.Component {
                                 );
                                 //     clearInterval(this._scrollItvlTimer);
 
+                                // NOTE: Required on android
+                                if (!this.movingItem) {
+                                    return;
+                                }
                                 console.log(
                                     "[DEBUG] From: ",
                                     this.movingItem.initOrder
@@ -666,11 +671,18 @@ class TaskList extends React.Component {
                                     useNativeDriver: true
                                 }).start(() => {
                                     this._panAnim.setValue(0);
-                                    this.onMoveEnded({
-                                        data: this.movingItem.task,
-                                        from: this.movingItem.initOrder,
-                                        to: this.movingItem.currPos
-                                    });
+
+                                    // this.movingItem can be null here in rare cases. Protect against this
+                                    if (this.movingItem) {
+                                        this.onMoveEnded({
+                                            data: this.movingItem.task,
+                                            from: this.movingItem.initOrder,
+                                            to: this.movingItem.currPos
+                                        });
+                                    } else {
+                                        // abort move if this.movingItem was null
+                                        this.props.didEndMove();
+                                    }
                                 });
                                 // this._isMoving = false;
                             } else if (nativeEvent.state == State.FAILED) {

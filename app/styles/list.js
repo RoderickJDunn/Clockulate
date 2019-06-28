@@ -104,7 +104,8 @@ export const TaskItemStyle = StyleSheet.create({
         flexDirection: "row",
         width: SCREEN_WIDTH - scaleByFactor(20, 0.4) + 10, // SIDE_PADDING = 10 * 2.  PAD_DURATION_DELETE = 5
         height: 55,
-        alignContent: "stretch"
+        alignContent: "stretch",
+        backgroundColor: Colors.brandMidGrey
     },
     taskInfoTouchable: {
         flex: 1,
@@ -146,14 +147,14 @@ export const TaskItemStyle = StyleSheet.create({
         // right: 10
     },
     deleteBtn: {
-        position: "absolute",
+        // position: "absolute",
         backgroundColor: Colors.deleteBtnRed,
         marginLeft: 20,
-        right: 0,
+        // right: 0,
         width: CONST_DIMENSIONS.TASK_DELETE_BTN_WIDTH,
         height: CONST_DIMENSIONS.TASK_DELETE_BTN_HEIGHT,
-        justifyContent: "center",
-        zIndex: 10000
+        justifyContent: "center"
+        // zIndex: 10000
     },
     deleteBtnText: {
         alignSelf: "stretch",
