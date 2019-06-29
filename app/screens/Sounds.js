@@ -6,7 +6,8 @@ import {
     Text,
     TouchableOpacity,
     StyleSheet,
-    InteractionManager
+    InteractionManager,
+    Platform
 } from "react-native";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import FAIcon from "react-native-vector-icons/FontAwesome";
@@ -191,6 +192,9 @@ export default class Sounds extends Component {
                                  Without this line, there is a brief gap shown at the bottom, meaning
                                  not enough rows are rendered in time for the transition...
                         */
+                        contentContainerStyle={{
+                            backgroundColor: Colors.darkGreyText
+                        }}
                         initialNumToRender={23}
                         keyExtractor={sound => sound.displayName}
                         renderItem={item => {
@@ -244,6 +248,8 @@ export default class Sounds extends Component {
                                     <View
                                         style={{
                                             height: 35,
+                                            backgroundColor:
+                                                Colors.brandDarkGrey,
                                             alignSelf: "stretch"
                                         }}
                                     />
@@ -367,9 +373,16 @@ export default class Sounds extends Component {
                         // borderColor={Colors.brandDarkGrey}
                         navigation={this.props.navigation}
                         pubBannerProps={{
-                            adSize: "smartBannerPortrait",
+                            adSize:
+                                Platform.OS == "ios"
+                                    ? "smartBannerPortrait"
+                                    : "banner",
                             // adUnitID: "ca-app-pub-3940256099942544/6300978111",
-                            adUnitID: "ca-app-pub-5775007461562122/9954191195",
+                            adUnitID: Platform.select({
+                                ios: "ca-app-pub-5775007461562122/9954191195",
+                                android:
+                                    "ca-app-pub-5775007461562122/1309673160"
+                            }),
                             testDevices: [AdMobBanner.simulatorId],
                             onAdFailedToLoad: this._bannerError,
                             onAdLoaded: () => {
@@ -434,7 +447,7 @@ const styles = StyleSheet.create({
     separator: {
         marginLeft: 15,
         backgroundColor: Colors.disabledGrey,
-        height: StyleSheet.hairlineWidth
+        height: Platform.select({ ios: StyleSheet.hairlineWidth, android: 1 })
     },
     soundListItem: {
         flex: 1,
@@ -451,7 +464,7 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         fontFamily: "Gurmukhi MN",
         fontSize: 16,
-        marginTop: 6,
+        marginTop: Platform.select({ ios: 6, android: 0 }),
         color: Colors.brandMidOpp
     },
     sectionHeaderCont: {
