@@ -704,9 +704,11 @@ class TaskDetail extends Component {
                     </KeyboardAvoidingView>
                     <View
                         style={{
-                            backgroundColor: Colors.brandMidGrey,
-                            margin: scaleByFactor(10, 0.5)
+                            backgroundColor: "transparent",
+                            margin: scaleByFactor(10, 0.5),
+                            height: SCREEN_HEIGHT - 20
                         }}
+                        pointerEvents="box-none"
                     >
                         <Text
                             style={[TextStyle.labelText, Styles.fieldLabelText]}
