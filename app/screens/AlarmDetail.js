@@ -2763,7 +2763,6 @@ class AlarmDetail extends Component {
                         backgroundColor: "red"
                     }}
                 /> */}
-                {this.state.isDatePickerVisible && (
                     <DateTimePicker
                         date={moment
                             .utc(this.state.alarm.wakeUpTime)
@@ -2771,11 +2770,10 @@ class AlarmDetail extends Component {
                             .toDate()} // time has been converted into a Date() for this Component
                         mode={"time"}
                         titleIOS={"Set Wake-Up Time"}
-                        isVisible={true}
+                    isVisible={this.state.isDatePickerVisible}
                         onConfirm={this._onWakeTimePicked}
                         onCancel={this._hideDateTimePicker}
                     />
-                )}
                 {this.state.showSnoozePicker && (
                     <PickerActionSheet
                         initialValues={[this.state.alarm.snoozeTime]}
