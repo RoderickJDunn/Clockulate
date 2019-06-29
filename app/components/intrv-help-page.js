@@ -28,10 +28,14 @@ const STATUS_BAR_HEIGHT = isIphoneX() ? 44 : 20;
 const HEADER_HEIGHT = Header.HEIGHT; // + STATUS_BAR_HEIGHT;
 
 const HELPPAGE_HEIGHT = SCREEN_HEIGHT - HEADER_HEIGHT;
+// console.log("HEADER_HEIGHT", HEADER_HEIGHT);
+// console.log("SCREEN_HEIGHT", SCREEN_HEIGHT);
+// console.log("HELPPAGE_HEIGHT", HELPPAGE_HEIGHT);
 
 const AnimAutoHeightImg = Animatable.createAnimatableComponent(AutoHeightImage);
 
 const STEP_HEIGHT = HELPPAGE_HEIGHT * 0.73;
+// console.log("STEP_HEIGHT", STEP_HEIGHT);
 export default class IntrvHelpPage extends Component {
     constructor(props) {
         super(props);
@@ -52,7 +56,13 @@ export default class IntrvHelpPage extends Component {
         } else {
             let currStepIdx = Math.round(this._scrollPos / STEP_HEIGHT);
             currStepIdx = Math.max(0, currStepIdx - 1);
-            this._scrollViewRef.scrollTo({ y: currStepIdx * STEP_HEIGHT });
+            this._scrollViewRef.scrollTo({
+                y: currStepIdx * STEP_HEIGHT,
+                duration: 4000
+            });
+
+            // NOTE: Updating scrollPos here since onMomentumScrollEnd not called on Android after using scrollTo
+            this._scrollPos = currStepIdx * STEP_HEIGHT;
             return true;
         }
     };
@@ -75,7 +85,14 @@ export default class IntrvHelpPage extends Component {
         if (nextStepIdx < sectionInfo.pageCount) {
             console.log("Jumping to step Index: ", nextStepIdx);
 
-            this._scrollViewRef.scrollTo({ y: nextStepIdx * STEP_HEIGHT });
+            this._scrollViewRef.scrollTo({
+                y: nextStepIdx * STEP_HEIGHT,
+                duration: 4000
+            });
+
+            // NOTE: Updating scrollPos here since onMomentumScrollEnd not called on Android after using scrollTo
+            this._scrollPos = nextStepIdx * STEP_HEIGHT;
+
             this.setState({ stepIdx: nextStepIdx });
             return true;
         } else {
