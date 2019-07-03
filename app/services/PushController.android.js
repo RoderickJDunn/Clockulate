@@ -3,8 +3,11 @@ import Colors from "../styles/colors";
 import realm from "../data/DataSchemas";
 import { SOUND_TYPES, ALARM_STATES } from "../data/constants";
 import moment from "moment";
+import { AppRegistry } from "react-native";
 
 let FAKE_CATEGORY = "MyFakeCategory";
+
+let reloadAlarmsList = null;
 
 // export function configure() {
 //     console.log("configuring notifications *************");
@@ -16,6 +19,29 @@ let FAKE_CATEGORY = "MyFakeCategory";
 //         }
 //     });
 // }
+
+// PushNotification.registerNotificationActions(["Snooze", "Turn Off"]);
+
+const notificationActionHandler = async actionData => {
+    console.log("Notification action received: " + JSON.stringify(actionData));
+    // const info = JSON.parse(action);
+    const info = actionData.notification;
+    console.log("info", info);
+    if (info.action == "snooze") {
+        // Do work pertaining to Accept action here
+        snoozeAlarm(info, reloadAlarmsList);
+    } else if (info.action == "turnoff") {
+        // Do work pertaining to Reject action here
+        clearAlarm(null, info.id, reloadAlarmsList);
+    }
+};
+
+AppRegistry.registerHeadlessTask(
+    "RNPushNotificationActionHandlerTask", // you must use the same name
+    () => {
+        return notificationActionHandler;
+    }
+);
 
 function alarmUUID_to_notificationID(alarmId) {
     let notifId = alarmId.replace(/[^[0-9]/g, "");
@@ -64,6 +90,8 @@ export let snoozeAlarm = (notificationInfo, reloadAlarmsList) => {
         if (reloadAlarmsList) {
             console.log("reloading alarms list");
             reloadAlarmsList();
+        } else {
+            console.error("reloadingAlarms callback is null!!!!");
         }
     }
 };
@@ -101,10 +129,12 @@ export let clearAlarm = (alarm, notificationID, reloadAlarmsList) => {
 export let resumeAlarm = () => {};
 export let cancelAllNotifications = () => {};
 
-export let scheduleAlarm = (alarm, reloadAlarmsList) => {
+export let scheduleAlarm = (alarm, reload, alarmDidInitialize) => {
     console.log(
         "scheduleAlarm for (rn-push-notification lib): " + alarm.wakeUpTime
     );
+
+    reloadAlarmsList = reload;
     // let in30Sec = new Date(Date.now() + 30 * 1000);
     // console.log("scheduleAlarm for (rn-push-notification lib): " + in30Sec);
 
@@ -136,12 +166,16 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
         // TODO: This functionality will be a premium feature
     }
 
-    let snoozeTime = alarm.snoozeTime * 1000;
+    let snoozeTime = alarm.snoozeTime * 60 * 1000;
+    // DEV:
     // if (__DEV__) {
     //     snoozeTime = 60 * 1000;
     // }
     setInAppAlarm(alarm, reloadAlarmsList);
     // console.log("notifId", notifId);
+
+    console.log("soundFile", soundFile);
+    console.log("snoozeTime", snoozeTime);
 
     // let snoozeTime = 600 * 1000; // in milliseconds
     // for (let i = 1; i <= notiCount; i++) {
@@ -163,8 +197,13 @@ export let scheduleAlarm = (alarm, reloadAlarmsList) => {
         // date: new Date(Date.now() + 30 * 1000),
         repeatType: "time",
         repeatTime: snoozeTime,
-        actions: '["Snooze", "Turn Off"]'
+        actions: [
+            { id: "snooze", text: "Snooze" },
+            { id: "turnoff", text: "Turn Off" }
+        ]
     });
+
+    alarmDidInitialize();
 };
 
 export let setInAppAlarm = (alarm, reloadAlarmsList) => {
