@@ -20,6 +20,11 @@ import Colors from "../styles/colors";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
+const FADED_STATES = {
+    HALF: 1,
+    FULL: 2
+};
+
 // console.log("STEP_HEIGHT", STEP_HEIGHT);
 export default class PagingDots extends Component {
     constructor(props) {
@@ -71,10 +76,15 @@ export default class PagingDots extends Component {
             );
         }
 
+        // NOTE: There is a simpler way of doing this with far fewer checks if I only cared about what
+        //          the final value activeDotIdx. However, I may want to add transition animations,
+        //          in which case the prev/new logic below is needed to determine what type of animation
+        //          should play.
+
         let activeDotIdx = 0;
         if (prevPageIdx < motionRangeL) {
             if (newPageIdx < motionRangeL) {
-                // page has moved within motionRangeL
+                // page has changed within motionRangeL
                 activeDotIdx = newPageIdx;
             } else if (newPageIdx <= motionRangeH) {
                 // page has changed from motionRangeL into STILL_RANGE
@@ -199,7 +209,21 @@ export default class PagingDots extends Component {
 
     render() {
         let { dotCount } = this.props;
-        let { pageIdx, activeDotIdx } = this.state;
+        let { pageIdx, activeDotIdx, pageCount } = this.state;
+        let leftEdgeFaded, rightEdgeFaded;
+
+        if (pageIdx > Math.trunc(dotCount / 2) + 1) {
+            leftEdgeFaded = FADED_STATES.FULL;
+        } else if (pageIdx > Math.trunc(dotCount / 2)) {
+            leftEdgeFaded = FADED_STATES.HALF;
+        }
+
+        if (pageIdx < pageCount - Math.trunc(dotCount / 2) - 1) {
+            rightEdgeFaded = FADED_STATES.FULL;
+        } else if (pageIdx < pageCount - Math.trunc(dotCount / 2)) {
+            rightEdgeFaded = FADED_STATES.HALF;
+        }
+
         return (
             <View style={styles.pagingDotsCont}>
                 {_.times(dotCount, i => {
@@ -207,7 +231,27 @@ export default class PagingDots extends Component {
                     let extraStyle;
                     if (activeDotIdx == i) {
                         extraStyle = styles.pageDotActive;
+                    } else if (leftEdgeFaded == FADED_STATES.HALF && i < 2) {
+                        extraStyle =
+                            i == 1 ? { opacity: 0.9 } : { opacity: 0.7 };
+                    } else if (leftEdgeFaded == FADED_STATES.FULL && i == 0) {
+                        extraStyle =
+                            i == 1 ? { opacity: 0.5 } : { opacity: 0.2 };
+                    } else if (
+                        rightEdgeFaded == FADED_STATES.HALF &&
+                        i >= dotCount - 2
+                    ) {
+                        extraStyle =
+                            i == dotCount - 2
+                                ? { opacity: 0.9 }
+                                : { opacity: 0.7 };
+                    } else if (rightEdgeFaded && i >= dotCount - 2) {
+                        extraStyle =
+                            i == dotCount - 2
+                                ? { opacity: 0.5 }
+                                : { opacity: 0.2 };
                     }
+
                     return (
                         <View key={i} style={[styles.pageDot, extraStyle]} />
                     );
