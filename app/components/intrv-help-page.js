@@ -42,7 +42,8 @@ export default class IntrvHelpPage extends Component {
         this.state = {
             idx: props.idx,
             stepIdx: 0,
-            sectionInfo: props.sectionInfo
+            image: props.image,
+            section: props.section
         };
     }
 
@@ -50,90 +51,90 @@ export default class IntrvHelpPage extends Component {
     _svCurrHeight = 150;
     _scrollPos = 0;
 
-    prevStep = () => {
-        if (this._scrollPos == 0) {
-            return false;
-        } else {
-            let currStepIdx = Math.round(this._scrollPos / STEP_HEIGHT);
-            currStepIdx = Math.max(0, currStepIdx - 1);
-            this._scrollViewRef.scrollTo({
-                y: currStepIdx * STEP_HEIGHT,
-                duration: 4000
-            });
+    // prevStep = () => {
+    //     if (this._scrollPos == 0) {
+    //         return false;
+    //     } else {
+    //         let currStepIdx = Math.round(this._scrollPos / STEP_HEIGHT);
+    //         currStepIdx = Math.max(0, currStepIdx - 1);
+    //         this._scrollViewRef.scrollTo({
+    //             y: currStepIdx * STEP_HEIGHT,
+    //             duration: 4000
+    //         });
 
-            // NOTE: Updating scrollPos here since onMomentumScrollEnd not called on Android after using scrollTo
-            this._scrollPos = currStepIdx * STEP_HEIGHT;
-            return true;
-        }
-    };
+    //         // NOTE: Updating scrollPos here since onMomentumScrollEnd not called on Android after using scrollTo
+    //         this._scrollPos = currStepIdx * STEP_HEIGHT;
+    //         return true;
+    //     }
+    // };
 
-    nextStep = () => {
-        let { idx, stepIdx, sectionInfo, showNextBtn } = this.state;
+    // nextStep = () => {
+    //     let { idx, stepIdx, sectionInfo, showNextBtn } = this.state;
 
-        const images = sectionInfo.images;
+    //     const images = sectionInfo.images;
 
-        // console.log("\nNext Step");
-        // console.log("idx", idx);
-        // console.log("stepIdx", stepIdx);
-        // console.log("this._scrollPos", this._scrollPos);
-        // console.log("STEP_HEIGHT", STEP_HEIGHT);
-        // console.log("this._svCurrHeight", this._svCurrHeight);
+    //     // console.log("\nNext Step");
+    //     // console.log("idx", idx);
+    //     // console.log("stepIdx", stepIdx);
+    //     // console.log("this._scrollPos", this._scrollPos);
+    //     // console.log("STEP_HEIGHT", STEP_HEIGHT);
+    //     // console.log("this._svCurrHeight", this._svCurrHeight);
 
-        let nextStepIdx = Math.round(this._scrollPos / STEP_HEIGHT) + 1;
-        // console.log("images.length", images.length);
+    //     let nextStepIdx = Math.round(this._scrollPos / STEP_HEIGHT) + 1;
+    //     // console.log("images.length", images.length);
 
-        if (nextStepIdx < sectionInfo.pageCount) {
-            console.log("Jumping to step Index: ", nextStepIdx);
+    //     if (nextStepIdx < sectionInfo.pageCount) {
+    //         console.log("Jumping to step Index: ", nextStepIdx);
 
-            this._scrollViewRef.scrollTo({
-                y: nextStepIdx * STEP_HEIGHT,
-                duration: 4000
-            });
+    //         this._scrollViewRef.scrollTo({
+    //             y: nextStepIdx * STEP_HEIGHT,
+    //             duration: 4000
+    //         });
 
-            // NOTE: Updating scrollPos here since onMomentumScrollEnd not called on Android after using scrollTo
-            this._scrollPos = nextStepIdx * STEP_HEIGHT;
+    //         // NOTE: Updating scrollPos here since onMomentumScrollEnd not called on Android after using scrollTo
+    //         this._scrollPos = nextStepIdx * STEP_HEIGHT;
 
-            this.setState({ stepIdx: nextStepIdx });
-            return true;
-        } else {
-            return false;
-        }
-    };
+    //         this.setState({ stepIdx: nextStepIdx });
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // };
 
-    updateBoundaryFlags = nextStepIdx => {
-        let { stepIdx, sectionInfo } = this.state;
-        if (nextStepIdx == null) {
-            nextStepIdx = stepIdx;
-        }
+    // updateBoundaryFlags = nextStepIdx => {
+    //     let { stepIdx, sectionInfo } = this.state;
+    //     if (nextStepIdx == null) {
+    //         nextStepIdx = stepIdx;
+    //     }
 
-        if (nextStepIdx == sectionInfo.pageCount - 1) {
-            // If 1) This is the last step, 2) We're at the bottom,
-            this.props.setBoundaryFlag({
-                lastStep: true
-            });
-        } else if (this._scrollPos == 0) {
-            // If 1) We're at the top (first step),
-            this.props.setBoundaryFlag({
-                firstStep: true
-            });
-        } else {
-            this.props.setBoundaryFlag({
-                firstStep: false,
-                lastStep: false
-            });
-        }
-    };
+    //     if (nextStepIdx == sectionInfo.pageCount - 1) {
+    //         // If 1) This is the last step, 2) We're at the bottom,
+    //         this.props.setBoundaryFlag({
+    //             lastStep: true
+    //         });
+    //     } else if (this._scrollPos == 0) {
+    //         // If 1) We're at the top (first step),
+    //         this.props.setBoundaryFlag({
+    //             firstStep: true
+    //         });
+    //     } else {
+    //         this.props.setBoundaryFlag({
+    //             firstStep: false,
+    //             lastStep: false
+    //         });
+    //     }
+    // };
 
-    flashScrollIndicators = () => {
-        if (!this._scrollViewRef) {
-            console.error("ScrollView Reference is null");
-        } else {
-            this._scrollViewRef.flashScrollIndicators();
-        }
-    };
+    // flashScrollIndicators = () => {
+    //     if (!this._scrollViewRef) {
+    //         console.error("ScrollView Reference is null");
+    //     } else {
+    //         this._scrollViewRef.flashScrollIndicators();
+    //     }
+    // };
 
     render() {
-        let { idx, stepIdx, sectionInfo, showNextBtn } = this.state;
+        let { idx, stepIdx, image, section, showNextBtn } = this.state;
 
         let { currSectIdx } = this.props;
 
@@ -142,186 +143,46 @@ export default class IntrvHelpPage extends Component {
         // console.log("currSectIndex", currSectIdx);
         // console.log("HEADER_HEIGHT", HEADER_HEIGHT);
         // let images = sectionInfo.images.slice(0, stepIdx + 1);
-        let images = sectionInfo.images;
+        // let images = sectionInfo.images;
 
         // console.log("images", images);
         // console.log("SCREEN_HEIGHT", SCREEN_HEIGHT);
-
         return (
-            <TouchableWithoutFeedback onPress={this.nextStep}>
-                <View
-                    style={styles.helpPage}
-                    // onStartShouldSetResponder={() => true}
-                >
-                    <View style={styles.scrollViewWrap}>
-                        <ScrollView
-                            style={styles.helpPageBox}
-                            ref={ref => (this._scrollViewRef = ref)}
-                            // snapToOffsets={sectionInfo.snapOffsets}
-                            snapToInterval={STEP_HEIGHT}
-                            decelerationRate="fast"
-                            indicatorStyle="white"
-                            onMomentumScrollEnd={event => {
-                                console.log(
-                                    "onMomentumScrollEnd: contentOffset.y",
-                                    event.nativeEvent.contentOffset.y
-                                );
-
-                                console.log(
-                                    "contentSize",
-                                    event.nativeEvent.contentSize
-                                );
-                                this._scrollPos =
-                                    event.nativeEvent.contentOffset.y;
-                                this._svCurrHeight =
-                                    event.nativeEvent.contentSize.height;
-
-                                let newStepIdx = Math.round(
-                                    this._scrollPos / STEP_HEIGHT
-                                );
-                                this.setState({ stepIdx: newStepIdx });
-                                this.updateBoundaryFlags(newStepIdx);
-                            }}
-                            contentContainerStyle={[
-                                {
-                                    alignItems: "center",
-                                    alignContent: "center",
-                                    justifyContent: "center",
-                                    flexGrow: 1
-                                    // backgroundColor: "blue"
+            <View
+                style={styles.helpPage}
+                // onStartShouldSetResponder={() => true}
+            >
+                <View style={styles.scrollViewWrap}>
+                    <AutoHeightImage
+                        width={SCREEN_WIDTH * this._imgWidthFactor - 50}
+                        source={{
+                            uri: getFullImgNameForPxDensity(image.path)
+                        }}
+                        onHeightChange={height => {
+                            // console.log(
+                            //     "onHeightChange",
+                            //     height
+                            // );
+                            if (height > STEP_HEIGHT) {
+                                this._imgWidthFactor -= 0.02;
+                                if (this._imgWidthFactor > 0.5) {
+                                    this.forceUpdate();
                                 }
-                            ]}
-                        >
-                            <View onStartShouldSetResponder={() => true}>
-                                {images.map((img, index) => {
-                                    let sharedImgs;
-
-                                    if (img.sharedWithPrev == true) {
-                                        return null;
-                                    }
-
-                                    if (img.sharePageWithNext) {
-                                        console.log("Found sharePage");
-                                        sharedImgs = images.slice(
-                                            index + 1,
-                                            index + img.sharePageWithNext + 1
-                                        );
-                                    }
-                                    // console.log("sharedImgs", sharedImgs);
-                                    // console.log(
-                                    //     "fetching img at uri: ",
-                                    //     getFullImgNameForPxDensity(img.path)
-                                    // );
-                                    return (
-                                        <TouchableWithoutFeedback
-                                            key={index}
-                                            onPress={this.nextStep}
-                                        >
-                                            <View
-                                                key={index}
-                                                style={[
-                                                    {
-                                                        justifyContent:
-                                                            "center",
-                                                        height: STEP_HEIGHT
-                                                        // backgroundColor: Colors.random()
-                                                    } /* ,  img.style */
-                                                ]}
-                                            >
-                                                <AutoHeightImage
-                                                    width={
-                                                        SCREEN_WIDTH *
-                                                            this
-                                                                ._imgWidthFactor -
-                                                        50
-                                                    }
-                                                    source={{
-                                                        uri: getFullImgNameForPxDensity(
-                                                            img.path
-                                                        )
-                                                    }}
-                                                    onHeightChange={height => {
-                                                        // console.log(
-                                                        //     "onHeightChange",
-                                                        //     height
-                                                        // );
-                                                        if (
-                                                            height > STEP_HEIGHT
-                                                        ) {
-                                                            this._imgWidthFactor -= 0.02;
-                                                            if (
-                                                                this
-                                                                    ._imgWidthFactor >
-                                                                0.5
-                                                            ) {
-                                                                this.forceUpdate();
-                                                            }
-                                                        }
-                                                    }}
-                                                    style={img.style}
-                                                />
-                                                {sharedImgs &&
-                                                    sharedImgs.map(
-                                                        (sharedImg, key) => {
-                                                            return (
-                                                                <AnimAutoHeightImg
-                                                                    contentInsetAdjustmentBehavior="automatic"
-                                                                    useNativeDriver={
-                                                                        true
-                                                                    }
-                                                                    animation={
-                                                                        "fadeInUp"
-                                                                    }
-                                                                    duration={
-                                                                        400
-                                                                    }
-                                                                    key={key}
-                                                                    width={
-                                                                        SCREEN_WIDTH *
-                                                                            this
-                                                                                ._imgWidthFactor -
-                                                                        50
-                                                                    }
-                                                                    source={{
-                                                                        uri: getFullImgNameForPxDensity(
-                                                                            sharedImg.path
-                                                                        )
-                                                                    }}
-                                                                    style={[
-                                                                        sharedImg.style,
-                                                                        {
-                                                                            height:
-                                                                                (SCREEN_WIDTH *
-                                                                                    this
-                                                                                        ._imgWidthFactor -
-                                                                                    50) /
-                                                                                sharedImg.aspectRatio
-                                                                        }
-                                                                    ]}
-                                                                />
-                                                            );
-                                                        }
-                                                    )}
-                                            </View>
-                                        </TouchableWithoutFeedback>
-                                    );
-                                })}
-                                {/* <View style={{ width: "100%", height: 40 }} /> */}
-                            </View>
-                        </ScrollView>
-                    </View>
-                    <View style={styles.sectionTitleWrap}>
-                        <Text style={styles.sectionTitle}>
-                            {sectionInfo.name}
+                            }
+                        }}
+                        style={image.style}
+                    />
+                </View>
+                <View style={styles.sectionTitleWrap}>
+                    <Text style={styles.sectionTitle}>{section.name}</Text>
+                    {section.subtitle && (
+                        <Text style={styles.sectSubtitle}>
+                            {section.subtitle}
                         </Text>
-                        {sectionInfo.subtitle && (
-                            <Text style={styles.sectSubtitle}>
-                                {sectionInfo.subtitle}
-                            </Text>
-                        )}
-                    </View>
-                    {/* Measuring line */}
-                    {/* <View
+                    )}
+                </View>
+                {/* Measuring line */}
+                {/* <View
                         style={{
                             position: "absolute",
                             // use this for a horizontal line
@@ -342,8 +203,7 @@ export default class IntrvHelpPage extends Component {
                             // marginTop: 40
                         }}
                     /> */}
-                </View>
-            </TouchableWithoutFeedback>
+            </View>
         );
     }
 }
@@ -358,6 +218,9 @@ const styles = StyleSheet.create({
         width: SCREEN_WIDTH * 0.95,
         position: "absolute",
         alignSelf: "center",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "yellow",
         // top: HELPPAGE_HEIGHT * 0.5 - (HELPPAGE_HEIGHT * 0.4),
         bottom: HELPPAGE_HEIGHT * 0.1 + 65
     },

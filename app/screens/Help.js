@@ -25,6 +25,7 @@ import ClkAlert from "../components/clk-awesome-alert";
 import IntrvHelpPage from "../components/intrv-help-page";
 import MiscStorage from "../config/misc_storage";
 import WelcomePage from "../components/welcome-page";
+import PagingDots from "../components/paging-dots";
 
 import { scaleByFactor } from "../util/font-scale";
 import { isIphoneX, ifIphoneX } from "react-native-iphone-x-helper";
@@ -165,17 +166,22 @@ export default class Help extends React.Component {
             isFocused: true
         };
 
-        this._snapPoints = [
-            { x: 0, id: "0" },
-            { x: -SCREEN_WIDTH, id: "1" },
-            { x: -SCREEN_WIDTH * 2, id: "2" },
-            { x: -SCREEN_WIDTH * 3, id: "3" }
-        ];
+        this._snapPoints = Array(IMG_URLS.length)
+            .fill(null)
+            .map((unusedElm, i) => {
+                return { x: -SCREEN_WIDTH * i, id: i + "" };
+            });
+
+        console.log("this._snapPoints", this._snapPoints);
 
         if (this.props.screenType == "modal") {
             this._isModal = true;
             this._welcomeOffset = 1;
-            this._snapPoints.push({ x: -SCREEN_WIDTH * 4, id: "4" });
+            let nextSnapIdx = this._snapPoints.length;
+            this._snapPoints.push({
+                x: -SCREEN_WIDTH * nextSnapIdx,
+                id: nextSnapIdx + ""
+            });
             this._pageRefs.push(null);
         }
 
@@ -273,54 +279,12 @@ export default class Help extends React.Component {
         this.setState({ showInfoPopup: !showInfoPopup });
     };
 
-    _nextStep = () => {
-        if (
-            this._pageRefs &&
-            this._pageRefs.length == 4 + this._welcomeOffset
-        ) {
-            let currPageRef = this._pageRefs[this._idx];
-
-            if (!currPageRef) {
-                alert(
-                    "Unable to download help documentation. Please make sure you have a Wi-Fi or Data connection."
-                );
-                return; // can occur if Help images do not load
-            }
-
-            if (!currPageRef.nextStep()) {
-                this.goToNextSect();
-            }
-        } else {
-            console.warn("Pagerefs not working correctly.");
-            console.log("Pageref length: ", this._pageRefs.length);
-        }
-    };
-
-    _prevStep = () => {
-        if (
-            this._pageRefs &&
-            this._pageRefs.length == 4 + this._welcomeOffset
-        ) {
-            let currPageRef = this._pageRefs[this._idx];
-
-            if (!currPageRef) {
-                return; // can occur if Help images do not load
-            }
-
-            if (!currPageRef.prevStep()) {
-                this.goToPrevSect();
-            }
-        } else {
-            console.warn("Pagerefs not working correctly.");
-            console.log("Pageref length: ", this._pageRefs.length);
-        }
-    };
-
-    goToNextSect = () => {
-        console.log("next section");
+    nextPage = () => {
+        console.log("next page");
         this._idx++;
         console.log(this._idx);
-        if (this._idx <= 3 + this._welcomeOffset) {
+        if (this._idx <= IMG_URLS.length + this._welcomeOffset - 1) {
+            console.log("Snapping to index: ", this._idx);
             this._interactable.snapTo({
                 index: this._idx
             });
@@ -328,11 +292,12 @@ export default class Help extends React.Component {
                 sectIdx: this._idx
             });
         } else {
-            this._idx = 3 + this._welcomeOffset;
+            this._idx = IMG_URLS.length + this._welcomeOffset - 1;
+            console.log("Not snapping. Already at final index ", this._idx);
         }
     };
 
-    goToPrevSect = () => {
+    prevPage = () => {
         this._idx = Math.max(0, this._idx - 1);
         if (this._idx >= 0) {
             console.log(this._idx);
@@ -367,33 +332,33 @@ export default class Help extends React.Component {
         }
     };
 
-    _renderPagingDots = idx => {
-        // console.log("idx", idx);
-        return (
-            <View style={styles.pagingDotsCont}>
-                <View
-                    style={[styles.pageDot, idx == 0 && styles.pageDotActive]}
-                />
-                <View
-                    style={[styles.pageDot, idx == 1 && styles.pageDotActive]}
-                />
-                <View
-                    style={[styles.pageDot, idx == 2 && styles.pageDotActive]}
-                />
-                <View
-                    style={[styles.pageDot, idx == 3 && styles.pageDotActive]}
-                />
-                {this._isModal && (
-                    <View
-                        style={[
-                            styles.pageDot,
-                            idx == 4 && styles.pageDotActive
-                        ]}
-                    />
-                )}
-            </View>
-        );
-    };
+    // _renderPagingDots = idx => {
+    //     // console.log("idx", idx);
+    //     return (
+    //         <View style={styles.pagingDotsCont}>
+    //             <View
+    //                 style={[styles.pageDot, idx == 0 && styles.pageDotActive]}
+    //             />
+    //             <View
+    //                 style={[styles.pageDot, idx == 1 && styles.pageDotActive]}
+    //             />
+    //             <View
+    //                 style={[styles.pageDot, idx == 2 && styles.pageDotActive]}
+    //             />
+    //             <View
+    //                 style={[styles.pageDot, idx == 3 && styles.pageDotActive]}
+    //             />
+    //             {this._isModal && (
+    //                 <View
+    //                     style={[
+    //                         styles.pageDot,
+    //                         idx == 4 && styles.pageDotActive
+    //                     ]}
+    //                 />
+    //             )}
+    //         </View>
+    //     );
+    // };
 
     render() {
         // console.log("Upgrade -- render() ");
@@ -422,7 +387,9 @@ export default class Help extends React.Component {
                     ref={elm => (this._interactable = elm)}
                     style={{
                         flex: 1,
-                        width: SCREEN_WIDTH * (4 + this._welcomeOffset),
+                        width:
+                            SCREEN_WIDTH *
+                            (IMG_URLS.length + this._welcomeOffset),
                         alignSelf: "stretch",
                         // marginTop: isIphoneX() ? -88 : -64,
                         flexDirection: "row"
@@ -448,12 +415,11 @@ export default class Help extends React.Component {
                                 this._pageRefs &&
                                 this._pageRefs.length == 4 + this._welcomeOffset
                             ) {
-                                let currPageRef = this._pageRefs[this._idx];
-
-                                currPageRef.updateBoundaryFlags &&
-                                    currPageRef.updateBoundaryFlags();
-                                currPageRef.flashScrollIndicators &&
-                                    currPageRef.flashScrollIndicators();
+                                // let currPageRef = this._pageRefs[this._idx];
+                                // currPageRef.updateBoundaryFlags &&
+                                //     currPageRef.updateBoundaryFlags();
+                                // currPageRef.flashScrollIndicators &&
+                                //     currPageRef.flashScrollIndicators();
                             } else {
                                 console.warn("Pagerefs not working correctly.");
                                 console.log(
@@ -471,28 +437,32 @@ export default class Help extends React.Component {
                 >
                     {this.state.isFocused && this._isModal && (
                         <WelcomePage
-                            goToNextSect={this.goToNextSect}
-                            ref={elm => (this._pageRefs[0] = elm)}
+                            nextPage={this.nextPage}
+                            // ref={elm => (this._pageRefs[0] = elm)}
                         />
                     )}
                     {this.state.isFocused &&
                     !this.state.isLoading &&
                     this.state.downloadSuccess ? (
-                        HELP_SECTIONS.map((section, idx) => {
-                            return (
-                                <IntrvHelpPage
-                                    ref={elm =>
-                                        (this._pageRefs[
-                                            idx + this._welcomeOffset
-                                        ] = elm)
-                                    }
-                                    key={idx + this._welcomeOffset}
-                                    idx={idx + this._welcomeOffset}
-                                    sectionInfo={section}
-                                    currSectIdx={this._idx}
-                                    setBoundaryFlag={this.setBoundaryFlag}
-                                />
-                            );
+                        HELP_SECTIONS.map((section, sectIdx) => {
+                            return section.images.map((img, idx) => {
+                                let key = sectIdx + "_" + idx;
+                                return (
+                                    <IntrvHelpPage
+                                        // ref={elm =>
+                                        //     (this._pageRefs[
+                                        //         idx + this._welcomeOffset
+                                        //     ] = elm)
+                                        // }
+                                        key={idx + this._welcomeOffset}
+                                        idx={idx + this._welcomeOffset}
+                                        image={img}
+                                        section={section}
+                                        currSectIdx={this._idx}
+                                        setBoundaryFlag={this.setBoundaryFlag}
+                                    />
+                                );
+                            });
                         })
                     ) : (
                         <View
@@ -635,7 +605,7 @@ export default class Help extends React.Component {
                                 flex: 1,
                                 justifyContent: "center"
                             }}
-                            onPress={this._prevStep}
+                            onPress={this.prevPage}
                         >
                             <Text
                                 style={[
@@ -649,14 +619,18 @@ export default class Help extends React.Component {
                             </Text>
                         </TouchableOpacity>
                     )}
-                    {this._renderPagingDots(this._idx)}
+                    <PagingDots
+                        dotCount={5}
+                        pageCount={IMG_URLS.length + this._welcomeOffset} // TODO:
+                        pageIdx={this._idx}
+                    />
                     <TouchableOpacity
                         style={{
                             flex: 1,
                             justifyContent: "center",
                             alignItems: "flex-end"
                         }}
-                        onPress={this._nextStep}
+                        onPress={this.nextPage}
                     >
                         <Text
                             style={[
@@ -708,28 +682,6 @@ export default class Help extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    pagingDotsCont: {
-        height: 20,
-        flexDirection: "row",
-        alignSelf: "center",
-        alignContent: "center",
-        // backgroundColor: "blue",
-        justifyContent: "center"
-    },
-    pageDot: {
-        height: 7,
-        width: 7,
-        borderRadius: 7,
-        alignSelf: "center",
-        backgroundColor: "#989898",
-        marginHorizontal: 5
-    },
-    pageDotActive: {
-        height: 10,
-        width: 10,
-        borderRadius: 7,
-        backgroundColor: "#BABABA"
-    },
     btnText: {
         color: Colors.brandLightOpp
     }
