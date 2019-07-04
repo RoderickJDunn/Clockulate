@@ -9,8 +9,8 @@ import {
     Image,
     StyleSheet,
     Animated,
-    LayoutAnimation,
-    ScrollView
+    ScrollView,
+    Easing
 } from "react-native";
 import _ from "lodash";
 
@@ -27,6 +27,8 @@ const FADED_STATES = {
 
 // console.log("STEP_HEIGHT", STEP_HEIGHT);
 export default class PagingDots extends Component {
+    _xTranslateAnim = new Animated.Value(0);
+
     constructor(props) {
         super(props);
 
@@ -57,7 +59,7 @@ export default class PagingDots extends Component {
     static calcNextActiveDotIdx(prevPageIdx, newPageIdx, state) {
         // This assumes pageIdx can only change by 1 (either direction)
 
-        let pageDiff = newPageIdx - prevPageIdx;
+        let pageDiff = prevPageIdx - newPageIdx;
         let { dotCount, pageCount, motionRangeH, motionRangeL } = state;
 
         if (pageDiff == 0) {
@@ -82,6 +84,8 @@ export default class PagingDots extends Component {
         //          should play.
 
         let activeDotIdx = 0;
+        let xTransRequired = 0;
+
         if (prevPageIdx < motionRangeL) {
             if (newPageIdx < motionRangeL) {
                 // page has changed within motionRangeL
@@ -94,7 +98,7 @@ export default class PagingDots extends Component {
                     `Invalid newPageIdx [${newPageIdx}], for prevPageIdx [${prevPageIdx}]`
                 );
             }
-        } else if (prevPageIdx <= motionRangeH) {
+        } else if (prevPageIdx < motionRangeH) {
             // prevPage was in STILL_RANGE
             if (newPageIdx < motionRangeL) {
                 // page has moved from STILL_RANGE to motionRangeL
@@ -102,6 +106,7 @@ export default class PagingDots extends Component {
             } else if (newPageIdx < motionRangeH) {
                 // page has changed within STILL_RANGE
                 activeDotIdx = PagingDots.getMidDotIdx(dotCount);
+                xTransRequired = pageDiff; // translate X left or right depending if pageDiff is -/+
             } else if (newPageIdx < pageCount) {
                 // page has changed from STILL_RANGE to motionRangeH
                 activeDotIdx = dotCount - (pageCount - newPageIdx);
@@ -136,8 +141,12 @@ export default class PagingDots extends Component {
         }
 
         console.log("Calc'd activeDotIdx: ", activeDotIdx);
+        console.log("xTransRequired: ", xTransRequired);
 
-        return activeDotIdx;
+        return {
+            activeDotIdx: activeDotIdx,
+            xTransRequired: xTransRequired
+        };
     }
 
     static getDerivedStateFromProps(nextProps, state) {
@@ -146,7 +155,7 @@ export default class PagingDots extends Component {
         // use prev/new pageIdx to detemine the next activeDotIdx
         return {
             pageIdx: nextProps.pageIdx,
-            activeDotIdx: PagingDots.calcNextActiveDotIdx(
+            ...PagingDots.calcNextActiveDotIdx(
                 state.pageIdx,
                 nextProps.pageIdx,
                 state
@@ -207,6 +216,20 @@ export default class PagingDots extends Component {
     //
     //
 
+    componentDidUpdate() {
+        let { xTransRequired } = this.state;
+        if (xTransRequired) {
+            Animated.timing(this._xTranslateAnim, {
+                toValue: 17 * xTransRequired,
+                duration: 350,
+                easing: Easing.inOut(Easing.circle),
+                useNativeDriver: true
+            }).start(() => {
+                this._xTranslateAnim.setValue(0);
+            });
+        }
+    }
+
     render() {
         let { dotCount } = this.props;
         let { pageIdx, activeDotIdx, pageCount } = this.state;
@@ -225,50 +248,153 @@ export default class PagingDots extends Component {
         }
 
         return (
-            <View style={styles.pagingDotsCont}>
-                {_.times(dotCount, i => {
-                    // TODO:
-                    let extraStyle;
-                    if (activeDotIdx == i) {
-                        extraStyle = styles.pageDotActive;
-                    } else if (leftEdgeFaded == FADED_STATES.HALF && i < 2) {
-                        extraStyle =
-                            i == 1 ? { opacity: 0.9 } : { opacity: 0.7 };
-                    } else if (leftEdgeFaded == FADED_STATES.FULL && i == 0) {
-                        extraStyle =
-                            i == 1 ? { opacity: 0.5 } : { opacity: 0.2 };
-                    } else if (
-                        rightEdgeFaded == FADED_STATES.HALF &&
-                        i >= dotCount - 2
-                    ) {
-                        extraStyle =
-                            i == dotCount - 2
-                                ? { opacity: 0.9 }
-                                : { opacity: 0.7 };
-                    } else if (rightEdgeFaded && i >= dotCount - 2) {
-                        extraStyle =
-                            i == dotCount - 2
-                                ? { opacity: 0.5 }
-                                : { opacity: 0.2 };
+            <View
+                style={[
+                    styles.pagingDotsWrapper,
+                    {
+                        width: 17 * dotCount + 3 // add 3 extra for active dot
                     }
+                ]}
+            >
+                <Animated.View
+                    style={[
+                        styles.pagingDotsCont,
+                        {
+                            transform: [
+                                {
+                                    translateX: this._xTranslateAnim
+                                }
+                            ]
+                        }
+                    ]}
+                >
+                    <View
+                        key={"edgeL"}
+                        style={[styles.pageDot, { opacity: 0.2 }]}
+                    />
+                    {_.times(dotCount, i => {
+                        // TODO:
+                        let extraStyle;
+                        if (activeDotIdx == i) {
+                            return (
+                                <View
+                                    key={i}
+                                    style={[
+                                        styles.pageDot,
+                                        { backgroundColor: "#98989899" }
+                                    ]}
+                                >
+                                    <Animated.View
+                                        style={[
+                                            styles.pageDot,
+                                            styles.pageDotActive,
+                                            {
+                                                transform: [
+                                                    {
+                                                        translateX: this._xTranslateAnim.interpolate(
+                                                            {
+                                                                inputRange: [
+                                                                    -1,
+                                                                    0,
+                                                                    1
+                                                                ],
+                                                                outputRange: [
+                                                                    1,
+                                                                    0,
+                                                                    -1
+                                                                ]
+                                                            }
+                                                        )
+                                                    },
+                                                    {
+                                                        translateY: this._xTranslateAnim.interpolate(
+                                                            {
+                                                                inputRange: [
+                                                                    -17,
+                                                                    -8,
+                                                                    0,
+                                                                    8,
+                                                                    17
+                                                                ],
+                                                                outputRange: [
+                                                                    0,
+                                                                    -10,
+                                                                    0,
+                                                                    -10,
+                                                                    0
+                                                                ]
+                                                            }
+                                                        )
+                                                    }
+                                                ]
+                                            }
+                                        ]}
+                                    />
+                                </View>
+                            );
+                        } else if (
+                            leftEdgeFaded == FADED_STATES.HALF &&
+                            i < 2
+                        ) {
+                            extraStyle =
+                                i == 1 ? { opacity: 0.9 } : { opacity: 0.7 };
+                        } else if (
+                            leftEdgeFaded == FADED_STATES.FULL &&
+                            i < 2
+                        ) {
+                            extraStyle =
+                                i == 1 ? { opacity: 0.5 } : { opacity: 0.2 };
+                        } else if (
+                            rightEdgeFaded == FADED_STATES.HALF &&
+                            i >= dotCount - 2
+                        ) {
+                            extraStyle =
+                                i == dotCount - 2
+                                    ? { opacity: 0.9 }
+                                    : { opacity: 0.7 };
+                        } else if (
+                            rightEdgeFaded == FADED_STATES.FULL &&
+                            i >= dotCount - 2
+                        ) {
+                            extraStyle =
+                                i == dotCount - 2
+                                    ? { opacity: 0.5 }
+                                    : { opacity: 0.2 };
+                        }
 
-                    return (
-                        <View key={i} style={[styles.pageDot, extraStyle]} />
-                    );
-                })}
+                        return (
+                            <View
+                                key={i}
+                                style={[styles.pageDot, extraStyle]}
+                            />
+                        );
+                    })}
+                    <View
+                        key={"edgeR"}
+                        style={[styles.pageDot, { opacity: 0.2 }]}
+                    />
+                </Animated.View>
             </View>
         );
     }
 }
 
 const styles = StyleSheet.create({
+    pagingDotsWrapper: {
+        alignSelf: "center",
+        alignContent: "center",
+        justifyContent: "center",
+        height: 40,
+        overflow: "hidden"
+        // backgroundColor: "yellow"
+    },
     pagingDotsCont: {
         height: 20,
         flexDirection: "row",
-        alignSelf: "center",
-        alignContent: "center",
-        // backgroundColor: "blue",
-        justifyContent: "center"
+        alignSelf: "center"
+        // alignContent: "center",
+        // backgroundColor: "red"
+        // justifyContent: "center"
     },
     pageDot: {
         height: 7,
@@ -276,7 +402,9 @@ const styles = StyleSheet.create({
         borderRadius: 7,
         alignSelf: "center",
         backgroundColor: "#989898",
-        marginHorizontal: 5
+        marginHorizontal: 5,
+        alignContent: "center",
+        justifyContent: "center"
     },
     pageDotActive: {
         height: 10,
