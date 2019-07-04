@@ -221,8 +221,8 @@ export default class PagingDots extends Component {
         if (xTransRequired) {
             Animated.timing(this._xTranslateAnim, {
                 toValue: 17 * xTransRequired,
-                duration: 350,
-                easing: Easing.inOut(Easing.circle),
+                duration: 250,
+                easing: Easing.bezier(0.13, 0.62, 0.87, 0.36),
                 useNativeDriver: true
             }).start(() => {
                 this._xTranslateAnim.setValue(0);
@@ -337,33 +337,93 @@ export default class PagingDots extends Component {
                             i < 2
                         ) {
                             extraStyle =
-                                i == 1 ? { opacity: 0.9 } : { opacity: 0.7 };
+                                i == 1
+                                    ? {
+                                          opacity: this._xTranslateAnim.interpolate(
+                                              {
+                                                  inputRange: [-17, 0, 17],
+                                                  outputRange: [0.7, 0.9, 1]
+                                              }
+                                          )
+                                      }
+                                    : {
+                                          opacity: this._xTranslateAnim.interpolate(
+                                              {
+                                                  inputRange: [-17, 0, 17],
+                                                  outputRange: [0.5, 0.7, 0.9]
+                                              }
+                                          )
+                                      };
                         } else if (
                             leftEdgeFaded == FADED_STATES.FULL &&
                             i < 2
                         ) {
                             extraStyle =
-                                i == 1 ? { opacity: 0.5 } : { opacity: 0.2 };
+                                i == 1
+                                    ? {
+                                          opacity: this._xTranslateAnim.interpolate(
+                                              {
+                                                  inputRange: [-17, 0, 17],
+                                                  outputRange: [0.2, 0.5, 0.7]
+                                              }
+                                          )
+                                      }
+                                    : {
+                                          opacity: this._xTranslateAnim.interpolate(
+                                              {
+                                                  inputRange: [-17, 0, 17],
+                                                  outputRange: [0, 0.2, 0.5]
+                                              }
+                                          )
+                                      };
                         } else if (
                             rightEdgeFaded == FADED_STATES.HALF &&
                             i >= dotCount - 2
                         ) {
                             extraStyle =
                                 i == dotCount - 2
-                                    ? { opacity: 0.9 }
-                                    : { opacity: 0.7 };
+                                    ? {
+                                          opacity: this._xTranslateAnim.interpolate(
+                                              {
+                                                  inputRange: [-17, 0, 17],
+                                                  outputRange: [1, 0.9, 0.7]
+                                              }
+                                          )
+                                      }
+                                    : {
+                                          opacity: this._xTranslateAnim.interpolate(
+                                              {
+                                                  inputRange: [-17, 0, 17],
+                                                  outputRange: [0.9, 0.7, 0.5]
+                                              }
+                                          )
+                                      };
                         } else if (
                             rightEdgeFaded == FADED_STATES.FULL &&
                             i >= dotCount - 2
                         ) {
                             extraStyle =
                                 i == dotCount - 2
-                                    ? { opacity: 0.5 }
-                                    : { opacity: 0.2 };
+                                    ? {
+                                          opacity: this._xTranslateAnim.interpolate(
+                                              {
+                                                  inputRange: [-17, 0, 17],
+                                                  outputRange: [0.7, 0.5, 0.2]
+                                              }
+                                          )
+                                      }
+                                    : {
+                                          opacity: this._xTranslateAnim.interpolate(
+                                              {
+                                                  inputRange: [-17, 0, 17],
+                                                  outputRange: [0.5, 0.2, 0]
+                                              }
+                                          )
+                                      };
                         }
 
                         return (
-                            <View
+                            <Animated.View
                                 key={i}
                                 style={[styles.pageDot, extraStyle]}
                             />
