@@ -28,6 +28,7 @@ const FADED_STATES = {
 // console.log("STEP_HEIGHT", STEP_HEIGHT);
 export default class PagingDots extends React.PureComponent {
     _xTranslateAnim = new Animated.Value(0);
+    _jumpAnim = new Animated.Value(0);
 
     constructor(props) {
         super(props);
@@ -223,10 +224,19 @@ export default class PagingDots extends React.PureComponent {
             Animated.timing(this._xTranslateAnim, {
                 toValue: 17 * xTransRequired,
                 duration: 250,
-                easing: Easing.bezier(0.13, 0.62, 0.87, 0.36),
+                easing: Easing.inOut(Easing.ease),
                 useNativeDriver: true
             }).start(() => {
                 this._xTranslateAnim.setValue(0);
+            });
+
+            Animated.timing(this._jumpAnim, {
+                toValue: 17 * xTransRequired,
+                duration: 250,
+                easing: Easing.bezier(0.13, 0.62, 0.87, 0.36),
+                useNativeDriver: true
+            }).start(() => {
+                this._jumpAnim.setValue(0);
             });
         }
     }
@@ -280,11 +290,29 @@ export default class PagingDots extends React.PureComponent {
                             return (
                                 <View
                                     key={i}
-                                    style={[
-                                        styles.pageDot,
-                                        { backgroundColor: "#98989899" }
-                                    ]}
+                                    style={{ justifyContent: "center" }}
                                 >
+                                    <Animated.View
+                                        style={[
+                                            styles.pageDot,
+                                            {
+                                                opacity: this._xTranslateAnim.interpolate(
+                                                    {
+                                                        inputRange: [
+                                                            -17,
+                                                            0,
+                                                            17
+                                                        ],
+                                                        outputRange: [
+                                                            0.5,
+                                                            1,
+                                                            0.5
+                                                        ]
+                                                    }
+                                                )
+                                            }
+                                        ]}
+                                    />
                                     <Animated.View
                                         style={[
                                             styles.pageDot,
@@ -308,7 +336,7 @@ export default class PagingDots extends React.PureComponent {
                                                         )
                                                     },
                                                     {
-                                                        translateY: this._xTranslateAnim.interpolate(
+                                                        translateY: this._jumpAnim.interpolate(
                                                             {
                                                                 inputRange: [
                                                                     -17,
@@ -471,6 +499,7 @@ const styles = StyleSheet.create({
         height: 10,
         width: 10,
         borderRadius: 7,
+        position: "absolute",
         backgroundColor: "#BABABA"
     }
 });
