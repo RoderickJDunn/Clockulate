@@ -26,7 +26,7 @@ const FADED_STATES = {
 };
 
 // console.log("STEP_HEIGHT", STEP_HEIGHT);
-export default class PagingDots extends Component {
+export default class PagingDots extends React.PureComponent {
     _xTranslateAnim = new Animated.Value(0);
 
     constructor(props) {
