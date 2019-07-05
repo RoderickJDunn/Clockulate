@@ -173,14 +173,7 @@ export default class IntrvHelpPage extends Component {
                         style={image.style}
                     />
                 </View>
-                <View style={styles.sectionTitleWrap}>
-                    <Text style={styles.sectionTitle}>{section.name}</Text>
-                    {section.subtitle && (
-                        <Text style={styles.sectSubtitle}>
-                            {section.subtitle}
-                        </Text>
-                    )}
-                </View>
+               
                 {/* Measuring line */}
                 {/* <View
                         style={{
@@ -220,7 +213,6 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "yellow",
         // top: HELPPAGE_HEIGHT * 0.5 - (HELPPAGE_HEIGHT * 0.4),
         bottom: HELPPAGE_HEIGHT * 0.1 + 65
     },
@@ -232,32 +224,5 @@ const styles = StyleSheet.create({
         shadowColor: "#000",
         elevation: 5,
         width: SCREEN_WIDTH * 0.95
-    },
-    sectionTitleWrap: {
-        position: "absolute",
-        left: 0,
-        right: 0,
-        paddingTop: 5,
-        bottom: HELPPAGE_HEIGHT * 0.1,
-        height: 65,
-        alignSelf: "center",
-        alignItems: "center",
-        alignContent: "center",
-        justifyContent: "center"
-    },
-    sectionTitle: {
-        fontSize: scaleByFactor(20, 0.8),
-        letterSpacing: 2,
-        fontFamily: "Gurmukhi MN",
-        textAlign: "center",
-        color: Colors.brandLightOpp
-    },
-    sectSubtitle: {
-        fontSize: scaleByFactor(14, 0.8),
-        letterSpacing: 2,
-        fontFamily: "Gurmukhi MN",
-        color: Colors.brandMidOpp,
-        alignSelf: "center",
-        marginLeft: 5
     }
 });

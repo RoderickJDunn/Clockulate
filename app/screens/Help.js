@@ -18,6 +18,7 @@ import Interactable from "react-native-interactable";
 import FAIcon from "react-native-vector-icons/FontAwesome";
 import AutoHeightImage from "react-native-auto-height-image";
 import * as Animatable from "react-native-animatable";
+import _ from "lodash";
 
 import { getFullImgNameForPxDensity } from "../img/image_map";
 import Colors from "../styles/colors";
@@ -67,7 +68,7 @@ let HELP_SECTIONS = [
                 style: null
             }
         ],
-        pageCount: 4, // different from image count, due to images 2/3 sharing a page
+        pageCount: 5, // different from image count, due to images 2/3 sharing a page
         snapOffsets: [SCREEN_HEIGHT * 0.6, SCREEN_HEIGHT]
     },
     {
@@ -279,7 +280,7 @@ export default class Help extends React.Component {
         this.setState({ showInfoPopup: !showInfoPopup });
     };
 
-    nextPage = () => {
+    nextPage = _.throttle(() => {
         console.log("next page");
         this._idx++;
         console.log(this._idx);
@@ -295,9 +296,9 @@ export default class Help extends React.Component {
             this._idx = IMG_URLS.length + this._welcomeOffset - 1;
             console.log("Not snapping. Already at final index ", this._idx);
         }
-    };
+    }, 500);
 
-    prevPage = () => {
+    prevPage = _.throttle(() => {
         this._idx = Math.max(0, this._idx - 1);
         if (this._idx >= 0) {
             console.log(this._idx);
@@ -308,7 +309,7 @@ export default class Help extends React.Component {
                 sectIdx: this._idx
             });
         }
-    };
+    }, 500);
 
     setBoundaryFlag = ({ lastStep, firstStep }) => {
         // console.log("setBoundaryFlag");
@@ -360,8 +361,27 @@ export default class Help extends React.Component {
     //     );
     // };
 
+    _getSectionForImgIdx(targetIdx) {
+        console.log("targetIdx", targetIdx);
+
+        targetIdx -= this._welcomeOffset;
+
+        let accumLen = 0;
+        for (let section of HELP_SECTIONS) {
+            accumLen += section.images.length;
+            console.log("runningIdx", accumLen);
+            if (targetIdx < accumLen) {
+                return section;
+            }
+        }
+    }
+
     render() {
         // console.log("Upgrade -- render() ");
+
+        let section = this._getSectionForImgIdx(this._idx);
+        console.log("section", section);
+
         return (
             <LinearGradient
                 start={{ x: 0.0, y: 0.25 }}
@@ -508,6 +528,16 @@ export default class Help extends React.Component {
                         </View>
                     )}
                 </Interactable.View>
+                {(this._welcomeOffset == 0 || this._idx > 0) && (
+                    <View style={styles.sectionTitleWrap}>
+                        <Text style={styles.sectionTitle}>{section.name}</Text>
+                        {section.subtitle && (
+                            <Text style={styles.sectSubtitle}>
+                                {section.subtitle}
+                            </Text>
+                        )}
+                    </View>
+                )}
                 {this._isModal && this._idx > 0 && (
                     <Animatable.View
                         contentInsetAdjustmentBehavior="automatic"
@@ -611,7 +641,7 @@ export default class Help extends React.Component {
                                 style={[
                                     styles.btnText,
                                     {
-                                        opacity: this.state.isFirstStep ? 0 : 1
+                                        opacity: this._idx == 0 ? 0 : 1
                                     }
                                 ]}
                             >
@@ -636,7 +666,13 @@ export default class Help extends React.Component {
                             style={[
                                 styles.btnText,
                                 {
-                                    opacity: this.state.isFinalStep ? 0 : 1
+                                    opacity:
+                                        this._idx <
+                                        IMG_URLS.length +
+                                            this._welcomeOffset -
+                                            1
+                                            ? 1
+                                            : 0
                                 }
                             ]}
                         >
@@ -684,5 +720,32 @@ export default class Help extends React.Component {
 const styles = StyleSheet.create({
     btnText: {
         color: Colors.brandLightOpp
+    },
+    sectionTitleWrap: {
+        position: "absolute",
+        left: 0,
+        right: 0,
+        paddingTop: 5,
+        bottom: HELPPAGE_HEIGHT * 0.1,
+        height: 65,
+        alignSelf: "center",
+        alignItems: "center",
+        alignContent: "center",
+        justifyContent: "center"
+    },
+    sectionTitle: {
+        fontSize: scaleByFactor(20, 0.8),
+        letterSpacing: 2,
+        fontFamily: "Gurmukhi MN",
+        textAlign: "center",
+        color: Colors.brandLightOpp
+    },
+    sectSubtitle: {
+        fontSize: scaleByFactor(14, 0.8),
+        letterSpacing: 2,
+        fontFamily: "Gurmukhi MN",
+        color: Colors.brandMidOpp,
+        alignSelf: "center",
+        marginLeft: 5
     }
 });
