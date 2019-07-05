@@ -65,8 +65,9 @@ export default class PagingDots extends React.PureComponent {
         if (pageDiff == 0) {
             return state.activeDotIdx; // return current idx, it doesn't need to change
         } else if (Math.abs(pageDiff) > 1) {
-            console.error("Page idx changed by >1. Not allowed for now");
-            return 0; // FIXME: Recover from this error
+            console.info("Page idx changed by >1. May not work correctly.");
+            pageDiff = pageDiff > 0 ? 1 : -1;
+            // return 0; // FIXME: Recover from this error
         } else if (
             prevPageIdx < 0 ||
             prevPageIdx >= pageCount ||
