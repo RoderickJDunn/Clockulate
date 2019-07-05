@@ -21,12 +21,14 @@ import Colors from "../styles/colors";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const FADED_STATES = {
-    HALF: 1,
-    FULL: 2
+    NONE: 0,
+    FULL: 1
 };
+// const DEFAULT_DURATION = 1000; // ms DEV: should be 250
+const DEFAULT_DURATION = 250; // ms
 
 // console.log("STEP_HEIGHT", STEP_HEIGHT);
-export default class PagingDots extends React.PureComponent {
+export default class PagingDots extends Component {
     _xTranslateAnim = new Animated.Value(0);
     _jumpAnim = new Animated.Value(0);
 
@@ -50,6 +52,154 @@ export default class PagingDots extends React.PureComponent {
             pageIdx: props.pageIdx,
             activeDotIdx: props.pageIdx
         };
+
+        /***** define all opacity interpolations *****/
+
+        /* Out-of-bounds animations (the 2 extra views, in addition to dotCount)*/
+        // Left-OOB <-> Left-edge, 0 <-> 0.2  (-17 <-> 0)
+        this._animOobFullL = this._xTranslateAnim.interpolate({
+            inputRange: [0, 17],
+            outputRange: [0, 0.2]
+        });
+
+        // Right-OOB <-> Right-edge, 0.2 <-> 0 (0 <-> 17)
+        this._animOobFullR = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0],
+            outputRange: [0.2, 0]
+        });
+
+        this._animOobTransL = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [1, 0.2, 1]
+        });
+
+        // Right-OOB <-> Right-edge, 0.2 <-> 0 (0 <-> 17)
+        this._animOobTransR = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [1, 0.2, 1]
+        });
+
+        // Left-OOB <-> Left-edge, 0 <-> 0.2  (-17 <-> 0)
+        this._animOobEndL = this._xTranslateAnim.interpolate({
+            inputRange: [0, 17],
+            outputRange: [0, 1]
+        });
+
+        // Right-OOB <-> Right-edge, 0.2 <-> 0 (0 <-> 17)
+        this._animOobEndR = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0],
+            outputRange: [1, 0]
+        });
+
+        /* Edge animations */
+        // Left-edge (0) <-> (idx 1), 0.2 <-> 0.5 (-17 <-> 0) -- for when pageIdx stays within STILL_RANGE
+        this._animEdgeFullL = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [0, 0.2, 0.5]
+        });
+
+        // Right-edge (DC - 1) <-> (DC - 2), 0.2 <-> 0.5 (0 <-> 17) -- for when pageIdx stays within STILL_RANGE
+        this._animEdgeFullR = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [0.5, 0.2, 0]
+        });
+
+        this._animEdgeTransL = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [0.5, 0.2, 1]
+        });
+
+        // Right-OOB <-> Right-edge, 0.2 <-> 0 (0 <-> 17)
+        this._animEdgeTransR = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [1, 0.2, 0.5]
+        });
+
+        // Left-edge (0) <-> (idx 1), 0.5 <-> 0.8 (-17 <-> 0) -- for when pageIdx exits/enters STILL_RANGE
+        this._animEdgeEndL = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0],
+            outputRange: [0, 1]
+        });
+
+        // Right-edge (DC - 1) <-> (DC - 2), 0.8 <-> 0.5 (0 <-> 17) -- for when pageIdx exits/enters STILL_RANGE
+        this._animEdgeEndR = this._xTranslateAnim.interpolate({
+            inputRange: [0, 17],
+            outputRange: [1, 0]
+        });
+
+        /* Animations for dots adjecent to edge (idx 1 or dotCount-2) */
+
+        // (Idx 1) <-> (idx 2), 0.5 <-> 1 (0 <-> 17) -- for when pageIdx stays within STILL_RANGE
+        this._animAdjFullL = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [0.2, 0.5, 1]
+        });
+
+        // (DC - 2) <-> (DC - 3), 0.5 <-> 1 (17 <-> 0) -- for when pageIdx stays within STILL_RANGE
+        this._animAdjFullR = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [1, 0.5, 0.2]
+        });
+
+        this._animAdjTransL = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [0.2, 0.5, 1]
+        });
+
+        // Right-OOB <-> Right-edge, 0.2 <-> 0 (0 <-> 17)
+        this._animAdjTransR = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [1, 0.5, 0.2]
+        });
+
+        this._animAdjEndL = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [0.2, 1, 1]
+        });
+
+        // (DC - 2) <-> (DC - 3), 0.8 <-> 1 (17 <-> 0) -- for when pageIdx exits/enters STILL_RANGE
+        this._animAdjEndR = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [1, 1, 0.2]
+        });
+
+        /* Animations for dots 2 from the edge (idx 2 or dotCount-3) (the center dot when dotCount==5) */
+        // NOTE: If there are only 5 dots, these need to be applied to a dot created 'behind' the active dot
+        //       If there are >5 dots, then these must be applied to the dots 3rd from the edges
+        this._animMidFullL = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [0.5, 1, 1]
+        });
+
+        // (DC - 2) <-> (DC - 3), 0.5 <-> 1 (17 <-> 0) -- for when pageIdx stays within STILL_RANGE
+        this._animMidFullR = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [1, 1, 0.5]
+        });
+
+        this._animMidTransL = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [0.5, 1, 0.5]
+        });
+
+        // Right-OOB <-> Right-edge, 0.2 <-> 0 (0 <-> 17)
+        this._animMidTransR = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [0.5, 1, 0.5]
+        });
+
+        // (Idx 1) <-> (idx 2), 0.8 <-> 1 (0 <-> 17) -- for when pageIdx exits/enters STILL_RANGE
+        this._animMidEndL = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [0.5, 1, 1]
+        });
+
+        // (DC - 2) <-> (DC - 3), 0.8 <-> 1 (17 <-> 0) -- for when pageIdx exits/enters STILL_RANGE
+        this._animMidEndR = this._xTranslateAnim.interpolate({
+            inputRange: [-17, 0, 17],
+            outputRange: [1, 1, 0.5]
+        });
+
         console.log("PageingDots initial state: ", this.state);
     }
 
@@ -152,17 +302,32 @@ export default class PagingDots extends React.PureComponent {
     }
 
     static getDerivedStateFromProps(nextProps, state) {
+        console.log("getDerivedStateFromProps");
         // TODO: If dotCount/pageCount we need to handle that before the next step.
 
-        // use prev/new pageIdx to detemine the next activeDotIdx
-        return {
-            pageIdx: nextProps.pageIdx,
-            ...PagingDots.calcNextActiveDotIdx(
-                state.pageIdx,
-                nextProps.pageIdx,
-                state
-            )
-        };
+        console.log("old State", state);
+
+        let upcomingState = PagingDots.calcNextActiveDotIdx(
+            state.pageIdx,
+            nextProps.pageIdx,
+            state
+        );
+
+        console.log("upcomingState", upcomingState);
+
+        if (upcomingState.xTransRequired) {
+            return {
+                xTransRequired: upcomingState.xTransRequired,
+                // Temporary stores of the next activeDotIdx and next pageIdx, to be applied to permanent state vars after animation completes
+                upcomingPageIdx: nextProps.pageIdx,
+                upcomingActDotIdx: upcomingState.activeDotIdx
+            };
+        } else {
+            return {
+                pageIdx: nextProps.pageIdx,
+                ...upcomingState
+            };
+        }
     }
 
     // TODO: Desired behavior/design
@@ -218,27 +383,56 @@ export default class PagingDots extends React.PureComponent {
     //
     //
 
-    componentDidUpdate() {
-        let { xTransRequired } = this.state;
+    // componentDidUpdate() {
+    //     let { xTransRequired } = this.state;
+    //     if (xTransRequired) {
+    //         Animated.timing(this._xTranslateAnim, {
+    //             toValue: 17 * xTransRequired,
+    //             duration: DEFAULT_DURATION,
+    //             easing: Easing.inOut(Easing.ease),
+    //             useNativeDriver: true
+    //         }).start(() => {
+    //             this._xTranslateAnim.setValue(0);
+    //         });
+    //         Animated.timing(this._jumpAnim, {
+    //             toValue: 17 * xTransRequired,
+    //             duration: DEFAULT_DURATION,
+    //             easing: Easing.bezier(0.13, 0.62, 0.87, 0.36),
+    //             useNativeDriver: true
+    //         }).start(() => {
+    //             this._jumpAnim.setValue(0);
+    //         });
+    //     }
+    // }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        let { xTransRequired } = nextState;
         if (xTransRequired) {
             Animated.timing(this._xTranslateAnim, {
                 toValue: 17 * xTransRequired,
-                duration: 250,
+                duration: DEFAULT_DURATION,
                 easing: Easing.inOut(Easing.ease),
                 useNativeDriver: true
             }).start(() => {
                 this._xTranslateAnim.setValue(0);
+                this.setState({
+                    pageIdx: nextState.upcomingPageIdx,
+                    activeDotIdx: nextState.upcomingActDotIdx,
+                    xTransRequired: false
+                });
             });
-
             Animated.timing(this._jumpAnim, {
                 toValue: 17 * xTransRequired,
-                duration: 250,
+                duration: DEFAULT_DURATION,
                 easing: Easing.bezier(0.13, 0.62, 0.87, 0.36),
                 useNativeDriver: true
             }).start(() => {
                 this._jumpAnim.setValue(0);
             });
+
+            return false;
         }
+        return true;
     }
 
     render() {
@@ -246,16 +440,59 @@ export default class PagingDots extends React.PureComponent {
         let { pageIdx, activeDotIdx, pageCount } = this.state;
         let leftEdgeFaded, rightEdgeFaded;
 
-        if (pageIdx > Math.trunc(dotCount / 2) + 1) {
-            leftEdgeFaded = FADED_STATES.FULL;
+        let leftOobAnim, rightOobAnim;
+        let leftEdgeAnim, rightEdgeAnim;
+        let leftAdjAnim, rightAdjAnim;
+        let leftMidAnim, rightMidAnim;
+
+        console.log("render() this.state", this.state);
+
+        // FIXME: I need to rethink this if/else logic... change it to the following
+        //  For simplicity, say dotCount==5 and PageCount==10
+        //     if pageIdx>3,
+        //          --> activeDotIdx==2 (mid),
+        //          --> central dot must
+        if (pageIdx == 3) {
+            // This is a special case where the EdgeL and OobL must be able to animate
+            //  to opacity==1 (This is because if BACK is pushed, that will cause the dots to be
+            //  scrolled to the LEFT as far as possible.)
+            leftOobAnim = this._animOobTransL;
+            leftEdgeAnim = this._animEdgeTransL;
+            leftAdjAnim = this._animAdjTransL;
+            leftMidAnim = this._animMidTransL;
         } else if (pageIdx > Math.trunc(dotCount / 2)) {
-            leftEdgeFaded = FADED_STATES.HALF;
+            console.log("Faded State == FULL");
+            leftEdgeFaded = FADED_STATES.FULL;
+            leftOobAnim = this._animOobFullL;
+            leftEdgeAnim = this._animEdgeFullL;
+            leftAdjAnim = this._animAdjFullL;
+            leftMidAnim = this._animMidFullL;
+        } else {
+            console.log("Faded State == NONE");
+            leftEdgeFaded = FADED_STATES.NONE;
+            leftOobAnim = this._animOobEndL;
+            leftEdgeAnim = this._animEdgeEndL;
+            leftAdjAnim = this._animAdjEndL;
+            leftMidAnim = this._animMidEndL; // no END anim required for dot @ mid position, so just set to Half
         }
 
-        if (pageIdx < pageCount - Math.trunc(dotCount / 2) - 1) {
+        if (pageIdx == pageCount - 4) {
+            rightOobAnim = this._animOobTransR;
+            rightEdgeAnim = this._animEdgeTransR;
+            rightAdjAnim = this._animAdjTransR;
+            rightMidAnim = this._animMidTransR;
+        } else if (pageIdx < pageCount - Math.trunc(dotCount / 2) - 1) {
             rightEdgeFaded = FADED_STATES.FULL;
-        } else if (pageIdx < pageCount - Math.trunc(dotCount / 2)) {
-            rightEdgeFaded = FADED_STATES.HALF;
+            rightOobAnim = this._animOobFullR;
+            rightEdgeAnim = this._animEdgeFullR;
+            rightAdjAnim = this._animAdjFullR;
+            rightMidAnim = this._animMidFullR;
+        } else {
+            rightEdgeFaded = FADED_STATES.NONE;
+            rightOobAnim = this._animOobEndR;
+            rightEdgeAnim = this._animEdgeEndR;
+            rightAdjAnim = this._animAdjEndR;
+            rightMidAnim = this._animMidEndR; // no END anim required for dot @ mid position, so just set to Half
         }
 
         return (
@@ -279,12 +516,16 @@ export default class PagingDots extends React.PureComponent {
                         }
                     ]}
                 >
-                    <View
+                    <Animated.View
                         key={"edgeL"}
-                        style={[styles.pageDot, { opacity: 0.2 }]}
+                        style={[
+                            styles.pageDot,
+                            {
+                                opacity: leftOobAnim
+                            }
+                        ]}
                     />
                     {_.times(dotCount, i => {
-                        // TODO:
                         let extraStyle;
                         if (activeDotIdx == i) {
                             return (
@@ -292,27 +533,18 @@ export default class PagingDots extends React.PureComponent {
                                     key={i}
                                     style={{ justifyContent: "center" }}
                                 >
-                                    <Animated.View
-                                        style={[
-                                            styles.pageDot,
-                                            {
-                                                opacity: this._xTranslateAnim.interpolate(
-                                                    {
-                                                        inputRange: [
-                                                            -17,
-                                                            0,
-                                                            17
-                                                        ],
-                                                        outputRange: [
-                                                            0.5,
-                                                            1,
-                                                            0.5
-                                                        ]
-                                                    }
-                                                )
-                                            }
-                                        ]}
-                                    />
+                                    {dotCount == 5 ? (
+                                        <Animated.View
+                                            style={[
+                                                styles.pageDot,
+                                                {
+                                                    opacity: leftMidAnim
+                                                }
+                                            ]}
+                                        />
+                                    ) : (
+                                        <View style={styles.pageDot} />
+                                    )}
                                     <Animated.View
                                         style={[
                                             styles.pageDot,
@@ -361,94 +593,16 @@ export default class PagingDots extends React.PureComponent {
                                     />
                                 </View>
                             );
-                        } else if (
-                            leftEdgeFaded == FADED_STATES.HALF &&
-                            i < 2
-                        ) {
+                        } else if (i < 2) {
                             extraStyle =
                                 i == 1
-                                    ? {
-                                          opacity: this._xTranslateAnim.interpolate(
-                                              {
-                                                  inputRange: [-17, 0, 17],
-                                                  outputRange: [0.7, 0.9, 1]
-                                              }
-                                          )
-                                      }
-                                    : {
-                                          opacity: this._xTranslateAnim.interpolate(
-                                              {
-                                                  inputRange: [-17, 0, 17],
-                                                  outputRange: [0.5, 0.7, 0.9]
-                                              }
-                                          )
-                                      };
-                        } else if (
-                            leftEdgeFaded == FADED_STATES.FULL &&
-                            i < 2
-                        ) {
-                            extraStyle =
-                                i == 1
-                                    ? {
-                                          opacity: this._xTranslateAnim.interpolate(
-                                              {
-                                                  inputRange: [-17, 0, 17],
-                                                  outputRange: [0.2, 0.5, 0.7]
-                                              }
-                                          )
-                                      }
-                                    : {
-                                          opacity: this._xTranslateAnim.interpolate(
-                                              {
-                                                  inputRange: [-17, 0, 17],
-                                                  outputRange: [0, 0.2, 0.5]
-                                              }
-                                          )
-                                      };
-                        } else if (
-                            rightEdgeFaded == FADED_STATES.HALF &&
-                            i >= dotCount - 2
-                        ) {
+                                    ? { opacity: leftAdjAnim }
+                                    : { opacity: leftEdgeAnim };
+                        } else if (i >= dotCount - 2) {
                             extraStyle =
                                 i == dotCount - 2
-                                    ? {
-                                          opacity: this._xTranslateAnim.interpolate(
-                                              {
-                                                  inputRange: [-17, 0, 17],
-                                                  outputRange: [1, 0.9, 0.7]
-                                              }
-                                          )
-                                      }
-                                    : {
-                                          opacity: this._xTranslateAnim.interpolate(
-                                              {
-                                                  inputRange: [-17, 0, 17],
-                                                  outputRange: [0.9, 0.7, 0.5]
-                                              }
-                                          )
-                                      };
-                        } else if (
-                            rightEdgeFaded == FADED_STATES.FULL &&
-                            i >= dotCount - 2
-                        ) {
-                            extraStyle =
-                                i == dotCount - 2
-                                    ? {
-                                          opacity: this._xTranslateAnim.interpolate(
-                                              {
-                                                  inputRange: [-17, 0, 17],
-                                                  outputRange: [0.7, 0.5, 0.2]
-                                              }
-                                          )
-                                      }
-                                    : {
-                                          opacity: this._xTranslateAnim.interpolate(
-                                              {
-                                                  inputRange: [-17, 0, 17],
-                                                  outputRange: [0.5, 0.2, 0]
-                                              }
-                                          )
-                                      };
+                                    ? { opacity: rightAdjAnim }
+                                    : { opacity: rightEdgeAnim };
                         }
 
                         return (
@@ -458,9 +612,14 @@ export default class PagingDots extends React.PureComponent {
                             />
                         );
                     })}
-                    <View
+                    <Animated.View
                         key={"edgeR"}
-                        style={[styles.pageDot, { opacity: 0.2 }]}
+                        style={[
+                            styles.pageDot,
+                            {
+                                opacity: rightOobAnim
+                            }
+                        ]}
                     />
                 </Animated.View>
             </View>
