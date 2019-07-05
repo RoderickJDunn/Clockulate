@@ -168,13 +168,13 @@ export default class PagingDots extends Component {
         //       If there are >5 dots, then these must be applied to the dots 3rd from the edges
         this._animMidFullL = this._xTranslateAnim.interpolate({
             inputRange: [-17, 0, 17],
-            outputRange: [0.5, 1, 1]
+            outputRange: [0.5, 1, 0.5]
         });
 
         // (DC - 2) <-> (DC - 3), 0.5 <-> 1 (17 <-> 0) -- for when pageIdx stays within STILL_RANGE
         this._animMidFullR = this._xTranslateAnim.interpolate({
             inputRange: [-17, 0, 17],
-            outputRange: [1, 1, 0.5]
+            outputRange: [0.5, 1, 0.5]
         });
 
         this._animMidTransL = this._xTranslateAnim.interpolate({
