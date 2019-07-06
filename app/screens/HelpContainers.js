@@ -1,12 +1,23 @@
 import React from "react";
-import { TouchableOpacity, Text, Button } from "react-native";
+import {
+    TouchableOpacity,
+    Text,
+    Button,
+    Animated,
+    StyleSheet,
+    Platform,
+    View
+} from "react-native";
 import { createStackNavigator } from "react-navigation";
 import FAIcon from "react-native-vector-icons/FontAwesome";
+import FeatherIcon from "react-native-vector-icons/Feather";
 
 import Help from "./Help";
 // import upgrades from "../config/upgrades";
 import { scaleByFactor } from "../util/font-scale";
 import Colors from "../styles/colors";
+
+let _menuAnim = new Animated.Value(0);
 
 export class HelpStack extends React.Component {
     static navigationOptions = ({
@@ -19,7 +30,13 @@ export class HelpStack extends React.Component {
         // console.log("screenProps", screenProps);
         // let navOpts = getActiveChildNavigationOptions(navigation, screenProps);
         // console.log("navOpts", navOpts);
-        // let { state: { params } = {} } = navigation;
+        let { state: { params } = {} } = navigation;
+
+        let menuIsOpen = params && params.menuIsOpen;
+        let title = menuIsOpen ? "Help Topics" : "Help";
+
+        let emptyHeaderLeft = { headerLeft: null };
+        let emptyObject = {};
 
         return {
             headerStyle: {
@@ -27,22 +44,55 @@ export class HelpStack extends React.Component {
                 backgroundColor: Colors.brandDarkGrey,
                 borderBottomWidth: 0
             },
+            ...(menuIsOpen && emptyHeaderLeft),
+            headerTitle: (
+                <View style={{ paddingHorizontal: 20 }}>
+                    <Text style={styles.navTitleText}>{title}</Text>
+                </View>
+            ),
             headerRight: (
-                <FAIcon
-                    name={"info"}
-                    color={Colors.brandLightGrey}
-                    underlayColor={Colors.brandDarkGrey}
-                    size={24}
+                <TouchableOpacity
                     onPress={() => {
-                        // ClKAlert -- how to use Help
-                        navigation.state.params.toggleInfoPopup();
+                        params.setMenuState && params.setMenuState(!menuIsOpen);
                     }}
-                    hitSlop={{ top: 10, bottom: 10, left: 20, right: 0 }}
                     style={{
+                        alignSelf: "flex-end",
                         paddingLeft: 20,
-                        marginRight: scaleByFactor(12, 0.9)
+                        paddingRight: 10
+                        // height: Header.HEIGHT - 20
                     }}
-                />
+                    hitSlop={{
+                        top: 10,
+                        bottom: 10,
+                        left: 20,
+                        right: 0
+                    }}
+                >
+                    <Animated.View
+                        style={{
+                            alignSelf: "center",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flex: 1,
+                            transform: [
+                                {
+                                    rotate: _menuAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: ["0deg", "-90deg"]
+                                    })
+                                },
+                                { perspective: 1000 }
+                            ]
+                        }}
+                    >
+                        <FeatherIcon
+                            name={"more-vertical"}
+                            color={Colors.brandLightGrey}
+                            underlayColor={Colors.brandDarkGrey}
+                            size={24}
+                        />
+                    </Animated.View>
+                </TouchableOpacity>
             )
         };
     };
@@ -54,6 +104,7 @@ export class HelpStack extends React.Component {
                 //     SP_stack: "Hello, I'm a SCREEN PROP from Help STACK!"
                 // }}
                 screenType={"stack"}
+                menuAnim={_menuAnim}
                 {...this.props}
             />
         );
@@ -85,3 +136,11 @@ export class HelpModal extends React.Component {
         );
     }
 }
+
+const styles = StyleSheet.create({
+    navTitleText: {
+        color: Colors.brandLightOpp,
+        fontSize: Platform.OS === "ios" ? 17 : 20,
+        fontWeight: Platform.OS === "ios" ? "600" : "500"
+    }
+});

@@ -27,9 +27,12 @@ import IntrvHelpPage from "../components/intrv-help-page";
 import MiscStorage from "../config/misc_storage";
 import WelcomePage from "../components/welcome-page";
 import PagingDots from "../components/paging-dots";
+import MenuItem from "../components/menu-item";
+import TouchableBackdrop from "../components/touchable-backdrop";
 
 import { scaleByFactor } from "../util/font-scale";
 import { isIphoneX, ifIphoneX } from "react-native-iphone-x-helper";
+import { HEADER } from "../data/licenses";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -39,7 +42,7 @@ const HELPPAGE_HEIGHT = SCREEN_HEIGHT - HEADER_HEIGHT;
 
 let HELP_SECTIONS = [
     {
-        name: "Alarms List",
+        name: "Saved Alarms",
         images: [
             {
                 path: "AlarmItem_final_step0",
@@ -72,8 +75,8 @@ let HELP_SECTIONS = [
         snapOffsets: [SCREEN_HEIGHT * 0.6, SCREEN_HEIGHT]
     },
     {
-        name: "Edit Alarm",
-        subtitle: "How it Works", // "Overview",
+        name: "How it Works",
+        subtitle: "Edit Alarm", // "Overview",
         images: [
             {
                 path: "AlarmDetail_final_step1",
@@ -99,8 +102,8 @@ let HELP_SECTIONS = [
         snapOffsets: []
     },
     {
-        name: "Edit Alarm",
-        subtitle: "Tasks",
+        name: "Editing Tasks",
+        subtitle: "Edit Alarm",
         images: [
             {
                 path: "ADTasks_final_step1",
@@ -122,8 +125,8 @@ let HELP_SECTIONS = [
         pageCount: 4
     },
     {
-        name: "Edit Alarm",
-        subtitle: "Modes",
+        name: "Switching Between Modes",
+        subtitle: "Edit Alarm",
         images: [
             {
                 path: "ADModes_final_step1",
@@ -164,7 +167,8 @@ export default class Help extends React.Component {
             isFirstStep: this.props.screenType != "modal",
             isLoading: true,
             downloadSuccess: false,
-            isFocused: true
+            isFocused: true,
+            menuIsOpen: false
         };
 
         this._snapPoints = Array(IMG_URLS.length)
@@ -200,13 +204,32 @@ export default class Help extends React.Component {
 
     componentDidMount() {
         this.props.navigation.setParams({
-            toggleInfoPopup: this.toggleInfoPopup
+            toggleInfoPopup: this.toggleInfoPopup,
+            setMenuState: this.setMenuState
         });
         if (MiscStorage.visitedHelp !== true) {
             MiscStorage.setVistedHelp(true);
             // setTimeout(this.toggleInfoPopup, 500);
         }
     }
+
+    setMenuState = (nextMenuState, nextState) => {
+        if (nextMenuState == this.state.menuIsOpen) return;
+
+        Animated.timing(this.props.menuAnim, {
+            toValue: nextMenuState ? 1 : 0,
+            duration: 200,
+            // delay: nextMenuState ? 0 : 100,
+            useNativeDriver: true
+        }).start();
+
+        if (nextState) {
+            this.setState({ menuIsOpen: nextMenuState, ...nextState });
+        } else {
+            this.setState({ menuIsOpen: nextMenuState });
+        }
+        this.props.navigation.setParams({ menuIsOpen: nextMenuState });
+    };
 
     _fetchImages = () => {
         let preFetchTasks = [];
@@ -333,34 +356,6 @@ export default class Help extends React.Component {
         }
     };
 
-    // _renderPagingDots = idx => {
-    //     // console.log("idx", idx);
-    //     return (
-    //         <View style={styles.pagingDotsCont}>
-    //             <View
-    //                 style={[styles.pageDot, idx == 0 && styles.pageDotActive]}
-    //             />
-    //             <View
-    //                 style={[styles.pageDot, idx == 1 && styles.pageDotActive]}
-    //             />
-    //             <View
-    //                 style={[styles.pageDot, idx == 2 && styles.pageDotActive]}
-    //             />
-    //             <View
-    //                 style={[styles.pageDot, idx == 3 && styles.pageDotActive]}
-    //             />
-    //             {this._isModal && (
-    //                 <View
-    //                     style={[
-    //                         styles.pageDot,
-    //                         idx == 4 && styles.pageDotActive
-    //                     ]}
-    //                 />
-    //             )}
-    //         </View>
-    //     );
-    // };
-
     _getSectionForImgIdx(targetIdx) {
         console.log("targetIdx", targetIdx);
 
@@ -375,6 +370,59 @@ export default class Help extends React.Component {
             }
         }
     }
+
+    _getPageIdxForSection(sectionIdx) {
+        console.log("Getting pageIdx for sectionIdx", sectionIdx);
+
+        let pageIdx = 0;
+        for (let i = 0; i < sectionIdx; i++) {
+            pageIdx += HELP_SECTIONS[i].images.length;
+            console.log("runningIdx", pageIdx);
+        }
+
+        return pageIdx;
+    }
+
+    _jumpToSection = sectionIdx => {
+        // prevent execution if menu is closed, since otherwise items can be tapped through the nav header
+        if (!this.state.menuIsOpen) return;
+
+        console.log("jumping to section ", sectionIdx);
+        this._idx = this._getPageIdxForSection(sectionIdx);
+
+        this._interactable.snapTo({
+            index: this._idx
+        });
+
+        this.setMenuState(false, { sectIdx: this._idx });
+    };
+
+    renderHelpMenuItem = (section, sectionIdx) => {
+        console.log("renderHelpMenuItem", section);
+
+        return (
+            <MenuItem
+                key={sectionIdx}
+                // left={
+                //     <FAIcon
+                //         size={25}
+                //         name="moon"
+                //         color={Colors.brandMidPurple}
+                //     />
+                // }
+                center={section.name}
+                // right={
+                //     true ? (
+                //         <FAIcon name="check" size={22} />
+                //     ) : (
+                //         <View />
+                //     )
+                // }
+                // separatorPosition={SCREEN_WIDTH * 0.15}
+                onPressItem={this._jumpToSection.bind(this, sectionIdx)}
+            />
+        );
+    };
 
     render() {
         // console.log("Upgrade -- render() ");
@@ -680,37 +728,56 @@ export default class Help extends React.Component {
                         </Text>
                     </TouchableOpacity>
                 </Animatable.View>
-                {this.state.showInfoPopup && (
-                    <ClkAlert
-                        contHeight={"mid"}
-                        headerIcon={
-                            <FAIcon
-                                name="info"
-                                size={33}
-                                color={Colors.brandLightPurple}
-                            />
-                        }
-                        title="Quick Tip"
-                        headerTextStyle={{ color: Colors.brandLightOpp }}
-                        bodyText={`Tap anywhere to reveal the next tip for this section.\nSwipe left/right to jump between sections`}
-                        dismissConfig={{
-                            onPress: () => {
-                                console.log("Dismissed Info popup");
-                                this.setState({ showInfoPopup: false });
-                            },
-                            text: "Got it!"
+                {this.state.menuIsOpen && (
+                    <TouchableBackdrop
+                        style={{
+                            position: "absolute",
+                            top: 0, // - (isIphoneX() ? 15 : 0),
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            backgroundColor: "rgba(0, 0, 0, 0.4)"
                         }}
-                        // confirmConfig={{
-                        //     onPress: () => {
-                        //         console.log(
-                        //             "Confirmed Upgrade popup: Going to Upgrades screen"
-                        //         );
-                        //         this.setState({ showUpgradePopup: false });
-                        //         this.props.navigation.navigate("Upgrade");
-                        //     },
-                        //     text: "Go to Upgrades"
-                        // }}
+                        onPress={() => {
+                            // console.log(
+                            //     "Pressed touchable without feedback"
+                            // );
+                            // let nextMenuIsOpen = !isMenuOpen;
+
+                            this.setMenuState(false);
+                        }}
                     />
+                )}
+                {!this._isModal && (
+                    <Animated.View
+                        style={{
+                            position: "absolute",
+                            top: HEADER_HEIGHT - 20, // - (isIphoneX() ? 20 : 0),
+                            left: 0,
+                            right: 0,
+                            height: 240,
+                            overflow: "hidden",
+                            transform: [
+                                {
+                                    translateY: this.props.menuAnim.interpolate(
+                                        {
+                                            inputRange: [0, 1],
+                                            outputRange: [
+                                                -290,
+                                                -HEADER_HEIGHT + 20
+                                            ]
+                                        }
+                                    )
+                                }
+                            ]
+                            // backgroundColor: "blue"
+                        }}
+                        pointerEvents="box-none"
+                    >
+                        {HELP_SECTIONS.map((section, sectIdx) =>
+                            this.renderHelpMenuItem(section, sectIdx)
+                        )}
+                    </Animated.View>
                 )}
             </LinearGradient>
         );

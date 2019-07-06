@@ -212,13 +212,35 @@ export default class PagingDots extends Component {
 
         let pageDiff = prevPageIdx - newPageIdx;
         let { dotCount, pageCount, motionRangeH, motionRangeL } = state;
+        let activeDotIdx = 0;
+        let xTransRequired = 0;
 
         if (pageDiff == 0) {
-            return state.activeDotIdx; // return current idx, it doesn't need to change
+            return { activeDotIdx: state.activeDotIdx }; // return current idx, it doesn't need to change
         } else if (Math.abs(pageDiff) > 1) {
             console.info("Page idx changed by >1. May not work correctly.");
-            pageDiff = pageDiff > 0 ? 1 : -1;
+            // pageDiff = pageDiff > 0 ? 1 : -1;
             // return 0; // FIXME: Recover from this error
+
+            // in this case, I think we only need to care about the new idx
+            if (newPageIdx < motionRangeL) {
+                // page has changed within motionRangeL
+                activeDotIdx = newPageIdx;
+            } else if (newPageIdx < motionRangeH) {
+                // page has changed from motionRangeL into STILL_RANGE
+                activeDotIdx = PagingDots.getMidDotIdx(dotCount);
+            } else if (newPageIdx < state.pageCount) {
+                activeDotIdx = state.dotCount - (state.pageCount - newPageIdx);
+                console.log("state.dotCount", state.dotCount);
+                console.log("newPageIdx", newPageIdx);
+                console.log("state.pageCount", state.pageCount);
+            } else {
+                console.error("newPageIdx is out of bounds", newPageIdx);
+            }
+
+            console.log("activeDotIdx", activeDotIdx);
+
+            return { activeDotIdx };
         } else if (
             prevPageIdx < 0 ||
             prevPageIdx >= pageCount ||
@@ -234,9 +256,6 @@ export default class PagingDots extends Component {
         //          the final value activeDotIdx. However, I may want to add transition animations,
         //          in which case the prev/new logic below is needed to determine what type of animation
         //          should play.
-
-        let activeDotIdx = 0;
-        let xTransRequired = 0;
 
         if (prevPageIdx < motionRangeL) {
             if (newPageIdx < motionRangeL) {
@@ -408,6 +427,7 @@ export default class PagingDots extends Component {
     shouldComponentUpdate(nextProps, nextState) {
         let { xTransRequired } = nextState;
         if (xTransRequired) {
+            xTransRequired = xTransRequired > 0 ? 1 : -1;
             Animated.timing(this._xTranslateAnim, {
                 toValue: 17 * xTransRequired,
                 duration: DEFAULT_DURATION,
