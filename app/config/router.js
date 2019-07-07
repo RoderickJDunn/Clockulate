@@ -10,7 +10,8 @@ import {
     Easing,
     Animated,
     Dimensions,
-    InteractionManager
+    InteractionManager,
+    Platform
 } from "react-native";
 import {
     createStackNavigator,
@@ -484,21 +485,26 @@ const DrawerRoot = createDrawerNavigator(
                 drawerLabel: "Upgrade"
             }
         },
-        SleepLog: {
-            screen: createStackNavigator(
-                {
-                    SleepLogScreen: {
-                        screen: SleepLog
+        // only including SleepLog for iOS
+        ...(Platform.os == "ios" && {
+            SleepLog: {
+                screen: createStackNavigator(
+                    {
+                        SleepLogScreen: {
+                            screen: SleepLog
+                        }
+                    },
+                    {
+                        defaultNavigationOptions: otherDrawerNavOptions(
+                            "Sleep Log"
+                        )
                     }
-                },
-                {
-                    defaultNavigationOptions: otherDrawerNavOptions("Sleep Log")
+                ),
+                navigationOptions: {
+                    drawerLabel: "Sleep Log"
                 }
-            ),
-            navigationOptions: {
-                drawerLabel: "Sleep Log"
             }
-        },
+        }),
         Settings: {
             screen: createStackNavigator({
                 SettingsScreen: {
@@ -611,7 +617,7 @@ const DrawerRoot = createDrawerNavigator(
         order: [
             "Alarms",
             "UpgradeStack",
-            "SleepLog",
+            ...(Platform.os == "ios" ? ["SleepLog"] : []), // only including SleepLog for iOS
             "Settings",
             "HelpStack",
             "About"

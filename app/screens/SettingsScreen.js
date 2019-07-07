@@ -26,6 +26,9 @@ const fontFamily = Platform.OS === "ios" ? "Avenir" : "sans-serif";
 const coolDownOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 60];
 const maxRecsOptions = [50, 100, 150, 200, 250, 500, 1000, "Unlimited"];
 
+// android does not seem to need any permissions, since we are not doing Recording service.
+PERMISS_STRINGS = ["microphone", "notification"];
+
 export default class SettingsScreenCkt extends React.Component {
     /*
     Props: 
@@ -41,15 +44,15 @@ export default class SettingsScreenCkt extends React.Component {
         console.log("constructor");
 
         // load Permissions
-        Permissions.checkMultiple(["microphone", "notification"]).then(
-            response => {
+        if (Platform.OS == "ios") {
+            Permissions.checkMultiple(PERMISS_STRINGS).then(response => {
                 console.log("response", response);
                 let { permissions } = this.state;
                 permissions.mic = response.microphone == "authorized";
                 permissions.notif = response.notification == "authorized";
                 this.setState({ permissions });
-            }
-        );
+            });
+        }
 
         this.state = {
             settings: {
@@ -71,77 +74,93 @@ export default class SettingsScreenCkt extends React.Component {
     data: SettingsData = [
         {
             type: "SECTION",
-            header: "Sleep Monitoring".toUpperCase(),
+            header: "General".toUpperCase(),
             rows: [
-                {
-                    title: "Recording Frequency",
-                    subtitle: "Minimum time between recordings",
-                    subtitleStyles: { numberOfLines: 2 },
-                    onPress: () => {
-                        this.props.navigation.navigate("PickerInputScreen", {
-                            dataSets: [coolDownOptions],
-                            dataLabels: ["minutes"],
-                            currValues: [this.state.settings.recCooldown],
-                            title: "Recording Frequency",
-                            description: minutes =>
-                                `The minimum time allowed between recordings. With the current setting, a recording will be made at most once every ${minutes} minutes.`,
-                            onNavigateBack: this.didSetRecCooldown
-                        });
-                    },
-                    renderAccessory: () => {
-                        let { recCooldown } = this.state.settings;
-                        return recCooldown != null ? (
-                            <Text
-                                style={{
-                                    color: "#999",
-                                    marginRight: 6,
-                                    fontSize: 18
-                                }}
-                            >
-                                {typeof recCooldown == "number"
-                                    ? recCooldown + " minutes"
-                                    : recCooldown}
-                            </Text>
-                        ) : (
-                            <ActivityIndicator />
-                        );
-                    },
-                    showDisclosureIndicator: true
-                },
-                {
-                    title: "Recordings Limit",
-                    subtitle: "Maximum number of recordings to be kept",
-                    subtitleStyles: { numberOfLines: 2 },
-                    onPress: () => {
-                        this.props.navigation.navigate("PickerInputScreen", {
-                            dataSets: [maxRecsOptions],
-                            dataLabels: ["recordings"],
-                            currValues: [this.state.settings.maxRecs],
-                            title: "Saved Recordings Limit",
-                            description:
-                                "The maximum number of recordings Clockulate will store. Any recordings created above this number, will cause the oldest one(s) to be deleted.",
-                            onNavigateBack: this.didSetMaxRecs
-                        });
-                        // this.setState({ showMaxRecsPicker: true });
-                    },
-                    renderAccessory: () => {
-                        let { maxRecs } = this.state.settings;
-                        return maxRecs != null ? (
-                            <Text
-                                style={{
-                                    color: "#999",
-                                    marginRight: 6,
-                                    fontSize: 18
-                                }}
-                            >
-                                {this.state.settings.maxRecs}
-                            </Text>
-                        ) : (
-                            <ActivityIndicator />
-                        );
-                    },
-                    showDisclosureIndicator: true
-                },
+                // Only include Recording settings for iOS
+                ...(Platform.os == "ios"
+                    ? [
+                          {
+                              title: "Recording Frequency",
+                              subtitle: "Minimum time between recordings",
+                              subtitleStyles: { numberOfLines: 2 },
+                              onPress: () => {
+                                  this.props.navigation.navigate(
+                                      "PickerInputScreen",
+                                      {
+                                          dataSets: [coolDownOptions],
+                                          dataLabels: ["minutes"],
+                                          currValues: [
+                                              this.state.settings.recCooldown
+                                          ],
+                                          title: "Recording Frequency",
+                                          description: minutes =>
+                                              `The minimum time allowed between recordings. With the current setting, a recording will be made at most once every ${minutes} minutes.`,
+                                          onNavigateBack: this.didSetRecCooldown
+                                      }
+                                  );
+                              },
+                              renderAccessory: () => {
+                                  let { recCooldown } = this.state.settings;
+                                  return recCooldown != null ? (
+                                      <Text
+                                          style={{
+                                              color: "#999",
+                                              marginRight: 6,
+                                              fontSize: 18
+                                          }}
+                                      >
+                                          {typeof recCooldown == "number"
+                                              ? recCooldown + " minutes"
+                                              : recCooldown}
+                                      </Text>
+                                  ) : (
+                                      <ActivityIndicator />
+                                  );
+                              },
+                              showDisclosureIndicator: true
+                          },
+                          {
+                              title: "Recordings Limit",
+                              subtitle:
+                                  "Maximum number of recordings to be kept",
+                              subtitleStyles: { numberOfLines: 2 },
+                              onPress: () => {
+                                  this.props.navigation.navigate(
+                                      "PickerInputScreen",
+                                      {
+                                          dataSets: [maxRecsOptions],
+                                          dataLabels: ["recordings"],
+                                          currValues: [
+                                              this.state.settings.maxRecs
+                                          ],
+                                          title: "Saved Recordings Limit",
+                                          description:
+                                              "The maximum number of recordings Clockulate will store. Any recordings created above this number, will cause the oldest one(s) to be deleted.",
+                                          onNavigateBack: this.didSetMaxRecs
+                                      }
+                                  );
+                                  // this.setState({ showMaxRecsPicker: true });
+                              },
+                              renderAccessory: () => {
+                                  let { maxRecs } = this.state.settings;
+                                  return maxRecs != null ? (
+                                      <Text
+                                          style={{
+                                              color: "#999",
+                                              marginRight: 6,
+                                              fontSize: 18
+                                          }}
+                                      >
+                                          {this.state.settings.maxRecs}
+                                      </Text>
+                                  ) : (
+                                      <ActivityIndicator />
+                                  );
+                              },
+                              showDisclosureIndicator: true
+                          }
+                      ]
+                    : []),
                 {
                     title: "Charge Reminder",
                     subtitle: "Remind me to plug in my device",
@@ -224,162 +243,195 @@ export default class SettingsScreenCkt extends React.Component {
                 // }
             ]
         },
-        {
-            type: "SECTION",
-            header: "Permissions".toUpperCase(),
-            rows: [
-                {
-                    title: "Microphone",
-                    subtitle: "Required to monitor sleep and ensure wakeup",
-                    renderAccessory: () => {
-                        let { mic } = this.state.permissions;
-                        return mic != null ? (
-                            mic == true ? (
-                                <EntypoIcon
-                                    color={"green"}
-                                    name="check"
-                                    size={24}
-                                />
-                            ) : (
-                                <EntypoIcon
-                                    color={"red"}
-                                    name="cross"
-                                    size={24}
-                                />
-                            )
-                        ) : (
-                            <ActivityIndicator />
-                        );
-                    },
-                    onPress: () => {
-                        let { permissions } = this.state;
-                        console.log("permissions.mic", permissions.mic);
-                        // Present alert asking if they want to go to Settings
-                        if (permissions.mic == true) {
-                            Alert.alert(
-                                "Change Permissions",
-                                "Recording permission is granted. You can remove this permission in the Settings app, but Clockulate will not be able to monitor your sleep quality, or play alarm sounds when your phone is set to Silent.",
-                                [
-                                    {
-                                        text: "Open Settings",
-                                        onPress: () => {
-                                            Linking.openURL("app-settings:");
-                                        }
-                                    },
-                                    {
-                                        text: "Cancel",
-                                        style: "cancel"
-                                    }
-                                ]
-                            );
-                        } else if (permissions.mic == false) {
-                            Permissions.request("microphone").then(status => {
-                                console.log("permissions.mic status", status);
-                                permissions.mic = status == "authorized";
-                                this.setState({ permissions });
-                                if (!permissions.mic) {
-                                    Alert.alert(
-                                        "Change Permissions",
-                                        "You can add this permission in the Settings app",
-                                        [
-                                            {
-                                                text: "Open Settings",
-                                                onPress: () => {
-                                                    Linking.openURL(
-                                                        "app-settings:"
-                                                    );
-                                                }
-                                            },
-                                            {
-                                                text: "Cancel",
-                                                style: "cancel"
-                                            }
-                                        ]
-                                    );
-                                }
-                            });
-                        }
-                    }
-                },
-                {
-                    title: "Notifications",
-                    subtitle: "Required to alert you when an Alarm goes off!",
-                    renderAccessory: () => {
-                        let { notif } = this.state.permissions;
-                        return notif != null ? (
-                            notif == true ? (
-                                <EntypoIcon
-                                    color={"green"}
-                                    name="check"
-                                    size={24}
-                                />
-                            ) : (
-                                <EntypoIcon
-                                    color={"red"}
-                                    name="cross"
-                                    size={24}
-                                />
-                            )
-                        ) : (
-                            <ActivityIndicator />
-                        );
-                    },
-                    onPress: () => {
-                        let { permissions } = this.state;
-                        console.log("permissions.notif", permissions.notif);
-                        if (permissions.notif == true) {
-                            // Present alert asking if they want to go to Settings
-                            Alert.alert(
-                                "Change Permissions",
-                                "Notification permission is granted. You can remove this permission in the Settings app, but Clockulate will not be able to send you alerts when your alarms ring.",
-                                [
-                                    {
-                                        text: "Open Settings",
-                                        onPress: () => {
-                                            Linking.openURL("app-settings:");
-                                        }
-                                    },
-                                    {
-                                        text: "Cancel",
-                                        style: "cancel"
-                                    }
-                                ]
-                            );
-                        } else if (permissions.notif == false) {
-                            Permissions.request("notification").then(status => {
-                                console.log(
-                                    "permissions.notification status",
-                                    status
-                                );
-                                permissions.notif = status == "authorized";
-                                this.setState({ permissions });
+        /* NOTE: Cool way to exclude an element from an array on creation. 
+        The ... (spread operator) expands [] to nothing.   
+        Both intutive ways of doing this (with _condition_ ? _include_ : null) or 
+        (_condition_ && _include_) doesn't work because if condition fails then 
+        null/undefined is included an element into the array.
+        */
+        ...(Platform.OS == "ios"
+            ? [
+                  {
+                      type: "SECTION",
+                      header: "Permissions".toUpperCase(),
+                      rows: [
+                          {
+                              title: "Microphone",
+                              subtitle:
+                                  "Required to monitor sleep and ensure wakeup",
+                              renderAccessory: () => {
+                                  let { mic } = this.state.permissions;
+                                  return mic != null ? (
+                                      mic == true ? (
+                                          <EntypoIcon
+                                              color={"green"}
+                                              name="check"
+                                              size={24}
+                                          />
+                                      ) : (
+                                          <EntypoIcon
+                                              color={"red"}
+                                              name="cross"
+                                              size={24}
+                                          />
+                                      )
+                                  ) : (
+                                      <ActivityIndicator />
+                                  );
+                              },
+                              onPress: () => {
+                                  let { permissions } = this.state;
+                                  console.log(
+                                      "permissions.mic",
+                                      permissions.mic
+                                  );
+                                  // Present alert asking if they want to go to Settings
+                                  if (permissions.mic == true) {
+                                      Alert.alert(
+                                          "Change Permissions",
+                                          "Recording permission is granted. You can remove this permission in the Settings app, but Clockulate will not be able to monitor your sleep quality, or play alarm sounds when your phone is set to Silent.",
+                                          [
+                                              {
+                                                  text: "Open Settings",
+                                                  onPress: () => {
+                                                      Linking.openURL(
+                                                          "app-settings:"
+                                                      );
+                                                  }
+                                              },
+                                              {
+                                                  text: "Cancel",
+                                                  style: "cancel"
+                                              }
+                                          ]
+                                      );
+                                  } else if (permissions.mic == false) {
+                                      Permissions.request("microphone").then(
+                                          status => {
+                                              console.log(
+                                                  "permissions.mic status",
+                                                  status
+                                              );
+                                              permissions.mic =
+                                                  status == "authorized";
+                                              this.setState({ permissions });
+                                              if (!permissions.mic) {
+                                                  Alert.alert(
+                                                      "Change Permissions",
+                                                      "You can add this permission in the Settings app",
+                                                      [
+                                                          {
+                                                              text:
+                                                                  "Open Settings",
+                                                              onPress: () => {
+                                                                  Linking.openURL(
+                                                                      "app-settings:"
+                                                                  );
+                                                              }
+                                                          },
+                                                          {
+                                                              text: "Cancel",
+                                                              style: "cancel"
+                                                          }
+                                                      ]
+                                                  );
+                                              }
+                                          }
+                                      );
+                                  }
+                              }
+                          },
+                          {
+                              title: "Notifications",
+                              subtitle:
+                                  "Required to alert you when an Alarm goes off!",
+                              renderAccessory: () => {
+                                  let { notif } = this.state.permissions;
+                                  return notif != null ? (
+                                      notif == true ? (
+                                          <EntypoIcon
+                                              color={"green"}
+                                              name="check"
+                                              size={24}
+                                          />
+                                      ) : (
+                                          <EntypoIcon
+                                              color={"red"}
+                                              name="cross"
+                                              size={24}
+                                          />
+                                      )
+                                  ) : (
+                                      <ActivityIndicator />
+                                  );
+                              },
+                              onPress: () => {
+                                  let { permissions } = this.state;
+                                  console.log(
+                                      "permissions.notif",
+                                      permissions.notif
+                                  );
+                                  if (permissions.notif == true) {
+                                      // Present alert asking if they want to go to Settings
+                                      Alert.alert(
+                                          "Change Permissions",
+                                          "Notification permission is granted. You can remove this permission in the Settings app, but Clockulate will not be able to send you alerts when your alarms ring.",
+                                          [
+                                              {
+                                                  text: "Open Settings",
+                                                  onPress: () => {
+                                                      Linking.openURL(
+                                                          "app-settings:"
+                                                      );
+                                                  }
+                                              },
+                                              {
+                                                  text: "Cancel",
+                                                  style: "cancel"
+                                              }
+                                          ]
+                                      );
+                                  } else if (permissions.notif == false) {
+                                      Permissions.request("notification").then(
+                                          status => {
+                                              console.log(
+                                                  "permissions.notification status",
+                                                  status
+                                              );
+                                              permissions.notif =
+                                                  status == "authorized";
+                                              this.setState({ permissions });
 
-                                if (!permissions.notif) {
-                                    Alert.alert(
-                                        "Change Permissions",
-                                        "You can add this permission in the Settings app",
-                                        [
-                                            {
-                                                text: "Open Settings",
-                                                onPress: () => {
-                                                    Linking.openURL(
-                                                        "app-settings:"
-                                                    );
-                                                }
-                                            },
-                                            {
-                                                text: "Cancel",
-                                                style: "cancel"
-                                            }
-                                        ]
-                                    );
-                                }
-                            });
-                        }
-                    }
-                }
-            ]
-        },
+                                              if (!permissions.notif) {
+                                                  Alert.alert(
+                                                      "Change Permissions",
+                                                      "You can add this permission in the Settings app",
+                                                      [
+                                                          {
+                                                              text:
+                                                                  "Open Settings",
+                                                              onPress: () => {
+                                                                  Linking.openURL(
+                                                                      "app-settings:"
+                                                                  );
+                                                              }
+                                                          },
+                                                          {
+                                                              text: "Cancel",
+                                                              style: "cancel"
+                                                          }
+                                                      ]
+                                                  );
+                                              }
+                                          }
+                                      );
+                                  }
+                              }
+                          }
+                      ]
+                  }
+              ]
+            : []),
         {
             type: "CUSTOM_VIEW",
             render: () => (
@@ -431,18 +483,20 @@ export default class SettingsScreenCkt extends React.Component {
                 <NavigationEvents
                     onWillFocus={payload => {
                         // load Permissions
-                        Permissions.checkMultiple([
-                            "microphone",
-                            "notification"
-                        ]).then(response => {
-                            console.log("response", response);
-                            let { permissions } = this.state;
-                            permissions.mic =
-                                response.microphone == "authorized";
-                            permissions.notif =
-                                response.notification == "authorized";
-                            this.setState({ permissions });
-                        });
+
+                        if (Platform.os == "ios") {
+                            Permissions.checkMultiple(PERMISS_STRINGS).then(
+                                response => {
+                                    console.log("response", response);
+                                    let { permissions } = this.state;
+                                    permissions.mic =
+                                        response.microphone == "authorized";
+                                    permissions.notif =
+                                        response.notification == "authorized";
+                                    this.setState({ permissions });
+                                }
+                            );
+                        }
 
                         let { settings } = this.state;
                         let permissions = {
