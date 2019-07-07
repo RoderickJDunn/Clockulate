@@ -177,7 +177,12 @@ export default class Help extends React.Component {
         this._snapPoints = Array(IMG_URLS.length)
             .fill(null)
             .map((unusedElm, i) => {
-                return { x: -SCREEN_WIDTH * i, id: i + "" };
+                return {
+                    x: -SCREEN_WIDTH * i,
+                    id: i + "",
+                    tension: 1000,
+                    damping: 0.4
+                };
             });
 
         console.log("this._snapPoints", this._snapPoints);
@@ -225,6 +230,26 @@ export default class Help extends React.Component {
             // delay: nextMenuState ? 0 : 100,
             useNativeDriver: true
         }).start();
+
+        LayoutAnimation.configureNext({
+            duration: 200,
+            update: {
+                duration: 200,
+                type: "easeInEaseOut"
+                // springDamping: 0.5,
+                // property: "scaleXY"
+            },
+            ...(nextMenuState == false && {
+                create: {
+                    delay: 50,
+                    duration: 150,
+                    type: "spring",
+                    springDamping: 1,
+                    // property: "opacity"
+                    property: "scaleXY"
+                }
+            })
+        });
 
         if (nextState) {
             this.setState({ menuIsOpen: nextMenuState, ...nextState });
@@ -406,23 +431,11 @@ export default class Help extends React.Component {
         return (
             <MenuItem
                 key={sectionIdx}
-                // left={
-                //     <FAIcon
-                //         size={25}
-                //         name="moon"
-                //         color={Colors.brandMidPurple}
-                //     />
-                // }
                 center={section.name}
-                // right={
-                //     true ? (
-                //         <FAIcon name="check" size={22} />
-                //     ) : (
-                //         <View />
-                //     )
-                // }
-                // separatorPosition={SCREEN_WIDTH * 0.15}
                 onPressItem={this._jumpToSection.bind(this, sectionIdx)}
+                style={{
+                    paddingLeft: 25
+                }}
             />
         );
     };
@@ -431,7 +444,13 @@ export default class Help extends React.Component {
         // console.log("Upgrade -- render() ");
 
         let section = this._getSectionForImgIdx(this._idx);
+
         console.log("section", section);
+        console.log("this._idx", this._idx);
+
+        let idxInSect = this._idx - section.startingIdx;
+
+        let subtitle = section.images[idxInSect].subtitle || section.subtitle;
 
         return (
             <LinearGradient
@@ -474,6 +493,7 @@ export default class Help extends React.Component {
                         // marginTop: isIphoneX() ? -88 : -64,
                         flexDirection: "row"
                     }}
+                    dragToss={0.6}
                     horizontalOnly={true}
                     snapPoints={this._snapPoints}
                     animatedNativeDriver={true}

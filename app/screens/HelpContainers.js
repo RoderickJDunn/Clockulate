@@ -6,7 +6,8 @@ import {
     Animated,
     StyleSheet,
     Platform,
-    View
+    View,
+    LayoutAnimation
 } from "react-native";
 import { createStackNavigator } from "react-navigation";
 import FAIcon from "react-native-vector-icons/FontAwesome";
@@ -36,7 +37,6 @@ export class HelpStack extends React.Component {
         let title = menuIsOpen ? "Help Topics" : "Help";
 
         let emptyHeaderLeft = { headerLeft: null };
-        let emptyObject = {};
 
         return {
             headerStyle: {
@@ -44,6 +44,7 @@ export class HelpStack extends React.Component {
                 backgroundColor: Colors.brandDarkGrey,
                 borderBottomWidth: 0
             },
+            // NOTE: This is how to conditionally include properties in an object using the spread operator
             ...(menuIsOpen && emptyHeaderLeft),
             headerTitle: (
                 <View style={{ paddingHorizontal: 20 }}>
