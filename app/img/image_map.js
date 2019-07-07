@@ -13,25 +13,25 @@ const IMAGE_URL_BASE =
 // maps screen sizes to correct images
 const IMG_MAP_ANDROID = {
     ProAdv_squarish: {
-        840: "ProAdv_squarish_375_375",
-        720: "ProAdv_squarish_375_375",
-        600: "ProAdv_squarish_375_375",
-        400: "ProAdv_squarish_350_350",
-        360: "ProAdv_squarish_331_331"
+        840: "proadv_squarish_375_375",
+        720: "proadv_squarish_375_375",
+        600: "proadv_squarish_375_375",
+        400: "proadv_squarish_350_350",
+        360: "proadv_squarish_331_331"
     },
     ProAdv_alarms_banner: {
-        840: "ProAdv_alarms_banner_414_100",
-        720: "ProAdv_alarms_banner_414_100",
-        600: "ProAdv_alarms_banner_414_100",
-        400: "ProAdv_alarms_banner_375_100",
-        360: "ProAdv_alarms_banner_320_100"
+        840: "proadv_alarms_banner_414_100",
+        720: "proadv_alarms_banner_414_100",
+        600: "proadv_alarms_banner_414_100",
+        400: "proadv_alarms_banner_375_100",
+        360: "proadv_alarms_banner_320_100"
     },
     ProAdv_sounds_banner: {
-        840: "ProAdv_sounds_banner_414_100",
-        720: "ProAdv_sounds_banner_414_100",
-        600: "ProAdv_sounds_banner_414_100",
-        400: "ProAdv_sounds_banner_375_100",
-        360: "ProAdv_sounds_banner_320_100"
+        840: "proadv_sounds_banner_414_100",
+        720: "proadv_sounds_banner_414_100",
+        600: "proadv_sounds_banner_414_100",
+        400: "proadv_sounds_banner_375_100",
+        360: "proadv_sounds_banner_320_100"
     }
 };
 
@@ -75,7 +75,7 @@ function roundDownToSizeClass(width) {
     ANDROID_SCREEN_CLASSES.some((sizeClass, idx) => {
         if (width >= sizeClass) {
             targetIdx = idx;
-            return true;
+            return ANDROID_SCREEN_CLASSES[targetIdx];
         }
     });
 
@@ -110,7 +110,7 @@ export let getFullImgNameForScreenSize = (imgBaseName, screenWidth) => {
     automatically (using the @2x / @3x notation).
 */
 export let getFullImgNameForPxDensity = imgBaseName => {
-    console.log("fetching full img name for ", imgBaseName);
-    console.log("PixelRatio.get()", PixelRatio.get());
+    // console.log("fetching full img name for ", imgBaseName);
+    // console.log("PixelRatio.get()", PixelRatio.get());
     return IMAGE_URL_BASE + NET_IMAGES[imgBaseName][PixelRatio.get()];
 };
