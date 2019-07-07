@@ -66,6 +66,7 @@ class ProAdv extends Component {
                             width: this.props.imgDims.width,
                             height: this.props.imgDims.height
                         }}
+                        resizeMode="contain"
                         source={[
                             {
                                 uri: getFullImgNameForScreenSize(

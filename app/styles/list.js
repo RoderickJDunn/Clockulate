@@ -147,14 +147,11 @@ export const TaskItemStyle = StyleSheet.create({
         // right: 10
     },
     deleteBtn: {
-        // position: "absolute",
         backgroundColor: Colors.deleteBtnRed,
         marginLeft: 20,
-        // right: 0,
         width: CONST_DIMENSIONS.TASK_DELETE_BTN_WIDTH,
         height: CONST_DIMENSIONS.TASK_DELETE_BTN_HEIGHT,
         justifyContent: "center"
-        // zIndex: 10000
     },
     deleteBtnText: {
         alignSelf: "stretch",

@@ -2122,9 +2122,15 @@ class AlarmDetail extends Component {
                                 onTextInputBlur={this.onLabelInputBlur}
                                 separation={0}
                                 textInputStyle={{
-                                    fontSize: scaleByFactor(32, 0.8),
+                                    fontSize: Platform.select({
+                                        ios: scaleByFactor(32, 0.8),
+                                        android: scaleByFactor(30, 0.8)
+                                    }),
                                     color: Colors.brandLightGrey,
-                                    lineHeight: scaleByFactor(32, 0.8)
+                                    lineHeight: Platform.select({
+                                        ios: scaleByFactor(32, 0.8),
+                                        android: scaleByFactor(22, 0.8)
+                                    })
                                 }}
                                 flex={0.5}
                                 autoResize={false}

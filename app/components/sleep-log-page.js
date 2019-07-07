@@ -10,7 +10,8 @@ import {
     Alert,
     Slider,
     ScrollView,
-    Animated
+    Animated,
+    Platform
 } from "react-native";
 
 const { Group, Shape, Surface, Text: ARTText } = ART;
@@ -1023,7 +1024,7 @@ const styles = StyleSheet.create({
         fontSize: 23,
         color: Colors.backgroundBright,
         fontFamily: "Gurmukhi MN",
-        marginTop: 4
+        marginTop: Platform.select({ ios: 4, android: 0 })
         // color: Colors.brandDarkGrey
     },
     statLabelText: {

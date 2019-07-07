@@ -803,9 +803,9 @@ class TaskDetail extends Component {
                                         <TouchableOpacity
                                             style={{
                                                 marginLeft: 10,
-                                                flexDirection: "row"
-                                                // backgroundColor: "blue",
-                                                // flex: 1
+                                                flexDirection: "row",
+                                                height: 25,
+                                                alignItems: "center"
                                             }}
                                             onPress={() => {
                                                 this.setState({

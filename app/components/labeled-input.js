@@ -113,7 +113,9 @@ class LabeledInput extends Component {
                                     // height: inputHeight + scaleByFactor(23, 0.5),
                                     // paddingVertical: 3,
                                     margin: 0,
-                                    flex: 1
+                                    paddingBottom: 0,
+                                    flex: 1,
+                                    textAlignVertical: "center"
                                     // backgroundColor: "#ededed"
                                     // borderRadius: 5
                                 }
@@ -139,6 +141,7 @@ class LabeledInput extends Component {
                                 )
                             }
                             multiline={false}
+                            numberOfLines={1}
                             underlineColorAndroid="transparent"
                             editable={
                                 this.props.editable == null
@@ -150,6 +153,7 @@ class LabeledInput extends Component {
                                     ? "left"
                                     : this.props.textAlign
                             }
+                            textAlignVertical={"center"}
                         />
                         {this.state.isEditing == true
                             ? this.props.clearButton

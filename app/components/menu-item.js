@@ -8,7 +8,8 @@ import {
     TouchableWithoutFeedback,
     View,
     TouchableOpacity,
-    Text
+    Text,
+    Platform
 } from "react-native";
 import Colors from "../styles/colors";
 
@@ -47,7 +48,6 @@ class MenuItem extends React.Component {
                                 // padding: 8,
                                 flexDirection: "row",
                                 flex: 1,
-                                justifyContent: "center",
                                 alignContent: "center",
                                 alignItems: "center"
                                 // borderColor: "blue",
@@ -142,13 +142,10 @@ const styles = StyleSheet.create({
     menuRowBtn: {
         height: 60,
         justifyContent: "center",
-        alignContent: "center",
-        alignItems: "center"
-        // borderWidth: 1,
-        // borderColor: "#487d"
+        alignContent: "center"
     },
     text: {
-        marginTop: 5,
+        marginTop: Platform.select({ ios: 5, android: 0 }),
         color: Colors.darkGreyText,
         fontFamily: "Gurmukhi MN"
     }
