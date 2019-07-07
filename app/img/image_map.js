@@ -8,7 +8,7 @@ import {
 import NET_IMAGES from "./network_images";
 
 const IMAGE_URL_BASE =
-    "https://raw.githubusercontent.com/RoderickJDunn/ckt-help-imgs/master/";
+    "https://raw.githubusercontent.com/RoderickJDunn/ckt-help-imgs/v1.1/";
 
 // maps screen sizes to correct images
 const IMG_MAP_ANDROID = {

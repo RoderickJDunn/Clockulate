@@ -10,7 +10,8 @@ import {
     StyleSheet,
     Animated,
     LayoutAnimation,
-    ActivityIndicator
+    ActivityIndicator,
+    Platform
 } from "react-native";
 import { Header, NavigationEvents } from "react-navigation";
 import LinearGradient from "react-native-linear-gradient";
@@ -42,56 +43,24 @@ const HELPPAGE_HEIGHT = SCREEN_HEIGHT - HEADER_HEIGHT;
 
 let HELP_SECTIONS = [
     {
-        name: "Saved Alarms",
-        images: [
-            {
-                path: "AlarmItem_final_step0",
-                style: { marginBottom: 5 }
-            },
-            {
-                path: "AlarmItem_final_step1",
-                style: { marginBottom: 5 },
-                sharePageWithNext: 1
-            },
-            {
-                path: "AlarmItem_final_step2",
-                style: { paddingBottom: 0 },
-                sharedWithPrev: true,
-                // NOTE: Aspect ratio is required when sharedWithPrev=true, since AutoHeightImage
-                //       determines the height of the image asynchronously, so LayoutAnimation
-                //       doesn't work when the image appears
-                aspectRatio: 664 / 454
-            },
-            {
-                path: "AlarmItem_final_step3",
-                style: null
-            },
-            {
-                path: "AlarmItem_final_step4",
-                style: null
-            }
-        ],
-        pageCount: 5, // different from image count, due to images 2/3 sharing a page
-        snapOffsets: [SCREEN_HEIGHT * 0.6, SCREEN_HEIGHT]
-    },
-    {
-        name: "How it Works",
+        name: "The Basics",
         subtitle: "Edit Alarm", // "Overview",
         images: [
             {
-                path: "AlarmDetail_final_step1",
+                path: "basics_img1",
+                subtitle: "Overview",
                 style: { paddingVertical: SCREEN_HEIGHT * 0.05 }
             },
             {
-                path: "AlarmDetail_final_step2",
+                path: "basics_img2",
                 style: null
             },
             {
-                path: "AlarmDetail_final_step3",
+                path: "basics_img3",
                 style: null
             },
             {
-                path: "AlarmDetail_final_step4",
+                path: "basics_img4",
                 style: {
                     paddingTop: SCREEN_HEIGHT * 0.08,
                     paddingBottom: SCREEN_HEIGHT * 0.03
@@ -102,52 +71,86 @@ let HELP_SECTIONS = [
         snapOffsets: []
     },
     {
-        name: "Editing Tasks",
-        subtitle: "Edit Alarm",
+        name: "Tasks",
+        // subtitle: "Edit Alarm",
         images: [
             {
-                path: "ADTasks_final_step1",
+                path: "tasks_img1",
                 style: null
             },
             {
-                path: "ADTasks_final_step2",
+                path: "tasks_img2",
                 style: null
             },
             {
-                path: "ADTasks_final_step3",
+                path: "tasks_img3",
                 style: null
             },
             {
-                path: "ADTasks_final_step4",
+                path: "tasks_img4",
                 style: null
             }
         ],
         pageCount: 4
     },
     {
-        name: "Switching Between Modes",
-        subtitle: "Edit Alarm",
+        name: "Alarm Modes",
+        // subtitle: "Edit Alarm",
         images: [
             {
-                path: "ADModes_final_step1",
+                path: "modes_img1",
+                subtitle: "Clockulate Mode",
                 style: { paddingVertical: SCREEN_HEIGHT * 0.14 }
             },
             {
-                path: "ADModes_final_step2",
+                path: "modes_img2",
+                subtitle: "Classic Mode",
                 style: { paddingVertical: SCREEN_HEIGHT * 0.28 }
             }
         ],
         pageCount: 2,
         isFinalSect: true
+    },
+    {
+        name: "Alarms List",
+        images: [
+            {
+                path:
+                    "alarmslist_img1" +
+                    Platform.select({ ios: "_ios", android: "_android" }),
+                style: { marginBottom: 5 }
+            },
+            {
+                path:
+                    "alarmslist_img2" +
+                    Platform.select({ ios: "_ios", android: "_android" }),
+                style: { marginBottom: 5 }
+            },
+            {
+                path: "alarmslist_img3",
+                style: null
+            }
+        ],
+        pageCount: 5, // different from image count, due to images 2/3 sharing a page
+        snapOffsets: [SCREEN_HEIGHT * 0.6, SCREEN_HEIGHT]
     }
 ];
 
-let IMG_URLS = HELP_SECTIONS.reduce((accum, sect) => {
+let totalPages = 0;
+
+let IMG_URLS = HELP_SECTIONS.reduce((accum, sect, idx) => {
     let sectImgUrls = sect.images.map(img =>
         getFullImgNameForPxDensity(img.path)
     );
-
     accum.push(...sectImgUrls);
+
+    /* NOTE: Unrelated functionality. Updates this section of HELP_SECTIONS, with an startingIdx property,
+        which indicates the overall pageIdx that this section begins with
+    */
+    HELP_SECTIONS[idx].startingIdx = totalPages;
+    totalPages += sect.images.length;
+    /* END */
+
     return accum;
 }, []);
 // console.log("IMG_URLS", IMG_URLS);
@@ -451,17 +454,25 @@ export default class Help extends React.Component {
                         this.setState({ isFocused: false });
                     }}
                 />
+                {(this._welcomeOffset == 0 || this._idx > 0) && (
+                    <View style={styles.sectionTitleWrap}>
+                        <Text style={styles.sectionTitle}>{section.name}</Text>
+                        {subtitle && (
+                            <Text style={styles.sectSubtitle}>{subtitle}</Text>
+                        )}
+                    </View>
+                )}
                 <Interactable.View
                     ref={elm => (this._interactable = elm)}
                     style={{
-                        flex: 1,
+                        flex: 0.8,
                         width:
                             SCREEN_WIDTH *
                             (IMG_URLS.length + this._welcomeOffset),
                         alignSelf: "stretch",
+                        // backgroundColor: "blue",
                         // marginTop: isIphoneX() ? -88 : -64,
                         flexDirection: "row"
-                        // backgroundColor: "green"
                     }}
                     horizontalOnly={true}
                     snapPoints={this._snapPoints}
@@ -576,16 +587,6 @@ export default class Help extends React.Component {
                         </View>
                     )}
                 </Interactable.View>
-                {(this._welcomeOffset == 0 || this._idx > 0) && (
-                    <View style={styles.sectionTitleWrap}>
-                        <Text style={styles.sectionTitle}>{section.name}</Text>
-                        {section.subtitle && (
-                            <Text style={styles.sectSubtitle}>
-                                {section.subtitle}
-                            </Text>
-                        )}
-                    </View>
-                )}
                 {this._isModal && this._idx > 0 && (
                     <Animatable.View
                         contentInsetAdjustmentBehavior="automatic"
@@ -653,17 +654,18 @@ export default class Help extends React.Component {
                     duration={this._isModal ? 1500 : 0}
                     delay={this._isModal ? 4000 : 0}
                     style={{
-                        position: "absolute",
                         justifyContent: "space-between",
                         flexDirection: "row",
                         alignSelf: "stretch",
                         width: "100%",
-                        height: 45,
+                        minHeight: 35,
                         paddingHorizontal: 20,
-                        bottom: ifIphoneX(35, 20),
+                        bottom: ifIphoneX(35, 0),
+                        // backgroundColor: "red",
                         backgroundColor: "transparent",
                         fontFamily: "Gurmukhi MN",
-                        fontSize: 30
+                        fontSize: 30,
+                        flex: 0.05
                     }}
                     // style={styles.playbackBox}
                 >
@@ -789,12 +791,7 @@ const styles = StyleSheet.create({
         color: Colors.brandLightOpp
     },
     sectionTitleWrap: {
-        position: "absolute",
-        left: 0,
-        right: 0,
-        paddingTop: 5,
-        bottom: HELPPAGE_HEIGHT * 0.1,
-        height: 65,
+        flex: 0.15,
         alignSelf: "center",
         alignItems: "center",
         alignContent: "center",

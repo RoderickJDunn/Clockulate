@@ -173,7 +173,7 @@ export default class IntrvHelpPage extends Component {
                         style={image.style}
                     />
                 </View>
-               
+
                 {/* Measuring line */}
                 {/* <View
                         style={{
@@ -212,9 +212,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         alignSelf: "center",
         justifyContent: "center",
-        alignItems: "center",
-        // top: HELPPAGE_HEIGHT * 0.5 - (HELPPAGE_HEIGHT * 0.4),
-        bottom: HELPPAGE_HEIGHT * 0.1 + 65
+        alignItems: "center"
     },
     helpPageBox: {
         top: 0,
