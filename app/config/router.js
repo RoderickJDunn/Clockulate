@@ -486,7 +486,7 @@ const DrawerRoot = createDrawerNavigator(
             }
         },
         // only including SleepLog for iOS
-        ...(Platform.os == "ios" && {
+        ...(Platform.OS == "ios" && {
             SleepLog: {
                 screen: createStackNavigator(
                     {
@@ -617,7 +617,7 @@ const DrawerRoot = createDrawerNavigator(
         order: [
             "Alarms",
             "UpgradeStack",
-            ...(Platform.os == "ios" ? ["SleepLog"] : []), // only including SleepLog for iOS
+            ...(Platform.OS == "ios" ? ["SleepLog"] : []), // only including SleepLog for iOS
             "Settings",
             "HelpStack",
             "About"

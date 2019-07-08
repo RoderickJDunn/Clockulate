@@ -77,7 +77,7 @@ export default class SettingsScreenCkt extends React.Component {
             header: "General".toUpperCase(),
             rows: [
                 // Only include Recording settings for iOS
-                ...(Platform.os == "ios"
+                ...(Platform.OS == "ios"
                     ? [
                           {
                               title: "Recording Frequency",
@@ -484,7 +484,7 @@ export default class SettingsScreenCkt extends React.Component {
                     onWillFocus={payload => {
                         // load Permissions
 
-                        if (Platform.os == "ios") {
+                        if (Platform.OS == "ios") {
                             Permissions.checkMultiple(PERMISS_STRINGS).then(
                                 response => {
                                     console.log("response", response);
