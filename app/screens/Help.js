@@ -476,14 +476,25 @@ export default class Help extends React.Component {
                         this.setState({ isFocused: false });
                     }}
                 />
+                <View
+                    style={[
+                        styles.sectionTitleWrap,
+                        { marginTop: this._isModal ? 20 : 0 }
+                    ]}
+                >
                 {(this._welcomeOffset == 0 || this._idx > 0) && (
-                    <View style={styles.sectionTitleWrap}>
-                        <Text style={styles.sectionTitle}>{section.name}</Text>
+                        <>
+                            <Text style={styles.sectionTitle}>
+                                {section.name}
+                            </Text>
                         {subtitle && (
-                            <Text style={styles.sectSubtitle}>{subtitle}</Text>
+                                <Text style={styles.sectSubtitle}>
+                                    {subtitle}
+                                </Text>
+                            )}
+                        </>
                         )}
                     </View>
-                )}
                 <Interactable.View
                     ref={elm => (this._interactable = elm)}
                     style={{
