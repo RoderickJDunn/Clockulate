@@ -101,6 +101,16 @@ const FIELDS_AUTO_VIEW_HEIGHT =
 const FLEX_CLOCK_LOADING =
     0.225 - (SCREEN_HEIGHT / 568 - 1) * 0.02 + ifIphoneX(0.009, 0);
 
+const BACK_ARROW = Platform.select({
+    ios: { icon: "chevron-left", size: 33 },
+    android: {
+        icon: "arrow-back",
+        size: 26,
+        style: {
+            paddingLeft: 8
+        }
+    }
+});
 class AlarmDetail extends Component {
     static defaultNavParams = {
         handleBackBtn: null,
@@ -128,12 +138,13 @@ class AlarmDetail extends Component {
                             params.handleBackBtn(/* Don't enable */ false);
                     }}
                     hitSlop={{ top: 10, bottom: 10, left: 0, right: 20 }}
+                    style={BACK_ARROW.style}
                 >
                     <MaterialIcon
-                        name={"chevron-left"}
+                        name={BACK_ARROW.icon}
                         color={Colors.brandLightGrey}
                         underlayColor={Colors.brandDarkGrey}
-                        size={33}
+                        size={BACK_ARROW.size}
                     />
                 </TouchableOpacity>
             ),
