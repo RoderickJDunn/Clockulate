@@ -326,11 +326,6 @@ export default class Help extends React.Component {
         console.log(e);
     };
 
-    toggleInfoPopup = () => {
-        let { showInfoPopup } = this.state;
-        this.setState({ showInfoPopup: !showInfoPopup });
-    };
-
     nextPage = _.throttle(() => {
         console.log("next page");
         this._idx++;
@@ -657,26 +652,6 @@ export default class Help extends React.Component {
                             style={{
                                 paddingLeft: 20,
                                 marginRight: scaleByFactor(12, 0.9)
-                            }}
-                        />
-                        <FAIcon
-                            name={"info"}
-                            color={Colors.brandLightGrey}
-                            underlayColor={Colors.brandDarkGrey}
-                            size={24}
-                            onPress={() => {
-                                // ClKAlert -- how to use Help
-                                this.toggleInfoPopup();
-                            }}
-                            hitSlop={{
-                                top: 10,
-                                bottom: 10,
-                                left: 20,
-                                right: 0
-                            }}
-                            style={{
-                                paddingRight: 20,
-                                marginLeft: scaleByFactor(12, 0.9)
                             }}
                         />
                     </Animatable.View>
