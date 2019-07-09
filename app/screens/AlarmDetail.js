@@ -1881,7 +1881,7 @@ class AlarmDetail extends Component {
                             ]
                         }
                     ]}
-                    source={{ uri: "clockBgd_v8_iphoneSE_to_8" }}
+                    source={{ uri: "clock_bkg_v8" }}
                 />
                 {touchableBackdrop}
                 <Interactable.View
@@ -2769,17 +2769,17 @@ class AlarmDetail extends Component {
                         backgroundColor: "red"
                     }}
                 /> */}
-                    <DateTimePicker
-                        date={moment
-                            .utc(this.state.alarm.wakeUpTime)
-                            .local()
-                            .toDate()} // time has been converted into a Date() for this Component
-                        mode={"time"}
-                        titleIOS={"Set Wake-Up Time"}
+                <DateTimePicker
+                    date={moment
+                        .utc(this.state.alarm.wakeUpTime)
+                        .local()
+                        .toDate()} // time has been converted into a Date() for this Component
+                    mode={"time"}
+                    titleIOS={"Set Wake-Up Time"}
                     isVisible={this.state.isDatePickerVisible}
-                        onConfirm={this._onWakeTimePicked}
-                        onCancel={this._hideDateTimePicker}
-                    />
+                    onConfirm={this._onWakeTimePicked}
+                    onCancel={this._hideDateTimePicker}
+                />
                 {this.state.showSnoozePicker && (
                     <PickerActionSheet
                         initialValues={[this.state.alarm.snoozeTime]}
