@@ -87,12 +87,12 @@ export default class WelcomePage extends Component {
                             {
                                 translateY: this._logoAnim.interpolate({
                                     inputRange: [0, 1],
-                                    outputRange: [0, -SCREEN_HEIGHT * 0.27]
+                                    outputRange: [0, -SCREEN_HEIGHT * 0.225]
                                 })
                             }
                         ]
                     }}
-                    source={{ uri: "WelcomeScreen_logo_v2" }}
+                    source={{ uri: "welcome_screen_logo_v2" }}
                 />
                 <Animatable.View
                     contentInsetAdjustmentBehavior="automatic"
@@ -108,6 +108,7 @@ export default class WelcomePage extends Component {
                 >
                     <Text
                         style={{
+                            marginTop: 80,
                             position: "absolute",
                             justifyContent: "center",
                             alignSelf: "stretch",
