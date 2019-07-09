@@ -58,22 +58,22 @@ let HELP_SECTIONS = [
             {
                 path: "basics_img3",
                 style: null
-            },
-            {
-                path: "basics_img4",
-                style: {
-                    paddingTop: SCREEN_HEIGHT * 0.08,
-                    paddingBottom: SCREEN_HEIGHT * 0.03
-                }
             }
         ],
-        pageCount: 4,
+        pageCount: 3,
         snapOffsets: []
     },
     {
         name: "Tasks",
         // subtitle: "Edit Alarm",
         images: [
+            {
+                path: "basics_img4",
+                style: {
+                    paddingTop: SCREEN_HEIGHT * 0.08,
+                    paddingBottom: SCREEN_HEIGHT * 0.03
+                }
+            },
             {
                 path: "tasks_img1",
                 style: null
@@ -91,7 +91,7 @@ let HELP_SECTIONS = [
                 style: null
             }
         ],
-        pageCount: 4
+        pageCount: 5
     },
     {
         name: "Alarm Modes",
@@ -128,6 +128,10 @@ let HELP_SECTIONS = [
             },
             {
                 path: "alarmslist_img3",
+                style: null
+            },
+            {
+                path: "alarmslist_img4",
                 style: null
             }
         ],
@@ -477,19 +481,19 @@ export default class Help extends React.Component {
                         { marginTop: this._isModal ? 20 : 0 }
                     ]}
                 >
-                {(this._welcomeOffset == 0 || this._idx > 0) && (
+                    {(this._welcomeOffset == 0 || this._idx > 0) && (
                         <>
                             <Text style={styles.sectionTitle}>
                                 {section.name}
                             </Text>
-                        {subtitle && (
+                            {subtitle && (
                                 <Text style={styles.sectSubtitle}>
                                     {subtitle}
                                 </Text>
                             )}
                         </>
-                        )}
-                    </View>
+                    )}
+                </View>
                 <Interactable.View
                     ref={elm => (this._interactable = elm)}
                     style={{
