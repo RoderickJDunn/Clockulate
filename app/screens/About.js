@@ -29,6 +29,15 @@ const backupLink = `itms-apps://itunes.apple.com/app/id${APP_ID}`;
 const contactLink = "http://www.clockulate.ca/contact";
 const supportLink = "http://www.clockulate.ca/support";
 
+const STORE_NAME = Platform.select({
+    ios: "App Store",
+    android: "Play Store"
+});
+
+const STORE_ICON = Platform.select({
+    ios: "app-store",
+    android: "google-play"
+});
 export default class About extends React.Component {
     /*
     Props: 
@@ -153,7 +162,8 @@ export default class About extends React.Component {
                             this.launchAppStoreWithLink(backupLink, err => {
                                 console.log("err", err);
                                 alert(
-                                    "An error occurred. Unable to launch App Store."
+                                    "An error occurred. Unable to launch " +
+                                        STORE_NAME
                                 );
                             });
                         });
@@ -161,13 +171,13 @@ export default class About extends React.Component {
                 >
                     <View style={styles.appStoreIconCont}>
                         <FAIcon
-                            name="app-store"
+                            name={STORE_ICON}
                             size={40}
                             color={Colors.brandLightOpp}
                         />
                     </View>
                     <Text style={styles.rateBtnText}>
-                        Rate Us on the {"\n"} App Store
+                        Rate Us on the {"\n"} {STORE_NAME}
                     </Text>
                 </TouchableOpacity>
             </View>
