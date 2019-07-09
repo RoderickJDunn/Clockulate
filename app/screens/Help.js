@@ -448,9 +448,12 @@ export default class Help extends React.Component {
         console.log("section", section);
         console.log("this._idx", this._idx);
 
-        let idxInSect = this._idx - section.startingIdx;
+        let idxInSect = this._idx - section.startingIdx - this._welcomeOffset;
 
-        let subtitle = section.images[idxInSect].subtitle || section.subtitle;
+        let subtitle;
+        if (idxInSect >= 0) {
+            subtitle = section.images[idxInSect].subtitle || section.subtitle;
+        }
 
         return (
             <LinearGradient
