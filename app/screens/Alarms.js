@@ -22,7 +22,8 @@ import {
     Button,
     AsyncStorage,
     Modal,
-    Animated
+    Animated,
+    StatusBar
 } from "react-native";
 import moment from "moment";
 import LinearGradient from "react-native-linear-gradient";
@@ -945,6 +946,9 @@ class Alarms extends Component {
                     colors={[Colors.brandMidGrey, Colors.brandDarkGrey]}
                     // {...this._idlePanResponder.panHandlers}
                 >
+                    {Platform.OS == "android" && (
+                        <StatusBar backgroundColor={Colors.brandDarkGrey} />
+                    )}
                     <SafeAreaView
                         forceInset={{
                             top: "never",
