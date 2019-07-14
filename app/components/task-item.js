@@ -385,6 +385,7 @@ class TaskItem extends React.Component {
                                     TextStyle.timeText,
                                     {
                                         alignSelf: "stretch",
+                                        marginTop: 8,
                                         // textAlign: "right",
                                         // backgroundColor: "red",
                                         color: this.props.data.enabled
@@ -446,8 +447,11 @@ class TaskItem extends React.Component {
                                         alignSelf: "stretch",
                                         textAlign: "right",
                                         fontSize: 24,
-                                        height: 30,
-                                        marginTop: 8
+                                        marginTop: 8,
+                                        height: Platform.select({
+                                            ios: 30,
+                                            android: "auto"
+                                        })
                                     }
                                 ]}
                             />
