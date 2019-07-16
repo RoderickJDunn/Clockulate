@@ -9,7 +9,7 @@ let FAKE_CATEGORY = "MyFakeCategory";
 
 let reloadAlarmsList = null;
 
-// export function configure() {
+// export function PushNotificationConfigure() {
 //     console.log("configuring notifications *************");
 //     PushNotification.configure({
 //         options: {
@@ -19,8 +19,6 @@ let reloadAlarmsList = null;
 //         }
 //     });
 // }
-
-// PushNotification.registerNotificationActions(["Snooze", "Turn Off"]);
 
 const notificationActionHandler = async actionData => {
     console.log("Notification action received: " + JSON.stringify(actionData));
@@ -109,6 +107,7 @@ export let clearAlarm = (alarm, notificationID, reloadAlarmsList) => {
     });
 
     if (alarm) {
+        cancelInAppAlarm(alarm);
         realm.write(() => {
             alarm.notificationId = null;
             alarm.snoozeCount = 0;
@@ -126,8 +125,12 @@ export let clearAlarm = (alarm, notificationID, reloadAlarmsList) => {
     }
 };
 
-export let resumeAlarm = () => {};
 export let cancelAllNotifications = () => {};
+
+export let resumeAlarm = (alarm, reload, alarmDidInitialize) => {
+    // The notification has already been set. We need to set the inApp timer only
+    setInAppAlarm(alarm, reload);
+};
 
 export let scheduleAlarm = (alarm, reload, alarmDidInitialize) => {
     console.log(
@@ -241,6 +244,11 @@ export let setInAppAlarm = (alarm, reloadAlarmsList) => {
 
     console.log("msUntilAlarm", msUntilAlarm);
 
+    // NOTE: I'm using a modified version of setTimeout (and setInterval), that handle
+    //        long times differently (avoids warning on Android). As a result, these functions
+    //        will return a string "_lt_<id>" instead of an integer if the timer is long. Because of
+    //        this, it cannot be saved in realm this property was setup to be an int. I am therefore
+    //        deconstructing the string to get the ID. And when canceling I need to do the opposite
     let timeoutId = setTimeout(() => {
         console.log("Alarm went off while app is open!");
 
@@ -249,6 +257,8 @@ export let setInAppAlarm = (alarm, reloadAlarmsList) => {
         });
         reloadAlarmsList();
     }, msUntilAlarm);
+
+    timeoutId = console.log("timeoutId", timeoutId);
 
     realm.write(() => {
         alarm.timeoutId = timeoutId;
@@ -279,7 +289,7 @@ export let checkForImplicitSnooze = (alarm, mNow) => {
     }
 
     // let almSnoozeTime = alarm.snoozeTime * 60; // convert snoozeTime to seconds
-    let almSnoozeTime = 1 * 60; // convert snoozeTime to seconds TODO: Change 1 to alarm.snoozeTime
+    let almSnoozeTime = alarm.snoozeTime * 60; // convert snoozeTime to seconds DEV: Change 1 to alarm.snoozeTime
     console.log("almSnoozeTime", almSnoozeTime);
 
     let expectedSnoozeCount = Math.ceil(secondsDiff / almSnoozeTime);
