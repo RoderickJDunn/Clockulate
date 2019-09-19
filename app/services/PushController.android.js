@@ -58,9 +58,7 @@ function fetchAlarmByNotifId(notificationId) {
         return null;
     } else {
         console.warn(
-            `Found more than 1 alarm (${
-                alarms.length
-            })  with notificationID ${notificationId}`
+            `Found more than 1 alarm (${alarms.length})  with notificationID ${notificationId}`
         );
         return null;
     }
@@ -258,7 +256,15 @@ export let setInAppAlarm = (alarm, reloadAlarmsList) => {
         reloadAlarmsList();
     }, msUntilAlarm);
 
-    timeoutId = console.log("timeoutId", timeoutId);
+    // hackery to convert the returned "long-timer ID" from a string to a negative integer
+    //  for storage in realm
+    console.log("timeoutId", timeoutId);
+    timeoutId = timeoutId.replace("_lt_", "-");
+    console.log("modded timeoutId", timeoutId);
+
+    if (typeof timeoutId === "string") {
+        timeoutId = parseInt(timeoutId, 10);
+    }
 
     realm.write(() => {
         alarm.timeoutId = timeoutId;
@@ -267,7 +273,13 @@ export let setInAppAlarm = (alarm, reloadAlarmsList) => {
 
 export let cancelInAppAlarm = alarm => {
     if (alarm && alarm.timeoutId) {
-        clearTimeout(alarm.timeoutId);
+        // converting the negative int (stored in realm) back to a long-timer ID string
+        let packgedTimeoutId = alarm.timeoutId;
+        if (packgedTimeoutId < 0) {
+            packgedTimeoutId = "_lt_" + Math.abs(packgedTimeoutId);
+        }
+
+        clearTimeout(packgedTimeoutId);
         realm.write(() => {
             alarm.timeoutId = null;
         });
