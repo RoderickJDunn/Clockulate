@@ -39,7 +39,8 @@ import {
     setInAppAlarm,
     resumeAlarm,
     checkForImplicitSnooze,
-    cancelAllNotifications
+    cancelAllNotifications,
+    cancelInAppAlarm
 } from "../services/PushController";
 import NotificationsIOS from "react-native-notifications";
 import realm from "../data/DataSchemas";
@@ -383,12 +384,16 @@ class Alarms extends Component {
         } else if (nextAppState === "background") {
             console.log("App is going into background");
 
-            // let alarms = realm
-            //     .objects("Alarm")
-            //     .filtered("status == $0", ALARM_STATES.SET);
-            // for (let i = 0; i < alarms.length; i++) {
-            //     cancelInAppAlarm(alarms[i]);
-            // }
+            // cancel any in-app timers before going to background. NOTE that this is handled
+            //  natively on iOS
+            if (Platform.OS == "android") {
+                let alarms = realm
+                    .objects("Alarm")
+                    .filtered("status == $0", ALARM_STATES.SET);
+                for (let i = 0; i < alarms.length; i++) {
+                    cancelInAppAlarm(alarms[i]);
+                }
+            }
         }
 
         this.setState({ appState: nextAppState });
@@ -492,7 +497,9 @@ class Alarms extends Component {
     }
 
     willNavigateBack = () => {
+        if (Platform.OS == "ios") {
         this.setState({ isLoading: true });
+        }
     };
 
     /* We only allow 1 alarm to be active (SET) at a time. This function checks if there is
@@ -797,7 +804,9 @@ class Alarms extends Component {
                 return;
             }
 
+            if (Platform.OS == "ios") {
             this.setState({ isLoading: true });
+            }
 
             let wakeUpTime = DateUtils.date_to_nextTimeInstance(
                 alarm.wakeUpTime
