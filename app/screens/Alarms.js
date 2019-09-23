@@ -126,19 +126,35 @@ class Alarms extends Component {
                 if (value === null) {
                     console.log("First Launch");
                     this.props.navigation.navigate("Help", {
-                        willExitHelp: () =>
-                            NotificationsIOS.requestPermissions([ALARM_CAT])
+                        willExitHelp: () => {
+                            if (Platform.OS == "ios") {
+                                console.log(
+                                    "IOS: Requesting notification permission"
+                                );
+                                // android doesn't require permission for notifications
+                                NotificationsIOS.requestPermissions([
+                                    ALARM_CAT
+                                ]);
+                            }
+                        }
                     });
                     setTimeout(() => SplashScreen.hide(), 1000);
                 } else {
                     setTimeout(() => SplashScreen.hide(), 500);
+
+                    if (Platform.OS == "ios") {
+                        console.log("IOS: Requesting notification permission");
+                        // android doesn't require permission for notifications
                     NotificationsIOS.requestPermissions([ALARM_CAT]);
+
+                        console.log("requesting mic permission");
 
                     // load Permissions
                     Permissions.check("microphone").then(response => {
                         console.log("response", response);
                         this._recPermission = response == "authorized";
                     });
+                }
                 }
             });
         } catch (error) {
@@ -825,10 +841,13 @@ class Alarms extends Component {
         console.log("alarmDidInitialize. ? error:", error);
         console.log("alarm", alarm);
         console.log("NextStatus: ", nextAlarmStatus);
+
+        if (Platform.OS == "ios") {
         if (!error) {
             this._recPermission = true;
         } else if (error == "NoRecPermission") {
             this._recPermission = false;
+        }
         }
 
         realm.write(() => {
@@ -1321,10 +1340,16 @@ class Alarms extends Component {
                         onWillFocus={payload => {
                             console.log("Alarms: onWillFocus");
                             // load Permissions
-                            Permissions.check("microphone").then(response => {
+
+                            if (Platform.OS == "ios") {
+                                Permissions.check("microphone").then(
+                                    response => {
                                 console.log("response", response);
-                                this._recPermission = response == "authorized";
-                            });
+                                        this._recPermission =
+                                            response == "authorized";
+                                    }
+                                );
+                            }
                         }}
                     />
                 </LinearGradient>
