@@ -256,13 +256,13 @@ export let setInAppAlarm = (alarm, reloadAlarmsList) => {
         reloadAlarmsList();
     }, msUntilAlarm);
 
-    // hackery to convert the returned "long-timer ID" from a string to a negative integer
+    // hackery to handle case where the timer returned is a "long timer". In this case, the timer ID will be a string
+    //  with the format "_lt_<int>", instead of an integer. We have to convert the string to a negative integer
     //  for storage in realm
     console.log("timeoutId", timeoutId);
-    timeoutId = timeoutId.replace("_lt_", "-");
-    console.log("modded timeoutId", timeoutId);
-
     if (typeof timeoutId === "string") {
+        timeoutId = timeoutId.replace("_lt_", "-");
+        console.log("modded timeoutId", timeoutId);
         timeoutId = parseInt(timeoutId, 10);
     }
 
