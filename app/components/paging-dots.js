@@ -305,14 +305,14 @@ export default class PagingDots extends Component {
         }
 
         // DEV: Extra checks to die early
-        if (activeDotIdx < 0 || activeDotIdx > pageCount - 1) {
-            console.error(
-                `Failed to calculated activeDotIdx. Got: ${activeDotIdx}`
-            );
-        }
+        // if (activeDotIdx < 0 || activeDotIdx > pageCount - 1) {
+        //     console.error(
+        //         `Failed to calculated activeDotIdx. Got: ${activeDotIdx}`
+        //     );
+        // }
 
-        console.log("Calc'd activeDotIdx: ", activeDotIdx);
-        console.log("xTransRequired: ", xTransRequired);
+        // console.log("Calc'd activeDotIdx: ", activeDotIdx);
+        // console.log("xTransRequired: ", xTransRequired);
 
         return {
             activeDotIdx: activeDotIdx,

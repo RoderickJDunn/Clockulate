@@ -15,6 +15,8 @@
 #import "RNNotifications.h"
 #import "RNNRouter.h"
 @import GoogleMobileAds;
+// DEV:
+// #import "MBFingerTipWindow.h"
 
 
 @implementation AppDelegate
@@ -89,4 +91,12 @@
 {
   [[RNNRouter sharedInstance] userNotificationCenter:center didReceiveNotificationResponse:response withCompletionHandler:completionHandler];
 }
+
+// DEV:
+// - (MBFingerTipWindow *)window
+// {
+//   static MBFingerTipWindow *visualFeedbackWindow = nil;
+//   if (!visualFeedbackWindow) visualFeedbackWindow = [[MBFingerTipWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+//   return visualFeedbackWindow;
+// }
 @end

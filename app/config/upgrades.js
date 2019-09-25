@@ -12,6 +12,7 @@ try {
             console.log("This is the FREE VERSION");
         }
         purchases.pro = value;
+        // purchases.pro = true;  // DEV: fake in the PRO version for Animator
     });
 } catch (error) {
     console.error(`Unable to check what purchases have been made: ${error}`);

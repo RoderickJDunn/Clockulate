@@ -609,6 +609,28 @@ export default class SleepLog extends React.Component {
                                             .toDate(),
                                         duration: 3
                                     }
+                                    // DEV: to add a more complete sample log for screenshots
+                                    // {
+                                    //     id: "13",
+                                    //     time: moment(sampleSleepStart)
+                                    //         .add(180, "minutes")
+                                    //         .toDate(),
+                                    //     duration: 5
+                                    // },
+                                    // {
+                                    //     id: "14",
+                                    //     time: moment(sampleSleepStart)
+                                    //         .add(189, "minutes")
+                                    //         .toDate(),
+                                    //     duration: 3
+                                    // },
+                                    // {
+                                    //     id: "15",
+                                    //     time: moment(sampleSleepStart)
+                                    //         .add(195, "minutes")
+                                    //         .toDate(),
+                                    //     duration: 20
+                                    // }
                                 ],
                                 timeAwake: 92
                             }}
