@@ -859,10 +859,16 @@ class TaskDetail extends Component {
                             navigation={this.props.navigation}
                             pubBannerProps={{
                                 adSize: "mediumRectangle",
-                                // adUnitID: "ca-app-pub-3940256099942544/6300978111",
-                                adUnitID:
-                                    "ca-app-pub-5775007461562122/9954191195",
-                                testDevices: [AdMobBanner.simulatorId],
+                                adUnitID: Platform.select({
+                                    ios:
+                                        "ca-app-pub-3940256099942544/6300978111",
+                                    android:
+                                        "ca-app-pub-5775007461562122/9954191195"
+                                }),
+                                testDevices: [
+                                    AdMobBanner.simulatorId
+                                    // "D1F14123639EE9FF460D5BF5FEA2EB9C"
+                                ],
                                 onAdFailedToLoad: this._bannerError,
                                 onAdLoaded: () => {
                                     console.log("adViewDidReceiveAd");

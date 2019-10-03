@@ -1128,10 +1128,17 @@ class Alarms extends Component {
                                 forcePro={this.state.forceProAdv}
                                 navigation={this.props.navigation}
                                 pubBannerProps={{
-                                    adSize: "smartBannerPortrait",
+                                    adSize:
+                                        Platform.OS == "ios"
+                                            ? "smartBannerPortrait"
+                                            : "banner",
                                     // adUnitID: "ca-app-pub-3940256099942544/6300978111",
-                                    adUnitID:
+                                    adUnitID: Platform.select({
+                                        ios:
                                         "ca-app-pub-5775007461562122/3906075015",
+                                        android:
+                                            "ca-app-pub-5775007461562122/2400173808"
+                                    }),
                                     testDevices: [AdMobBanner.simulatorId],
                                     onAdFailedToLoad: this._bannerError,
                                     validAdSizes: ["banner", "largeBanner"],
