@@ -20,11 +20,17 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const fontFamily = Platform.OS === "ios" ? "Avenir" : "sans-serif";
 
+// TODO: ANDROID_SUPPORT
+// TODO: FIXME: This app_id and the rating links are different for Android
 const APP_ID = "1452117998";
 
 // NOTE: Its possible that the appID in these links doesn't work. I need to test it once I have an AppStore AppID......
 //       If the links turn out to be wrong, make sure to add the corrected links in Info.plist under LSApplicationQueriesSchemes
-const rateAppLink = `itms-apps://itunes.apple.com/app/viewContentsUserReviews?id=${APP_ID}`; // (Option 2) Open App Review Tab
+const rateAppLink = Platform.select({
+    ios: `itms-apps://itunes.apple.com/app/viewContentsUserReviews?id=${APP_ID}`,
+    android: `http://play.google.com/store/apps/details?id=com.clock_sample1` // TODO:
+});
+
 const backupLink = `itms-apps://itunes.apple.com/app/id${APP_ID}`;
 const contactLink = "http://www.clockulate.ca/contact";
 const supportLink = "http://www.clockulate.ca/support";
