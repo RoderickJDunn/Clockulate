@@ -30,7 +30,7 @@ import { scaleByFactor } from "../util/font-scale";
 
 const PRODUCTS = Platform.select({
     ios: ["ClockulateProMain"],
-    android: ["ClockulateProMain"]
+    android: ["clockulate.pro_main"]
 });
 
 let AnimLinearGradient = Animated.createAnimatedComponent(LinearGradient);
@@ -552,6 +552,7 @@ export default class Upgrade extends React.Component {
 
             // Will return a purchase object with a receipt which can be used to validate on your server.
             const purchase = await RNIap.buyProduct(products[0].productId);
+
             upgrades.setPro(true);
             this.setState({
                 receipt: purchase.transactionReceipt, // save the receipt if you need it, whether locally, or to your server.
