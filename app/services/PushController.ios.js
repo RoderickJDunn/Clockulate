@@ -42,6 +42,9 @@ const AlarmTriggerEvents = new NativeEventEmitter(
 
 let reloadAlarmsList = null;
 
+export let PushNotificationConfigure = () => {};
+export let cancelInAppAlarm = () => {};
+
 let initializeAlarm = (alarm, alarmDidInitialize) => {
     console.log("sending time: ", alarm.time);
 
