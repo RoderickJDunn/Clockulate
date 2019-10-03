@@ -146,16 +146,16 @@ class Alarms extends Component {
                     if (Platform.OS == "ios") {
                         console.log("IOS: Requesting notification permission");
                         // android doesn't require permission for notifications
-                    NotificationsIOS.requestPermissions([ALARM_CAT]);
+                        NotificationsIOS.requestPermissions([ALARM_CAT]);
 
                         console.log("requesting mic permission");
 
-                    // load Permissions
-                    Permissions.check("microphone").then(response => {
-                        console.log("response", response);
-                        this._recPermission = response == "authorized";
-                    });
-                }
+                        // load Permissions
+                        Permissions.check("microphone").then(response => {
+                            console.log("response", response);
+                            this._recPermission = response == "authorized";
+                        });
+                    }
                 }
             });
         } catch (error) {
@@ -271,66 +271,7 @@ class Alarms extends Component {
 
         if (Platform.OS === "ios") {
             NotificationsIOS.consumeBackgroundQueue();
-        } else {
-            // PushNotificationAndroid.cancelAllLocalNotifications();
-
-            // console.log(
-            //     "notificationActionReceived listeners.length",
-            //     DeviceEventEmitter.listeners("notificationActionReceived").length
-            // );
-            // DeviceEventEmitter.addListener("remoteNotificationReceived", e => {
-            //     console.log("Notification event: ", e);
-            // });
-            DeviceEventEmitter.removeAllSubscriptions(
-                "notificationActionReceived"
-            );
-            PushNotificationAndroid.unregister();
-            // console.log(
-            //     "notificationActionReceived listeners.length",
-            //     DeviceEventEmitter.listeners("notificationActionReceived").length
-            // );
-            // Register all the valid actions for notifications here and add the action handler for each action
-            PushNotificationAndroid.registerNotificationActions([
-                "Snooze",
-                "Turn Off"
-            ]);
-            DeviceEventEmitter.addListener("notificationActionReceived", e => {
-                console.log("Notification event: ", e);
-                // console.log(
-                //     "notificationActionReceived event received: " + e
-                // );
-                const info = JSON.parse(e.dataJSON);
-                console.log("info", info);
-                if (info.action == "Snooze") {
-                    // Do work pertaining to Accept action here
-                    // Nothing to do here if we have already scheduled all the snooze alarms
-                    snoozeAlarm(info, this.reloadAlarms.bind(this));
-                } else if (info.action == "Turn Off") {
-                    // Do work pertaining to Reject action here
-                    // cancel all snooze notifs for this Alarm
-                    clearAlarm(
-                        null,
-                        info.notificationId.toString(),
-                        this.reloadAlarms.bind(this)
-                    );
-                }
-                // Add all the required actions handlers
-            });
-
-            // console.log(
-            //     "notificationActionReceived listeners.length",
-            //     DeviceEventEmitter.listeners("notificationActionReceived").length
-            // );
         }
-
-        // this._didBlurListener = this.props.navigation.addListener(
-        //     "didBlur",
-        //     payload => {
-        //         this.isCurrentScreen = false;
-        //         clearTimeout(this._idleTimer);
-        //         this.disableProxManager();
-        //     }
-        // );
 
         this._didFocusListener = this.props.navigation.addListener(
             "didFocus",
@@ -361,12 +302,7 @@ class Alarms extends Component {
                 "notificationOpened",
                 this.onNotificationOpened.bind(this)
             );
-        } else {
-            DeviceEventEmitter.removeAllSubscriptions(
-                "notificationActionReceived"
-            );
         }
-        // this.props.navigation.removeListener("didBlur");
 
         this.props.navigation.removeListener("didFocus");
 
@@ -498,7 +434,7 @@ class Alarms extends Component {
 
     willNavigateBack = () => {
         if (Platform.OS == "ios") {
-        this.setState({ isLoading: true });
+            this.setState({ isLoading: true });
         }
     };
 
@@ -805,7 +741,7 @@ class Alarms extends Component {
             }
 
             if (Platform.OS == "ios") {
-            this.setState({ isLoading: true });
+                this.setState({ isLoading: true });
             }
 
             let wakeUpTime = DateUtils.date_to_nextTimeInstance(
@@ -852,11 +788,11 @@ class Alarms extends Component {
         console.log("NextStatus: ", nextAlarmStatus);
 
         if (Platform.OS == "ios") {
-        if (!error) {
-            this._recPermission = true;
-        } else if (error == "NoRecPermission") {
-            this._recPermission = false;
-        }
+            if (!error) {
+                this._recPermission = true;
+            } else if (error == "NoRecPermission") {
+                this._recPermission = false;
+            }
         }
 
         realm.write(() => {
@@ -1135,7 +1071,7 @@ class Alarms extends Component {
                                     // adUnitID: "ca-app-pub-3940256099942544/6300978111",
                                     adUnitID: Platform.select({
                                         ios:
-                                        "ca-app-pub-5775007461562122/3906075015",
+                                            "ca-app-pub-5775007461562122/3906075015",
                                         android:
                                             "ca-app-pub-5775007461562122/2400173808"
                                     }),
@@ -1360,7 +1296,7 @@ class Alarms extends Component {
                             if (Platform.OS == "ios") {
                                 Permissions.check("microphone").then(
                                     response => {
-                                console.log("response", response);
+                                        console.log("response", response);
                                         this._recPermission =
                                             response == "authorized";
                                     }
